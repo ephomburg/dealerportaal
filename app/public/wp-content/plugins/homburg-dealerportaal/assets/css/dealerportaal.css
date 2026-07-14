@@ -30,13 +30,6 @@
 	background-size: cover;
 	background-position: center 30%;
 }
-/* Op de downloadspagina staan de bestanden voorop; de hero mag daar
-   compacter zodat er sneller inhoud te zien is. */
-.hdp-hero-klein.alignfull {
-	height: 20vh;
-	min-height: 140px;
-	max-height: 220px;
-}
 /* WordPress geeft blokken automatisch een kleine bovenmarge (block-gap);
    die moet hier op nul, anders ontstaat er een naad tussen hero en
    welkomstsectie. */
