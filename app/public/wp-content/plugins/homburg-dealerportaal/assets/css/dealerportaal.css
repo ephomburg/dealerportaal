@@ -119,6 +119,24 @@
 }
 .hdp-veld input:focus { border-color: var(--wp--preset--color--homburg-rood); outline: none; }
 
+.hdp-veld-invoer { position: relative; }
+.hdp-veld-invoer svg {
+	position: absolute;
+	left: 0.85rem;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 16px;
+	height: 16px;
+	stroke: var(--wp--preset--color--grijs-tekst);
+	pointer-events: none;
+	transition: stroke 0.2s;
+}
+.hdp-veld-invoer input { padding-left: 2.6rem; }
+.hdp-veld-invoer:focus-within svg { stroke: var(--wp--preset--color--homburg-rood); }
+
+.hdp-login-kaart .hdp-kaart-icoon { margin-bottom: 1.1rem; }
+.hdp-login-kaart .hdp-btn-logout { margin-top: 0.4rem; }
+
 .hdp-login-fout {
 	display: none;
 	background: #fdecec;

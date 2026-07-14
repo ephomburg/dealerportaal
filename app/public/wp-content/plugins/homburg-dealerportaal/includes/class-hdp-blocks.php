@@ -121,6 +121,7 @@ class HDP_Blocks {
 		<div class="hdp-hero alignfull" style="background-image:url('<?php echo esc_url( $a['heroAfbeelding'] ); ?>')" aria-hidden="true"></div>
 		<div class="hdp-login-sectie">
 			<div class="hdp-login-kaart">
+				<?php self::render_icoon( 'login' ); ?>
 				<h1><?php echo esc_html( HDP_I18N::t( 'login_titel' ) ); ?></h1>
 				<p class="hdp-intro"><?php echo esc_html( $intro ); ?></p>
 
@@ -132,11 +133,17 @@ class HDP_Blocks {
 					<?php wp_nonce_field( 'hdp_login', 'hdp_login_nonce' ); ?>
 					<div class="hdp-veld">
 						<label for="gebruikersnaam"><?php echo esc_html( HDP_I18N::t( 'label_gebruiker' ) ); ?></label>
-						<input type="text" id="gebruikersnaam" name="gebruikersnaam" autocomplete="username" required>
+						<div class="hdp-veld-invoer">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+							<input type="text" id="gebruikersnaam" name="gebruikersnaam" autocomplete="username" required>
+						</div>
 					</div>
 					<div class="hdp-veld">
 						<label for="wachtwoord"><?php echo esc_html( HDP_I18N::t( 'label_wachtwoord' ) ); ?></label>
-						<input type="password" id="wachtwoord" name="wachtwoord" autocomplete="current-password" required>
+						<div class="hdp-veld-invoer">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+							<input type="password" id="wachtwoord" name="wachtwoord" autocomplete="current-password" required>
+						</div>
 					</div>
 					<button type="submit" class="hdp-btn"><?php echo esc_html( HDP_I18N::t( 'btn_inloggen' ) ); ?></button>
 				</form>
@@ -152,9 +159,10 @@ class HDP_Blocks {
 			?>
 			<div class="hdp-login-sectie">
 				<div class="hdp-login-kaart">
+					<?php self::render_icoon( 'wachten' ); ?>
 					<h1><?php echo esc_html( HDP_I18N::t( 'account_titel' ) ); ?></h1>
 					<p class="hdp-intro"><?php echo esc_html( HDP_I18N::t( 'account_tekst' ) ); ?></p>
-					<a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?></a>
+					<a class="hdp-btn-logout" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?></a>
 				</div>
 			</div>
 			<?php
@@ -338,6 +346,8 @@ class HDP_Blocks {
 			'configurator' => '<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.12-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.85a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01A1.7 1.7 0 0 0 10.05 3V3a2 2 0 1 1 4 0v.09c0 .68.4 1.29 1.03 1.56a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01c.27.62.88 1.03 1.56 1.03H21a2 2 0 1 1 0 4h-.09c-.68 0-1.29.4-1.51 1z"/>',
 			'downloads'    => '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>',
 			'content'      => '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+			'login'        => '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+			'wachten'      => '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
 		);
 
 		if ( ! isset( $paden[ $type ] ) ) {
