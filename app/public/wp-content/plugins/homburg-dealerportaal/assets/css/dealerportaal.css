@@ -371,17 +371,73 @@
 .hdp-terug { margin-top: 1.6rem; }
 
 /* ==========================================================================
+   ADMINPORTAAL (tijdelijk, nog niet afgeschermd upload-scherm)
+   ========================================================================== */
+.hdp-admin-sectie {
+	max-width: 70%;
+	margin: 0 auto;
+	padding: 2.5rem 0 3.5rem;
+}
+.hdp-admin-sectie h1 { font-size: 1.5rem; font-weight: 700; }
+.hdp-admin-intro { color: var(--wp--preset--color--grijs-tekst); font-size: 0.92rem; margin: 0.3rem 0 1.6rem; }
+
+.hdp-admin-melding {
+	border-radius: 6px;
+	padding: 0.8rem 1rem;
+	margin-bottom: 1.4rem;
+	font-size: 0.88rem;
+	font-weight: 600;
+}
+.hdp-admin-melding-ok { background: #ecfdf1; color: #1a7d3a; border: 1px solid #b9ebc9; }
+.hdp-admin-melding-fout { background: #fdecec; color: var(--wp--preset--color--homburg-rood-donker); border: 1px solid #f5c2c2; }
+
+.hdp-admin-formulier {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	border-top: 5px solid var(--wp--preset--color--homburg-rood);
+	padding: 1.8rem 1.8rem 1.6rem;
+	margin-bottom: 2.5rem;
+}
+.hdp-admin-label {
+	display: block;
+	font-weight: 600;
+	font-size: 0.85rem;
+	margin-bottom: 0.5rem;
+}
+.hdp-admin-checkbox {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	font-size: 0.9rem;
+	font-weight: 500;
+	margin-right: 1.5rem;
+}
+/* .hdp-veld input stelt input-velden standaard breed/omrand in (t.b.v.
+   tekstvelden); checkboxes moeten dat juist niet krijgen. */
+.hdp-veld input[type="checkbox"] {
+	width: auto;
+	padding: 0;
+	border: none;
+	margin: 0;
+}
+
+.hdp-admin-recent-titel { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
+
+/* ==========================================================================
    RESPONSIVE
    ========================================================================== */
 @media (max-width: 900px) {
 	.hdp-kaarten-sectie { max-width: 90%; grid-template-columns: repeat(2, 1fr); }
 	.hdp-downloads { max-width: 90%; }
 	.hdp-info-sectie { max-width: 90%; }
+	.hdp-admin-sectie { max-width: 90%; }
 }
 @media (max-width: 600px) {
 	.hdp-kaarten-sectie { max-width: 100%; grid-template-columns: 1fr; padding: 1.5rem 1rem; }
 	.hdp-downloads { max-width: 100%; padding: 1.5rem 1rem; }
 	.hdp-info-sectie { max-width: 100%; padding: 1rem 1rem 2rem; }
+	.hdp-admin-sectie { max-width: 100%; padding: 1.5rem 1rem; }
 	.hdp-info-grid { grid-template-columns: 1fr; }
 	.hdp-info-kaart { flex-direction: column; }
 	.hdp-welkom { padding: 1.6rem 0; }

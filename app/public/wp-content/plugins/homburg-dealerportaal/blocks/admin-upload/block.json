@@ -1,0 +1,20 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "homburg/admin-upload",
+	"title": "Adminportaal (bestand uploaden)",
+	"category": "widgets",
+	"icon": "upload",
+	"description": "Tijdelijk, nog niet afgeschermd upload-scherm: bestand + titel + merk + regio worden direct als download gepubliceerd. Later vervangen door een Supabase-koppeling en toegangscontrole.",
+	"textdomain": "homburg-dealerportaal",
+	"attributes": {
+		"titel": { "type": "string", "default": "Adminportaal" },
+		"intro": { "type": "string", "default": "Testomgeving: dit scherm is nu voor iedereen te bezoeken en te gebruiken. Later wordt dit alleen voor beheerders zichtbaar en gaan bestanden via Supabase." }
+	},
+	"supports": {
+		"html": false,
+		"multiple": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}
