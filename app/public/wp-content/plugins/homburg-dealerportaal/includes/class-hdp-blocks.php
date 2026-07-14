@@ -101,7 +101,7 @@ class HDP_Blocks {
 				<div class="hdp-welkom-inner">
 					<div class="hdp-welkom-top">
 						<h1><?php echo esc_html( $titel ); ?></h1>
-						<a class="hdp-btn-logout" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?></a>
+						<a class="hdp-btn-logout" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?></a>
 					</div>
 					<p><?php echo esc_html( $omschrijving ); ?></p>
 				</div>
@@ -182,7 +182,7 @@ class HDP_Blocks {
 				<div class="hdp-welkom-inner">
 					<div class="hdp-welkom-top">
 						<h1><?php echo esc_html( HDP_I18N::t( 'welkom_prefix' ) ); ?> <?php echo esc_html( $user->display_name ); ?></h1>
-						<a class="hdp-btn-logout" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?></a>
+						<a class="hdp-btn-logout" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?></a>
 					</div>
 					<p><?php echo esc_html( $portaal_intro ); ?></p>
 					<?php if ( $merken ) : ?>

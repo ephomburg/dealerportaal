@@ -75,17 +75,21 @@
 .hdp-btn-secundair:hover { background: var(--wp--preset--color--grijs-licht); border-color: var(--wp--preset--color--donkergrijs); color: var(--wp--preset--color--donkergrijs); }
 
 .hdp-btn-logout {
-	background: transparent;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	background: var(--wp--preset--color--grijs-licht);
 	color: var(--wp--preset--color--donkergrijs);
-	border: 2px solid var(--wp--preset--color--rand);
-	border-radius: 6px;
-	padding: 0.5rem 1.1rem;
+	border: none;
+	border-radius: 8px;
+	padding: 0.6rem 1.2rem;
 	font-weight: 600;
 	font-size: 0.85rem;
 	text-decoration: none;
-	transition: background 0.2s, border-color 0.2s;
+	transition: background 0.2s, color 0.2s, transform 0.15s;
 }
-.hdp-btn-logout:hover { background: var(--wp--preset--color--homburg-rood); border-color: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--wit); }
+.hdp-btn-logout svg { width: 15px; height: 15px; stroke: currentColor; flex-shrink: 0; }
+.hdp-btn-logout:hover { background: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--wit); transform: translateY(-1px); }
 
 /* ==========================================================================
    LOGIN-SCHERM
