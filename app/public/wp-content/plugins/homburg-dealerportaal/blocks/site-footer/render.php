@@ -3,8 +3,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$nl_titel = HDP_I18N::kies( 'Homburg Nederland', 'Homburg Pays-Bas' );
-$be_titel = HDP_I18N::kies( 'Homburg België', 'Homburg Belgique' );
+// Vaste merknamen, bewust hetzelfde in NL en FR (zoals ook "Homburg
+// Belgium" in de header altijd Engels blijft, ongeacht de taalkeuze).
+$nl_titel = 'Homburg Holland';
+$be_titel = 'Homburg Belgium';
 ?>
 <footer class="hdp-site-footer">
 	<div class="hdp-footer-boven">
