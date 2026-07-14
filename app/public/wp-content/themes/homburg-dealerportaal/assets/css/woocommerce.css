@@ -1,0 +1,392 @@
+/* ==========================================================================
+   HOMBURG DEALERPORTAAL — WOOCOMMERCE
+   Herbruikt dezelfde tokens als de rest van het thema/portaal
+   (--wp--preset--color--*, --hdp-radius, --hdp-schaduw uit het portaal).
+   Alleen geladen op WooCommerce-pagina's (zie includes/woocommerce/setup.php).
+   ========================================================================== */
+:root {
+	--hdp-wc-radius:  10px;
+	--hdp-wc-schaduw: 0 4px 18px rgba(43, 45, 49, 0.10);
+}
+
+/* ==========================================================================
+   ALGEMEEN: meldingen, paginering, breadcrumb
+   ========================================================================== */
+.woocommerce-message,
+.woocommerce-error,
+.woocommerce-info,
+.woocommerce-noreviews,
+p.no-comments {
+	background: var(--wp--preset--color--wit);
+	border-left: 4px solid var(--wp--preset--color--homburg-rood);
+	border-radius: 6px;
+	box-shadow: var(--hdp-wc-schaduw);
+	padding: 1rem 1.2rem;
+	margin: 0 0 1.5rem;
+	list-style: none;
+	font-size: 0.92rem;
+	color: var(--wp--preset--color--donkergrijs);
+}
+.woocommerce-message { border-left-color: var(--wp--preset--color--homburg-rood); }
+.woocommerce-info { border-left-color: var(--wp--preset--color--grijs-tekst); }
+.woocommerce-error { border-left-color: var(--wp--preset--color--homburg-rood-donker); background: #fdecec; }
+.woocommerce-message a.button,
+.woocommerce-error a.button,
+.woocommerce-info a.button {
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+	border-radius: 6px;
+	padding: 0.5rem 1rem;
+	text-decoration: none;
+	font-weight: 700;
+	margin-left: 0.75rem;
+}
+
+.woocommerce-breadcrumb {
+	font-size: 0.82rem;
+	color: var(--wp--preset--color--grijs-tekst);
+	margin-bottom: 1.5rem;
+}
+.woocommerce-breadcrumb a { color: var(--wp--preset--color--grijs-tekst); text-decoration: none; }
+.woocommerce-breadcrumb a:hover { color: var(--wp--preset--color--homburg-rood); }
+
+.woocommerce-pagination ul.page-numbers {
+	display: flex;
+	gap: 0.4rem;
+	list-style: none;
+	padding: 0;
+	margin: 2rem 0 0;
+}
+.woocommerce-pagination .page-numbers li { display: inline-flex; }
+.woocommerce-pagination .page-numbers a,
+.woocommerce-pagination .page-numbers span {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 2.2rem;
+	height: 2.2rem;
+	padding: 0 0.6rem;
+	border-radius: 6px;
+	border: 2px solid var(--wp--preset--color--rand);
+	color: var(--wp--preset--color--donkergrijs);
+	text-decoration: none;
+	font-weight: 600;
+	font-size: 0.85rem;
+}
+.woocommerce-pagination .page-numbers a:hover { border-color: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--homburg-rood); }
+.woocommerce-pagination .page-numbers .current {
+	background: var(--wp--preset--color--homburg-rood);
+	border-color: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+}
+
+.woocommerce-result-count,
+.woocommerce-ordering {
+	font-size: 0.85rem;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.woocommerce-ordering select {
+	border: 2px solid var(--wp--preset--color--rand);
+	border-radius: 6px;
+	padding: 0.4rem 0.6rem;
+	font-family: inherit;
+}
+
+/* ==========================================================================
+   PRODUCTKAART (shop, categorie, zoekresultaten) — hergebruikt .hdp-kaart
+   ========================================================================== */
+ul.products {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 1.5rem;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+ul.products li.product {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-wc-radius);
+	box-shadow: var(--hdp-wc-schaduw);
+	border-top: 5px solid var(--wp--preset--color--homburg-rood);
+	padding: 1.6rem 1.5rem 1.8rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	transition: transform 0.15s, box-shadow 0.15s;
+	list-style: none;
+}
+ul.products li.product:hover { transform: translateY(-3px); box-shadow: 0 8px 26px rgba(43, 45, 49, 0.16); }
+ul.products li.product img {
+	border-radius: 8px;
+	aspect-ratio: 1 / 1;
+	object-fit: cover;
+	width: 100%;
+	height: auto;
+	margin-bottom: 0.4rem;
+}
+ul.products li.product .woocommerce-loop-product__title {
+	font-size: 1rem;
+	font-weight: 700;
+	color: var(--wp--preset--color--donkergrijs);
+	margin: 0;
+}
+ul.products li.product a { text-decoration: none; }
+
+.hdp-wc-merk {
+	display: inline-block;
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--homburg-rood);
+}
+.hdp-wc-merk--groot { font-size: 0.78rem; margin: 0.2rem 0 0.6rem; }
+
+.hdp-wc-kaart-meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.6rem;
+	font-size: 0.78rem;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-wc-sku { color: var(--wp--preset--color--grijs-tekst); }
+
+ul.products li.product .price {
+	font-size: 1.05rem;
+	font-weight: 700;
+	color: var(--wp--preset--color--donkergrijs);
+	margin: 0.2rem 0 0.4rem;
+}
+ul.products li.product .price del { color: var(--wp--preset--color--grijs-tekst); font-weight: 400; opacity: 0.7; }
+ul.products li.product .price ins { text-decoration: none; color: var(--wp--preset--color--homburg-rood); }
+
+.stock { font-size: 0.78rem; font-weight: 600; }
+.stock.in-stock { color: #1a7d3a; }
+.stock.out-of-stock { color: var(--wp--preset--color--homburg-rood-donker); }
+.stock.on-backorder { color: #a0740a; }
+
+ul.products li.product > a.button,
+ul.products li.product > a.hdp-wc-bekijk-knop,
+ul.products li.product .added_to_cart {
+	margin-top: auto;
+}
+ul.products li.product .button,
+.hdp-wc-bekijk-knop {
+	display: inline-block;
+	text-align: center;
+	border-radius: 6px;
+	padding: 0.7rem 1.2rem;
+	font-weight: 700;
+	font-size: 0.88rem;
+	text-decoration: none !important;
+	transition: background 0.15s, transform 0.15s;
+}
+ul.products li.product > a.button {
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit) !important;
+	border: none;
+	margin-top: 0.5rem;
+}
+ul.products li.product > a.button:hover { background: var(--wp--preset--color--homburg-rood-donker); }
+.hdp-wc-bekijk-knop {
+	background: var(--wp--preset--color--wit);
+	color: var(--wp--preset--color--donkergrijs) !important;
+	border: 2px solid var(--wp--preset--color--rand);
+	margin-top: 0.7rem;
+}
+.hdp-wc-bekijk-knop:hover { background: var(--wp--preset--color--grijs-licht); border-color: var(--wp--preset--color--donkergrijs); }
+
+.woocommerce-no-products-found {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-wc-radius);
+	box-shadow: var(--hdp-wc-schaduw);
+	padding: 2.5rem 1.5rem;
+	text-align: center;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+
+/* ==========================================================================
+   LOSSE PRODUCTPAGINA
+   ========================================================================== */
+.single-product .summary h1.product_title {
+	font-size: 1.6rem;
+	font-weight: 700;
+	color: var(--wp--preset--color--donkergrijs);
+}
+.single-product .summary .price {
+	font-size: 1.4rem;
+	font-weight: 700;
+	color: var(--wp--preset--color--homburg-rood);
+	margin: 0.6rem 0;
+}
+.single-product .summary .price del { color: var(--wp--preset--color--grijs-tekst); opacity: 0.7; font-size: 1rem; }
+.single-product div.images { border-radius: var(--hdp-wc-radius); overflow: hidden; }
+.single-product div.images img { border-radius: var(--hdp-wc-radius); }
+
+.single-product form.cart .quantity input.qty {
+	border: 2px solid var(--wp--preset--color--rand);
+	border-radius: 6px;
+	padding: 0.6rem 0.7rem;
+	width: 4.5rem;
+	font-family: inherit;
+	font-size: 0.95rem;
+}
+.single-product .single_add_to_cart_button,
+.single-product form.cart .button {
+	background: var(--wp--preset--color--homburg-rood) !important;
+	color: var(--wp--preset--color--wit) !important;
+	border: none !important;
+	border-radius: 6px !important;
+	padding: 0.8rem 1.6rem !important;
+	font-weight: 700 !important;
+	font-size: 0.95rem !important;
+	text-transform: none !important;
+	transition: background 0.2s;
+}
+.single-product .single_add_to_cart_button:hover { background: var(--wp--preset--color--homburg-rood-donker) !important; }
+
+.single-product .product_meta {
+	font-size: 0.82rem;
+	color: var(--wp--preset--color--grijs-tekst);
+	border-top: 1px solid var(--wp--preset--color--rand);
+	margin-top: 1.5rem;
+	padding-top: 1rem;
+}
+.single-product .product_meta a { color: var(--wp--preset--color--grijs-tekst); }
+
+.woocommerce-tabs {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-wc-radius);
+	box-shadow: var(--hdp-wc-schaduw);
+	padding: 1.5rem 1.8rem;
+	margin-top: 2rem;
+}
+.woocommerce-tabs ul.tabs { list-style: none; display: flex; gap: 1.5rem; padding: 0; margin: 0 0 1.2rem; border-bottom: 1px solid var(--wp--preset--color--rand); }
+.woocommerce-tabs ul.tabs li a { text-decoration: none; font-weight: 700; color: var(--wp--preset--color--grijs-tekst); padding-bottom: 0.6rem; display: inline-block; }
+.woocommerce-tabs ul.tabs li.active a { color: var(--wp--preset--color--homburg-rood); border-bottom: 2px solid var(--wp--preset--color--homburg-rood); }
+
+.related.products ul.products,
+.up-sells ul.products { margin-top: 1rem; }
+.related.products > h2,
+.up-sells > h2 { font-size: 1.15rem; font-weight: 700; margin: 2.5rem 0 1.2rem; }
+
+/* ==========================================================================
+   WINKELMAND / AFREKENEN (WooCommerce-blokken)
+   ========================================================================== */
+.wc-block-components-button:not(.is-link),
+.wp-block-woocommerce-proceed-to-checkout-block .wc-block-cart__submit-button,
+.wc-block-components-checkout-place-order-button {
+	background: var(--wp--preset--color--homburg-rood) !important;
+	border-color: var(--wp--preset--color--homburg-rood) !important;
+	color: var(--wp--preset--color--wit) !important;
+	border-radius: 6px !important;
+	font-weight: 700 !important;
+}
+.wc-block-components-button:not(.is-link):hover {
+	background: var(--wp--preset--color--homburg-rood-donker) !important;
+	border-color: var(--wp--preset--color--homburg-rood-donker) !important;
+}
+.wc-block-cart-item__product-name,
+.wc-block-components-product-name { color: var(--wp--preset--color--donkergrijs); font-weight: 700; }
+.wc-block-components-totals-item__value,
+.wc-block-components-totals-footer-item .wc-block-components-totals-item__value {
+	color: var(--wp--preset--color--donkergrijs);
+	font-weight: 700;
+}
+.wc-block-components-notice-banner {
+	border-radius: 6px !important;
+	box-shadow: var(--hdp-wc-schaduw);
+}
+.wc-block-components-notice-banner.is-error { border-left-color: var(--wp--preset--color--homburg-rood-donker) !important; }
+.wc-block-components-notice-banner.is-success { border-left-color: var(--wp--preset--color--homburg-rood) !important; }
+.wc-block-cart .wc-block-components-panel,
+.wc-block-checkout .wc-block-components-panel {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-wc-radius);
+}
+
+/* ==========================================================================
+   MIJN ACCOUNT / BESTELGESCHIEDENIS
+   ========================================================================== */
+.woocommerce-MyAccount-navigation ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+.woocommerce-MyAccount-navigation a {
+	display: block;
+	padding: 0.6rem 0.9rem;
+	border-radius: 6px;
+	color: var(--wp--preset--color--donkergrijs);
+	text-decoration: none;
+	font-weight: 600;
+	font-size: 0.9rem;
+}
+.woocommerce-MyAccount-navigation a:hover { background: var(--wp--preset--color--grijs-licht); }
+.woocommerce-MyAccount-navigation .is-active a { background: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--wit); }
+
+table.shop_table,
+.woocommerce-orders-table {
+	width: 100%;
+	border-collapse: collapse;
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-wc-radius);
+	overflow: hidden;
+	box-shadow: var(--hdp-wc-schaduw);
+}
+table.shop_table th {
+	background: var(--wp--preset--color--grijs-licht);
+	text-align: left;
+	font-size: 0.78rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--wp--preset--color--grijs-tekst);
+	padding: 0.8rem 1rem;
+}
+table.shop_table td { padding: 0.8rem 1rem; border-top: 1px solid var(--wp--preset--color--rand); font-size: 0.88rem; }
+
+.woocommerce-orders-table__cell-order-status mark.order-status {
+	display: inline-block;
+	border-radius: 999px;
+	padding: 0.25rem 0.75rem;
+	font-size: 0.72rem;
+	font-weight: 700;
+	background: var(--wp--preset--color--grijs-licht);
+	color: var(--wp--preset--color--donkergrijs);
+}
+
+.woocommerce-form-row input.input-text,
+.woocommerce-form-row select,
+.woocommerce form .form-row input.input-text,
+.woocommerce form .form-row select {
+	border: 2px solid var(--wp--preset--color--rand);
+	border-radius: 6px;
+	padding: 0.7rem 0.9rem;
+	font-family: inherit;
+	font-size: 0.92rem;
+	width: 100%;
+}
+.woocommerce form .form-row input.input-text:focus,
+.woocommerce form .form-row select:focus { border-color: var(--wp--preset--color--homburg-rood); outline: none; }
+.woocommerce button.button,
+.woocommerce input.button,
+.woocommerce #respond input#submit {
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+	border: none;
+	border-radius: 6px;
+	padding: 0.75rem 1.4rem;
+	font-weight: 700;
+	font-size: 0.92rem;
+	cursor: pointer;
+}
+.woocommerce button.button:hover,
+.woocommerce input.button:hover { background: var(--wp--preset--color--homburg-rood-donker); }
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 900px) {
+	ul.products { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+	ul.products { grid-template-columns: 1fr; }
+	.woocommerce-tabs ul.tabs { flex-wrap: wrap; gap: 1rem; }
+}

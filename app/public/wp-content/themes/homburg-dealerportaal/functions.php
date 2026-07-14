@@ -21,3 +21,10 @@ add_action(
 		wp_enqueue_style( 'homburg-dealerportaal-theme', get_stylesheet_uri(), array(), wp_get_theme()->get( 'Version' ) );
 	}
 );
+
+// WooCommerce-integratie: alleen geladen wanneer WooCommerce actief is,
+// logisch gescheiden zodat productzichtbaarheid/toegangscontrole hier
+// later bij kan zonder de rest van het thema te raken.
+require_once get_theme_file_path( 'includes/woocommerce/setup.php' );
+require_once get_theme_file_path( 'includes/woocommerce/product-brand.php' );
+require_once get_theme_file_path( 'includes/woocommerce/product-card.php' );
