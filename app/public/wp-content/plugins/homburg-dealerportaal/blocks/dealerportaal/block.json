@@ -45,7 +45,13 @@
 		"kaart3Omschrijving": { "type": "string", "default": "Prijslijsten, brochures, handleidingen en beeldmateriaal, exclusief voor dealers." },
 		"kaart3OmschrijvingFr": { "type": "string", "default": "Listes de prix, brochures, manuels et supports visuels, réservés aux revendeurs." },
 		"kaart3Knoptekst": { "type": "string", "default": "Naar downloads" },
-		"kaart3KnoptekstFr": { "type": "string", "default": "Vers les téléchargements" }
+		"kaart3KnoptekstFr": { "type": "string", "default": "Vers les téléchargements" },
+		"kaart4Titel": { "type": "string", "default": "Content" },
+		"kaart4TitelFr": { "type": "string", "default": "Contenu" },
+		"kaart4Omschrijving": { "type": "string", "default": "Vind hier content voor op jouw socials of advertenties." },
+		"kaart4OmschrijvingFr": { "type": "string", "default": "Retrouvez ici du contenu pour vos réseaux sociaux ou vos publicités." },
+		"kaart4Knoptekst": { "type": "string", "default": "Naar content" },
+		"kaart4KnoptekstFr": { "type": "string", "default": "Vers le contenu" }
 	},
 	"supports": {
 		"html": false,

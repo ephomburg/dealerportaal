@@ -77,6 +77,16 @@
 						veld( attributes, setAttributes, 'Omschrijving (FR)', 'kaart3OmschrijvingFr', true ),
 						veld( attributes, setAttributes, 'Knoptekst (NL)', 'kaart3Knoptekst', false ),
 						veld( attributes, setAttributes, 'Knoptekst (FR)', 'kaart3KnoptekstFr', false )
+					),
+					el(
+						PanelBody,
+						{ title: 'Kaart 4 – Content', initialOpen: false },
+						veld( attributes, setAttributes, 'Titel (NL)', 'kaart4Titel', false ),
+						veld( attributes, setAttributes, 'Titel (FR)', 'kaart4TitelFr', false ),
+						veld( attributes, setAttributes, 'Omschrijving (NL)', 'kaart4Omschrijving', true ),
+						veld( attributes, setAttributes, 'Omschrijving (FR)', 'kaart4OmschrijvingFr', true ),
+						veld( attributes, setAttributes, 'Knoptekst (NL)', 'kaart4Knoptekst', false ),
+						veld( attributes, setAttributes, 'Knoptekst (FR)', 'kaart4KnoptekstFr', false )
 					)
 				),
 				el( ServerSideRender, {

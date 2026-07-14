@@ -175,6 +175,10 @@ class HDP_Blocks {
 		$kaart3_titel       = HDP_I18N::kies( $a['kaart3Titel'], $a['kaart3TitelFr'] );
 		$kaart3_omschrijving = HDP_I18N::kies( $a['kaart3Omschrijving'], $a['kaart3OmschrijvingFr'] );
 		$kaart3_knoptekst   = HDP_I18N::kies( $a['kaart3Knoptekst'], $a['kaart3KnoptekstFr'] );
+		$kaart4_titel       = HDP_I18N::kies( $a['kaart4Titel'], $a['kaart4TitelFr'] );
+		$kaart4_omschrijving = HDP_I18N::kies( $a['kaart4Omschrijving'], $a['kaart4OmschrijvingFr'] );
+		$kaart4_knoptekst   = HDP_I18N::kies( $a['kaart4Knoptekst'], $a['kaart4KnoptekstFr'] );
+		$content_url        = HDP_Settings::get( 'content_url' );
 		?>
 		<div class="hdp-hero alignfull" style="background-image:url('<?php echo esc_url( $a['heroAfbeelding'] ); ?>')" aria-hidden="true"></div>
 		<div class="hdp-portaal alignfull">
@@ -219,6 +223,17 @@ class HDP_Blocks {
 					<h2><?php echo esc_html( $kaart3_titel ); ?></h2>
 					<p><?php echo esc_html( $kaart3_omschrijving ); ?></p>
 					<a class="hdp-btn" href="<?php echo esc_url( home_url( '/downloads/' ) ); ?>"><?php echo esc_html( $kaart3_knoptekst ); ?></a>
+				</article>
+
+				<article class="hdp-kaart">
+					<?php self::render_icoon( 'content' ); ?>
+					<h2><?php echo esc_html( $kaart4_titel ); ?></h2>
+					<p><?php echo esc_html( $kaart4_omschrijving ); ?></p>
+					<?php if ( $content_url ) : ?>
+						<a class="hdp-btn" href="<?php echo esc_url( $content_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $kaart4_knoptekst ); ?></a>
+					<?php else : ?>
+						<p class="hdp-nog-niet"><?php echo esc_html( HDP_I18N::t( 'nog_niet_geconfigureerd' ) ); ?></p>
+					<?php endif; ?>
 				</article>
 			</section>
 
@@ -322,6 +337,7 @@ class HDP_Blocks {
 			'webshop'      => '<circle cx="9" cy="21" r="1.5"/><circle cx="19" cy="21" r="1.5"/><path d="M2 3h3l2.6 12.5a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H6"/>',
 			'configurator' => '<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.12-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.85a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01A1.7 1.7 0 0 0 10.05 3V3a2 2 0 1 1 4 0v.09c0 .68.4 1.29 1.03 1.56a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01c.27.62.88 1.03 1.56 1.03H21a2 2 0 1 1 0 4h-.09c-.68 0-1.29.4-1.51 1z"/>',
 			'downloads'    => '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>',
+			'content'      => '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
 		);
 
 		if ( ! isset( $paden[ $type ] ) ) {
