@@ -103,7 +103,17 @@ ul.products {
 	margin: 0;
 	padding: 0;
 }
+/* WooCommerce's eigen woocommerce-layout.css zet op li.product zelf een
+   float + vaste breedte-percentages (.columns-3 etc.) met een hogere
+   specificiteit dan een simpele "ul.products li.product"-selector, ook al
+   laadt dit bestand ná die van WooCommerce. !important is hier bewust
+   nodig om het eigen rastersysteem van WooCommerce volledig te vervangen
+   door onze eigen CSS-grid. */
 ul.products li.product {
+	float: none !important;
+	width: auto !important;
+	margin: 0 !important;
+	clear: none !important;
 	background: var(--wp--preset--color--wit);
 	border-radius: var(--hdp-wc-radius);
 	box-shadow: var(--hdp-wc-schaduw);
