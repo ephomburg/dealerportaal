@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "homburg/downloads-pagina",
+	"title": "Dealerdownloads",
+	"category": "widgets",
+	"icon": "download",
+	"description": "Toont de beveiligde downloadlijst voor ingelogde, goedgekeurde dealers. Niet-ingelogde bezoekers zien het inlogscherm.",
+	"textdomain": "homburg-dealerportaal",
+	"attributes": {
+		"heroAfbeelding": {
+			"type": "string",
+			"default": "https://www.homburg-belgium.com/wp-content/uploads/2023/09/Homburg-Holland-precisielandbouw-man-in-veld.jpg"
+		},
+		"titel": {
+			"type": "string",
+			"default": "Downloads voor dealers"
+		},
+		"omschrijving": {
+			"type": "string",
+			"default": "Deze bestanden zijn uitsluitend bedoeld voor Homburg-dealers en mogen niet verder worden verspreid."
+		}
+	},
+	"supports": {
+		"html": false,
+		"multiple": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

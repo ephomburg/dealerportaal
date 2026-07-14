@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Downloads – voorproefje</title>
+<style>
+  :root {
+    --rood: #c00d0d;
+    --rood-donker: #9a0a0a;
+    --donkergrijs: #2b2d31;
+    --grijs-tekst: #55585e;
+    --grijs-licht: #f4f5f7;
+    --wit: #ffffff;
+    --rand: #e2e4e8;
+    --radius: 10px;
+    --schaduw: 0 4px 18px rgba(43, 45, 49, 0.10);
+    --font: 'Segoe UI', Arial, sans-serif;
+  }
+
+  /* Bewuste keuze: dit voorproefje volgt de vaste (lichte) huisstijl van het
+     dealerportaal zelf, dat geen donkere modus heeft — geen thema-omschakeling
+     dus, dat zou een andere site voorspiegelen dan wat er echt gebouwd wordt. */
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+  body {
+    font-family: var(--font);
+    background: var(--grijs-licht);
+    color: var(--donkergrijs);
+    line-height: 1.6;
+  }
+
+  a { color: var(--rood); }
+  button, input { font-family: var(--font); }
+  :focus-visible { outline: 3px solid var(--rood); outline-offset: 2px; }
+
+  .header {
+    background: var(--donkergrijs);
+    color: var(--wit);
+    border-bottom: 4px solid var(--rood);
+  }
+  .header-inner {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 1.1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+  .woordmerk-blok {
+    background: var(--rood);
+    color: var(--wit);
+    font-weight: 800;
+    font-size: 1.1rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: 4px;
+  }
+  .woordmerk-tekst strong { display: block; font-size: 1rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+  .woordmerk-tekst span { font-size: 0.68rem; color: #b9bcc2; letter-spacing: 0.14em; text-transform: uppercase; }
+
+  .paginakop {
+    background: var(--wit);
+    border-bottom: 1px solid var(--rand);
+    padding: 2.2rem 1.5rem;
+  }
+  .paginakop-inner { max-width: 1140px; margin: 0 auto; }
+  .paginakop h1 { font-size: 1.6rem; font-weight: 700; }
+  .paginakop p { color: var(--grijs-tekst); font-size: 0.95rem; margin-top: 0.3rem; max-width: 640px; }
+
+  main { max-width: 1140px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  /* ── Werkbalk: zoeken + filters ───────────────────────────────── */
+  .werkbalk {
+    background: var(--wit);
+    border-radius: var(--radius);
+    box-shadow: var(--schaduw);
+    padding: 1.4rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+  .zoekveld { position: relative; }
+  .zoekveld svg {
+    position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%);
+    width: 17px; height: 17px; stroke: var(--grijs-tekst); pointer-events: none;
+  }
+  .zoekveld input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.6rem;
+    border: 2px solid var(--rand);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: var(--donkergrijs);
+  }
+  .zoekveld input:focus { border-color: var(--rood); outline: none; }
+
+  .filterrij { display: flex; flex-wrap: wrap; align-items: center; gap: 1.6rem; row-gap: 0.9rem; }
+  .filtergroep { display: flex; flex-direction: column; gap: 0.5rem; }
+  .filtergroep-label {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--grijs-tekst);
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .chip {
+    border: 2px solid var(--rand);
+    background: var(--wit);
+    color: var(--donkergrijs);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .chip:hover { border-color: var(--donkergrijs); }
+  .chip.actief { background: var(--rood); border-color: var(--rood); color: var(--wit); }
+
+  .filterrij-onder { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .telling { font-size: 0.85rem; color: var(--grijs-tekst); }
+  .telling strong { color: var(--donkergrijs); }
+  .wis-filters {
+    background: none; border: none; color: var(--rood); font-weight: 600; font-size: 0.85rem;
+    cursor: pointer; text-decoration: underline;
+  }
+  .wis-filters:hover { color: var(--rood-donker); }
+
+  /* ── Downloadkaarten ──────────────────────────────────────────── */
+  .kaarten-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 1.1rem;
+  }
+  .dl-kaart {
+    background: var(--wit);
+    border-radius: var(--radius);
+    box-shadow: var(--schaduw);
+    border-top: 4px solid var(--rood);
+    padding: 1.3rem 1.3rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .dl-kaart:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(43,45,49,0.15); }
+  .dl-kaart.verborgen { display: none; }
+
+  .dl-top { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
+  .dl-type {
+    background: var(--donkergrijs); color: var(--wit); font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase; border-radius: 4px; padding: 0.25rem 0.5rem;
+  }
+  .dl-regios { display: flex; gap: 0.3rem; }
+  .vlag {
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.03em; border-radius: 4px;
+    padding: 0.2rem 0.4rem; background: var(--grijs-licht); color: var(--grijs-tekst); border: 1px solid var(--rand);
+  }
+
+  .dl-titel { font-size: 1rem; font-weight: 700; }
+  .dl-omschrijving { font-size: 0.86rem; color: var(--grijs-tekst); flex: 1; }
+  .dl-merk {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--rood);
+  }
+  .dl-knop {
+    display: inline-block; text-align: center; background: var(--rood); color: var(--wit);
+    font-weight: 700; font-size: 0.88rem; padding: 0.6rem 1rem; border-radius: 6px; text-decoration: none;
+    margin-top: 0.3rem; transition: background 0.15s;
+  }
+  .dl-knop:hover { background: var(--rood-donker); }
+
+  .leeg-resultaat {
+    display: none;
+    background: var(--wit); border-radius: var(--radius); box-shadow: var(--schaduw);
+    padding: 3rem 1.5rem; text-align: center; color: var(--grijs-tekst);
+  }
+  .leeg-resultaat.zichtbaar { display: block; }
+  .leeg-resultaat p { margin-bottom: 0.9rem; }
+
+  .voorproefje-badge {
+    max-width: 1140px; margin: 0 auto; padding: 0 1.5rem;
+  }
+  .voorproefje-badge span {
+    display: inline-block; margin-top: 1.2rem; font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--grijs-tekst);
+    background: var(--wit); border: 1px dashed var(--rand); border-radius: 6px; padding: 0.4rem 0.7rem;
+  }
+
+  @media (max-width: 640px) {
+    .kaarten-grid { grid-template-columns: 1fr; }
+    .filterrij { gap: 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <span class="woordmerk-blok">H</span>
+      <span class="woordmerk-tekst">
+        <strong>Homburg</strong>
+        <span>Dealerportaal</span>
+      </span>
+    </div>
+  </header>
+
+  <section class="paginakop">
+    <div class="paginakop-inner">
+      <h1>Downloads voor dealers</h1>
+      <p>U ziet hier alleen bestanden voor de merken en regio's waarvoor uw account is goedgekeurd.</p>
+    </div>
+  </section>
+
+  <main>
+    <div class="werkbalk">
+      <div class="zoekveld">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="zoeken" placeholder="Zoek op bestandsnaam, bijv. &quot;prijslijst&quot;…" autocomplete="off">
+      </div>
+
+      <div class="filterrij">
+        <div class="filtergroep">
+          <span class="filtergroep-label">Regio</span>
+          <div class="chips" id="regio-chips">
+            <button class="chip actief" data-regio="alle">Alles</button>
+            <button class="chip" data-regio="nl">Nederland</button>
+            <button class="chip" data-regio="be">België</button>
+          </div>
+        </div>
+        <div class="filtergroep">
+          <span class="filtergroep-label">Merk</span>
+          <div class="chips" id="merk-chips">
+            <button class="chip" data-merk="Merk A">Merk A</button>
+            <button class="chip" data-merk="Merk B">Merk B</button>
+            <button class="chip" data-merk="Merk C">Merk C</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="filterrij-onder">
+        <p class="telling"><strong id="telling-zichtbaar">6</strong> van <span id="telling-totaal">6</span> downloads zichtbaar</p>
+        <button class="wis-filters" id="wis-filters">Filters wissen</button>
+      </div>
+    </div>
+
+    <div class="kaarten-grid" id="kaarten-grid">
+      <!-- Kaarten worden door onderstaand script gevuld op basis van de voorbeelddata. -->
+    </div>
+
+    <div class="leeg-resultaat" id="leeg-resultaat">
+      <p>Geen downloads gevonden voor deze combinatie van filters.</p>
+      <button class="wis-filters" id="wis-filters-leeg">Filters wissen</button>
+    </div>
+
+    <div class="voorproefje-badge">
+      <span>Voorproefje — voorbeelddata, nog niet gekoppeld aan echte dealerrechten</span>
+    </div>
+  </main>
+
+<script>
+"use strict";
+
+/* Voorbeelddata: illustreert hoe merk + regio straks aan elke download
+   hangen. In de echte versie komt dit uit de rechten van de dealer en de
+   instellingen per download, niet uit deze lijst. */
+var downloads = [
+  { titel: "Prijslijst 2026", omschrijving: "Actuele dealerprijslijst, geldig vanaf januari 2026.", type: "PDF", merk: "Merk A", regios: ["nl", "be"] },
+  { titel: "Productbrochure zaaimachines", omschrijving: "Voor klantgesprekken en beurzen.", type: "PDF", merk: "Merk A", regios: ["nl"] },
+  { titel: "Onderdelencatalogus", omschrijving: "Overzicht van onderdelen en artikelnummers.", type: "XLSX", merk: "Merk B", regios: ["be"] },
+  { titel: "Beeldbank machines", omschrijving: "Productfoto's in hoge resolutie (ZIP-archief).", type: "ZIP", merk: "Merk B", regios: ["nl", "be"] },
+  { titel: "Handleiding ploegen", omschrijving: "Installatie- en onderhoudshandleiding.", type: "PDF", merk: "Merk C", regios: ["nl"] },
+  { titel: "Prijslijst onderdelen 2026", omschrijving: "Aparte prijslijst voor losse onderdelen.", type: "XLSX", merk: "Merk A", regios: ["be"] }
+];
+
+var vlagnaam = { nl: "NL", be: "BE" };
+
+var grid = document.getElementById("kaarten-grid");
+var actieveRegio = "alle";
+var actieveMerken = [];
+
+function bouwKaarten() {
+  grid.innerHTML = "";
+  downloads.forEach(function (item, index) {
+    var kaart = document.createElement("article");
+    kaart.className = "dl-kaart";
+    kaart.dataset.titel = item.titel.toLowerCase();
+    kaart.dataset.merk = item.merk;
+    kaart.dataset.regios = item.regios.join(" ");
+
+    var vlaggen = item.regios.map(function (r) { return '<span class="vlag">' + vlagnaam[r] + '</span>'; }).join("");
+
+    kaart.innerHTML =
+      '<div class="dl-top"><span class="dl-type">' + item.type + '</span><div class="dl-regios">' + vlaggen + '</div></div>' +
+      '<div class="dl-merk">' + item.merk + '</div>' +
+      '<div class="dl-titel">' + item.titel + '</div>' +
+      '<p class="dl-omschrijving">' + item.omschrijving + '</p>' +
+      '<a class="dl-knop" href="#" onclick="return false;">Downloaden</a>';
+
+    grid.appendChild(kaart);
+  });
+}
+
+function filterToepassen() {
+  var zoekterm = document.getElementById("zoeken").value.trim().toLowerCase();
+  var kaarten = grid.querySelectorAll(".dl-kaart");
+  var zichtbaar = 0;
+
+  kaarten.forEach(function (kaart) {
+    var voldoetZoek = !zoekterm || kaart.dataset.titel.indexOf(zoekterm) !== -1;
+    var voldoetRegio = actieveRegio === "alle" || kaart.dataset.regios.split(" ").indexOf(actieveRegio) !== -1;
+    var voldoetMerk = actieveMerken.length === 0 || actieveMerken.indexOf(kaart.dataset.merk) !== -1;
+
+    var zichtbaarheid = voldoetZoek && voldoetRegio && voldoetMerk;
+    kaart.classList.toggle("verborgen", !zichtbaarheid);
+    if (zichtbaarheid) { zichtbaar++; }
+  });
+
+  document.getElementById("telling-zichtbaar").textContent = zichtbaar;
+  document.getElementById("leeg-resultaat").classList.toggle("zichtbaar", zichtbaar === 0);
+}
+
+document.getElementById("zoeken").addEventListener("input", filterToepassen);
+
+document.getElementById("regio-chips").addEventListener("click", function (e) {
+  var chip = e.target.closest(".chip");
+  if (!chip) return;
+  actieveRegio = chip.dataset.regio;
+  this.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("actief"); });
+  chip.classList.add("actief");
+  filterToepassen();
+});
+
+document.getElementById("merk-chips").addEventListener("click", function (e) {
+  var chip = e.target.closest(".chip");
+  if (!chip) return;
+  var merk = chip.dataset.merk;
+  var idx = actieveMerken.indexOf(merk);
+  if (idx === -1) { actieveMerken.push(merk); chip.classList.add("actief"); }
+  else { actieveMerken.splice(idx, 1); chip.classList.remove("actief"); }
+  filterToepassen();
+});
+
+function filtersWissen() {
+  document.getElementById("zoeken").value = "";
+  actieveRegio = "alle";
+  actieveMerken = [];
+  document.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("actief"); });
+  document.querySelector('.chip[data-regio="alle"]').classList.add("actief");
+  filterToepassen();
+}
+document.getElementById("wis-filters").addEventListener("click", filtersWissen);
+document.getElementById("wis-filters-leeg").addEventListener("click", filtersWissen);
+
+document.getElementById("telling-totaal").textContent = downloads.length;
+bouwKaarten();
+</script>
+
+</body>
+</html>

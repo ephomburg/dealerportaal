@@ -1,0 +1,39 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "homburg/dealerportaal",
+	"title": "Dealerportaal (login + portaal)",
+	"category": "widgets",
+	"icon": "id-alt",
+	"description": "Toont het inlogscherm, of na inloggen het dealerportaal met webshop-, configurator- en downloadskaarten. De teksten hieronder zijn aanpasbaar; het inlogformulier en de gebruikersgegevens blijven altijd door de server bepaald.",
+	"textdomain": "homburg-dealerportaal",
+	"attributes": {
+		"heroAfbeelding": {
+			"type": "string",
+			"default": "https://www.homburg-belgium.com/wp-content/uploads/2023/09/Homburg-Holland-precisielandbouw-man-in-veld.jpg"
+		},
+		"loginIntro": {
+			"type": "string",
+			"default": "Log in met uw dealeraccount voor toegang tot de webshop, productconfigurator en downloads."
+		},
+		"portaalIntro": {
+			"type": "string",
+			"default": "Kies hieronder waar u naartoe wilt. De webshop en productconfigurator openen in een nieuw tabblad."
+		},
+		"kaart1Titel": { "type": "string", "default": "Webshop" },
+		"kaart1Omschrijving": { "type": "string", "default": "Bestel onderdelen en machines rechtstreeks via de dealerwebshop, met uw dealercondities." },
+		"kaart1Knoptekst": { "type": "string", "default": "Naar de webshop" },
+		"kaart2Titel": { "type": "string", "default": "Productconfigurator" },
+		"kaart2Omschrijving": { "type": "string", "default": "Stel machines op maat samen voor uw klant en genereer direct een specificatie en offerte." },
+		"kaart2Knoptekst": { "type": "string", "default": "Open configurator" },
+		"kaart3Titel": { "type": "string", "default": "Downloads" },
+		"kaart3Omschrijving": { "type": "string", "default": "Prijslijsten, brochures, handleidingen en beeldmateriaal, exclusief voor dealers." },
+		"kaart3Knoptekst": { "type": "string", "default": "Naar downloads" }
+	},
+	"supports": {
+		"html": false,
+		"multiple": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

@@ -1,0 +1,29 @@
+# Volledige WordPress-kern, plugins van derden en uploads: geen eigen code,
+# hoeft niet in de repo (WooCommerce zelf, WordPress-kernbestanden, media).
+app/public/wp-admin/
+app/public/wp-includes/
+app/public/wp-content/uploads/
+app/public/wp-content/plugins/woocommerce/
+app/public/wp-content/themes/twentytwentyfive/
+app/public/wp-content/themes/twentytwentyfour/
+app/public/wp-content/themes/twentytwentythree/
+app/public/*.php
+app/public/.htaccess
+app/public/license.txt
+app/public/readme.html
+app/public/wp-content/*.php
+app/public/wp-content/index.php
+app/public/wp-content/plugins/index.php
+app/public/wp-content/themes/index.php
+downloads/
+
+# Geheimen en lokale Local-by-Flywheel-configuratie
+app/public/wp-config.php
+app/.envrc
+
+# Server- en Local-omgevingsbestanden (niet projectcode)
+conf/
+logs/
+
+# Tijdelijke testbestanden
+*.tmp

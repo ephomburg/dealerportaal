@@ -1,0 +1,392 @@
+/* ==========================================================================
+   HOMBURG DEALERPORTAAL – PORTAAL-/LOGIN-/DOWNLOADSSCHERM
+   Kleuren komen uit het thema (theme.json) via --wp--preset--color--*,
+   zodat er één plek is waar de huisstijl is vastgelegd. Dit bestand
+   voegt alleen de lay-out toe die specifiek is voor de shortcodes.
+   ========================================================================== */
+:root {
+	--hdp-radius:  10px;
+	--hdp-schaduw: 0 4px 18px rgba(43, 45, 49, 0.10);
+}
+
+.hdp-portaal, .hdp-portaal *,
+.hdp-login-sectie, .hdp-login-sectie * {
+	box-sizing: border-box;
+}
+.hdp-portaal, .hdp-login-sectie {
+	line-height: 1.6;
+}
+
+/* Sfeerbeeld direct onder de header, edge-to-edge zoals in het origineel.
+   De klasse "alignfull" is het ingebouwde mechanisme van het blokthema om
+   uit de smalle inhoudskolom te breken. De achtergrondafbeelding komt
+   inline mee vanuit het blokattribuut (zie HDP_Blocks). */
+.hdp-hero.alignfull {
+	position: relative;
+	height: 46vh;
+	min-height: 240px;
+	max-height: 440px;
+	margin-block: 0;
+	background-size: cover;
+	background-position: center 30%;
+}
+/* Op de downloadspagina staan de bestanden voorop; de hero mag daar
+   compacter zodat er sneller inhoud te zien is. */
+.hdp-hero-klein.alignfull {
+	height: 20vh;
+	min-height: 140px;
+	max-height: 220px;
+}
+/* WordPress geeft blokken automatisch een kleine bovenmarge (block-gap);
+   die moet hier op nul, anders ontstaat er een naad tussen hero en
+   welkomstsectie. */
+.hdp-portaal.alignfull { margin-block-start: 0; }
+.hdp-hero::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, var(--wp--preset--color--wit) 100%);
+}
+
+/* ==========================================================================
+   ALGEMENE KNOPPEN
+   ========================================================================== */
+.hdp-btn {
+	display: inline-block;
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+	border: none;
+	border-radius: 6px;
+	padding: 0.8rem 1.6rem;
+	font-weight: 700;
+	font-size: 0.95rem;
+	text-decoration: none;
+	text-align: center;
+	cursor: pointer;
+	transition: background 0.2s, transform 0.15s;
+}
+.hdp-btn:hover { background: var(--wp--preset--color--homburg-rood-donker); transform: translateY(-1px); color: var(--wp--preset--color--wit); }
+
+.hdp-btn-secundair {
+	background: var(--wp--preset--color--wit);
+	color: var(--wp--preset--color--donkergrijs);
+	border: 2px solid var(--wp--preset--color--rand);
+}
+.hdp-btn-secundair:hover { background: var(--wp--preset--color--grijs-licht); border-color: var(--wp--preset--color--donkergrijs); color: var(--wp--preset--color--donkergrijs); }
+
+.hdp-btn-logout {
+	background: transparent;
+	color: var(--wp--preset--color--donkergrijs);
+	border: 2px solid var(--wp--preset--color--rand);
+	border-radius: 6px;
+	padding: 0.5rem 1.1rem;
+	font-weight: 600;
+	font-size: 0.85rem;
+	text-decoration: none;
+	transition: background 0.2s, border-color 0.2s;
+}
+.hdp-btn-logout:hover { background: var(--wp--preset--color--homburg-rood); border-color: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--wit); }
+
+/* ==========================================================================
+   LOGIN-SCHERM
+   ========================================================================== */
+.hdp-login-sectie {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1rem 0 3rem;
+}
+
+.hdp-login-kaart {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	padding: 2.5rem 2.2rem;
+	width: 100%;
+	max-width: 420px;
+	border-top: 5px solid var(--wp--preset--color--homburg-rood);
+}
+
+.hdp-login-kaart h1 { font-size: 1.45rem; font-weight: 700; margin-bottom: 0.4rem; }
+.hdp-login-kaart p.hdp-intro { color: var(--wp--preset--color--grijs-tekst); font-size: 0.92rem; margin-bottom: 1.6rem; }
+
+.hdp-veld { margin-bottom: 1.1rem; }
+.hdp-veld label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.35rem; }
+.hdp-veld input {
+	width: 100%;
+	padding: 0.75rem 0.9rem;
+	border: 2px solid var(--wp--preset--color--rand);
+	border-radius: 6px;
+	font-size: 0.95rem;
+	transition: border-color 0.2s;
+}
+.hdp-veld input:focus { border-color: var(--wp--preset--color--homburg-rood); outline: none; }
+
+.hdp-login-fout {
+	display: none;
+	background: #fdecec;
+	color: var(--wp--preset--color--homburg-rood-donker);
+	border: 1px solid #f5c2c2;
+	border-radius: 6px;
+	padding: 0.7rem 0.9rem;
+	font-size: 0.85rem;
+	font-weight: 600;
+	margin-bottom: 1.1rem;
+}
+.hdp-login-fout.hdp-zichtbaar { display: block; }
+
+.hdp-login-kaart .hdp-btn { width: 100%; }
+
+/* ==========================================================================
+   PORTAAL (na inloggen)
+   ========================================================================== */
+.hdp-welkom {
+	background: var(--wp--preset--color--wit);
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+	padding: 2.2rem 0;
+}
+/* Op pagina's zonder hero (bijv. downloads) staat deze sectie direct
+   onder de header en mag hij iets meer lucht krijgen. */
+.hdp-welkom-zonder-hero { padding-top: 2.8rem; }
+.hdp-welkom-inner { padding: 0 15%; }
+.hdp-welkom-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.hdp-welkom h1 { font-size: 1.6rem; font-weight: 700; }
+.hdp-welkom p { color: var(--wp--preset--color--grijs-tekst); font-size: 0.95rem; margin-top: 0.2rem; }
+.hdp-merken { font-weight: 600; }
+
+.hdp-kaarten-sectie {
+	max-width: 70%;
+	margin: 0 auto;
+	padding: 2.5rem 0;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 1.5rem;
+}
+
+.hdp-kaart-icoon {
+	width: 52px;
+	height: 52px;
+	border-radius: 8px;
+	background: var(--wp--preset--color--grijs-licht);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.hdp-kaart-icoon svg { width: 28px; height: 28px; stroke: var(--wp--preset--color--homburg-rood); }
+
+.hdp-kaart {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	padding: 1.8rem 1.6rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.9rem;
+	border-top: 5px solid var(--wp--preset--color--homburg-rood);
+	transition: transform 0.15s, box-shadow 0.15s;
+}
+.hdp-kaart:hover { transform: translateY(-3px); box-shadow: 0 8px 26px rgba(43, 45, 49, 0.16); }
+.hdp-kaart h2 { font-size: 1.1rem; font-weight: 700; }
+.hdp-kaart p { color: var(--wp--preset--color--grijs-tekst); font-size: 0.88rem; flex: 1; }
+.hdp-kaart .hdp-btn, .hdp-kaart .hdp-nog-niet { margin-top: auto; }
+.hdp-nog-niet { color: var(--wp--preset--color--grijs-tekst); font-size: 0.85rem; font-style: italic; }
+
+/* ==========================================================================
+   AANVULLENDE INFORMATIE (bestellen, contact, technische documentatie)
+   ========================================================================== */
+.hdp-info-sectie {
+	max-width: 70%;
+	margin: 0 auto;
+	padding: 1rem 0 3.5rem;
+}
+.hdp-info-titel {
+	font-size: 1.15rem;
+	font-weight: 700;
+	color: var(--wp--preset--color--donkergrijs);
+	margin-bottom: 1.25rem;
+	padding-bottom: 0.9rem;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+}
+
+/* Bewust géén rode bovenrand en géén grote CTA-knop: dit is naslag-
+   informatie, geen navigatie-actie zoals de drie kaarten hierboven.
+   Twee kolommen (i.p.v. drie) en losse link-chips i.p.v. inline tekst-
+   links geven het een eigen, rustiger karakter. */
+.hdp-info-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 1rem;
+}
+.hdp-info-kaart {
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: var(--hdp-radius);
+	padding: 1.4rem 1.5rem;
+	display: flex;
+	align-items: flex-start;
+	gap: 1rem;
+	transition: border-color 0.15s, box-shadow 0.15s;
+}
+.hdp-info-kaart:hover { border-color: var(--wp--preset--color--homburg-rood); box-shadow: var(--hdp-schaduw); }
+.hdp-info-icoon {
+	flex-shrink: 0;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background: var(--wp--preset--color--grijs-licht);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.hdp-info-icoon svg { width: 19px; height: 19px; stroke: var(--wp--preset--color--homburg-rood); }
+.hdp-info-body { min-width: 0; }
+.hdp-info-body h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; }
+.hdp-info-body p { color: var(--wp--preset--color--grijs-tekst); font-size: 0.85rem; }
+
+.hdp-info-links { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.8rem; }
+.hdp-info-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	background: var(--wp--preset--color--grijs-licht);
+	color: var(--wp--preset--color--donkergrijs);
+	font-size: 0.78rem;
+	font-weight: 600;
+	padding: 0.4rem 0.75rem;
+	border-radius: 6px;
+	text-decoration: none;
+	transition: background 0.15s, color 0.15s;
+}
+.hdp-info-link svg { width: 13px; height: 13px; stroke: currentColor; flex-shrink: 0; }
+.hdp-info-link:hover { background: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--wit); }
+
+/* ==========================================================================
+   DOWNLOADS
+   ========================================================================== */
+.hdp-downloads {
+	max-width: 70%;
+	margin: 0 auto;
+	padding: 2.5rem 0 3rem;
+}
+/* ── Werkbalk: zoeken + filteren ──────────────────────────────── */
+.hdp-dl-werkbalk {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	padding: 1.4rem 1.5rem;
+	margin-bottom: 1.5rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1.1rem;
+}
+.hdp-zoekveld { position: relative; }
+.hdp-zoekveld svg {
+	position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%);
+	width: 17px; height: 17px; stroke: var(--wp--preset--color--grijs-tekst); pointer-events: none;
+}
+.hdp-zoekveld input {
+	width: 100%;
+	padding: 0.75rem 1rem 0.75rem 2.6rem;
+	border: 2px solid var(--wp--preset--color--rand);
+	border-radius: 8px;
+	font-size: 0.95rem;
+}
+.hdp-zoekveld input:focus { border-color: var(--wp--preset--color--homburg-rood); outline: none; }
+
+.hdp-filterrij { display: flex; flex-wrap: wrap; align-items: center; gap: 1.6rem; row-gap: 0.9rem; }
+.hdp-filtergroep { display: flex; flex-direction: column; gap: 0.5rem; }
+.hdp-filtergroep-label {
+	font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.hdp-chip {
+	border: 2px solid var(--wp--preset--color--rand);
+	background: var(--wp--preset--color--wit);
+	font-family: inherit;
+	font-size: 0.82rem;
+	font-weight: 600;
+	padding: 0.4rem 0.85rem;
+	border-radius: 999px;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.hdp-chip:hover { border-color: var(--wp--preset--color--donkergrijs); }
+.hdp-chip-actief {
+	background: var(--wp--preset--color--homburg-rood) !important;
+	border-color: var(--wp--preset--color--homburg-rood) !important;
+	color: var(--wp--preset--color--wit) !important;
+}
+
+.hdp-filterrij-onder { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.hdp-telling { font-size: 0.85rem; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-wis-filters {
+	background: none; border: none; font-family: inherit; color: var(--wp--preset--color--homburg-rood);
+	font-weight: 600; font-size: 0.85rem; cursor: pointer; text-decoration: underline; padding: 0;
+}
+.hdp-wis-filters:hover { color: var(--wp--preset--color--homburg-rood-donker); }
+
+.hdp-leeg-resultaat {
+	display: none;
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	padding: 2.5rem 1.5rem;
+	text-align: center;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-leeg-resultaat.hdp-zichtbaar { display: block; }
+
+.hdp-download-lijst {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	overflow: hidden;
+}
+.hdp-download-item {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 1.1rem 1.4rem;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+}
+.hdp-download-item:last-child { border-bottom: none; }
+.hdp-download-type {
+	flex-shrink: 0;
+	background: var(--wp--preset--color--donkergrijs);
+	color: var(--wp--preset--color--wit);
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	border-radius: 4px;
+	padding: 0.3rem 0.5rem;
+	text-transform: uppercase;
+	min-width: 46px;
+	text-align: center;
+}
+.hdp-download-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.hdp-download-info strong { font-size: 0.95rem; font-weight: 600; }
+.hdp-download-info span { font-size: 0.8rem; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-download-item .hdp-btn { padding: 0.55rem 1.1rem; font-size: 0.85rem; flex-shrink: 0; }
+.hdp-terug { margin-top: 1.6rem; }
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 900px) {
+	.hdp-kaarten-sectie { max-width: 90%; grid-template-columns: repeat(2, 1fr); }
+	.hdp-downloads { max-width: 90%; }
+	.hdp-info-sectie { max-width: 90%; }
+}
+@media (max-width: 600px) {
+	.hdp-kaarten-sectie { max-width: 100%; grid-template-columns: 1fr; padding: 1.5rem 1rem; }
+	.hdp-downloads { max-width: 100%; padding: 1.5rem 1rem; }
+	.hdp-info-sectie { max-width: 100%; padding: 1rem 1rem 2rem; }
+	.hdp-info-grid { grid-template-columns: 1fr; }
+	.hdp-info-kaart { flex-direction: column; }
+	.hdp-welkom { padding: 1.6rem 0; }
+	.hdp-welkom-inner { padding: 0 1rem; }
+	.hdp-hero { height: 220px; min-height: 0; }
+	.hdp-download-item { flex-wrap: wrap; }
+	.hdp-download-item .hdp-btn { width: 100%; }
+}

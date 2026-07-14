@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homburg Dealerportaal</title>
+
+  <!-- Montserrat via Google Fonts, met Arial als fallback -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       HOMBURG DEALERPORTAAL – STIJL
+       Kleuren en basiswaarden staan als CSS-variabelen bovenin,
+       zodat de huisstijl op één plek aanpasbaar is.
+       ========================================================================== */
+    :root {
+      --homburg-rood:        #c00d0d;
+      --homburg-rood-donker: #9a0a0a;
+      --donkergrijs:         #2b2d31;
+      --grijs-tekst:         #55585e;
+      --grijs-licht:         #f4f5f7;
+      --wit:                 #ffffff;
+      --rand:                #e2e4e8;
+      --radius:              10px;
+      --schaduw:             0 4px 18px rgba(43, 45, 49, 0.10);
+      --font:                'Montserrat', Arial, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { animation: none !important; transition: none !important; }
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--grijs-licht);
+      color: var(--donkergrijs);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { color: var(--homburg-rood); }
+
+    /* Toegankelijk focusbeeld voor toetsenbordgebruikers */
+    a:focus-visible, button:focus-visible, input:focus-visible {
+      outline: 3px solid var(--homburg-rood);
+      outline-offset: 2px;
+    }
+
+    /* ==========================================================================
+       HEADER
+       ========================================================================== */
+    .header {
+      background: var(--donkergrijs);
+      color: var(--wit);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      /* Rode accentlijn onderaan de header – kenmerkend Homburg-detail */
+      border-bottom: 4px solid var(--homburg-rood);
+    }
+
+    .header-inner {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0.9rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    /* Woordmerk.
+       LET OP HOMBURG: vervang dit blok desgewenst door een echt logo:
+       <img src="pad/naar/logo.svg" alt="Homburg Machinehandel BV" height="36"> */
+    .woordmerk {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      text-decoration: none;
+      color: var(--wit);
+    }
+    .woordmerk-blok {
+      background: var(--homburg-rood);
+      color: var(--wit);
+      font-weight: 800;
+      font-size: 1.15rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 4px;
+      letter-spacing: 0.02em;
+    }
+    .woordmerk-tekst { line-height: 1.2; }
+    .woordmerk-tekst strong {
+      display: block;
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .woordmerk-tekst span {
+      font-size: 0.72rem;
+      color: #b9bcc2;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .btn-logout {
+      background: transparent;
+      color: var(--wit);
+      border: 2px solid rgba(255, 255, 255, 0.45);
+      border-radius: 6px;
+      padding: 0.5rem 1.1rem;
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .btn-logout:hover {
+      background: var(--homburg-rood);
+      border-color: var(--homburg-rood);
+    }
+
+    /* ==========================================================================
+       HERO – full-bleed sfeerbeeld direct onder de header.
+       Boven 100% zichtbaar, vervaagt naar 0% (paginakleur) onderaan.
+       ========================================================================== */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 46vh;
+      min-height: 240px;
+      max-height: 440px;
+      background-image: url("https://www.homburg-belgium.com/wp-content/uploads/2023/09/Homburg-Holland-precisielandbouw-man-in-veld.jpg");
+      background-size: cover;
+      background-position: center 30%;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      /* Verloop: bovenaan volledig doorzichtig (foto 100% zichtbaar),
+         onderaan volledig dekkend in de paginakleur (foto 0% zichtbaar). */
+      background: linear-gradient(to bottom, rgba(244, 245, 247, 0) 0%, var(--grijs-licht) 100%);
+    }
+
+    /* ==========================================================================
+       ALGEMENE KNOPPEN
+       ========================================================================== */
+    .btn {
+      display: inline-block;
+      background: var(--homburg-rood);
+      color: var(--wit);
+      border: none;
+      border-radius: 6px;
+      padding: 0.8rem 1.6rem;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn:hover { background: var(--homburg-rood-donker); transform: translateY(-1px); }
+
+    .btn-secundair {
+      background: var(--wit);
+      color: var(--donkergrijs);
+      border: 2px solid var(--rand);
+    }
+    .btn-secundair:hover { background: var(--grijs-licht); border-color: var(--donkergrijs); }
+
+    /* ==========================================================================
+       LOGIN-SCHERM
+       ========================================================================== */
+    .login-sectie {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .login-kaart {
+      background: var(--wit);
+      border-radius: var(--radius);
+      box-shadow: var(--schaduw);
+      padding: 2.5rem 2.2rem;
+      width: 100%;
+      max-width: 420px;
+      border-top: 5px solid var(--homburg-rood);
+    }
+
+    .login-kaart h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .login-kaart p.intro {
+      color: var(--grijs-tekst);
+      font-size: 0.92rem;
+      margin-bottom: 1.6rem;
+    }
+
+    .veld { margin-bottom: 1.1rem; }
+    .veld label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.35rem;
+    }
+    .veld input {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      border: 2px solid var(--rand);
+      border-radius: 6px;
+      font-family: var(--font);
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+    .veld input:focus { border-color: var(--homburg-rood); outline: none; }
+
+    .login-fout {
+      display: none;
+      background: #fdecec;
+      color: var(--homburg-rood-donker);
+      border: 1px solid #f5c2c2;
+      border-radius: 6px;
+      padding: 0.7rem 0.9rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.1rem;
+    }
+    .login-fout.zichtbaar { display: block; }
+
+    .login-kaart .btn { width: 100%; }
+
+    .demo-hint {
+      margin-top: 1.2rem;
+      font-size: 0.78rem;
+      color: var(--grijs-tekst);
+      background: var(--grijs-licht);
+      border-radius: 6px;
+      padding: 0.65rem 0.8rem;
+    }
+
+    /* ==========================================================================
+       PORTAAL (na inloggen)
+       ========================================================================== */
+    .portaal { flex: 1; }
+
+    .welkom {
+      background: var(--wit);
+      border-bottom: 1px solid var(--rand);
+      padding: 2.2rem 1.5rem;
+    }
+    .welkom-inner { max-width: 1140px; margin: 0 auto; }
+    .welkom h1 { font-size: 1.6rem; font-weight: 700; }
+    .welkom p { color: var(--grijs-tekst); font-size: 0.95rem; }
+
+    .kaarten-sectie {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .kaart {
+      background: var(--wit);
+      border-radius: var(--radius);
+      box-shadow: var(--schaduw);
+      padding: 1.8rem 1.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      border-top: 5px solid var(--homburg-rood);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .kaart:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 26px rgba(43, 45, 49, 0.16);
+    }
+
+    .kaart-icoon {
+      width: 52px;
+      height: 52px;
+      border-radius: 8px;
+      background: var(--grijs-licht);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .kaart-icoon svg { width: 28px; height: 28px; stroke: var(--homburg-rood); }
+
+    .kaart h2 { font-size: 1.1rem; font-weight: 700; }
+    .kaart p { color: var(--grijs-tekst); font-size: 0.88rem; flex: 1; }
+    .kaart .btn { margin-top: auto; }
+
+    /* ==========================================================================
+       FOOTER
+       ========================================================================== */
+    .footer {
+      background: var(--donkergrijs);
+      color: #c9ccd2;
+      border-top: 4px solid var(--homburg-rood);
+      margin-top: auto;
+    }
+    .footer-inner {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 2.2rem 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      font-size: 0.85rem;
+    }
+    .footer h3 {
+      color: var(--wit);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.6rem;
+    }
+    .footer a { color: #c9ccd2; text-decoration: none; }
+    .footer a:hover { color: var(--wit); text-decoration: underline; }
+    .footer-onder {
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      text-align: center;
+      padding: 0.9rem 1.5rem;
+      font-size: 0.75rem;
+      color: #8f939b;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE: tablet en mobiel
+       ========================================================================== */
+    @media (max-width: 900px) {
+      .kaarten-sectie { grid-template-columns: repeat(2, 1fr); }
+      .footer-inner { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+      .kaarten-sectie { grid-template-columns: 1fr; padding: 1.5rem 1rem; }
+      .footer-inner { grid-template-columns: 1fr; }
+      .welkom { padding: 1.6rem 1rem; }
+      .woordmerk-tekst span { display: none; }
+      .hero { height: 220px; min-height: 0; }
+    }
+
+    /* Hulpmiddel: secties tonen/verbergen via JavaScript */
+    .verborgen { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       HEADER – met Homburg-woordmerk en logout-knop (rechtsboven)
+       ======================================================================== -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="#" class="woordmerk" aria-label="Homburg Dealerportaal – startpagina">
+        <!-- HOMBURG: vervang dit woordmerk eventueel door het echte logo -->
+        <span class="woordmerk-blok">H</span>
+        <span class="woordmerk-tekst">
+          <strong>Homburg Machinehandel</strong>
+          <span>Dealerportaal</span>
+        </span>
+      </a>
+      <!-- Logout-knop: alleen zichtbaar na inloggen (geregeld via JavaScript) -->
+      <button id="btnLogout" class="btn-logout verborgen" type="button">Uitloggen</button>
+    </div>
+  </header>
+
+  <!-- Sfeerbeeld: 100% zichtbaar bovenaan, vervaagt naar 0% (paginakleur) onderaan.
+       HOMBURG: vervang de achtergrondafbeelding hierboven bij .hero indien gewenst. -->
+  <div class="hero" aria-hidden="true"></div>
+
+  <!-- ========================================================================
+       LOGIN-SCHERM – zichtbaar zolang de dealer niet is ingelogd
+       ======================================================================== -->
+  <main id="loginSectie" class="login-sectie">
+    <div class="login-kaart">
+      <h1>Inloggen dealerportaal</h1>
+      <p class="intro">Log in met uw dealeraccount voor toegang tot de webshop, productconfigurator en downloads.</p>
+
+      <div id="loginFout" class="login-fout" role="alert">
+        Onjuiste gebruikersnaam of wachtwoord. Probeer het opnieuw.
+      </div>
+
+      <!-- Geen <form>-submit naar server: afhandeling gebeurt in JavaScript (demo) -->
+      <form id="loginFormulier" novalidate>
+        <div class="veld">
+          <label for="gebruikersnaam">Gebruikersnaam</label>
+          <input type="text" id="gebruikersnaam" name="gebruikersnaam" autocomplete="username" required>
+        </div>
+        <div class="veld">
+          <label for="wachtwoord">Wachtwoord</label>
+          <input type="password" id="wachtwoord" name="wachtwoord" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn">Inloggen</button>
+      </form>
+
+      <!-- DEMO-HINT: verwijderen zodra echte authenticatie is gekoppeld -->
+      <div class="demo-hint">
+        <strong>Demo:</strong> gebruikersnaam <code>dealer</code>, wachtwoord <code>homburg2026</code>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================================================
+       PORTAAL – zichtbaar ná inloggen
+       ======================================================================== -->
+  <main id="portaalSectie" class="portaal verborgen">
+
+    <section class="welkom">
+      <div class="welkom-inner">
+        <h1>Welkom, <span id="dealerNaam">dealer</span></h1>
+        <p>Kies hieronder waar u naartoe wilt. De webshop en productconfigurator openen in een nieuw tabblad.</p>
+      </div>
+    </section>
+
+    <!-- De drie hoofdopties -->
+    <section class="kaarten-sectie" aria-label="Portaalopties">
+
+      <!-- 1. Webshop (externe URL, nieuw tabblad) -->
+      <article class="kaart">
+        <div class="kaart-icoon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1.5"/><circle cx="19" cy="21" r="1.5"/>
+            <path d="M2 3h3l2.6 12.5a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H6"/>
+          </svg>
+        </div>
+        <h2>Homburg-webshop</h2>
+        <p>Bestel onderdelen en machines rechtstreeks via de dealerwebshop, met uw dealercondities.</p>
+        <a id="linkWebshop" class="btn" href="#" target="_blank" rel="noopener noreferrer">Naar de webshop</a>
+      </article>
+
+      <!-- 2. Productconfigurator (externe URL, nieuw tabblad) -->
+      <article class="kaart">
+        <div class="kaart-icoon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+            <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.12-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.85a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01A1.7 1.7 0 0 0 10.05 3V3a2 2 0 1 1 4 0v.09c0 .68.4 1.29 1.03 1.56a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01c.27.62.88 1.03 1.56 1.03H21a2 2 0 1 1 0 4h-.09c-.68 0-1.29.4-1.51 1z"/>
+          </svg>
+        </div>
+        <h2>Productconfigurator</h2>
+        <p>Stel machines op maat samen voor uw klant en genereer direct een specificatie en offerte.</p>
+        <a id="linkConfigurator" class="btn" href="#" target="_blank" rel="noopener noreferrer">Open configurator</a>
+      </article>
+
+      <!-- 3. Downloads (aparte pagina) -->
+      <article class="kaart">
+        <div class="kaart-icoon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>
+          </svg>
+        </div>
+        <h2>Downloads</h2>
+        <p>Prijslijsten, brochures, handleidingen en beeldmateriaal, exclusief voor dealers.</p>
+        <a class="btn btn-secundair" href="dealerportaal/downloads/index.html">Naar downloads</a>
+      </article>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       FOOTER – contactgegevens
+       HOMBURG: pas hieronder de adres- en contactgegevens aan waar nodig.
+       ======================================================================== -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <h3>Homburg Machinehandel BV</h3>
+        <p>Voorbeeldweg 1<br>9051 AB Stiens<br>Nederland</p>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <p>
+          Tel: <a href="tel:+31581234567">+31 (0)58 123 45 67</a><br>
+          E-mail: <a href="mailto:dealers@homburg.nl">dealers@homburg.nl</a>
+        </p>
+      </div>
+      <div>
+        <h3>Openingstijden</h3>
+        <p>Maandag t/m vrijdag<br>08:00 – 17:00 uur</p>
+      </div>
+    </div>
+    <div class="footer-onder">
+      © <span id="jaartal"></span> Homburg Machinehandel BV – Dealerportaal. Alle rechten voorbehouden.
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+
+    /* ========================================================================
+       CONFIGURATIE – HIER PAST HOMBURG ALLES AAN
+       ======================================================================== */
+    const CONFIG = {
+      // Externe links (openen in een nieuw tabblad)
+      // HOMBURG: vervang door de echte URLs van webshop en configurator.
+      urls: {
+        webshop:      "https://www.voorbeeld-webshop.nl",
+        configurator: "https://www.voorbeeld-configurator.nl"
+      },
+
+      // TIJDELIJKE DEMO-LOGIN — ALLEEN VOOR DEZE DEMO.
+      // ============================================================
+      // WAARSCHUWING: dit is GEEN echte beveiliging. Inloggegevens in
+      // client-side JavaScript zijn voor iedereen zichtbaar via de broncode.
+      // In productie moet authenticatie SERVER-SIDE gebeuren.
+      // Verwijder dit demoAccount-blok zodra echte login is gekoppeld.
+      // ============================================================
+      demoAccount: {
+        gebruikersnaam: "dealer",
+        wachtwoord: "homburg2026"
+      }
+    };
+
+    /* ========================================================================
+       ELEMENTEN
+       ======================================================================== */
+    const loginSectie    = document.getElementById("loginSectie");
+    const portaalSectie  = document.getElementById("portaalSectie");
+    const loginFormulier = document.getElementById("loginFormulier");
+    const loginFout      = document.getElementById("loginFout");
+    const btnLogout      = document.getElementById("btnLogout");
+    const dealerNaam     = document.getElementById("dealerNaam");
+
+    // Sleutel voor sessie-opslag (alleen demo; echte sessies beheert de server)
+    const SESSIE_SLEUTEL = "homburgDealerIngelogd";
+
+    /* ========================================================================
+       INITIALISATIE
+       ======================================================================== */
+    function init() {
+      // Externe URLs uit de configuratie koppelen aan de knoppen
+      document.getElementById("linkWebshop").href      = CONFIG.urls.webshop;
+      document.getElementById("linkConfigurator").href = CONFIG.urls.configurator;
+
+      // Jaartal in de footer automatisch bijwerken
+      document.getElementById("jaartal").textContent = new Date().getFullYear();
+
+      // Sessie herstellen: blijft ingelogd binnen hetzelfde browsertabblad.
+      // (sessionStorage wordt gewist zodra het tabblad sluit.)
+      const opgeslagenNaam = sessionStorage.getItem(SESSIE_SLEUTEL);
+      if (opgeslagenNaam) {
+        toonPortaal(opgeslagenNaam);
+      }
+    }
+
+    /* ========================================================================
+       LOGIN / LOGOUT (demo – zie waarschuwing in CONFIG.demoAccount)
+       ======================================================================== */
+    loginFormulier.addEventListener("submit", function (gebeurtenis) {
+      gebeurtenis.preventDefault();
+
+      const naam       = document.getElementById("gebruikersnaam").value.trim();
+      const wachtwoord = document.getElementById("wachtwoord").value;
+
+      // DEMO-controle. HOMBURG: vervang dit blok door een fetch/POST naar
+      // uw eigen server-side login-endpoint.
+      const geldig =
+        naam === CONFIG.demoAccount.gebruikersnaam &&
+        wachtwoord === CONFIG.demoAccount.wachtwoord;
+
+      if (geldig) {
+        sessionStorage.setItem(SESSIE_SLEUTEL, naam);
+        loginFout.classList.remove("zichtbaar");
+        loginFormulier.reset();
+        toonPortaal(naam);
+      } else {
+        loginFout.classList.add("zichtbaar");
+      }
+    });
+
+    btnLogout.addEventListener("click", function () {
+      sessionStorage.removeItem(SESSIE_SLEUTEL);
+      toonLogin();
+    });
+
+    /* ========================================================================
+       WEERGAVE WISSELEN
+       ======================================================================== */
+    function toonPortaal(naam) {
+      dealerNaam.textContent = naam;
+      loginSectie.classList.add("verborgen");
+      portaalSectie.classList.remove("verborgen");
+      btnLogout.classList.remove("verborgen");
+      window.scrollTo(0, 0);
+    }
+
+    function toonLogin() {
+      portaalSectie.classList.add("verborgen");
+      btnLogout.classList.add("verborgen");
+      loginSectie.classList.remove("verborgen");
+      window.scrollTo(0, 0);
+    }
+
+    // Start
+    init();
+  </script>
+</body>
+</html>

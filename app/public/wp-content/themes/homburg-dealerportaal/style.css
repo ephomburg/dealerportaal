@@ -1,0 +1,133 @@
+/*
+Theme Name: Homburg Dealerportaal
+Description: Eigen blokthema voor het Homburg-dealerportaal, gebouwd op het originele HTML-ontwerp (rood/donkergrijs, Montserrat). Geen bloggerichte onderdelen; puur gericht op de dealerportaalsite.
+Author: Homburg Machinehandel BV
+Version: 1.8.0
+Requires at least: 6.4
+Tested up to: 6.7
+Requires PHP: 7.4
+Text Domain: homburg-dealerportaal-theme
+*/
+
+/* WordPress geeft de hoofdinhoud automatisch een kleine bovenmarge
+   (block-gap) t.o.v. de header; die moet hier op nul voor een naadloze
+   overgang van header naar de inhoud (bijv. de hero-afbeelding). */
+.wp-site-blocks > main { margin-block-start: 0; }
+
+.hdp-site-header, .hdp-site-header * {
+	font-family: 'Montserrat', Arial, sans-serif;
+	box-sizing: border-box;
+}
+.hdp-site-header {
+	background: var(--wp--preset--color--donkergrijs);
+	color: var(--wp--preset--color--wit);
+	border-bottom: 4px solid var(--wp--preset--color--homburg-rood);
+}
+.hdp-header-inner {
+	padding: 1.3rem 15%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+.hdp-woordmerk {
+	display: flex;
+	align-items: center;
+	gap: 0.7rem;
+	text-decoration: none;
+	color: var(--wp--preset--color--wit);
+}
+.hdp-logo { height: 32px; width: auto; display: block; }
+.hdp-woordmerk-tekst { line-height: 1.2; }
+.hdp-woordmerk-tekst span {
+	font-size: 0.72rem;
+	color: #b9bcc2;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+}
+.hdp-hoofdmenu { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
+.hdp-menu-knop {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+	text-decoration: none;
+	font-weight: 700;
+	font-size: 0.8rem;
+	padding: 0.5rem 0.9rem;
+	border-radius: 6px;
+	transition: background 0.2s;
+}
+.hdp-menu-knop svg { width: 14px; height: 14px; flex-shrink: 0; }
+.hdp-menu-knop:hover { background: var(--wp--preset--color--homburg-rood-donker); }
+@media (max-width: 600px) {
+	.hdp-woordmerk-tekst span { display: none; }
+}
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+.hdp-site-footer, .hdp-site-footer * {
+	font-family: 'Montserrat', Arial, sans-serif;
+	box-sizing: border-box;
+}
+.hdp-site-footer {
+	background: var(--wp--preset--color--donkergrijs);
+	color: #c9ccd2;
+	border-top: 4px solid var(--wp--preset--color--homburg-rood);
+	margin-top: 3rem;
+}
+.hdp-footer-boven {
+	padding: 2.2rem 15%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 2.5rem;
+	flex-wrap: wrap;
+}
+.hdp-footer-logo {
+	flex-shrink: 0;
+	width: 180px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.hdp-footer-logo img { height: 28px; width: auto; display: block; }
+.hdp-footer-inner {
+	flex-shrink: 0;
+	display: grid;
+	grid-template-columns: repeat(3, minmax(140px, 220px));
+	gap: 1.5rem;
+	font-size: 0.85rem;
+}
+.hdp-footer-inner h3 {
+	color: var(--wp--preset--color--wit);
+	font-size: 0.85rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	margin-bottom: 0.6rem;
+}
+.hdp-footer-inner p { color: #c9ccd2; }
+.hdp-footer-inner a { color: #c9ccd2; text-decoration: none; }
+.hdp-footer-inner a:hover { color: var(--wp--preset--color--wit); text-decoration: underline; }
+.hdp-footer-onder {
+	border-top: 1px solid rgba(255, 255, 255, 0.12);
+	text-align: center;
+	padding: 0.9rem 1.5rem;
+	font-size: 0.75rem;
+	color: #8f939b;
+}
+.hdp-footer-onder a { color: #8f939b; text-decoration: underline; }
+.hdp-footer-onder a:hover { color: var(--wp--preset--color--wit); }
+
+@media (max-width: 900px) {
+	.hdp-footer-inner { grid-template-columns: repeat(2, minmax(140px, 220px)); }
+}
+@media (max-width: 600px) {
+	.hdp-footer-inner { grid-template-columns: minmax(140px, 220px); }
+	.hdp-footer-boven { justify-content: center; text-align: center; }
+	.hdp-footer-logo { justify-content: center; }
+}
