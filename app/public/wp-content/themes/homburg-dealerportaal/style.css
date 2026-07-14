@@ -2,7 +2,7 @@
 Theme Name: Homburg Dealerportaal
 Description: Eigen blokthema voor het Homburg-dealerportaal, gebouwd op het originele HTML-ontwerp (rood/donkergrijs, Montserrat). Geen bloggerichte onderdelen; puur gericht op de dealerportaalsite.
 Author: Homburg Machinehandel BV
-Version: 1.13.0
+Version: 1.14.0
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -109,19 +109,22 @@ Text Domain: homburg-dealerportaal-theme
 	margin: 0 auto;
 	padding: 3rem 0 2.5rem;
 	display: grid;
-	grid-template-columns: minmax(140px, 200px) repeat(3, 1fr);
+	grid-template-columns: auto repeat(3, 1fr);
 	gap: 2.5rem;
 	align-items: start;
 }
+/* auto (i.p.v. een vaste/capped breedte) zodat de kolom altijd precies om
+   het logo past — dit logo heeft een breed formaat (~7,5:1), dus een
+   smalle kolom laat het buiten zijn kolom en over de volgende kolomtekst
+   heen lopen. */
 .hdp-footer-logo {
-	align-self: center;
-	height: 100%;
+	align-self: stretch;
 	display: flex;
 	align-items: center;
 	padding-right: 2.5rem;
 	border-right: 1px solid rgba(255, 255, 255, 0.14);
 }
-.hdp-footer-logo img { height: 34px; width: auto; display: block; }
+.hdp-footer-logo img { height: 28px; width: auto; display: block; }
 
 .hdp-footer-inner {
 	display: contents;
