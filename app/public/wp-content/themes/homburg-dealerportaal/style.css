@@ -2,7 +2,7 @@
 Theme Name: Homburg Dealerportaal
 Description: Eigen blokthema voor het Homburg-dealerportaal, gebouwd op het originele HTML-ontwerp (rood/donkergrijs, Montserrat). Geen bloggerichte onderdelen; puur gericht op de dealerportaalsite.
 Author: Homburg Machinehandel BV
-Version: 1.11.0
+Version: 1.12.0
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -101,40 +101,69 @@ Text Domain: homburg-dealerportaal-theme
 	border-top: 4px solid var(--wp--preset--color--homburg-rood);
 	margin-top: 3rem;
 }
+/* Zelfde inhoudsbreedte (70%) als de rest van de pagina (hero, kaarten),
+   zodat de footer daar precies op aansluit i.p.v. een losse, gecentreerde
+   flex-rij met willekeurige witruimtes. */
 .hdp-footer-boven {
-	padding: 2.2rem 15%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 2.5rem;
-	flex-wrap: wrap;
-}
-.hdp-footer-logo {
-	flex-shrink: 0;
-	width: 180px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-.hdp-footer-logo img { height: 28px; width: auto; display: block; }
-.hdp-footer-inner {
-	flex-shrink: 0;
+	max-width: 70%;
+	margin: 0 auto;
+	padding: 3rem 0 2.5rem;
 	display: grid;
-	grid-template-columns: repeat(3, minmax(140px, 220px));
-	gap: 1.5rem;
-	font-size: 0.85rem;
+	grid-template-columns: minmax(140px, 200px) repeat(3, 1fr);
+	gap: 2.5rem;
+	align-items: start;
 }
+.hdp-footer-logo img { height: 30px; width: auto; display: block; }
+
+.hdp-footer-inner {
+	display: contents;
+}
+.hdp-footer-inner > div { min-width: 0; }
 .hdp-footer-inner h3 {
 	color: var(--wp--preset--color--wit);
-	font-size: 0.85rem;
+	font-size: 0.82rem;
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
-	margin-bottom: 0.6rem;
+	margin-bottom: 0.9rem;
 }
-.hdp-footer-inner p { color: #c9ccd2; }
-.hdp-footer-inner a { color: #c9ccd2; text-decoration: none; }
-.hdp-footer-inner a:hover { color: var(--wp--preset--color--wit); text-decoration: underline; }
+.hdp-footer-adres {
+	font-size: 0.85rem;
+	line-height: 1.7;
+	color: #c9ccd2;
+}
+.hdp-footer-contact {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	margin-top: 0.9rem;
+}
+.hdp-footer-contact a {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.55rem;
+	color: #c9ccd2;
+	text-decoration: none;
+	font-size: 0.85rem;
+}
+.hdp-footer-contact a svg { width: 14px; height: 14px; stroke: var(--wp--preset--color--homburg-rood); flex-shrink: 0; }
+.hdp-footer-contact a:hover { color: var(--wp--preset--color--wit); }
+
+.hdp-footer-social { display: flex; gap: 0.6rem; }
+.hdp-social-icoon {
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.08);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background 0.2s;
+}
+.hdp-social-icoon svg { width: 16px; height: 16px; stroke: #c9ccd2; transition: stroke 0.2s; }
+.hdp-social-icoon:hover { background: var(--wp--preset--color--homburg-rood); }
+.hdp-social-icoon:hover svg { stroke: var(--wp--preset--color--wit); }
+
 .hdp-footer-onder {
 	border-top: 1px solid rgba(255, 255, 255, 0.12);
 	text-align: center;
@@ -146,10 +175,12 @@ Text Domain: homburg-dealerportaal-theme
 .hdp-footer-onder a:hover { color: var(--wp--preset--color--wit); }
 
 @media (max-width: 900px) {
-	.hdp-footer-inner { grid-template-columns: repeat(2, minmax(140px, 220px)); }
+	.hdp-footer-boven { max-width: 90%; grid-template-columns: repeat(2, 1fr); }
+	.hdp-footer-logo { grid-column: 1 / -1; }
 }
 @media (max-width: 600px) {
-	.hdp-footer-inner { grid-template-columns: minmax(140px, 220px); }
-	.hdp-footer-boven { justify-content: center; text-align: center; }
-	.hdp-footer-logo { justify-content: center; }
+	.hdp-footer-boven { max-width: 100%; padding: 2.5rem 1.5rem 2rem; grid-template-columns: 1fr; text-align: center; }
+	.hdp-footer-logo { display: flex; justify-content: center; }
+	.hdp-footer-contact a { justify-content: center; }
+	.hdp-footer-social { justify-content: center; }
 }
