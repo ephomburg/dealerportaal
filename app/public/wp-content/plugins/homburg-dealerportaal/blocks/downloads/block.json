@@ -16,9 +16,17 @@
 			"type": "string",
 			"default": "Downloads voor dealers"
 		},
+		"titelFr": {
+			"type": "string",
+			"default": "Téléchargements pour revendeurs"
+		},
 		"omschrijving": {
 			"type": "string",
 			"default": "Deze bestanden zijn uitsluitend bedoeld voor Homburg-dealers en mogen niet verder worden verspreid."
+		},
+		"omschrijvingFr": {
+			"type": "string",
+			"default": "Ces fichiers sont exclusivement destinés aux revendeurs Homburg et ne peuvent pas être diffusés davantage."
 		}
 	},
 	"supports": {

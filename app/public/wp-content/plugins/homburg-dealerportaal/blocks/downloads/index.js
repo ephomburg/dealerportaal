@@ -35,8 +35,10 @@
 						PanelBody,
 						{ title: 'Teksten', initialOpen: true },
 						veld( attributes, setAttributes, 'Afbeeldings-URL (hero)', 'heroAfbeelding', false ),
-						veld( attributes, setAttributes, 'Titel', 'titel', false ),
-						veld( attributes, setAttributes, 'Omschrijving', 'omschrijving', true )
+						veld( attributes, setAttributes, 'Titel (NL)', 'titel', false ),
+						veld( attributes, setAttributes, 'Titel (FR)', 'titelFr', false ),
+						veld( attributes, setAttributes, 'Omschrijving (NL)', 'omschrijving', true ),
+						veld( attributes, setAttributes, 'Omschrijving (FR)', 'omschrijvingFr', true )
 					)
 				),
 				el( ServerSideRender, {

@@ -1,0 +1,16 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "homburg/site-footer",
+	"title": "Homburg footer",
+	"category": "widgets",
+	"icon": "align-full-width",
+	"description": "Vaste sitebrede footer met vestigingen, social media en copyright, in de gekozen taal (NL/FR).",
+	"textdomain": "homburg-dealerportaal",
+	"supports": {
+		"html": false,
+		"multiple": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

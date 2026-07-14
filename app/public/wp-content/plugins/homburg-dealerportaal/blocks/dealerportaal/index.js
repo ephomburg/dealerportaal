@@ -39,33 +39,44 @@
 					el(
 						PanelBody,
 						{ title: 'Inlogscherm', initialOpen: false },
-						veld( attributes, setAttributes, 'Introductietekst', 'loginIntro', true )
+						veld( attributes, setAttributes, 'Introductietekst (NL)', 'loginIntro', true ),
+						veld( attributes, setAttributes, 'Introductietekst (FR)', 'loginIntroFr', true )
 					),
 					el(
 						PanelBody,
 						{ title: 'Portaal (na inloggen)', initialOpen: false },
-						veld( attributes, setAttributes, 'Introductietekst', 'portaalIntro', true )
+						veld( attributes, setAttributes, 'Introductietekst (NL)', 'portaalIntro', true ),
+						veld( attributes, setAttributes, 'Introductietekst (FR)', 'portaalIntroFr', true )
 					),
 					el(
 						PanelBody,
 						{ title: 'Kaart 1 – Webshop', initialOpen: false },
-						veld( attributes, setAttributes, 'Titel', 'kaart1Titel', false ),
-						veld( attributes, setAttributes, 'Omschrijving', 'kaart1Omschrijving', true ),
-						veld( attributes, setAttributes, 'Knoptekst', 'kaart1Knoptekst', false )
+						veld( attributes, setAttributes, 'Titel (NL)', 'kaart1Titel', false ),
+						veld( attributes, setAttributes, 'Titel (FR)', 'kaart1TitelFr', false ),
+						veld( attributes, setAttributes, 'Omschrijving (NL)', 'kaart1Omschrijving', true ),
+						veld( attributes, setAttributes, 'Omschrijving (FR)', 'kaart1OmschrijvingFr', true ),
+						veld( attributes, setAttributes, 'Knoptekst (NL)', 'kaart1Knoptekst', false ),
+						veld( attributes, setAttributes, 'Knoptekst (FR)', 'kaart1KnoptekstFr', false )
 					),
 					el(
 						PanelBody,
 						{ title: 'Kaart 2 – Configurator', initialOpen: false },
-						veld( attributes, setAttributes, 'Titel', 'kaart2Titel', false ),
-						veld( attributes, setAttributes, 'Omschrijving', 'kaart2Omschrijving', true ),
-						veld( attributes, setAttributes, 'Knoptekst', 'kaart2Knoptekst', false )
+						veld( attributes, setAttributes, 'Titel (NL)', 'kaart2Titel', false ),
+						veld( attributes, setAttributes, 'Titel (FR)', 'kaart2TitelFr', false ),
+						veld( attributes, setAttributes, 'Omschrijving (NL)', 'kaart2Omschrijving', true ),
+						veld( attributes, setAttributes, 'Omschrijving (FR)', 'kaart2OmschrijvingFr', true ),
+						veld( attributes, setAttributes, 'Knoptekst (NL)', 'kaart2Knoptekst', false ),
+						veld( attributes, setAttributes, 'Knoptekst (FR)', 'kaart2KnoptekstFr', false )
 					),
 					el(
 						PanelBody,
 						{ title: 'Kaart 3 – Downloads', initialOpen: false },
-						veld( attributes, setAttributes, 'Titel', 'kaart3Titel', false ),
-						veld( attributes, setAttributes, 'Omschrijving', 'kaart3Omschrijving', true ),
-						veld( attributes, setAttributes, 'Knoptekst', 'kaart3Knoptekst', false )
+						veld( attributes, setAttributes, 'Titel (NL)', 'kaart3Titel', false ),
+						veld( attributes, setAttributes, 'Titel (FR)', 'kaart3TitelFr', false ),
+						veld( attributes, setAttributes, 'Omschrijving (NL)', 'kaart3Omschrijving', true ),
+						veld( attributes, setAttributes, 'Omschrijving (FR)', 'kaart3OmschrijvingFr', true ),
+						veld( attributes, setAttributes, 'Knoptekst (NL)', 'kaart3Knoptekst', false ),
+						veld( attributes, setAttributes, 'Knoptekst (FR)', 'kaart3KnoptekstFr', false )
 					)
 				),
 				el( ServerSideRender, {

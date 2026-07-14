@@ -11,6 +11,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * auth-cookie via setcookie(), wat mislukt zodra de thema-header al is
  * ge-echood. Na verwerking volgt een redirect, zodat het blok alleen nog
  * hoeft te renderen op basis van de huidige inlogstatus.
+ *
+ * Bewerkbare teksten (kaarten, intro's) hebben een Nederlands en een
+ * Frans blokattribuut; HDP_I18N::kies() kiest de juiste op basis van de
+ * taalswitch en valt terug op het Nederlands als het Frans nog leeg is.
+ * Vaste teksten (labels, knoppen, meldingen) komen uit HDP_I18N::t().
  */
 class HDP_Blocks {
 
@@ -70,7 +75,7 @@ class HDP_Blocks {
 		if ( is_user_logged_in() ) {
 			self::render_portal_content( $a );
 		} else {
-			$fout = isset( $_GET['hdp_fout'] ) ? 'Onjuiste gebruikersnaam of wachtwoord. Probeer het opnieuw.' : '';
+			$fout = isset( $_GET['hdp_fout'] ) ? HDP_I18N::t( 'login_fout' ) : '';
 			self::render_login( $fout, $a );
 		}
 
@@ -86,21 +91,24 @@ class HDP_Blocks {
 			return ob_get_clean();
 		}
 
+		$titel       = HDP_I18N::kies( $a['titel'], $a['titelFr'] );
+		$omschrijving = HDP_I18N::kies( $a['omschrijving'], $a['omschrijvingFr'] );
+
 		ob_start();
 		?>
 		<div class="hdp-portaal alignfull">
 			<section class="hdp-welkom alignfull hdp-welkom-zonder-hero">
 				<div class="hdp-welkom-inner">
 					<div class="hdp-welkom-top">
-						<h1><?php echo esc_html( $a['titel'] ); ?></h1>
-						<a class="hdp-btn-logout" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>">Uitloggen</a>
+						<h1><?php echo esc_html( $titel ); ?></h1>
+						<a class="hdp-btn-logout" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?></a>
 					</div>
-					<p><?php echo esc_html( $a['omschrijving'] ); ?></p>
+					<p><?php echo esc_html( $omschrijving ); ?></p>
 				</div>
 			</section>
 			<section class="hdp-downloads">
 				<?php echo self::render_downloads_lijst(); // phpcs:ignore WordPress.Security.EscapeOutput -- reeds ge-escaped in render_downloads_lijst(). ?>
-				<p class="hdp-terug"><a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/dealerportaal/' ) ); ?>">&larr; Terug naar het portaal</a></p>
+				<p class="hdp-terug"><a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/dealerportaal/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'terug_naar_portaal' ) ); ?></a></p>
 			</section>
 		</div>
 		<?php
@@ -108,12 +116,13 @@ class HDP_Blocks {
 	}
 
 	private static function render_login( $fout, $a ) {
+		$intro = HDP_I18N::kies( $a['loginIntro'], $a['loginIntroFr'] );
 		?>
 		<div class="hdp-hero alignfull" style="background-image:url('<?php echo esc_url( $a['heroAfbeelding'] ); ?>')" aria-hidden="true"></div>
 		<div class="hdp-login-sectie">
 			<div class="hdp-login-kaart">
-				<h1>Inloggen dealerportaal</h1>
-				<p class="hdp-intro"><?php echo esc_html( $a['loginIntro'] ); ?></p>
+				<h1><?php echo esc_html( HDP_I18N::t( 'login_titel' ) ); ?></h1>
+				<p class="hdp-intro"><?php echo esc_html( $intro ); ?></p>
 
 				<?php if ( $fout ) : ?>
 					<div class="hdp-login-fout hdp-zichtbaar" role="alert"><?php echo esc_html( $fout ); ?></div>
@@ -122,14 +131,14 @@ class HDP_Blocks {
 				<form method="post">
 					<?php wp_nonce_field( 'hdp_login', 'hdp_login_nonce' ); ?>
 					<div class="hdp-veld">
-						<label for="gebruikersnaam">Gebruikersnaam</label>
+						<label for="gebruikersnaam"><?php echo esc_html( HDP_I18N::t( 'label_gebruiker' ) ); ?></label>
 						<input type="text" id="gebruikersnaam" name="gebruikersnaam" autocomplete="username" required>
 					</div>
 					<div class="hdp-veld">
-						<label for="wachtwoord">Wachtwoord</label>
+						<label for="wachtwoord"><?php echo esc_html( HDP_I18N::t( 'label_wachtwoord' ) ); ?></label>
 						<input type="password" id="wachtwoord" name="wachtwoord" autocomplete="current-password" required>
 					</div>
-					<button type="submit" class="hdp-btn">Inloggen</button>
+					<button type="submit" class="hdp-btn"><?php echo esc_html( HDP_I18N::t( 'btn_inloggen' ) ); ?></button>
 				</form>
 			</div>
 		</div>
@@ -143,9 +152,9 @@ class HDP_Blocks {
 			?>
 			<div class="hdp-login-sectie">
 				<div class="hdp-login-kaart">
-					<h1>Account in behandeling</h1>
-					<p class="hdp-intro">Uw account is nog niet goedgekeurd voor het dealerportaal. Neem contact op met Homburg Machinehandel.</p>
-					<a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>">Uitloggen</a>
+					<h1><?php echo esc_html( HDP_I18N::t( 'account_titel' ) ); ?></h1>
+					<p class="hdp-intro"><?php echo esc_html( HDP_I18N::t( 'account_tekst' ) ); ?></p>
+					<a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?></a>
 				</div>
 			</div>
 			<?php
@@ -155,18 +164,29 @@ class HDP_Blocks {
 		$merken           = get_user_meta( $user->ID, 'hdp_merken', true );
 		$webshop_url      = HDP_Settings::get( 'webshop_url' );
 		$configurator_url = HDP_Settings::get( 'configurator_url' );
+
+		$portaal_intro      = HDP_I18N::kies( $a['portaalIntro'], $a['portaalIntroFr'] );
+		$kaart1_titel       = HDP_I18N::kies( $a['kaart1Titel'], $a['kaart1TitelFr'] );
+		$kaart1_omschrijving = HDP_I18N::kies( $a['kaart1Omschrijving'], $a['kaart1OmschrijvingFr'] );
+		$kaart1_knoptekst   = HDP_I18N::kies( $a['kaart1Knoptekst'], $a['kaart1KnoptekstFr'] );
+		$kaart2_titel       = HDP_I18N::kies( $a['kaart2Titel'], $a['kaart2TitelFr'] );
+		$kaart2_omschrijving = HDP_I18N::kies( $a['kaart2Omschrijving'], $a['kaart2OmschrijvingFr'] );
+		$kaart2_knoptekst   = HDP_I18N::kies( $a['kaart2Knoptekst'], $a['kaart2KnoptekstFr'] );
+		$kaart3_titel       = HDP_I18N::kies( $a['kaart3Titel'], $a['kaart3TitelFr'] );
+		$kaart3_omschrijving = HDP_I18N::kies( $a['kaart3Omschrijving'], $a['kaart3OmschrijvingFr'] );
+		$kaart3_knoptekst   = HDP_I18N::kies( $a['kaart3Knoptekst'], $a['kaart3KnoptekstFr'] );
 		?>
 		<div class="hdp-hero alignfull" style="background-image:url('<?php echo esc_url( $a['heroAfbeelding'] ); ?>')" aria-hidden="true"></div>
 		<div class="hdp-portaal alignfull">
 			<section class="hdp-welkom alignfull">
 				<div class="hdp-welkom-inner">
 					<div class="hdp-welkom-top">
-						<h1>Welkom, <?php echo esc_html( $user->display_name ); ?></h1>
-						<a class="hdp-btn-logout" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>">Uitloggen</a>
+						<h1><?php echo esc_html( HDP_I18N::t( 'welkom_prefix' ) ); ?> <?php echo esc_html( $user->display_name ); ?></h1>
+						<a class="hdp-btn-logout" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?></a>
 					</div>
-					<p><?php echo esc_html( $a['portaalIntro'] ); ?></p>
+					<p><?php echo esc_html( $portaal_intro ); ?></p>
 					<?php if ( $merken ) : ?>
-						<p class="hdp-merken">Geautoriseerd voor: <?php echo esc_html( $merken ); ?></p>
+						<p class="hdp-merken"><?php echo esc_html( HDP_I18N::t( 'geautoriseerd_voor' ) ); ?> <?php echo esc_html( $merken ); ?></p>
 					<?php endif; ?>
 				</div>
 			</section>
@@ -174,31 +194,31 @@ class HDP_Blocks {
 			<section class="hdp-kaarten-sectie" aria-label="Portaalopties">
 				<article class="hdp-kaart">
 					<?php self::render_icoon( 'webshop' ); ?>
-					<h2><?php echo esc_html( $a['kaart1Titel'] ); ?></h2>
-					<p><?php echo esc_html( $a['kaart1Omschrijving'] ); ?></p>
+					<h2><?php echo esc_html( $kaart1_titel ); ?></h2>
+					<p><?php echo esc_html( $kaart1_omschrijving ); ?></p>
 					<?php if ( $webshop_url ) : ?>
-						<a class="hdp-btn" href="<?php echo esc_url( $webshop_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $a['kaart1Knoptekst'] ); ?></a>
+						<a class="hdp-btn" href="<?php echo esc_url( $webshop_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $kaart1_knoptekst ); ?></a>
 					<?php else : ?>
-						<a class="hdp-btn" href="#"><?php echo esc_html( $a['kaart1Knoptekst'] ); ?></a>
+						<a class="hdp-btn" href="#"><?php echo esc_html( $kaart1_knoptekst ); ?></a>
 					<?php endif; ?>
 				</article>
 
 				<article class="hdp-kaart">
 					<?php self::render_icoon( 'configurator' ); ?>
-					<h2><?php echo esc_html( $a['kaart2Titel'] ); ?></h2>
-					<p><?php echo esc_html( $a['kaart2Omschrijving'] ); ?></p>
+					<h2><?php echo esc_html( $kaart2_titel ); ?></h2>
+					<p><?php echo esc_html( $kaart2_omschrijving ); ?></p>
 					<?php if ( $configurator_url ) : ?>
-						<a class="hdp-btn" href="<?php echo esc_url( $configurator_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $a['kaart2Knoptekst'] ); ?></a>
+						<a class="hdp-btn" href="<?php echo esc_url( $configurator_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $kaart2_knoptekst ); ?></a>
 					<?php else : ?>
-						<p class="hdp-nog-niet">Nog niet geconfigureerd</p>
+						<p class="hdp-nog-niet"><?php echo esc_html( HDP_I18N::t( 'nog_niet_geconfigureerd' ) ); ?></p>
 					<?php endif; ?>
 				</article>
 
 				<article class="hdp-kaart">
 					<?php self::render_icoon( 'downloads' ); ?>
-					<h2><?php echo esc_html( $a['kaart3Titel'] ); ?></h2>
-					<p><?php echo esc_html( $a['kaart3Omschrijving'] ); ?></p>
-					<a class="hdp-btn" href="<?php echo esc_url( home_url( '/downloads/' ) ); ?>"><?php echo esc_html( $a['kaart3Knoptekst'] ); ?></a>
+					<h2><?php echo esc_html( $kaart3_titel ); ?></h2>
+					<p><?php echo esc_html( $kaart3_omschrijving ); ?></p>
+					<a class="hdp-btn" href="<?php echo esc_url( home_url( '/downloads/' ) ); ?>"><?php echo esc_html( $kaart3_knoptekst ); ?></a>
 				</article>
 			</section>
 
@@ -210,7 +230,8 @@ class HDP_Blocks {
 	/**
 	 * Aanvullende informatie (bestellen, contact magazijn, technische
 	 * documentatie per merk) — vaste, zelden wijzigende inhoud, daarom
-	 * hier als statische opmaak in plaats van losse blokattributen.
+	 * hier als statische opmaak (via HDP_I18N::t()) in plaats van losse
+	 * blokattributen.
 	 */
 	private static function render_info_sectie() {
 		$mail_icoon = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>';
@@ -218,22 +239,22 @@ class HDP_Blocks {
 		$link_icoon = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
 		?>
 		<section class="hdp-info-sectie" aria-label="Aanvullende informatie">
-			<h2 class="hdp-info-titel">Overige informatie</h2>
+			<h2 class="hdp-info-titel"><?php echo esc_html( HDP_I18N::t( 'info_label' ) ); ?></h2>
 			<div class="hdp-info-grid">
 
 				<article class="hdp-info-kaart">
 					<div class="hdp-info-icoon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L4 3a1 1 0 0 0-1 1l.24 5.59a2 2 0 0 0 .59 1.41l9.58 9.58a2 2 0 0 0 2.83 0l4.35-4.34a2 2 0 0 0 0-2.83Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></div>
 					<div class="hdp-info-body">
-						<h3>Bestellen en levertijden</h3>
-						<p>Prijzen die niet zichtbaar zijn via deze dealerlogin kunnen opgevraagd worden via ons magazijn. Prijslijsten per merk zijn beschikbaar onder het onderdeel "verkoopdocumenten".</p>
+						<h3><?php echo esc_html( HDP_I18N::t( 'info_bestellen_titel' ) ); ?></h3>
+						<p><?php echo esc_html( HDP_I18N::t( 'info_bestellen_tekst' ) ); ?></p>
 					</div>
 				</article>
 
 				<article class="hdp-info-kaart">
 					<div class="hdp-info-icoon" aria-hidden="true"><?php echo $mail_icoon; // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?></div>
 					<div class="hdp-info-body">
-						<h3>Contact magazijn</h3>
-						<p>Bereikbaar via e-mail of telefonisch.</p>
+						<h3><?php echo esc_html( HDP_I18N::t( 'info_contact_titel' ) ); ?></h3>
+						<p><?php echo esc_html( HDP_I18N::t( 'info_contact_tekst' ) ); ?></p>
 						<div class="hdp-info-links">
 							<a class="hdp-info-link" href="mailto:mag@homburg-holland.com"><?php echo $mail_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?> mag@homburg-holland.com</a>
 							<a class="hdp-info-link" href="tel:+31582045232"><?php echo $tel_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?> +31 58 204 5232</a>
@@ -244,8 +265,8 @@ class HDP_Blocks {
 				<article class="hdp-info-kaart">
 					<div class="hdp-info-icoon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94Z"/></svg></div>
 					<div class="hdp-info-body">
-						<h3>(Technische) informatie</h3>
-						<p>Voor HARDI en oudere machines van Rabe.</p>
+						<h3><?php echo esc_html( HDP_I18N::t( 'info_technisch_titel' ) ); ?></h3>
+						<p><?php echo esc_html( HDP_I18N::t( 'info_technisch_tekst' ) ); ?></p>
 						<div class="hdp-info-links">
 							<a class="hdp-info-link" href="https://www.agroparts.com" target="_blank" rel="noopener noreferrer"><?php echo $link_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?> agroparts.com</a>
 							<a class="hdp-info-link" href="https://rabe-ersatzteile.de/" target="_blank" rel="noopener noreferrer"><?php echo $link_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?> Rabe Ersatzteilportal</a>
@@ -256,8 +277,8 @@ class HDP_Blocks {
 				<article class="hdp-info-kaart">
 					<div class="hdp-info-icoon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></div>
 					<div class="hdp-info-body">
-						<h3>Bogballe onderdelen</h3>
-						<p>Documentatie en onderdelen voor Bogballe-strooiers.</p>
+						<h3><?php echo esc_html( HDP_I18N::t( 'info_bogballe_titel' ) ); ?></h3>
+						<p><?php echo esc_html( HDP_I18N::t( 'info_bogballe_tekst' ) ); ?></p>
 						<div class="hdp-info-links">
 							<a class="hdp-info-link" href="https://media.bogballe.com" target="_blank" rel="noopener noreferrer"><?php echo $link_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?> media.bogballe.com</a>
 						</div>
@@ -267,8 +288,8 @@ class HDP_Blocks {
 				<article class="hdp-info-kaart">
 					<div class="hdp-info-icoon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2Z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7Z"/></svg></div>
 					<div class="hdp-info-body">
-						<h3>Väderstad onderdelen</h3>
-						<p>Gedetailleerde informatie en onderdelen voor Väderstad-machines.</p>
+						<h3><?php echo esc_html( HDP_I18N::t( 'info_vaderstad_titel' ) ); ?></h3>
+						<p><?php echo esc_html( HDP_I18N::t( 'info_vaderstad_tekst' ) ); ?></p>
 						<div class="hdp-info-links">
 							<a class="hdp-info-link" href="https://www.vaderstad.com/en/support/parts-catalogue-online" target="_blank" rel="noopener noreferrer"><?php echo $link_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?> Väderstad parts catalogue</a>
 						</div>
@@ -278,11 +299,11 @@ class HDP_Blocks {
 				<article class="hdp-info-kaart">
 					<div class="hdp-info-icoon" aria-hidden="true"><?php echo $link_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
 					<div class="hdp-info-body">
-						<h3>Draincleaner onderdelen</h3>
-						<p>Onderdelenboeken van de Homburg Draincleaners, te vinden bij het onderdeel "Support".</p>
-						<div class="hdp-info-links">
-							<a class="hdp-info-link" href="https://www.homburg-holland.com/nl/downloads" target="_blank" rel="noopener noreferrer"><?php echo $link_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?> Naar onze website</a>
-						</div>
+						<h3><?php echo esc_html( HDP_I18N::t( 'info_draincleaner_titel' ) ); ?></h3>
+						<p>
+							<?php echo esc_html( HDP_I18N::t( 'info_draincleaner_tekst' ) ); ?>
+							<a class="hdp-info-link" href="https://www.homburg-holland.com/nl/downloads" target="_blank" rel="noopener noreferrer"><?php echo $link_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?> <?php echo esc_html( HDP_I18N::t( 'info_onze_website' ) ); ?></a>.
+						</p>
 					</div>
 				</article>
 
@@ -323,7 +344,7 @@ class HDP_Blocks {
 		);
 
 		if ( ! $downloads ) {
-			return '<p class="hdp-nog-niet">Nog geen downloads beschikbaar</p>';
+			return '<p class="hdp-nog-niet">' . esc_html( HDP_I18N::t( 'nog_geen_downloads' ) ) . '</p>';
 		}
 
 		// Merken voor de filterchips worden automatisch afgeleid uit de
@@ -343,20 +364,20 @@ class HDP_Blocks {
 		<div class="hdp-dl-werkbalk">
 			<div class="hdp-zoekveld">
 				<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-				<input type="text" id="hdp-zoeken" placeholder="Zoek op bestandsnaam…" autocomplete="off">
+				<input type="text" id="hdp-zoeken" placeholder="<?php echo esc_attr( HDP_I18N::t( 'zoek_placeholder' ) ); ?>" autocomplete="off">
 			</div>
 			<div class="hdp-filterrij">
 				<div class="hdp-filtergroep">
-					<span class="hdp-filtergroep-label">Regio</span>
+					<span class="hdp-filtergroep-label"><?php echo esc_html( HDP_I18N::t( 'filter_regio' ) ); ?></span>
 					<div class="hdp-chips" id="hdp-regio-chips">
-						<button type="button" class="hdp-chip hdp-chip-actief" data-regio="alle">Alles</button>
-						<button type="button" class="hdp-chip" data-regio="nl">Nederland</button>
-						<button type="button" class="hdp-chip" data-regio="be">België</button>
+						<button type="button" class="hdp-chip hdp-chip-actief" data-regio="alle"><?php echo esc_html( HDP_I18N::t( 'filter_alles' ) ); ?></button>
+						<button type="button" class="hdp-chip" data-regio="nl"><?php echo esc_html( HDP_I18N::t( 'filter_nederland' ) ); ?></button>
+						<button type="button" class="hdp-chip" data-regio="be"><?php echo esc_html( HDP_I18N::t( 'filter_belgie' ) ); ?></button>
 					</div>
 				</div>
 				<?php if ( $merken ) : ?>
 				<div class="hdp-filtergroep">
-					<span class="hdp-filtergroep-label">Merk</span>
+					<span class="hdp-filtergroep-label"><?php echo esc_html( HDP_I18N::t( 'filter_merk' ) ); ?></span>
 					<div class="hdp-chips" id="hdp-merk-chips">
 						<?php foreach ( $merken as $merk ) : ?>
 							<button type="button" class="hdp-chip" data-merk="<?php echo esc_attr( $merk ); ?>"><?php echo esc_html( $merk ); ?></button>
@@ -366,8 +387,8 @@ class HDP_Blocks {
 				<?php endif; ?>
 			</div>
 			<div class="hdp-filterrij-onder">
-				<p class="hdp-telling"><strong id="hdp-telling-zichtbaar"><?php echo count( $downloads ); ?></strong> van <?php echo count( $downloads ); ?> downloads zichtbaar</p>
-				<button type="button" class="hdp-wis-filters" id="hdp-wis-filters">Filters wissen</button>
+				<p class="hdp-telling"><strong id="hdp-telling-zichtbaar"><?php echo count( $downloads ); ?></strong> <?php echo esc_html( HDP_I18N::t( 'telling_van' ) ); ?> <?php echo count( $downloads ); ?> <?php echo esc_html( HDP_I18N::t( 'telling_zichtbaar' ) ); ?></p>
+				<button type="button" class="hdp-wis-filters" id="hdp-wis-filters"><?php echo esc_html( HDP_I18N::t( 'wis_filters' ) ); ?></button>
 			</div>
 		</div>
 
@@ -388,12 +409,12 @@ class HDP_Blocks {
 							<span><?php echo esc_html( wp_strip_all_tags( $download->post_content ) ); ?></span>
 						<?php endif; ?>
 					</span>
-					<a class="hdp-btn" href="<?php echo esc_url( HDP_Downloads_CPT::download_url( $download->ID ) ); ?>">Downloaden</a>
+					<a class="hdp-btn" href="<?php echo esc_url( HDP_Downloads_CPT::download_url( $download->ID ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'btn_downloaden' ) ); ?></a>
 				</div>
 			<?php endforeach; ?>
 		</div>
 
-		<p class="hdp-leeg-resultaat" id="hdp-leeg-resultaat">Geen downloads gevonden voor deze combinatie van filters.</p>
+		<p class="hdp-leeg-resultaat" id="hdp-leeg-resultaat"><?php echo esc_html( HDP_I18N::t( 'leeg_resultaat' ) ); ?></p>
 
 		<script>
 		(function () {

@@ -5,7 +5,7 @@
 	"title": "Dealerportaal (login + portaal)",
 	"category": "widgets",
 	"icon": "id-alt",
-	"description": "Toont het inlogscherm, of na inloggen het dealerportaal met webshop-, configurator- en downloadskaarten. De teksten hieronder zijn aanpasbaar; het inlogformulier en de gebruikersgegevens blijven altijd door de server bepaald.",
+	"description": "Toont het inlogscherm, of na inloggen het dealerportaal met webshop-, configurator- en downloadskaarten. De teksten hieronder zijn aanpasbaar (NL + FR); het inlogformulier en de gebruikersgegevens blijven altijd door de server bepaald.",
 	"textdomain": "homburg-dealerportaal",
 	"attributes": {
 		"heroAfbeelding": {
@@ -16,19 +16,36 @@
 			"type": "string",
 			"default": "Log in met uw dealeraccount voor toegang tot de webshop, productconfigurator en downloads."
 		},
+		"loginIntroFr": {
+			"type": "string",
+			"default": "Connectez-vous avec votre compte revendeur pour accéder à la boutique, au configurateur de produits et aux téléchargements."
+		},
 		"portaalIntro": {
 			"type": "string",
 			"default": "Kies hieronder waar u naartoe wilt. De webshop en productconfigurator openen in een nieuw tabblad."
 		},
+		"portaalIntroFr": {
+			"type": "string",
+			"default": "Choisissez ci-dessous où vous souhaitez aller. La boutique et le configurateur de produits s'ouvrent dans un nouvel onglet."
+		},
 		"kaart1Titel": { "type": "string", "default": "Webshop" },
+		"kaart1TitelFr": { "type": "string", "default": "Boutique en ligne" },
 		"kaart1Omschrijving": { "type": "string", "default": "Bestel onderdelen en machines rechtstreeks via de dealerwebshop, met uw dealercondities." },
+		"kaart1OmschrijvingFr": { "type": "string", "default": "Commandez des pièces et des machines directement via la boutique revendeur, aux conditions qui vous sont accordées." },
 		"kaart1Knoptekst": { "type": "string", "default": "Naar de webshop" },
+		"kaart1KnoptekstFr": { "type": "string", "default": "Vers la boutique" },
 		"kaart2Titel": { "type": "string", "default": "Productconfigurator" },
+		"kaart2TitelFr": { "type": "string", "default": "Configurateur de produits" },
 		"kaart2Omschrijving": { "type": "string", "default": "Stel machines op maat samen voor uw klant en genereer direct een specificatie en offerte." },
+		"kaart2OmschrijvingFr": { "type": "string", "default": "Configurez des machines sur mesure pour votre client et générez immédiatement une fiche technique et un devis." },
 		"kaart2Knoptekst": { "type": "string", "default": "Open configurator" },
+		"kaart2KnoptekstFr": { "type": "string", "default": "Ouvrir le configurateur" },
 		"kaart3Titel": { "type": "string", "default": "Downloads" },
+		"kaart3TitelFr": { "type": "string", "default": "Téléchargements" },
 		"kaart3Omschrijving": { "type": "string", "default": "Prijslijsten, brochures, handleidingen en beeldmateriaal, exclusief voor dealers." },
-		"kaart3Knoptekst": { "type": "string", "default": "Naar downloads" }
+		"kaart3OmschrijvingFr": { "type": "string", "default": "Listes de prix, brochures, manuels et supports visuels, réservés aux revendeurs." },
+		"kaart3Knoptekst": { "type": "string", "default": "Naar downloads" },
+		"kaart3KnoptekstFr": { "type": "string", "default": "Vers les téléchargements" }
 	},
 	"supports": {
 		"html": false,

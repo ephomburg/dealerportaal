@@ -1,0 +1,16 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "homburg/site-header",
+	"title": "Homburg header",
+	"category": "widgets",
+	"icon": "menu",
+	"description": "Vaste sitebrede header met logo, links naar homburg-holland.com/homburg-belgium.com en de NL/FR-taalswitch.",
+	"textdomain": "homburg-dealerportaal",
+	"supports": {
+		"html": false,
+		"multiple": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}
