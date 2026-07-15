@@ -169,8 +169,28 @@ class HDP_Downloads_CPT {
 		if ( ! $download_id ) {
 			return;
 		}
-		$download_id = absint( $download_id );
 
+		$bestand = self::resolve_download( absint( $download_id ) );
+
+		nocache_headers();
+		header( 'Content-Type: ' . $bestand['mime'] );
+		header( 'Content-Disposition: attachment; filename="' . basename( $bestand['pad'] ) . '"' );
+		header( 'Content-Length: ' . filesize( $bestand['pad'] ) );
+		header( 'X-Content-Type-Options: nosniff' );
+		// WP_Filesystem zou het hele bestand eerst in PHP-geheugen moeten laden;
+		// direct streamen naar de output is hier bewust efficiënter, ook bij
+		// grotere downloads.
+		readfile( $bestand['pad'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
+		exit;
+	}
+
+	/**
+	 * Controleert toegang en levert bestandsgegevens op, of stopt met
+	 * wp_die() bij geen toegang/ontbrekend bestand. Los van
+	 * handle_download() zodat dit getest kan worden zonder de
+	 * uiteindelijke exit uit te voeren (niet aanroepbaar binnen PHPUnit).
+	 */
+	public static function resolve_download( $download_id ) {
 		$mag_zien = is_user_logged_in() && HDP_Roles::mag_portaal_zien( get_current_user_id() );
 
 		if ( ! $mag_zien ) {
@@ -189,20 +209,15 @@ class HDP_Downloads_CPT {
 			wp_die( esc_html__( 'Bestand niet gevonden.', 'homburg-dealerportaal' ), 'Niet gevonden', array( 'response' => 404 ) );
 		}
 
-		$mime = get_post_mime_type( $attachment_id );
-
 		self::tel_download( $download_id );
 
-		nocache_headers();
-		header( 'Content-Type: ' . ( $mime ? $mime : 'application/octet-stream' ) );
-		header( 'Content-Disposition: attachment; filename="' . basename( $file ) . '"' );
-		header( 'Content-Length: ' . filesize( $file ) );
-		header( 'X-Content-Type-Options: nosniff' );
-		// WP_Filesystem zou het hele bestand eerst in PHP-geheugen moeten laden;
-		// direct streamen naar de output is hier bewust efficiënter, ook bij
-		// grotere downloads.
-		readfile( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
-		exit;
+		$mime = get_post_mime_type( $attachment_id );
+
+		return array(
+			'post_id' => $download_id,
+			'pad'     => $file,
+			'mime'    => $mime ? $mime : 'application/octet-stream',
+		);
 	}
 
 	public static function columns( $columns ) {
@@ -253,6 +268,10 @@ class HDP_Downloads_CPT {
 		if ( ! add_post_meta( $post_id, '_hdp_download_teller', 1, true ) ) {
 			global $wpdb;
 			$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + 1 WHERE post_id = %d AND meta_key = %s", $post_id, '_hdp_download_teller' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- atomaire increment; via get_post_meta()+update_post_meta() zou de teller bij gelijktijdige downloads kunnen overschrijven.
+			// De directe UPDATE hierboven gaat buiten WordPress' objectcache om,
+			// die anders de oude waarde zou blijven teruggeven aan
+			// get_post_meta() (o.a. bij persistente caching zoals Redis).
+			wp_cache_delete( $post_id, 'post_meta' );
 		}
 	}
 

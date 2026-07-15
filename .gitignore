@@ -32,3 +32,9 @@ logs/
 # staan wel in de repo; composer.lock legt de exacte versies vast, vendor/
 # zelf niet — dat installeert iedereen zelf via composer install).
 /vendor/
+
+# PHPUnit-testcache en de testdatabase-config (bevat lokale DB-credentials,
+# net als wp-config.php) — tests/wp-tests-config-sample.php staat wel in
+# de repo als sjabloon.
+.phpunit.result.cache
+tests/wp-tests-config.php

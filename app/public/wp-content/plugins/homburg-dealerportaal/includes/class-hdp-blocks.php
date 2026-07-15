@@ -71,20 +71,29 @@ class HDP_Blocks {
 			$terug_naar = home_url( '/dealerportaal/' );
 		}
 
-		$pogingen_sleutel = self::login_pogingen_sleutel();
-		$pogingen         = (int) get_transient( $pogingen_sleutel );
-
-		if ( $pogingen >= self::MAX_LOGIN_POGINGEN ) {
-			wp_safe_redirect( add_query_arg( 'hdp_fout', 'geblokkeerd', remove_query_arg( 'hdp_fout', $terug_naar ) ) );
-			exit;
-		}
-
 		$gebruikersnaam = isset( $_POST['gebruikersnaam'] ) ? sanitize_text_field( wp_unslash( $_POST['gebruikersnaam'] ) ) : '';
 		// Wachtwoord bewust NIET door sanitize_text_field() halen: dat zou geldige
 		// speciale tekens in een wachtwoord kunnen wijzigen, waardoor een dealer
 		// met zo'n wachtwoord niet meer zou kunnen inloggen. wp-login.php van
 		// WordPress-kern zelf doet dit om dezelfde reden ook niet.
 		$wachtwoord = isset( $_POST['wachtwoord'] ) ? (string) wp_unslash( $_POST['wachtwoord'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		wp_safe_redirect( self::verwerk_inloggegevens( $gebruikersnaam, $wachtwoord, $terug_naar ) );
+		exit;
+	}
+
+	/**
+	 * Bevat de eigenlijke inlog-/blokkadebeslissing, los van de
+	 * redirect/exit hierboven — 'exit' is niet aan te roepen binnen een
+	 * testomgeving, dus staat de testbare logica hier apart.
+	 */
+	public static function verwerk_inloggegevens( $gebruikersnaam, $wachtwoord, $terug_naar ) {
+		$pogingen_sleutel = self::login_pogingen_sleutel();
+		$pogingen         = (int) get_transient( $pogingen_sleutel );
+
+		if ( $pogingen >= self::MAX_LOGIN_POGINGEN ) {
+			return add_query_arg( 'hdp_fout', 'geblokkeerd', remove_query_arg( 'hdp_fout', $terug_naar ) );
+		}
 
 		$resultaat = wp_signon(
 			array(
@@ -97,12 +106,11 @@ class HDP_Blocks {
 
 		if ( is_wp_error( $resultaat ) ) {
 			set_transient( $pogingen_sleutel, $pogingen + 1, self::LOGIN_BLOKKADE_SECONDEN );
-			wp_safe_redirect( add_query_arg( 'hdp_fout', '1', remove_query_arg( 'hdp_fout', $terug_naar ) ) );
-		} else {
-			delete_transient( $pogingen_sleutel );
-			wp_safe_redirect( remove_query_arg( 'hdp_fout', $terug_naar ) );
+			return add_query_arg( 'hdp_fout', '1', remove_query_arg( 'hdp_fout', $terug_naar ) );
 		}
-		exit;
+
+		delete_transient( $pogingen_sleutel );
+		return remove_query_arg( 'hdp_fout', $terug_naar );
 	}
 
 	/**
