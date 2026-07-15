@@ -257,6 +257,18 @@
 .hdp-nog-niet { color: var(--wp--preset--color--grijs-tekst); font-size: 0.85rem; font-style: italic; }
 
 /* ==========================================================================
+   TAALWISSEL VOOR STATISCHE BLOKKEN (bijv. homburg/info-kaart)
+   Deze blokken zijn geen PHP-rendering meer, dus staat zowel de NL- als de
+   FR-tekst altijd in de HTML; welke zichtbaar is bepaalt data-taal op de
+   <html>-tag (zie HDP_I18N::voeg_data_taal_toe()). Bewust alleen
+   "verbergen"-regels, nooit "tonen": zo hoeft er geen display-waarde per
+   elementtype (h2/h3/p) teruggezet te worden.
+   ========================================================================== */
+[data-taal="fr"] .hdp-taal-nl { display: none !important; }
+[data-taal="nl"] .hdp-taal-fr,
+html:not([data-taal]) .hdp-taal-fr { display: none !important; }
+
+/* ==========================================================================
    AANVULLENDE INFORMATIE (bestellen, contact, technische documentatie)
    ========================================================================== */
 .hdp-info-sectie {

@@ -1,0 +1,26 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "homburg/info-kaart",
+	"title": "Homburg infokaart",
+	"category": "widgets",
+	"icon": "info",
+	"description": "Eén kaart voor de 'Overige informatie'-sectie: icoon, titel, tekst en optioneel 1-2 links. Volledig bewerkbaar in de editor, geen code nodig.",
+	"textdomain": "homburg-dealerportaal",
+	"attributes": {
+		"icoon": { "type": "string", "default": "bestellen" },
+		"titel": { "type": "string", "default": "" },
+		"titelFr": { "type": "string", "default": "" },
+		"tekst": { "type": "string", "default": "" },
+		"tekstFr": { "type": "string", "default": "" },
+		"link1Label": { "type": "string", "default": "" },
+		"link1Url": { "type": "string", "default": "" },
+		"link2Label": { "type": "string", "default": "" },
+		"link2Url": { "type": "string", "default": "" }
+	},
+	"supports": {
+		"html": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

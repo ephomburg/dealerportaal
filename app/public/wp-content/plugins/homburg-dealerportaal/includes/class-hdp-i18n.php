@@ -20,6 +20,18 @@ class HDP_I18N {
 
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'verwerk_taalwissel' ) );
+		add_filter( 'language_attributes', array( __CLASS__, 'voeg_data_taal_toe' ) );
+	}
+
+	/**
+	 * Zet de huidige taal als data-taal op de <html>-tag. Statische
+	 * (niet-PHP-gerenderde) blokken zoals homburg/info-kaart tonen zowel de
+	 * NL- als de FR-tekst in de HTML en verbergen er via zuivere CSS één van
+	 * de twee — zo werkt de taalwissel ook voor content die niet meer per
+	 * request door PHP wordt opgebouwd.
+	 */
+	public static function voeg_data_taal_toe( $output ) {
+		return $output . ' data-taal="' . esc_attr( self::huidige_taal() ) . '"';
 	}
 
 	/**
@@ -140,28 +152,6 @@ class HDP_I18N {
 			'nog_geen_content'  => array( 'nl' => 'Nog geen content beschikbaar', 'fr' => 'Aucun contenu disponible pour le moment' ),
 			'terug_naar_portaal' => array( 'nl' => '← Terug naar het portaal', 'fr' => '← Retour au portail' ),
 			'btn_downloaden'    => array( 'nl' => 'Downloaden', 'fr' => 'Télécharger' ),
-
-			// Overige informatie
-			'info_label'        => array( 'nl' => 'Overige informatie', 'fr' => 'Autres informations' ),
-			'info_bestellen_titel' => array( 'nl' => 'Bestellen en levertijden', 'fr' => 'Commandes et délais de livraison' ),
-			'info_bestellen_tekst' => array(
-				'nl' => 'Prijzen die niet zichtbaar zijn via deze dealerlogin kunnen opgevraagd worden via ons magazijn. Prijslijsten per merk zijn beschikbaar onder het onderdeel "verkoopdocumenten".',
-				'fr' => 'Les prix non visibles via cette connexion revendeur peuvent être demandés auprès de notre entrepôt. Les listes de prix par marque sont disponibles dans la rubrique "documents de vente".',
-			),
-			'info_contact_titel' => array( 'nl' => 'Contact magazijn', 'fr' => 'Contact entrepôt' ),
-			'info_contact_tekst' => array( 'nl' => 'Bereikbaar via e-mail of telefonisch.', 'fr' => 'Joignable par e-mail ou par téléphone.' ),
-			'info_technisch_titel' => array( 'nl' => '(Technische) informatie', 'fr' => 'Informations (techniques)' ),
-			'info_technisch_tekst' => array( 'nl' => 'Voor HARDI en oudere machines van Rabe:', 'fr' => 'Pour HARDI et les anciennes machines Rabe :' ),
-			'info_bogballe_titel' => array( 'nl' => 'Bogballe onderdelen', 'fr' => 'Pièces Bogballe' ),
-			'info_bogballe_tekst' => array( 'nl' => 'Beschikbaar via:', 'fr' => 'Disponible via :' ),
-			'info_vaderstad_titel' => array( 'nl' => 'Väderstad onderdelen', 'fr' => 'Pièces Väderstad' ),
-			'info_vaderstad_tekst' => array( 'nl' => 'Gedetailleerde informatie en onderdelen via:', 'fr' => 'Informations détaillées et pièces via :' ),
-			'info_draincleaner_titel' => array( 'nl' => 'Draincleaner onderdelen', 'fr' => 'Pièces Draincleaner' ),
-			'info_draincleaner_tekst' => array(
-				'nl' => 'Voor onderdelenboeken van de Homburg Draincleaners kun je terecht bij het onderdeel "Support" op',
-				'fr' => 'Pour les catalogues de pièces des Draincleaners Homburg, consultez la rubrique "Support" sur',
-			),
-			'info_onze_website' => array( 'nl' => 'onze website', 'fr' => 'notre site web' ),
 		);
 	}
 }
