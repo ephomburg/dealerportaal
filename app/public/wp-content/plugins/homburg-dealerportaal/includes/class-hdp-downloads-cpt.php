@@ -191,6 +191,8 @@ class HDP_Downloads_CPT {
 
 		$mime = get_post_mime_type( $attachment_id );
 
+		self::tel_download( $download_id );
+
 		nocache_headers();
 		header( 'Content-Type: ' . ( $mime ? $mime : 'application/octet-stream' ) );
 		header( 'Content-Disposition: attachment; filename="' . basename( $file ) . '"' );
@@ -208,6 +210,7 @@ class HDP_Downloads_CPT {
 		$columns['hdp_bestand']   = 'Bestand';
 		$columns['hdp_merk']      = 'Merk';
 		$columns['hdp_regio']     = 'Regio';
+		$columns['hdp_teller']    = 'Downloads';
 		return $columns;
 	}
 
@@ -232,7 +235,29 @@ class HDP_Downloads_CPT {
 		if ( 'hdp_regio' === $column ) {
 			$regios = self::get_regios( $post_id );
 			echo $regios ? esc_html( strtoupper( implode( ', ', $regios ) ) ) : '—';
+			return;
 		}
+
+		if ( 'hdp_teller' === $column ) {
+			echo esc_html( self::get_download_teller( $post_id ) );
+		}
+	}
+
+	/**
+	 * Telt bij elke geleverde download op — alleen zichtbaar in het
+	 * wp-admin-overzicht (kolom + adminportaal), nooit voor dealers zelf.
+	 * Atomair opgehoogd via een directe UPDATE-query om raceconditie bij
+	 * gelijktijdige downloads te vermijden.
+	 */
+	private static function tel_download( $post_id ) {
+		if ( ! add_post_meta( $post_id, '_hdp_download_teller', 1, true ) ) {
+			global $wpdb;
+			$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + 1 WHERE post_id = %d AND meta_key = %s", $post_id, '_hdp_download_teller' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- atomaire increment; via get_post_meta()+update_post_meta() zou de teller bij gelijktijdige downloads kunnen overschrijven.
+		}
+	}
+
+	public static function get_download_teller( $post_id ) {
+		return (int) get_post_meta( $post_id, '_hdp_download_teller', true );
 	}
 
 	public static function download_url( $post_id ) {

@@ -346,6 +346,19 @@
 	color: var(--wp--preset--color--wit) !important;
 }
 
+.hdp-sorteer-select {
+	border: 2px solid var(--wp--preset--color--rand);
+	background: var(--wp--preset--color--wit);
+	font-family: inherit;
+	font-size: 0.82rem;
+	font-weight: 600;
+	color: var(--wp--preset--color--donkergrijs);
+	padding: 0.45rem 0.75rem;
+	border-radius: 8px;
+	cursor: pointer;
+}
+.hdp-sorteer-select:focus { outline: none; border-color: var(--wp--preset--color--homburg-rood); }
+
 .hdp-filterrij-onder { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 .hdp-telling { font-size: 0.85rem; color: var(--wp--preset--color--grijs-tekst); }
 .hdp-wis-filters {

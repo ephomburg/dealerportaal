@@ -19,6 +19,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class HDP_Blocks {
 
+	const MAX_LOGIN_POGINGEN      = 5;
+	const LOGIN_BLOKKADE_SECONDEN = 15 * MINUTE_IN_SECONDS;
+
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'registreer_blokken' ) );
 		add_action( 'init', array( __CLASS__, 'verwerk_login' ) );
@@ -44,9 +47,36 @@ class HDP_Blocks {
 		wp_enqueue_style( 'hdp-dealerportaal', HDP_PLUGIN_URL . 'assets/css/dealerportaal.css', array(), HDP_VERSION );
 	}
 
+	/**
+	 * IP-adres van de bezoeker, voor de eenvoudige pogingenteller hieronder.
+	 * Bewust alleen REMOTE_ADDR (geen X-Forwarded-For e.d.): die headers zijn
+	 * door de bezoeker zelf te vervalsen tenzij een reverse proxy ze expliciet
+	 * overschrijft, en zouden de teller dus juist omzeilbaar maken.
+	 */
+	private static function login_ip() {
+		return isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	}
+
+	private static function login_pogingen_sleutel() {
+		return 'hdp_login_pogingen_' . md5( self::login_ip() );
+	}
+
 	public static function verwerk_login() {
 		if ( ! isset( $_POST['hdp_login_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hdp_login_nonce'] ) ), 'hdp_login' ) ) {
 			return;
+		}
+
+		$terug_naar = wp_get_referer();
+		if ( ! $terug_naar ) {
+			$terug_naar = home_url( '/dealerportaal/' );
+		}
+
+		$pogingen_sleutel = self::login_pogingen_sleutel();
+		$pogingen         = (int) get_transient( $pogingen_sleutel );
+
+		if ( $pogingen >= self::MAX_LOGIN_POGINGEN ) {
+			wp_safe_redirect( add_query_arg( 'hdp_fout', 'geblokkeerd', remove_query_arg( 'hdp_fout', $terug_naar ) ) );
+			exit;
 		}
 
 		$gebruikersnaam = isset( $_POST['gebruikersnaam'] ) ? sanitize_text_field( wp_unslash( $_POST['gebruikersnaam'] ) ) : '';
@@ -65,17 +95,27 @@ class HDP_Blocks {
 			is_ssl()
 		);
 
-		$terug_naar = wp_get_referer();
-		if ( ! $terug_naar ) {
-			$terug_naar = home_url( '/dealerportaal/' );
-		}
-
 		if ( is_wp_error( $resultaat ) ) {
+			set_transient( $pogingen_sleutel, $pogingen + 1, self::LOGIN_BLOKKADE_SECONDEN );
 			wp_safe_redirect( add_query_arg( 'hdp_fout', '1', remove_query_arg( 'hdp_fout', $terug_naar ) ) );
 		} else {
+			delete_transient( $pogingen_sleutel );
 			wp_safe_redirect( remove_query_arg( 'hdp_fout', $terug_naar ) );
 		}
 		exit;
+	}
+
+	/**
+	 * Vertaalt de ?hdp_fout=-vlag (Post/Redirect/Get, geen state-wijziging)
+	 * naar de juiste, vertaalde melding. Gedeeld door alle schermen waar het
+	 * inlogformulier kan verschijnen (dealerportaal, downloads, content).
+	 */
+	private static function login_foutmelding() {
+		if ( ! isset( $_GET['hdp_fout'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return '';
+		}
+		$code = sanitize_key( wp_unslash( $_GET['hdp_fout'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return 'geblokkeerd' === $code ? HDP_I18N::t( 'login_geblokkeerd' ) : HDP_I18N::t( 'login_fout' );
 	}
 
 	public static function render_dealerportaal( $a ) {
@@ -84,10 +124,7 @@ class HDP_Blocks {
 		if ( is_user_logged_in() ) {
 			self::render_portal_content( $a );
 		} else {
-			// Post/Redirect/Get: alleen een weergavevlag voor de foutmelding na
-			// een mislukte login, geen actie die state wijzigt.
-			$fout = isset( $_GET['hdp_fout'] ) ? HDP_I18N::t( 'login_fout' ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			self::render_login( $fout, $a );
+			self::render_login( self::login_foutmelding(), $a );
 		}
 
 		return ob_get_clean();
@@ -98,7 +135,7 @@ class HDP_Blocks {
 
 		if ( ! $mag_zien ) {
 			ob_start();
-			self::render_login( '', $a );
+			self::render_login( self::login_foutmelding(), $a );
 			return ob_get_clean();
 		}
 
@@ -138,7 +175,7 @@ class HDP_Blocks {
 
 		if ( ! $mag_zien ) {
 			ob_start();
-			self::render_login( '', $a );
+			self::render_login( self::login_foutmelding(), $a );
 			return ob_get_clean();
 		}
 
@@ -497,6 +534,14 @@ class HDP_Blocks {
 					</div>
 				</div>
 				<?php endif; ?>
+				<div class="hdp-filtergroep">
+					<span class="hdp-filtergroep-label"><?php echo esc_html( HDP_I18N::t( 'sorteren_label' ) ); ?></span>
+					<select id="hdp-sorteer" class="hdp-sorteer-select">
+						<option value="datum-nieuw"><?php echo esc_html( HDP_I18N::t( 'sorteer_nieuw' ) ); ?></option>
+						<option value="datum-oud"><?php echo esc_html( HDP_I18N::t( 'sorteer_oud' ) ); ?></option>
+						<option value="naam-az"><?php echo esc_html( HDP_I18N::t( 'sorteer_naam' ) ); ?></option>
+					</select>
+				</div>
 			</div>
 			<div class="hdp-filterrij-onder">
 				<p class="hdp-telling" aria-live="polite" aria-atomic="true"><strong id="hdp-telling-zichtbaar"><?php echo count( $downloads ); ?></strong> <?php echo esc_html( HDP_I18N::t( 'telling_van' ) ); ?> <?php echo count( $downloads ); ?> <?php echo esc_html( HDP_I18N::t( 'telling_zichtbaar' ) ); ?></p>
@@ -513,7 +558,8 @@ class HDP_Blocks {
 				<div class="hdp-download-item"
 					data-titel="<?php echo esc_attr( strtolower( $download->post_title ) ); ?>"
 					data-merk="<?php echo esc_attr( $merk ); ?>"
-					data-regios="<?php echo esc_attr( implode( ' ', $regios ) ); ?>">
+					data-regios="<?php echo esc_attr( implode( ' ', $regios ) ); ?>"
+					data-datum="<?php echo esc_attr( get_post_time( 'U', true, $download ) ); ?>">
 					<span class="hdp-download-type"><?php echo esc_html( HDP_Downloads_CPT::type_label( $download->ID ) ); ?></span>
 					<span class="hdp-download-info">
 						<strong><?php echo esc_html( $download->post_title ); ?></strong>
@@ -538,8 +584,22 @@ class HDP_Blocks {
 			var regioChips = document.getElementById('hdp-regio-chips');
 			var merkChips = document.getElementById('hdp-merk-chips');
 			var wisKnop = document.getElementById('hdp-wis-filters');
+			var sorteerSelect = document.getElementById('hdp-sorteer');
 			var actieveRegio = 'alle';
 			var actieveMerken = [];
+
+			function sorteerToepassen() {
+				if (!sorteerSelect || !lijst) { return; }
+				var volgorde = sorteerSelect.value;
+				Array.prototype.slice.call(items).sort(function (a, b) {
+					if (volgorde === 'naam-az') { return a.dataset.titel.localeCompare(b.dataset.titel); }
+					var datumA = parseInt(a.dataset.datum, 10);
+					var datumB = parseInt(b.dataset.datum, 10);
+					return volgorde === 'datum-oud' ? datumA - datumB : datumB - datumA;
+				}).forEach(function (item) { lijst.appendChild(item); });
+			}
+
+			if (sorteerSelect) { sorteerSelect.addEventListener('change', sorteerToepassen); }
 
 			function filterToepassen() {
 				var zoekterm = zoekveld ? zoekveld.value.trim().toLowerCase() : '';

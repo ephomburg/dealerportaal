@@ -99,6 +99,10 @@ class HDP_I18N {
 				'nl' => 'Onjuiste gebruikersnaam of wachtwoord. Probeer het opnieuw.',
 				'fr' => "Nom d'utilisateur ou mot de passe incorrect. Veuillez réessayer.",
 			),
+			'login_geblokkeerd' => array(
+				'nl' => 'Te veel mislukte inlogpogingen. Probeer het over 15 minuten opnieuw.',
+				'fr' => 'Trop de tentatives de connexion échouées. Réessayez dans 15 minutes.',
+			),
 			'account_titel'     => array( 'nl' => 'Account in behandeling', 'fr' => 'Compte en cours de validation' ),
 			'account_tekst'     => array(
 				'nl' => 'Uw account is nog niet goedgekeurd voor het dealerportaal. Neem contact op met Homburg Machinehandel.',
@@ -119,6 +123,10 @@ class HDP_I18N {
 			'filter_nederland'  => array( 'nl' => 'Nederland', 'fr' => 'Pays-Bas' ),
 			'filter_belgie'     => array( 'nl' => 'België', 'fr' => 'Belgique' ),
 			'filter_merk'       => array( 'nl' => 'Merk', 'fr' => 'Marque' ),
+			'sorteren_label'    => array( 'nl' => 'Sorteren', 'fr' => 'Trier' ),
+			'sorteer_nieuw'     => array( 'nl' => 'Nieuwste eerst', 'fr' => "Plus récents d'abord" ),
+			'sorteer_oud'       => array( 'nl' => 'Oudste eerst', 'fr' => "Plus anciens d'abord" ),
+			'sorteer_naam'      => array( 'nl' => 'Naam (A-Z)', 'fr' => 'Nom (A-Z)' ),
 			'telling_van'       => array( 'nl' => 'van', 'fr' => 'sur' ),
 			'telling_zichtbaar' => array( 'nl' => 'downloads zichtbaar', 'fr' => 'téléchargements visibles' ),
 			'wis_filters'       => array( 'nl' => 'Filters wissen', 'fr' => 'Réinitialiser les filtres' ),
