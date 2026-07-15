@@ -6,4 +6,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * @var array $attributes Blokattributen (met standaardwaarden uit block.json).
  */
-echo HDP_Blocks::render_dealerportaal( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- render_dealerportaal() escaped elk veld al zelf.
+echo HDP_Portal_Render::render_dealerportaal( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- render_dealerportaal() escaped elk veld al zelf.

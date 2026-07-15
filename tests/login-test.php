@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Test HDP_Blocks::verwerk_inloggegevens() — de testbare kern van de
+ * Test HDP_Login::verwerk_inloggegevens() — de testbare kern van de
  * loginverwerking, los van de wp_safe_redirect()+exit in verwerk_login()
  * zelf (exit is niet aan te roepen binnen PHPUnit).
  *
@@ -48,46 +48,46 @@ class Login_Test extends WP_UnitTestCase {
 	}
 
 	public function test_correcte_gegevens_geven_geen_foutmelding_en_wissen_pogingenteller() {
-		set_transient( $this->pogingen_sleutel(), 2, HDP_Blocks::LOGIN_BLOKKADE_SECONDEN );
+		set_transient( $this->pogingen_sleutel(), 2, HDP_Login::LOGIN_BLOKKADE_SECONDEN );
 
-		$bestemming = HDP_Blocks::verwerk_inloggegevens( 'testdealer', 'GeheimWachtwoord123!', $this->terug_naar );
+		$bestemming = HDP_Login::verwerk_inloggegevens( 'testdealer', 'GeheimWachtwoord123!', $this->terug_naar );
 
 		$this->assertStringNotContainsString( 'hdp_fout', $bestemming );
 		$this->assertFalse( get_transient( $this->pogingen_sleutel() ) );
 	}
 
 	public function test_onjuist_wachtwoord_geeft_foutmelding_en_telt_poging_op() {
-		$bestemming = HDP_Blocks::verwerk_inloggegevens( 'testdealer', 'verkeerd-wachtwoord', $this->terug_naar );
+		$bestemming = HDP_Login::verwerk_inloggegevens( 'testdealer', 'verkeerd-wachtwoord', $this->terug_naar );
 
 		$this->assertStringContainsString( 'hdp_fout=1', $bestemming );
 		$this->assertSame( 1, (int) get_transient( $this->pogingen_sleutel() ) );
 	}
 
 	public function test_pogingenteller_loopt_op_bij_herhaalde_mislukte_pogingen() {
-		HDP_Blocks::verwerk_inloggegevens( 'testdealer', 'verkeerd-wachtwoord', $this->terug_naar );
-		HDP_Blocks::verwerk_inloggegevens( 'testdealer', 'verkeerd-wachtwoord', $this->terug_naar );
-		HDP_Blocks::verwerk_inloggegevens( 'testdealer', 'verkeerd-wachtwoord', $this->terug_naar );
+		HDP_Login::verwerk_inloggegevens( 'testdealer', 'verkeerd-wachtwoord', $this->terug_naar );
+		HDP_Login::verwerk_inloggegevens( 'testdealer', 'verkeerd-wachtwoord', $this->terug_naar );
+		HDP_Login::verwerk_inloggegevens( 'testdealer', 'verkeerd-wachtwoord', $this->terug_naar );
 
 		$this->assertSame( 3, (int) get_transient( $this->pogingen_sleutel() ) );
 	}
 
 	public function test_na_max_pogingen_wordt_geblokkeerd_ook_met_juist_wachtwoord() {
-		for ( $i = 0; $i < HDP_Blocks::MAX_LOGIN_POGINGEN; $i++ ) {
-			HDP_Blocks::verwerk_inloggegevens( 'testdealer', 'verkeerd-wachtwoord', $this->terug_naar );
+		for ( $i = 0; $i < HDP_Login::MAX_LOGIN_POGINGEN; $i++ ) {
+			HDP_Login::verwerk_inloggegevens( 'testdealer', 'verkeerd-wachtwoord', $this->terug_naar );
 		}
 
-		$bestemming = HDP_Blocks::verwerk_inloggegevens( 'testdealer', 'GeheimWachtwoord123!', $this->terug_naar );
+		$bestemming = HDP_Login::verwerk_inloggegevens( 'testdealer', 'GeheimWachtwoord123!', $this->terug_naar );
 
 		$this->assertStringContainsString( 'hdp_fout=geblokkeerd', $bestemming );
 	}
 
 	public function test_blokkade_raakt_niet_een_ander_ip_adres() {
-		for ( $i = 0; $i < HDP_Blocks::MAX_LOGIN_POGINGEN; $i++ ) {
-			HDP_Blocks::verwerk_inloggegevens( 'testdealer', 'verkeerd-wachtwoord', $this->terug_naar );
+		for ( $i = 0; $i < HDP_Login::MAX_LOGIN_POGINGEN; $i++ ) {
+			HDP_Login::verwerk_inloggegevens( 'testdealer', 'verkeerd-wachtwoord', $this->terug_naar );
 		}
 
 		$_SERVER['REMOTE_ADDR'] = '198.51.100.9';
-		$bestemming             = HDP_Blocks::verwerk_inloggegevens( 'testdealer', 'GeheimWachtwoord123!', $this->terug_naar );
+		$bestemming             = HDP_Login::verwerk_inloggegevens( 'testdealer', 'GeheimWachtwoord123!', $this->terug_naar );
 
 		$this->assertStringNotContainsString( 'hdp_fout', $bestemming );
 
