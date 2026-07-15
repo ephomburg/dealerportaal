@@ -66,9 +66,15 @@ class HDP_Downloads_CPT {
 	 */
 	public static function render_rechten_meta_box( $post ) {
 		wp_nonce_field( 'hdp_rechten_save', 'hdp_rechten_nonce' );
-		$merk    = get_post_meta( $post->ID, '_hdp_merk', true );
-		$regios  = self::get_regios( $post->ID );
+		$merk      = get_post_meta( $post->ID, '_hdp_merk', true );
+		$regios    = self::get_regios( $post->ID );
+		$categorie = self::get_categorie( $post->ID );
 		?>
+		<p>
+			<strong>Categorie</strong><br>
+			<label><input type="radio" name="hdp_categorie" value="download" <?php checked( 'download', $categorie ); ?>> Download (prijslijst, handleiding, e.d.)</label><br>
+			<label><input type="radio" name="hdp_categorie" value="content" <?php checked( 'content', $categorie ); ?>> Content (voor social media/advertenties)</label>
+		</p>
 		<p>
 			<label for="hdp_merk"><strong>Merk</strong></label><br>
 			<input type="text" name="hdp_merk" id="hdp_merk" value="<?php echo esc_attr( $merk ); ?>" class="widefat" placeholder="bijv. Merk A">
@@ -88,6 +94,12 @@ class HDP_Downloads_CPT {
 
 	public static function get_merk( $post_id ) {
 		return get_post_meta( $post_id, '_hdp_merk', true );
+	}
+
+	/** Bestaande downloads van vóór dit onderscheid hebben geen meta; die tellen als 'download'. */
+	public static function get_categorie( $post_id ) {
+		$waarde = get_post_meta( $post_id, '_hdp_categorie', true );
+		return 'content' === $waarde ? 'content' : 'download';
 	}
 
 	public static function render_meta_box( $post ) {
@@ -131,6 +143,9 @@ class HDP_Downloads_CPT {
 		}
 
 		if ( isset( $_POST['hdp_rechten_nonce'] ) && wp_verify_nonce( wp_unslash( $_POST['hdp_rechten_nonce'] ), 'hdp_rechten_save' ) ) {
+			$categorie = isset( $_POST['hdp_categorie'] ) && 'content' === $_POST['hdp_categorie'] ? 'content' : 'download';
+			update_post_meta( $post_id, '_hdp_categorie', $categorie );
+
 			update_post_meta( $post_id, '_hdp_merk', isset( $_POST['hdp_merk'] ) ? sanitize_text_field( wp_unslash( $_POST['hdp_merk'] ) ) : '' );
 
 			$regios = array();
@@ -186,13 +201,19 @@ class HDP_Downloads_CPT {
 	}
 
 	public static function columns( $columns ) {
-		$columns['hdp_bestand'] = 'Bestand';
-		$columns['hdp_merk']    = 'Merk';
-		$columns['hdp_regio']   = 'Regio';
+		$columns['hdp_categorie'] = 'Categorie';
+		$columns['hdp_bestand']   = 'Bestand';
+		$columns['hdp_merk']      = 'Merk';
+		$columns['hdp_regio']     = 'Regio';
 		return $columns;
 	}
 
 	public static function column_content( $column, $post_id ) {
+		if ( 'hdp_categorie' === $column ) {
+			echo 'content' === self::get_categorie( $post_id ) ? 'Content' : 'Download';
+			return;
+		}
+
 		if ( 'hdp_bestand' === $column ) {
 			$attachment_id = get_post_meta( $post_id, '_hdp_attachment_id', true );
 			echo $attachment_id ? esc_html( basename( get_attached_file( $attachment_id ) ) ) : '—';

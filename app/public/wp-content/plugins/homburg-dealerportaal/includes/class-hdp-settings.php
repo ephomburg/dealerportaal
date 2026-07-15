@@ -34,14 +34,12 @@ class HDP_Settings {
 
 		add_settings_field( 'webshop_url', 'Webshop-URL', array( __CLASS__, 'field_webshop_url' ), 'hdp-instellingen', 'hdp_urls' );
 		add_settings_field( 'configurator_url', 'Productconfigurator-URL', array( __CLASS__, 'field_configurator_url' ), 'hdp-instellingen', 'hdp_urls' );
-		add_settings_field( 'content_url', 'Content-URL', array( __CLASS__, 'field_content_url' ), 'hdp-instellingen', 'hdp_urls' );
 	}
 
 	public static function sanitize( $input ) {
 		return array(
 			'webshop_url'      => isset( $input['webshop_url'] ) ? esc_url_raw( $input['webshop_url'] ) : '',
 			'configurator_url' => isset( $input['configurator_url'] ) ? esc_url_raw( $input['configurator_url'] ) : '',
-			'content_url'      => isset( $input['content_url'] ) ? esc_url_raw( $input['content_url'] ) : '',
 		);
 	}
 
@@ -63,14 +61,6 @@ class HDP_Settings {
 			'<input type="url" name="%s[configurator_url]" value="%s" class="regular-text" placeholder="https://">',
 			esc_attr( self::OPTION ),
 			esc_attr( self::get( 'configurator_url' ) )
-		);
-	}
-
-	public static function field_content_url() {
-		printf(
-			'<input type="url" name="%s[content_url]" value="%s" class="regular-text" placeholder="https://">',
-			esc_attr( self::OPTION ),
-			esc_attr( self::get( 'content_url' ) )
 		);
 	}
 

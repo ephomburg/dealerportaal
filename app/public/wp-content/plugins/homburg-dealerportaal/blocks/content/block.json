@@ -1,0 +1,38 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "homburg/content-pagina",
+	"title": "Dealercontent",
+	"category": "widgets",
+	"icon": "camera",
+	"description": "Toont de beveiligde bibliotheek met social media-/advertentiecontent voor ingelogde, goedgekeurde dealers. Niet-ingelogde bezoekers zien het inlogscherm.",
+	"textdomain": "homburg-dealerportaal",
+	"attributes": {
+		"heroAfbeelding": {
+			"type": "string",
+			"default": "https://www.homburg-belgium.com/wp-content/uploads/2023/09/Homburg-Holland-precisielandbouw-man-in-veld.jpg"
+		},
+		"titel": {
+			"type": "string",
+			"default": "Content voor dealers"
+		},
+		"titelFr": {
+			"type": "string",
+			"default": "Contenu pour revendeurs"
+		},
+		"omschrijving": {
+			"type": "string",
+			"default": "Beeldmateriaal en teksten voor op uw eigen social media of advertenties, exclusief voor Homburg-dealers."
+		},
+		"omschrijvingFr": {
+			"type": "string",
+			"default": "Visuels et textes pour vos propres réseaux sociaux ou publicités, réservés aux revendeurs Homburg."
+		}
+	},
+	"supports": {
+		"html": false,
+		"multiple": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

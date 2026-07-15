@@ -152,6 +152,10 @@
 
 .hdp-login-kaart .hdp-btn { width: 100%; }
 
+.hdp-wachtwoord-vergeten { text-align: center; margin-top: 1rem; font-size: 0.85rem; }
+.hdp-wachtwoord-vergeten a { color: var(--wp--preset--color--grijs-tekst); text-decoration: underline; }
+.hdp-wachtwoord-vergeten a:hover { color: var(--wp--preset--color--homburg-rood); }
+
 /* ==========================================================================
    PORTAAL (na inloggen)
    ========================================================================== */

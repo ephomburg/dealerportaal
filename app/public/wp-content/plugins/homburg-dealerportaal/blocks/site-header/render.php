@@ -30,8 +30,8 @@ $link_icoon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 				Homburg Belgium
 			</a>
 			<div class="hdp-taalswitch" role="group" aria-label="Taal / Langue">
-				<a href="<?php echo esc_url( add_query_arg( 'hdp_taal', 'nl' ) ); ?>" class="hdp-taal-knop<?php echo 'nl' === $huidige_taal ? ' hdp-taal-actief' : ''; ?>">NL</a>
-				<a href="<?php echo esc_url( add_query_arg( 'hdp_taal', 'fr' ) ); ?>" class="hdp-taal-knop<?php echo 'fr' === $huidige_taal ? ' hdp-taal-actief' : ''; ?>">FR</a>
+				<a href="<?php echo esc_url( add_query_arg( 'hdp_taal', 'nl' ) ); ?>" class="hdp-taal-knop<?php echo 'nl' === $huidige_taal ? ' hdp-taal-actief' : ''; ?>"<?php echo 'nl' === $huidige_taal ? ' aria-current="true"' : ''; ?>>NL</a>
+				<a href="<?php echo esc_url( add_query_arg( 'hdp_taal', 'fr' ) ); ?>" class="hdp-taal-knop<?php echo 'fr' === $huidige_taal ? ' hdp-taal-actief' : ''; ?>"<?php echo 'fr' === $huidige_taal ? ' aria-current="true"' : ''; ?>>FR</a>
 			</div>
 		</nav>
 	</div>

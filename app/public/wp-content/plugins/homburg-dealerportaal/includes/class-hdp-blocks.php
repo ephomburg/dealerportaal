@@ -28,11 +28,16 @@ class HDP_Blocks {
 	public static function registreer_blokken() {
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/dealerportaal' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/downloads' );
+		register_block_type( HDP_PLUGIN_DIR . 'blocks/content' );
 	}
 
 	public static function enqueue_assets() {
 		$post = get_post();
-		if ( ! $post || ( ! has_block( 'homburg/dealerportaal', $post ) && ! has_block( 'homburg/downloads-pagina', $post ) ) ) {
+		if ( ! $post
+			|| ( ! has_block( 'homburg/dealerportaal', $post )
+				&& ! has_block( 'homburg/downloads-pagina', $post )
+				&& ! has_block( 'homburg/content-pagina', $post ) )
+		) {
 			return;
 		}
 
@@ -107,7 +112,46 @@ class HDP_Blocks {
 				</div>
 			</section>
 			<section class="hdp-downloads">
-				<?php echo self::render_downloads_lijst(); // phpcs:ignore WordPress.Security.EscapeOutput -- reeds ge-escaped in render_downloads_lijst(). ?>
+				<?php echo self::render_downloads_lijst( 'download' ); // phpcs:ignore WordPress.Security.EscapeOutput -- reeds ge-escaped in render_downloads_lijst(). ?>
+				<p class="hdp-terug"><a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/dealerportaal/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'terug_naar_portaal' ) ); ?></a></p>
+			</section>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Bibliotheek met content voor social media/advertenties — zelfde
+	 * opzet als de downloadspagina (zoeken, merk-/regiofilter, beveiligd
+	 * endpoint), maar dan gefilterd op categorie "content" i.p.v.
+	 * "download". Zie render_downloads_lijst().
+	 */
+	public static function render_content_pagina( $a ) {
+		$mag_zien = is_user_logged_in() && HDP_Roles::mag_portaal_zien( get_current_user_id() );
+
+		if ( ! $mag_zien ) {
+			ob_start();
+			self::render_login( '', $a );
+			return ob_get_clean();
+		}
+
+		$titel        = HDP_I18N::kies( $a['titel'], $a['titelFr'] );
+		$omschrijving = HDP_I18N::kies( $a['omschrijving'], $a['omschrijvingFr'] );
+
+		ob_start();
+		?>
+		<div class="hdp-portaal alignfull">
+			<section class="hdp-welkom alignfull hdp-welkom-zonder-hero">
+				<div class="hdp-welkom-inner">
+					<div class="hdp-welkom-top">
+						<h1><?php echo esc_html( $titel ); ?></h1>
+						<a class="hdp-btn-logout" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>"><?php echo self::svg_icoon( 'uitloggen' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?><?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?></a>
+					</div>
+					<p><?php echo esc_html( $omschrijving ); ?></p>
+				</div>
+			</section>
+			<section class="hdp-downloads">
+				<?php echo self::render_downloads_lijst( 'content' ); // phpcs:ignore WordPress.Security.EscapeOutput -- reeds ge-escaped in render_downloads_lijst(). ?>
 				<p class="hdp-terug"><a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/dealerportaal/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'terug_naar_portaal' ) ); ?></a></p>
 			</section>
 		</div>
@@ -147,6 +191,7 @@ class HDP_Blocks {
 					</div>
 					<button type="submit" class="hdp-btn"><?php echo esc_html( HDP_I18N::t( 'btn_inloggen' ) ); ?></button>
 				</form>
+				<p class="hdp-wachtwoord-vergeten"><a href="<?php echo esc_url( wp_lostpassword_url( home_url( '/dealerportaal/' ) ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'wachtwoord_vergeten' ) ); ?></a></p>
 			</div>
 		</div>
 		<?php
@@ -186,7 +231,6 @@ class HDP_Blocks {
 		$kaart4_titel       = HDP_I18N::kies( $a['kaart4Titel'], $a['kaart4TitelFr'] );
 		$kaart4_omschrijving = HDP_I18N::kies( $a['kaart4Omschrijving'], $a['kaart4OmschrijvingFr'] );
 		$kaart4_knoptekst   = HDP_I18N::kies( $a['kaart4Knoptekst'], $a['kaart4KnoptekstFr'] );
-		$content_url        = HDP_Settings::get( 'content_url' );
 		?>
 		<div class="hdp-hero alignfull" style="background-image:url('<?php echo esc_url( $a['heroAfbeelding'] ); ?>')" aria-hidden="true"></div>
 		<div class="hdp-portaal alignfull">
@@ -237,11 +281,7 @@ class HDP_Blocks {
 					<?php self::render_icoon( 'content' ); ?>
 					<h2><?php echo esc_html( $kaart4_titel ); ?></h2>
 					<p><?php echo esc_html( $kaart4_omschrijving ); ?></p>
-					<?php if ( $content_url ) : ?>
-						<a class="hdp-btn" href="<?php echo esc_url( $content_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $kaart4_knoptekst ); ?></a>
-					<?php else : ?>
-						<p class="hdp-nog-niet"><?php echo esc_html( HDP_I18N::t( 'nog_niet_geconfigureerd' ) ); ?></p>
-					<?php endif; ?>
+					<a class="hdp-btn" href="<?php echo esc_url( home_url( '/content/' ) ); ?>"><?php echo esc_html( $kaart4_knoptekst ); ?></a>
 				</article>
 			</section>
 
@@ -382,17 +422,33 @@ class HDP_Blocks {
 		<?php
 	}
 
-	private static function render_downloads_lijst() {
+	/**
+	 * $categorie bepaalt of dit de technische downloads ('download': prijs-
+	 * lijsten, handleidingen, e.d.) of de socialmedia-/advertentiecontent
+	 * ('content') toont. Bestaande downloads van vóór dit onderscheid
+	 * hebben geen _hdp_categorie-meta; die tellen mee als 'download'.
+	 */
+	private static function render_downloads_lijst( $categorie = 'download' ) {
+		$meta_query = 'content' === $categorie
+			? array( array( 'key' => '_hdp_categorie', 'value' => 'content' ) )
+			: array(
+				'relation' => 'OR',
+				array( 'key' => '_hdp_categorie', 'value' => 'download' ),
+				array( 'key' => '_hdp_categorie', 'compare' => 'NOT EXISTS' ),
+			);
+
 		$downloads = get_posts(
 			array(
 				'post_type'      => HDP_Downloads_CPT::POST_TYPE,
 				'posts_per_page' => -1,
 				'post_status'    => 'publish',
+				'meta_query'     => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- kleine, beheerste dataset (dealerdownloads), geen gebruikersinvoer.
 			)
 		);
 
 		if ( ! $downloads ) {
-			return '<p class="hdp-nog-niet">' . esc_html( HDP_I18N::t( 'nog_geen_downloads' ) ) . '</p>';
+			$leeg_sleutel = 'content' === $categorie ? 'nog_geen_content' : 'nog_geen_downloads';
+			return '<p class="hdp-nog-niet">' . esc_html( HDP_I18N::t( $leeg_sleutel ) ) . '</p>';
 		}
 
 		// Merken voor de filterchips worden automatisch afgeleid uit de
@@ -435,7 +491,7 @@ class HDP_Blocks {
 				<?php endif; ?>
 			</div>
 			<div class="hdp-filterrij-onder">
-				<p class="hdp-telling"><strong id="hdp-telling-zichtbaar"><?php echo count( $downloads ); ?></strong> <?php echo esc_html( HDP_I18N::t( 'telling_van' ) ); ?> <?php echo count( $downloads ); ?> <?php echo esc_html( HDP_I18N::t( 'telling_zichtbaar' ) ); ?></p>
+				<p class="hdp-telling" aria-live="polite" aria-atomic="true"><strong id="hdp-telling-zichtbaar"><?php echo count( $downloads ); ?></strong> <?php echo esc_html( HDP_I18N::t( 'telling_van' ) ); ?> <?php echo count( $downloads ); ?> <?php echo esc_html( HDP_I18N::t( 'telling_zichtbaar' ) ); ?></p>
 				<button type="button" class="hdp-wis-filters" id="hdp-wis-filters"><?php echo esc_html( HDP_I18N::t( 'wis_filters' ) ); ?></button>
 			</div>
 		</div>

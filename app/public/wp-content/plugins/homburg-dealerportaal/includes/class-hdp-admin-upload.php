@@ -120,7 +120,8 @@ class HDP_Admin_Upload {
 
 		wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $upload['file'] ) );
 
-		$merk = isset( $_POST['hdp_merk'] ) ? sanitize_text_field( wp_unslash( $_POST['hdp_merk'] ) ) : '';
+		$categorie = isset( $_POST['hdp_categorie'] ) && 'content' === $_POST['hdp_categorie'] ? 'content' : 'download';
+		$merk      = isset( $_POST['hdp_merk'] ) ? sanitize_text_field( wp_unslash( $_POST['hdp_merk'] ) ) : '';
 
 		$regios = array();
 		if ( ! empty( $_POST['hdp_regio_nl'] ) ) {
@@ -143,10 +144,12 @@ class HDP_Admin_Upload {
 		}
 
 		update_post_meta( $download_id, '_hdp_attachment_id', $attachment_id );
+		update_post_meta( $download_id, '_hdp_categorie', $categorie );
 		update_post_meta( $download_id, '_hdp_merk', $merk );
 		update_post_meta( $download_id, '_hdp_regios', implode( ',', $regios ) );
 
-		self::redirect_met_status( $terug_naar, 'gelukt', $titel . ' is geüpload en staat nu op de downloadspagina.' );
+		$doelpagina = 'content' === $categorie ? 'de contentpagina' : 'de downloadspagina';
+		self::redirect_met_status( $terug_naar, 'gelukt', $titel . ' is geüpload en staat nu op ' . $doelpagina . '.' );
 	}
 
 	private static function redirect_met_status( $url, $status, $bericht ) {
@@ -191,6 +194,12 @@ class HDP_Admin_Upload {
 				<div class="hdp-veld">
 					<label for="hdp_bestand">Bestand</label>
 					<input type="file" id="hdp_bestand" name="hdp_bestand" required>
+				</div>
+
+				<div class="hdp-veld">
+					<span class="hdp-admin-label">Categorie</span>
+					<label class="hdp-admin-checkbox"><input type="radio" name="hdp_categorie" value="download" checked> Download (prijslijst, handleiding, e.d.)</label>
+					<label class="hdp-admin-checkbox"><input type="radio" name="hdp_categorie" value="content"> Content (voor social media/advertenties)</label>
 				</div>
 
 				<div class="hdp-veld">
@@ -239,8 +248,11 @@ class HDP_Admin_Upload {
 						<strong><?php echo esc_html( $download->post_title ); ?></strong>
 						<span>
 							<?php
-							$merk   = HDP_Downloads_CPT::get_merk( $download->ID );
-							$regios = HDP_Downloads_CPT::get_regios( $download->ID );
+							$categorie = HDP_Downloads_CPT::get_categorie( $download->ID );
+							$merk      = HDP_Downloads_CPT::get_merk( $download->ID );
+							$regios    = HDP_Downloads_CPT::get_regios( $download->ID );
+							echo esc_html( 'content' === $categorie ? 'Content' : 'Download' );
+							echo ' · ';
 							echo esc_html( $merk ? $merk : 'geen merk' );
 							echo ' · ';
 							echo esc_html( $regios ? strtoupper( implode( ', ', $regios ) ) : 'geen regio' );

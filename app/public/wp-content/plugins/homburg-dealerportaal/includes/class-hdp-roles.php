@@ -41,6 +41,7 @@ class HDP_Roles {
 
 		self::maak_pagina_indien_nodig( 'dealerportaal', 'Dealerportaal', '<!-- wp:homburg/dealerportaal /-->' );
 		self::maak_pagina_indien_nodig( 'downloads', 'Downloads', '<!-- wp:homburg/downloads-pagina /-->' );
+		self::maak_pagina_indien_nodig( 'content', 'Content', '<!-- wp:homburg/content-pagina /-->' );
 		self::maak_pagina_indien_nodig( 'adminportaal', 'Adminportaal', '<!-- wp:homburg/admin-upload /-->' );
 	}
 

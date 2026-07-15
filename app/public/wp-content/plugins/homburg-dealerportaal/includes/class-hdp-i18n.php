@@ -102,6 +102,7 @@ class HDP_I18N {
 				'fr' => "Votre compte n'a pas encore été approuvé pour le portail concessionnaire. Contactez Homburg Machinehandel.",
 			),
 			'btn_uitloggen'     => array( 'nl' => 'Uitloggen', 'fr' => 'Déconnexion' ),
+			'wachtwoord_vergeten' => array( 'nl' => 'Wachtwoord vergeten?', 'fr' => 'Mot de passe oublié ?' ),
 
 			// Portaal
 			'welkom_prefix'     => array( 'nl' => 'Welkom,', 'fr' => 'Bienvenue,' ),
@@ -123,6 +124,7 @@ class HDP_I18N {
 				'fr' => 'Aucun téléchargement trouvé pour cette combinaison de filtres.',
 			),
 			'nog_geen_downloads' => array( 'nl' => 'Nog geen downloads beschikbaar', 'fr' => 'Aucun téléchargement disponible pour le moment' ),
+			'nog_geen_content'  => array( 'nl' => 'Nog geen content beschikbaar', 'fr' => 'Aucun contenu disponible pour le moment' ),
 			'terug_naar_portaal' => array( 'nl' => '← Terug naar het portaal', 'fr' => '← Retour au portail' ),
 			'btn_downloaden'    => array( 'nl' => 'Downloaden', 'fr' => 'Télécharger' ),
 
