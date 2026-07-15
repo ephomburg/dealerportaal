@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Homburg Dealerportaal
  * Description: Dealerportaal met echte inlogbeveiliging, dealerrechten (merken/korting) en beveiligde downloads voor Homburg-dealers.
- * Version:     1.17.2
+ * Version:     1.18.0
  * Author:      Homburg Machinehandel BV
  * Text Domain: homburg-dealerportaal
  */
@@ -11,7 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'HDP_VERSION', '1.17.2' );
+// Versienummer komt uit de plugin-header hierboven (Version:), zodat het
+// maar op één plek hoeft te worden bijgewerkt bij een release.
+define( 'HDP_VERSION', get_file_data( __FILE__, array( 'version' => 'Version' ) )['version'] );
 define( 'HDP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HDP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
