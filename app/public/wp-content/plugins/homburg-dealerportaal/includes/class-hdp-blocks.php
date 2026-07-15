@@ -110,6 +110,7 @@ class HDP_Blocks {
 		<div class="hdp-portaal alignfull">
 			<section class="hdp-welkom alignfull hdp-welkom-zonder-hero">
 				<div class="hdp-welkom-inner">
+					<a class="hdp-terug-boven" href="<?php echo esc_url( home_url( '/dealerportaal/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'terug_naar_portaal' ) ); ?></a>
 					<div class="hdp-welkom-top">
 						<h1><?php echo esc_html( $titel ); ?></h1>
 						<a class="hdp-btn-logout" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>"><?php echo self::svg_icoon( 'uitloggen' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?><?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?></a>
@@ -149,6 +150,7 @@ class HDP_Blocks {
 		<div class="hdp-portaal alignfull">
 			<section class="hdp-welkom alignfull hdp-welkom-zonder-hero">
 				<div class="hdp-welkom-inner">
+					<a class="hdp-terug-boven" href="<?php echo esc_url( home_url( '/dealerportaal/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'terug_naar_portaal' ) ); ?></a>
 					<div class="hdp-welkom-top">
 						<h1><?php echo esc_html( $titel ); ?></h1>
 						<a class="hdp-btn-logout" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>"><?php echo self::svg_icoon( 'uitloggen' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?><?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?></a>
