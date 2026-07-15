@@ -27,3 +27,8 @@ logs/
 
 # Tijdelijke testbestanden
 *.tmp
+
+# PHPCS/WordPress Coding Standards-tooling (composer.json/phpcs.xml.dist
+# staan wel in de repo; composer.lock legt de exacte versies vast, vendor/
+# zelf niet — dat installeert iedereen zelf via composer install).
+/vendor/

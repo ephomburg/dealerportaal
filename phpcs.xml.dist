@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<ruleset name="Homburg Dealerportaal">
+	<description>WordPress Coding Standards voor de eigen plugin en het eigen thema. WordPress-kern, meegeleverde plugins/themes en dev-tooling worden overgeslagen — dat is code die we niet zelf schrijven of beheren.</description>
+
+	<file>app/public/wp-content/plugins/homburg-dealerportaal</file>
+	<file>app/public/wp-content/themes/homburg-dealerportaal</file>
+
+	<arg name="extensions" value="php"/>
+	<arg name="colors"/>
+	<arg value="sp"/>
+
+	<config name="minimum_supported_wp_version" value="6.4"/>
+
+	<rule ref="WordPress">
+		<!-- Korte array-syntax array() i.p.v. [] is bewust de stijl in dit project. -->
+		<exclude name="Generic.Arrays.DisallowShortArraySyntax"/>
+
+		<!-- Dit project schrijft bewust weinig comments/docblokken (comments alleen
+		     bij niet-vanzelfsprekende keuzes) — volledige docblokken bij elke
+		     functie/klasse/bestand afdwingen zou vooral ruis opleveren. -->
+		<exclude name="Squiz.Commenting.FunctionComment"/>
+		<exclude name="Squiz.Commenting.FileComment"/>
+		<exclude name="Squiz.Commenting.ClassComment"/>
+		<exclude name="Squiz.Commenting.VariableComment"/>
+
+		<!-- De i18n-woordenboeken (HDP_I18N::teksten()) zijn bewust compacte
+		     één-regel-per-vertaling tabellen; elke waarde op een eigen regel
+		     zetten zou een paar honderd regels langer en minder scanbaar maken. -->
+		<exclude name="WordPress.Arrays.ArrayDeclarationSpacing"/>
+		<exclude name="WordPress.Arrays.MultipleStatementAlignment"/>
+
+		<!-- "hdp"/"HDP" is als prefix door dit hele project heen al vastgelegd
+		     (tientallen bestanden). Dit is een privé, single-site plugin (geen
+		     publiek gedistribueerde plugin), dus het botsingsrisico van een kort
+		     prefix is verwaarloosbaar — een volledige hernoeming naar bijv.
+		     "homburg_" zou een enorme, risicovolle refactor zijn voor geen
+		     praktisch voordeel. Ook onderdrukt dit valse meldingen op lokale
+		     variabelen in blok-render.php-bestanden (WP-kern-patroon), die
+		     PHPCS ten onrechte als "globaal" beschouwt. -->
+		<exclude name="WordPress.NamingConventions.PrefixAllGlobals"/>
+
+		<!-- index.asset.php is de standaardbestandsnaam die WordPress zelf voor
+		     blok-editorscripts hanteert (@wordpress/scripts-conventie) — niet
+		     iets om in dit project van af te wijken. -->
+		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
+
+		<!-- Zelfde reden als de Commenting-uitsluitingen hierboven: geen volledige
+		     docblok-structuur of eindpunctuatie afdwingen op de korte, bewust
+		     terse comments in dit project. -->
+		<exclude name="Generic.Commenting.DocComment.MissingShort"/>
+		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar"/>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="homburg-dealerportaal"/>
+				<element value="homburg-dealerportaal-theme"/>
+			</property>
+		</properties>
+	</rule>
+</ruleset>
