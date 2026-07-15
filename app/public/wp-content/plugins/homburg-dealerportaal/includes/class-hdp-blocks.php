@@ -218,7 +218,6 @@ class HDP_Blocks {
 		<div class="hdp-hero alignfull" style="background-image:url('<?php echo esc_url( $a['heroAfbeelding'] ); ?>')" aria-hidden="true"></div>
 		<div class="hdp-login-sectie">
 			<div class="hdp-login-kaart">
-				<?php self::render_icoon( 'login' ); ?>
 				<h1><?php echo esc_html( HDP_I18N::t( 'login_titel' ) ); ?></h1>
 				<p class="hdp-intro"><?php echo esc_html( $intro ); ?></p>
 
