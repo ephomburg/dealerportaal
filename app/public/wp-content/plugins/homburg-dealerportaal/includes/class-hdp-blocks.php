@@ -14,6 +14,7 @@ class HDP_Blocks {
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'registreer_blokken' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_editor_assets' ) );
 	}
 
 	public static function registreer_blokken() {
@@ -35,5 +36,17 @@ class HDP_Blocks {
 		}
 
 		wp_enqueue_style( 'hdp-dealerportaal', HDP_PLUGIN_URL . 'assets/css/dealerportaal.css', array(), HDP_VERSION );
+	}
+
+	/**
+	 * Zonder dit blijven de dynamische portaalblokken (met hun ServerSideRender-
+	 * of PHP-preview) en homburg/info-kaart in de editor onopgemaakt: de hero,
+	 * kaarten en iconen hebben geen enkele stijl en vallen daardoor (bijna)
+	 * onzichtbaar samen tot een lege pagina — precies het "ik zie niks"-effect.
+	 * Wordt altijd geladen in de editor (dit hook draait toch alleen daar),
+	 * dus geen has_block()-check nodig zoals bij de front-end variant.
+	 */
+	public static function enqueue_editor_assets() {
+		wp_enqueue_style( 'hdp-dealerportaal-editor', HDP_PLUGIN_URL . 'assets/css/dealerportaal.css', array(), HDP_VERSION );
 	}
 }
