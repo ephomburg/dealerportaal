@@ -299,6 +299,8 @@ class HDP_Blocks {
 				</div>
 			</section>
 
+			<?php HDP_Herbestellen::render(); ?>
+
 			<section class="hdp-kaarten-sectie" aria-label="Portaalopties">
 				<article class="hdp-kaart">
 					<?php self::render_icoon( 'webshop' ); ?>

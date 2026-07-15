@@ -191,6 +191,43 @@
 	gap: 1.5rem;
 }
 
+.hdp-herbestellen-sectie {
+	max-width: 70%;
+	margin: 0 auto;
+	padding: 2.5rem 0 0;
+}
+.hdp-herbestellen-titel { font-size: 1.15rem; font-weight: 700; margin-bottom: 1.1rem; }
+.hdp-herbestellen-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 1.2rem;
+}
+.hdp-herbestel-kaart {
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: var(--hdp-radius);
+	padding: 1.1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.7rem;
+	transition: box-shadow 0.15s;
+}
+.hdp-herbestel-kaart:hover { box-shadow: var(--hdp-schaduw); }
+.hdp-herbestel-afbeelding { width: 100%; aspect-ratio: 1; border-radius: 6px; overflow: hidden; background: var(--wp--preset--color--grijs-licht); }
+.hdp-herbestel-afbeelding img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hdp-herbestel-info { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; }
+.hdp-herbestel-info strong { font-size: 0.9rem; font-weight: 700; line-height: 1.3; }
+.hdp-herbestel-info span { font-size: 0.85rem; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-btn-klein { padding: 0.55rem 1rem; font-size: 0.82rem; width: 100%; }
+
+@media (max-width: 900px) {
+	.hdp-herbestellen-sectie { max-width: 90%; }
+}
+@media (max-width: 600px) {
+	.hdp-herbestellen-sectie { max-width: 100%; padding: 1.5rem 1rem 0; }
+	.hdp-herbestellen-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+
 .hdp-kaart-icoon {
 	width: 52px;
 	height: 52px;
