@@ -136,13 +136,13 @@ class HDP_Downloads_CPT {
 			return;
 		}
 
-		if ( isset( $_POST['hdp_bestand_nonce'] ) && wp_verify_nonce( wp_unslash( $_POST['hdp_bestand_nonce'] ), 'hdp_bestand_save' ) ) {
+		if ( isset( $_POST['hdp_bestand_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hdp_bestand_nonce'] ) ), 'hdp_bestand_save' ) ) {
 			if ( isset( $_POST['hdp_attachment_id'] ) ) {
 				update_post_meta( $post_id, '_hdp_attachment_id', absint( $_POST['hdp_attachment_id'] ) );
 			}
 		}
 
-		if ( isset( $_POST['hdp_rechten_nonce'] ) && wp_verify_nonce( wp_unslash( $_POST['hdp_rechten_nonce'] ), 'hdp_rechten_save' ) ) {
+		if ( isset( $_POST['hdp_rechten_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hdp_rechten_nonce'] ) ), 'hdp_rechten_save' ) ) {
 			$categorie = isset( $_POST['hdp_categorie'] ) && 'content' === $_POST['hdp_categorie'] ? 'content' : 'download';
 			update_post_meta( $post_id, '_hdp_categorie', $categorie );
 
@@ -196,7 +196,10 @@ class HDP_Downloads_CPT {
 		header( 'Content-Disposition: attachment; filename="' . basename( $file ) . '"' );
 		header( 'Content-Length: ' . filesize( $file ) );
 		header( 'X-Content-Type-Options: nosniff' );
-		readfile( $file );
+		// WP_Filesystem zou het hele bestand eerst in PHP-geheugen moeten laden;
+		// direct streamen naar de output is hier bewust efficiënter, ook bij
+		// grotere downloads.
+		readfile( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
 		exit;
 	}
 

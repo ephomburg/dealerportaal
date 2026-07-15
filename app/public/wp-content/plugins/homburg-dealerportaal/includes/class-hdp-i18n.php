@@ -22,12 +22,17 @@ class HDP_I18N {
 		add_action( 'init', array( __CLASS__, 'verwerk_taalwissel' ) );
 	}
 
+	/**
+	 * Wisselt alleen de weergavetaal (cookie), zonder verdere state te
+	 * wijzigen — een link naar bijv. ?hdp_taal=fr moet overal (ook vanuit
+	 * een bladwijzer) blijven werken, dus bewust geen nonce hier.
+	 */
 	public static function verwerk_taalwissel() {
-		if ( ! isset( $_GET['hdp_taal'] ) ) {
+		if ( ! isset( $_GET['hdp_taal'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
-		$taal = sanitize_key( wp_unslash( $_GET['hdp_taal'] ) );
+		$taal = sanitize_key( wp_unslash( $_GET['hdp_taal'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! in_array( $taal, self::TALEN, true ) ) {
 			return;
 		}
@@ -40,10 +45,8 @@ class HDP_I18N {
 	}
 
 	public static function huidige_taal() {
-		if ( isset( $_COOKIE[ self::COOKIE ] ) && in_array( $_COOKIE[ self::COOKIE ], self::TALEN, true ) ) {
-			return $_COOKIE[ self::COOKIE ];
-		}
-		return 'nl';
+		$taal = isset( $_COOKIE[ self::COOKIE ] ) ? sanitize_key( wp_unslash( $_COOKIE[ self::COOKIE ] ) ) : '';
+		return in_array( $taal, self::TALEN, true ) ? $taal : 'nl';
 	}
 
 	public static function is_frans() {
@@ -135,7 +138,7 @@ class HDP_I18N {
 				'nl' => 'Prijzen die niet zichtbaar zijn via deze dealerlogin kunnen opgevraagd worden via ons magazijn. Prijslijsten per merk zijn beschikbaar onder het onderdeel "verkoopdocumenten".',
 				'fr' => 'Les prix non visibles via cette connexion revendeur peuvent être demandés auprès de notre entrepôt. Les listes de prix par marque sont disponibles dans la rubrique "documents de vente".',
 			),
-			'info_contact_titel' => array( 'nl' => 'Contact magazijn', 'fr' => "Contact entrepôt" ),
+			'info_contact_titel' => array( 'nl' => 'Contact magazijn', 'fr' => 'Contact entrepôt' ),
 			'info_contact_tekst' => array( 'nl' => 'Bereikbaar via e-mail of telefonisch.', 'fr' => 'Joignable par e-mail ou par téléphone.' ),
 			'info_technisch_titel' => array( 'nl' => '(Technische) informatie', 'fr' => 'Informations (techniques)' ),
 			'info_technisch_tekst' => array( 'nl' => 'Voor HARDI en oudere machines van Rabe:', 'fr' => 'Pour HARDI et les anciennes machines Rabe :' ),

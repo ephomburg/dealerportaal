@@ -61,7 +61,7 @@ class HDP_User_Fields {
 			return;
 		}
 
-		if ( ! isset( $_POST['hdp_user_fields_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['hdp_user_fields_nonce'] ), 'hdp_user_fields' ) ) {
+		if ( ! isset( $_POST['hdp_user_fields_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hdp_user_fields_nonce'] ) ), 'hdp_user_fields' ) ) {
 			return;
 		}
 

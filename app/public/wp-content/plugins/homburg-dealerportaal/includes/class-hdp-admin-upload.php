@@ -68,7 +68,7 @@ class HDP_Admin_Upload {
 			return;
 		}
 
-		if ( ! isset( $_POST['hdp_admin_upload_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['hdp_admin_upload_nonce'] ), self::NONCE_ACTIE ) ) {
+		if ( ! isset( $_POST['hdp_admin_upload_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hdp_admin_upload_nonce'] ) ), self::NONCE_ACTIE ) ) {
 			return;
 		}
 
@@ -176,10 +176,16 @@ class HDP_Admin_Upload {
 			<h1><?php echo esc_html( $a['titel'] ); ?></h1>
 			<p class="hdp-admin-intro"><?php echo esc_html( $a['intro'] ); ?></p>
 
-			<?php if ( isset( $_GET['hdp_upload_status'], $_GET['hdp_upload_bericht'] ) ) : ?>
-				<?php $status = 'gelukt' === $_GET['hdp_upload_status'] ? 'hdp-admin-melding-ok' : 'hdp-admin-melding-fout'; ?>
+			<?php
+			// Post/Redirect/Get: dit zijn alleen weergave-parameters voor de
+			// meldingsbanner na een upload, geen actie die state wijzigt —
+			// daarom hier bewust geen nonce (de daadwerkelijke upload hierboven
+			// is dat wel).
+			?>
+			<?php if ( isset( $_GET['hdp_upload_status'], $_GET['hdp_upload_bericht'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
+				<?php $status = 'gelukt' === $_GET['hdp_upload_status'] ? 'hdp-admin-melding-ok' : 'hdp-admin-melding-fout'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- alleen vergeleken tegen een vaste letterlijke waarde. ?>
 				<div class="hdp-admin-melding <?php echo esc_attr( $status ); ?>">
-					<?php echo esc_html( rawurldecode( wp_unslash( $_GET['hdp_upload_bericht'] ) ) ); ?>
+					<?php echo esc_html( sanitize_text_field( rawurldecode( wp_unslash( $_GET['hdp_upload_bericht'] ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- al gesanitized (sanitize_text_field) en ge-escaped (esc_html), phpcs ziet dat niet door de rawurldecode()-tussenstap heen. ?>
 				</div>
 			<?php endif; ?>
 

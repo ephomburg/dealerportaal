@@ -45,12 +45,16 @@ class HDP_Blocks {
 	}
 
 	public static function verwerk_login() {
-		if ( ! isset( $_POST['hdp_login_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['hdp_login_nonce'] ), 'hdp_login' ) ) {
+		if ( ! isset( $_POST['hdp_login_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hdp_login_nonce'] ) ), 'hdp_login' ) ) {
 			return;
 		}
 
-		$gebruikersnaam = isset( $_POST['gebruikersnaam'] ) ? trim( wp_unslash( $_POST['gebruikersnaam'] ) ) : '';
-		$wachtwoord     = isset( $_POST['wachtwoord'] ) ? (string) $_POST['wachtwoord'] : '';
+		$gebruikersnaam = isset( $_POST['gebruikersnaam'] ) ? sanitize_text_field( wp_unslash( $_POST['gebruikersnaam'] ) ) : '';
+		// Wachtwoord bewust NIET door sanitize_text_field() halen: dat zou geldige
+		// speciale tekens in een wachtwoord kunnen wijzigen, waardoor een dealer
+		// met zo'n wachtwoord niet meer zou kunnen inloggen. wp-login.php van
+		// WordPress-kern zelf doet dit om dezelfde reden ook niet.
+		$wachtwoord = isset( $_POST['wachtwoord'] ) ? (string) wp_unslash( $_POST['wachtwoord'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$resultaat = wp_signon(
 			array(
@@ -80,7 +84,9 @@ class HDP_Blocks {
 		if ( is_user_logged_in() ) {
 			self::render_portal_content( $a );
 		} else {
-			$fout = isset( $_GET['hdp_fout'] ) ? HDP_I18N::t( 'login_fout' ) : '';
+			// Post/Redirect/Get: alleen een weergavevlag voor de foutmelding na
+			// een mislukte login, geen actie die state wijzigt.
+			$fout = isset( $_GET['hdp_fout'] ) ? HDP_I18N::t( 'login_fout' ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			self::render_login( $fout, $a );
 		}
 
@@ -96,7 +102,7 @@ class HDP_Blocks {
 			return ob_get_clean();
 		}
 
-		$titel       = HDP_I18N::kies( $a['titel'], $a['titelFr'] );
+		$titel        = HDP_I18N::kies( $a['titel'], $a['titelFr'] );
 		$omschrijving = HDP_I18N::kies( $a['omschrijving'], $a['omschrijvingFr'] );
 
 		ob_start();
@@ -218,19 +224,19 @@ class HDP_Blocks {
 		$webshop_url      = HDP_Settings::get( 'webshop_url' );
 		$configurator_url = HDP_Settings::get( 'configurator_url' );
 
-		$portaal_intro      = HDP_I18N::kies( $a['portaalIntro'], $a['portaalIntroFr'] );
-		$kaart1_titel       = HDP_I18N::kies( $a['kaart1Titel'], $a['kaart1TitelFr'] );
+		$portaal_intro       = HDP_I18N::kies( $a['portaalIntro'], $a['portaalIntroFr'] );
+		$kaart1_titel        = HDP_I18N::kies( $a['kaart1Titel'], $a['kaart1TitelFr'] );
 		$kaart1_omschrijving = HDP_I18N::kies( $a['kaart1Omschrijving'], $a['kaart1OmschrijvingFr'] );
-		$kaart1_knoptekst   = HDP_I18N::kies( $a['kaart1Knoptekst'], $a['kaart1KnoptekstFr'] );
-		$kaart2_titel       = HDP_I18N::kies( $a['kaart2Titel'], $a['kaart2TitelFr'] );
+		$kaart1_knoptekst    = HDP_I18N::kies( $a['kaart1Knoptekst'], $a['kaart1KnoptekstFr'] );
+		$kaart2_titel        = HDP_I18N::kies( $a['kaart2Titel'], $a['kaart2TitelFr'] );
 		$kaart2_omschrijving = HDP_I18N::kies( $a['kaart2Omschrijving'], $a['kaart2OmschrijvingFr'] );
-		$kaart2_knoptekst   = HDP_I18N::kies( $a['kaart2Knoptekst'], $a['kaart2KnoptekstFr'] );
-		$kaart3_titel       = HDP_I18N::kies( $a['kaart3Titel'], $a['kaart3TitelFr'] );
+		$kaart2_knoptekst    = HDP_I18N::kies( $a['kaart2Knoptekst'], $a['kaart2KnoptekstFr'] );
+		$kaart3_titel        = HDP_I18N::kies( $a['kaart3Titel'], $a['kaart3TitelFr'] );
 		$kaart3_omschrijving = HDP_I18N::kies( $a['kaart3Omschrijving'], $a['kaart3OmschrijvingFr'] );
-		$kaart3_knoptekst   = HDP_I18N::kies( $a['kaart3Knoptekst'], $a['kaart3KnoptekstFr'] );
-		$kaart4_titel       = HDP_I18N::kies( $a['kaart4Titel'], $a['kaart4TitelFr'] );
+		$kaart3_knoptekst    = HDP_I18N::kies( $a['kaart3Knoptekst'], $a['kaart3KnoptekstFr'] );
+		$kaart4_titel        = HDP_I18N::kies( $a['kaart4Titel'], $a['kaart4TitelFr'] );
 		$kaart4_omschrijving = HDP_I18N::kies( $a['kaart4Omschrijving'], $a['kaart4OmschrijvingFr'] );
-		$kaart4_knoptekst   = HDP_I18N::kies( $a['kaart4Knoptekst'], $a['kaart4KnoptekstFr'] );
+		$kaart4_knoptekst    = HDP_I18N::kies( $a['kaart4Knoptekst'], $a['kaart4KnoptekstFr'] );
 		?>
 		<div class="hdp-hero alignfull" style="background-image:url('<?php echo esc_url( $a['heroAfbeelding'] ); ?>')" aria-hidden="true"></div>
 		<div class="hdp-portaal alignfull">
