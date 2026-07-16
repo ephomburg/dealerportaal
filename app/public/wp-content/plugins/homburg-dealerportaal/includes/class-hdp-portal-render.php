@@ -44,23 +44,9 @@ class HDP_Portal_Render {
 			return;
 		}
 
-		$merken           = get_user_meta( $user->ID, 'hdp_merken', true );
-		$webshop_url      = HDP_Settings::get( 'webshop_url' );
-		$configurator_url = HDP_Settings::get( 'configurator_url' );
+		$merken = get_user_meta( $user->ID, 'hdp_merken', true );
 
-		$portaal_intro       = HDP_I18N::kies( $a['portaalIntro'], $a['portaalIntroFr'] );
-		$kaart1_titel        = HDP_I18N::kies( $a['kaart1Titel'], $a['kaart1TitelFr'] );
-		$kaart1_omschrijving = HDP_I18N::kies( $a['kaart1Omschrijving'], $a['kaart1OmschrijvingFr'] );
-		$kaart1_knoptekst    = HDP_I18N::kies( $a['kaart1Knoptekst'], $a['kaart1KnoptekstFr'] );
-		$kaart2_titel        = HDP_I18N::kies( $a['kaart2Titel'], $a['kaart2TitelFr'] );
-		$kaart2_omschrijving = HDP_I18N::kies( $a['kaart2Omschrijving'], $a['kaart2OmschrijvingFr'] );
-		$kaart2_knoptekst    = HDP_I18N::kies( $a['kaart2Knoptekst'], $a['kaart2KnoptekstFr'] );
-		$kaart3_titel        = HDP_I18N::kies( $a['kaart3Titel'], $a['kaart3TitelFr'] );
-		$kaart3_omschrijving = HDP_I18N::kies( $a['kaart3Omschrijving'], $a['kaart3OmschrijvingFr'] );
-		$kaart3_knoptekst    = HDP_I18N::kies( $a['kaart3Knoptekst'], $a['kaart3KnoptekstFr'] );
-		$kaart4_titel        = HDP_I18N::kies( $a['kaart4Titel'], $a['kaart4TitelFr'] );
-		$kaart4_omschrijving = HDP_I18N::kies( $a['kaart4Omschrijving'], $a['kaart4OmschrijvingFr'] );
-		$kaart4_knoptekst    = HDP_I18N::kies( $a['kaart4Knoptekst'], $a['kaart4KnoptekstFr'] );
+		$portaal_intro = HDP_I18N::kies( $a['portaalIntro'], $a['portaalIntroFr'] );
 		?>
 		<div class="hdp-hero alignfull" style="background-image:url('<?php echo esc_url( $a['heroAfbeelding'] ); ?>')" aria-hidden="true"></div>
 		<div class="hdp-portaal alignfull">
@@ -78,44 +64,6 @@ class HDP_Portal_Render {
 			</section>
 
 			<?php HDP_Herbestellen::render(); ?>
-
-			<section class="hdp-kaarten-sectie" aria-label="Portaalopties">
-				<article class="hdp-kaart">
-					<?php HDP_Icons::render_icoon( 'webshop' ); ?>
-					<h2><?php echo esc_html( $kaart1_titel ); ?></h2>
-					<p><?php echo esc_html( $kaart1_omschrijving ); ?></p>
-					<?php if ( $webshop_url ) : ?>
-						<a class="hdp-btn" href="<?php echo esc_url( $webshop_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $kaart1_knoptekst ); ?></a>
-					<?php else : ?>
-						<a class="hdp-btn" href="#"><?php echo esc_html( $kaart1_knoptekst ); ?></a>
-					<?php endif; ?>
-				</article>
-
-				<article class="hdp-kaart">
-					<?php HDP_Icons::render_icoon( 'configurator' ); ?>
-					<h2><?php echo esc_html( $kaart2_titel ); ?></h2>
-					<p><?php echo esc_html( $kaart2_omschrijving ); ?></p>
-					<?php if ( $configurator_url ) : ?>
-						<a class="hdp-btn" href="<?php echo esc_url( $configurator_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $kaart2_knoptekst ); ?></a>
-					<?php else : ?>
-						<p class="hdp-nog-niet"><?php echo esc_html( HDP_I18N::t( 'nog_niet_geconfigureerd' ) ); ?></p>
-					<?php endif; ?>
-				</article>
-
-				<article class="hdp-kaart">
-					<?php HDP_Icons::render_icoon( 'downloads' ); ?>
-					<h2><?php echo esc_html( $kaart3_titel ); ?></h2>
-					<p><?php echo esc_html( $kaart3_omschrijving ); ?></p>
-					<a class="hdp-btn" href="<?php echo esc_url( home_url( '/downloads/' ) ); ?>"><?php echo esc_html( $kaart3_knoptekst ); ?></a>
-				</article>
-
-				<article class="hdp-kaart">
-					<?php HDP_Icons::render_icoon( 'content' ); ?>
-					<h2><?php echo esc_html( $kaart4_titel ); ?></h2>
-					<p><?php echo esc_html( $kaart4_omschrijving ); ?></p>
-					<a class="hdp-btn" href="<?php echo esc_url( home_url( '/content/' ) ); ?>"><?php echo esc_html( $kaart4_knoptekst ); ?></a>
-				</article>
-			</section>
 		</div>
 		<?php
 	}

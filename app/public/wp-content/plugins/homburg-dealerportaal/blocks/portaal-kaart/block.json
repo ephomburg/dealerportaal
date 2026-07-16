@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "homburg/portaal-kaart",
+	"title": "Homburg portaalkaart",
+	"category": "widgets",
+	"icon": "grid-view",
+	"description": "Eén van de hoofdkaarten op het dealerportaal (Webshop, Productconfigurator, e.d.): icoon, titel, tekst en knop. Titel/tekst direct bewerkbaar in het canvas; Frans en de link staan in het zijpaneel.",
+	"textdomain": "homburg-dealerportaal",
+	"attributes": {
+		"icoon": { "type": "string", "default": "webshop" },
+		"titel": { "type": "string", "default": "" },
+		"titelFr": { "type": "string", "default": "" },
+		"tekst": { "type": "string", "default": "" },
+		"tekstFr": { "type": "string", "default": "" },
+		"knoptekst": { "type": "string", "default": "" },
+		"knoptekstFr": { "type": "string", "default": "" },
+		"url": { "type": "string", "default": "" },
+		"instellingSleutel": { "type": "string", "default": "" },
+		"nieuweTab": { "type": "boolean", "default": false }
+	},
+	"supports": {
+		"html": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

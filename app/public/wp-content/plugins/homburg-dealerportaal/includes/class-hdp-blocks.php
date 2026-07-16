@@ -22,6 +22,7 @@ class HDP_Blocks {
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/downloads' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/content' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/info-kaart' );
+		register_block_type( HDP_PLUGIN_DIR . 'blocks/portaal-kaart' );
 	}
 
 	public static function enqueue_assets() {
@@ -30,7 +31,8 @@ class HDP_Blocks {
 			|| ( ! has_block( 'homburg/dealerportaal', $post )
 				&& ! has_block( 'homburg/downloads-pagina', $post )
 				&& ! has_block( 'homburg/content-pagina', $post )
-				&& ! has_block( 'homburg/info-kaart', $post ) )
+				&& ! has_block( 'homburg/info-kaart', $post )
+				&& ! has_block( 'homburg/portaal-kaart', $post ) )
 		) {
 			return;
 		}

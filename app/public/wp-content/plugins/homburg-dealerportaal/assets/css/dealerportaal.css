@@ -9,8 +9,14 @@
 	--hdp-schaduw: 0 4px 18px rgba(43, 45, 49, 0.10);
 }
 
+/* .hdp-info-sectie/.hdp-kaarten-sectie staan sinds de omzetting naar
+   losse, bewerkbare blokken (homburg/info-kaart, homburg/portaal-kaart)
+   als zelfstandige blokken náást .hdp-portaal i.p.v. erbinnen — daarom
+   hier expliciet meegenomen i.p.v. alleen via voorouderselectie. */
 .hdp-portaal, .hdp-portaal *,
-.hdp-login-sectie, .hdp-login-sectie * {
+.hdp-login-sectie, .hdp-login-sectie *,
+.hdp-info-sectie, .hdp-info-sectie *,
+.hdp-kaarten-sectie, .hdp-kaarten-sectie * {
 	box-sizing: border-box;
 }
 .hdp-portaal, .hdp-login-sectie {
