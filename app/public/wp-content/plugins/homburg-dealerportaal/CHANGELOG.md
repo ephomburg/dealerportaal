@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.35.0
+- Block-patterns via auto-discovery (`HDP_Patterns`): elk `.php`-bestand in `patterns/` met een headerdocblock (Title/Slug/Categories/Description) wordt automatisch geregistreerd, zonder code- of versiewijziging. WordPress scant alleen de `patterns/`-map van het actieve thema; deze loader doet hetzelfde voor de plugin. Nieuwe pattern-categorie "Homburg dealerportaal".
+- Eerste pattern `homburg/portaalkaarten-sectie`: de vier hoofdkaarten (webshop/configurator/downloads/content) in één `hdp-kaarten-sectie`-groep, met webshop- en configurator-URL uit Instellingen > Dealerportaal.
+
 ## 1.34.0
 - Merken-autorisatie wordt nu echt afgedwongen: een dealer met een ingestelde merkenlijst ziet alleen downloads/content van die merken (of zonder merk-tag); een dealer zonder ingestelde merken blijft alles zien. Voorheen was "Geautoriseerd voor:" puur informatief.
 - Dealers krijgen automatisch een (tweetalige) e-mail zodra hun account wordt goedgekeurd — vanuit zowel het front-end gebruikersoverzicht als het wp-admin-gebruikersprofiel, en alleen bij de overgang naar goedgekeurd (niet bij elke opslag).
