@@ -8,6 +8,9 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.39.0
+- Foutmonitoring (`HDP_Log`): fatale PHP-fouten en niet-afgevangen excepties die in de plugincode ontstaan worden weggeschreven naar `wp-content/uploads/hdp-logs/hdp-JJJJ-MM.log` (afgeschermde map, per maand). Bij een fatale fout gaat er ook een gethrottelde e-mail naar `marketing@homburg-holland.com`. Plugincode kan zelf loggen via `HDP_Log::schrijf()`. Bekijken/wissen via Instellingen > Dealerportaal foutenlog. Fouten van WordPress-core of andere plugins worden genegeerd (geen ruis).
+
 ## 1.38.0
 - `HDP_Editor` uitgebreid: de patronen-kiezer toont nu alleen nog de categorieën "Homburg dealerportaal" en "WooCommerce" — kern-, thema- en externe patronen (met hun tientallen categorieën) worden uitgeschreven via `remove_theme_support('core-block-patterns')` + `should_load_remote_block_patterns` + gerichte `unregister_block_pattern(_category)`.
 - Insluitingen (`core/embed`) verwijderd uit de toegestane blokken; "Klassiek" (`core/freeform`, rich text mét HTML-tab) toegevoegd naast "Aangepaste HTML".
