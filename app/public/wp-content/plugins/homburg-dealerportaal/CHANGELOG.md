@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.38.0
+- `HDP_Editor` uitgebreid: de patronen-kiezer toont nu alleen nog de categorieën "Homburg dealerportaal" en "WooCommerce" — kern-, thema- en externe patronen (met hun tientallen categorieën) worden uitgeschreven via `remove_theme_support('core-block-patterns')` + `should_load_remote_block_patterns` + gerichte `unregister_block_pattern(_category)`.
+- Insluitingen (`core/embed`) verwijderd uit de toegestane blokken; "Klassiek" (`core/freeform`, rich text mét HTML-tab) toegevoegd naast "Aangepaste HTML".
+
 ## 1.37.0
 - Blokkenkiezer opgeschoond (`HDP_Editor`): op gewone pagina's/berichten toont de inserter nog maar een beheersbare set — alle `homburg/*`-blokken plus basis- en lay-outblokken (paragraaf, koptekst, lijst, afbeelding, groep, kolommen, knoppen, tabel, ...). Blokken die deze site nooit gebruikt (poëzie, RSS, wiskunde, accordeon, tag cloud, ...) verdwijnen uit de kiezer. WooCommerce winkelwagen/afrekenen en pagina's die al `woocommerce/*`-blokken bevatten houden de volledige set; front-end en bestaande inhoud blijven ongemoeid.
 
