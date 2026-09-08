@@ -1,0 +1,72 @@
+name: Deploy plugin naar live
+
+# Synchroniseert alleen wp-content/plugins/homburg-dealerportaal/ naar de
+# live server via rsync-over-SSH. Raakt niets anders op productie
+# (WooCommerce, FileBird, uploads, wp-config, WordPress-core).
+#
+# Benodigde repository-secrets (Settings > Secrets and variables > Actions):
+#   SSH_PRIVATE_KEY  volledige inhoud van .deploy/deploy_key (incl. BEGIN/END-regels)
+#   REMOTE_HOST      109.71.54.11
+#   REMOTE_USER      homburgd
+#   REMOTE_PORT      2222
+#   REMOTE_TARGET    /home/homburgd/public_html/wp-content/plugins/homburg-dealerportaal/
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/public/wp-content/plugins/homburg-dealerportaal/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Alleen tonen wat er zou wijzigen (niets overschrijven)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-live
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: SSH-sleutel en known_hosts klaarzetten
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${{ secrets.REMOTE_PORT }}" -H "${{ secrets.REMOTE_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Verbinding testen
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "${{ secrets.REMOTE_PORT }}" \
+            -o StrictHostKeyChecking=yes -o BatchMode=yes \
+            "${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}" \
+            'echo "SSH OK op $(hostname) — $(pwd)"'
+
+      - name: Rsync (dry-run — toont wat er zou wijzigen)
+        run: |
+          rsync -rlptzvi --delete --dry-run \
+            --exclude='.git*' --exclude='.DS_Store' \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.REMOTE_PORT }} -o StrictHostKeyChecking=yes -o BatchMode=yes" \
+            "app/public/wp-content/plugins/homburg-dealerportaal/" \
+            "${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_TARGET }}"
+
+      - name: Rsync (echt) — overslaan bij dry_run
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.dry_run == false }}
+        run: |
+          rsync -rlptzvi --delete \
+            --exclude='.git*' --exclude='.DS_Store' \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.REMOTE_PORT }} -o StrictHostKeyChecking=yes -o BatchMode=yes" \
+            "app/public/wp-content/plugins/homburg-dealerportaal/" \
+            "${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_TARGET }}"
+
+      - name: Sleutel opruimen
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
