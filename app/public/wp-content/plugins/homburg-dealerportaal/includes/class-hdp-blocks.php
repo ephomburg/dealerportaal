@@ -14,7 +14,7 @@ class HDP_Blocks {
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'registreer_blokken' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
-		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_editor_assets' ) );
+		add_action( 'enqueue_block_assets', array( __CLASS__, 'enqueue_editor_assets' ) );
 		add_filter( 'render_block', array( __CLASS__, 'verberg_portaal_secties' ), 10, 2 );
 	}
 
@@ -49,10 +49,17 @@ class HDP_Blocks {
 	 * of PHP-preview) en homburg/info-kaart in de editor onopgemaakt: de hero,
 	 * kaarten en iconen hebben geen enkele stijl en vallen daardoor (bijna)
 	 * onzichtbaar samen tot een lege pagina — precies het "ik zie niks"-effect.
-	 * Wordt altijd geladen in de editor (dit hook draait toch alleen daar),
-	 * dus geen has_block()-check nodig zoals bij de front-end variant.
+	 *
+	 * Draait op enqueue_block_assets (i.p.v. enqueue_block_editor_assets): sinds
+	 * WordPress 6.3 zit het editor-canvas in een iframe, en alleen stijlen die
+	 * via enqueue_block_assets binnenkomen worden dat iframe in getrokken. De
+	 * is_admin()-check houdt de front-end ongemoeid — die laadt de CSS via
+	 * enqueue_assets() met has_block()-gate.
 	 */
 	public static function enqueue_editor_assets() {
+		if ( ! is_admin() ) {
+			return;
+		}
 		wp_enqueue_style( 'hdp-dealerportaal-editor', HDP_PLUGIN_URL . 'assets/css/dealerportaal.css', array(), HDP_VERSION );
 	}
 
