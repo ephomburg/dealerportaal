@@ -1,0 +1,41 @@
+# Regeleindes normaliseren: alles wat tekst is, wordt in Git opgeslagen met
+# LF. Voorkomt de "LF will be replaced by CRLF"-waarschuwingen en diffs die
+# alleen uit onzichtbare regeleinde-verschillen bestaan. Verandert niets aan
+# hoe PHP/JS draait — regeleindes zijn voor de uitvoerende server onzichtbaar.
+* text=auto eol=lf
+
+*.php   text eol=lf
+*.js    text eol=lf
+*.css   text eol=lf
+*.json  text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+*.html  text eol=lf
+*.xml   text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.dist  text eol=lf
+*.pot   text eol=lf
+
+# Windows-scripts houden hun eigen regeleindes.
+*.ps1   text eol=crlf
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+
+# Binair: nooit als tekst behandelen (geen regeleinde-conversie, geen diff).
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.svg   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
+*.pdf   binary
+*.zip   binary
+*.gz    binary
+*.mo    binary
+*.sql   binary
