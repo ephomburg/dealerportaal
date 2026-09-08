@@ -8,6 +8,9 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.37.0
+- Blokkenkiezer opgeschoond (`HDP_Editor`): op gewone pagina's/berichten toont de inserter nog maar een beheersbare set — alle `homburg/*`-blokken plus basis- en lay-outblokken (paragraaf, koptekst, lijst, afbeelding, groep, kolommen, knoppen, tabel, ...). Blokken die deze site nooit gebruikt (poëzie, RSS, wiskunde, accordeon, tag cloud, ...) verdwijnen uit de kiezer. WooCommerce winkelwagen/afrekenen en pagina's die al `woocommerce/*`-blokken bevatten houden de volledige set; front-end en bestaande inhoud blijven ongemoeid.
+
 ## 1.36.0
 - Editor-canvas toont de plugin-blokken (portaalkaarten, infokaarten, hero) nu weer opgemaakt. Sinds WordPress 6.3 zit het canvas in een `iframe`; de CSS werd via `enqueue_block_editor_assets` geladen en kwam dat `iframe` niet meer in, waardoor kaarten als kale tekst verschenen. Nu via `enqueue_block_assets` (met `is_admin()`-check, dus front-end ongemoeid).
 
