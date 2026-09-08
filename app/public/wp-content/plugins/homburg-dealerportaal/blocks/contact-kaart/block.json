@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "homburg/contact-kaart",
+	"title": "Homburg contactkaart",
+	"category": "widgets",
+	"icon": "email",
+	"description": "Contactkaart voor de 'Overige informatie'-sectie: icoon, titel, tekst en automatisch opgemaakte e-mail- en telefoonknoppen. Je vult alleen het adres en nummer in; de mailto:- en tel:-links worden er zelf van gemaakt.",
+	"textdomain": "homburg-dealerportaal",
+	"attributes": {
+		"icoon": { "type": "string", "default": "mail" },
+		"titel": { "type": "string", "default": "" },
+		"titelFr": { "type": "string", "default": "" },
+		"tekst": { "type": "string", "default": "" },
+		"tekstFr": { "type": "string", "default": "" },
+		"email": { "type": "string", "default": "" },
+		"telefoon": { "type": "string", "default": "" }
+	},
+	"supports": {
+		"html": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

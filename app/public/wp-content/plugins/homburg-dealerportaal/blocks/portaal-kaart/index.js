@@ -3,6 +3,7 @@
 	var Fragment = element.Fragment;
 	var InspectorControls = blockEditor.InspectorControls;
 	var RichText = blockEditor.RichText;
+	var useBlockProps = blockEditor.useBlockProps;
 	var PanelBody = components.PanelBody;
 	var TextControl = components.TextControl;
 	var TextareaControl = components.TextareaControl;
@@ -40,6 +41,7 @@
 		edit: function ( props ) {
 			var a = props.attributes;
 			var setAttributes = props.setAttributes;
+			var blockProps = useBlockProps( { className: 'hdp-kaart' } );
 
 			return el(
 				Fragment,
@@ -99,7 +101,7 @@
 				),
 				el(
 					'article',
-					{ className: 'hdp-kaart' },
+					blockProps,
 					el( 'div', {
 						className: 'hdp-kaart-icoon',
 						'aria-hidden': 'true',

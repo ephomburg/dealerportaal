@@ -8,6 +8,11 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.40.0
+- `homburg/portaal-kaart` en `homburg/info-kaart` gebruiken nu `useBlockProps()` op hun wrapper in de editor. Daardoor is de hele kaart één klikbare blokgrens: klik = blok geselecteerd, Backspace/Delete verwijdert 'm, de blok-toolbar hangt aan de kaart. Voorheen landde een klik in het tekstveld en was het blok alleen via de lijstweergave te pakken.
+- Nieuw blok `homburg/contact-kaart`: als de infokaart, maar met losse velden **E-mail** en **Telefoon** die automatisch `mailto:` / `tel:`-knoppen worden — geen handmatige links meer typen.
+- Nieuw pattern `homburg/overige-informatie`: de volledige "Overige informatie"-sectie (kop + raster met alle infokaarten en de contactkaart), ineens te plaatsen.
+
 ## 1.39.0
 - Foutmonitoring (`HDP_Log`): fatale PHP-fouten en niet-afgevangen excepties die in de plugincode ontstaan worden weggeschreven naar `wp-content/uploads/hdp-logs/hdp-JJJJ-MM.log` (afgeschermde map, per maand). Bij een fatale fout gaat er ook een gethrottelde e-mail naar `marketing@homburg-holland.com`. Plugincode kan zelf loggen via `HDP_Log::schrijf()`. Bekijken/wissen via Instellingen > Dealerportaal foutenlog. Fouten van WordPress-core of andere plugins worden genegeerd (geen ruis).
 

@@ -9,45 +9,37 @@
 	var TextareaControl = components.TextareaControl;
 	var SelectControl = components.SelectControl;
 
-	// Zelfde iconenset als HDP_Icons (PHP) — dit blok is bewust statisch
-	// (geen render.php), dus de paden staan ook hier, alleen voor de
-	// iconen die in de infosectie gebruikt worden.
+	// Zelfde iconenset als HDP_Icons (PHP) — alleen voor de iconenkiezer
+	// en de canvas-preview hier; de front-end gebruikt HDP_Icons zelf.
 	var ICOON_PADEN = {
-		bestellen: '<path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L4 3a1 1 0 0 0-1 1l.24 5.59a2 2 0 0 0 .59 1.41l9.58 9.58a2 2 0 0 0 2.83 0l4.35-4.34a2 2 0 0 0 0-2.83Z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
 		mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/>',
-		technisch: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94Z"/>',
-		bogballe: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/>',
-		vaderstad: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2Z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7Z"/>',
+		tel: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
+		gebruiker: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
 		link: '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>'
 	};
 	var ICOON_OPTIES = [
-		{ label: 'Bestellen (label/tag)', value: 'bestellen' },
 		{ label: 'Envelop (mail)', value: 'mail' },
-		{ label: 'Sleutel (technisch)', value: 'technisch' },
-		{ label: 'Map (bogballe)', value: 'bogballe' },
-		{ label: 'Boek (vaderstad)', value: 'vaderstad' },
+		{ label: 'Telefoon', value: 'tel' },
+		{ label: 'Persoon', value: 'gebruiker' },
 		{ label: 'Link (extern)', value: 'link' }
 	];
 
 	function icoonSvg( type ) {
-		var pad = ICOON_PADEN[ type ] || ICOON_PADEN.link;
+		var pad = ICOON_PADEN[ type ] || ICOON_PADEN.mail;
 		return '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + pad + '</svg>';
 	}
 
-	function linkRij( label, url ) {
-		if ( ! label ) {
+	function knopPreview( icoon, tekst ) {
+		if ( ! tekst ) {
 			return null;
 		}
-		return el( 'a', {
+		return el( 'span', {
 			className: 'hdp-info-link',
-			href: url || '#',
-			target: '_blank',
-			rel: 'noopener noreferrer',
-			dangerouslySetInnerHTML: { __html: icoonSvg( 'link' ) + ' ' + label }
+			dangerouslySetInnerHTML: { __html: icoonSvg( icoon ) + ' ' + tekst }
 		} );
 	}
 
-	blocks.registerBlockType( 'homburg/info-kaart', {
+	blocks.registerBlockType( 'homburg/contact-kaart', {
 		edit: function ( props ) {
 			var a = props.attributes;
 			var setAttributes = props.setAttributes;
@@ -71,6 +63,23 @@
 					),
 					el(
 						PanelBody,
+						{ title: 'Contactgegevens', initialOpen: true },
+						el( TextControl, {
+							label: 'E-mailadres',
+							type: 'email',
+							value: a.email,
+							help: 'Wordt automatisch een mailto:-knop.',
+							onChange: function ( waarde ) { setAttributes( { email: waarde } ); }
+						} ),
+						el( TextControl, {
+							label: 'Telefoonnummer',
+							value: a.telefoon,
+							help: 'Weergave zoals ingevuld; de link wordt tel:+cijfers.',
+							onChange: function ( waarde ) { setAttributes( { telefoon: waarde } ); }
+						} )
+					),
+					el(
+						PanelBody,
 						{ title: 'Frans (FR)', initialOpen: false },
 						el( TextControl, {
 							label: 'Titel (FR)',
@@ -81,30 +90,6 @@
 							label: 'Tekst (FR)',
 							value: a.tekstFr,
 							onChange: function ( waarde ) { setAttributes( { tekstFr: waarde } ); }
-						} )
-					),
-					el(
-						PanelBody,
-						{ title: 'Links', initialOpen: false },
-						el( TextControl, {
-							label: 'Link 1 — tekst',
-							value: a.link1Label,
-							onChange: function ( waarde ) { setAttributes( { link1Label: waarde } ); }
-						} ),
-						el( TextControl, {
-							label: 'Link 1 — URL',
-							value: a.link1Url,
-							onChange: function ( waarde ) { setAttributes( { link1Url: waarde } ); }
-						} ),
-						el( TextControl, {
-							label: 'Link 2 — tekst',
-							value: a.link2Label,
-							onChange: function ( waarde ) { setAttributes( { link2Label: waarde } ); }
-						} ),
-						el( TextControl, {
-							label: 'Link 2 — URL',
-							value: a.link2Url,
-							onChange: function ( waarde ) { setAttributes( { link2Url: waarde } ); }
 						} )
 					)
 				),
@@ -131,11 +116,11 @@
 							onChange: function ( waarde ) { setAttributes( { tekst: waarde } ); },
 							placeholder: 'Tekst (NL)'
 						} ),
-						( a.link1Label || a.link2Label ) ? el(
+						( a.email || a.telefoon ) ? el(
 							'div',
 							{ className: 'hdp-info-links' },
-							linkRij( a.link1Label, a.link1Url ),
-							linkRij( a.link2Label, a.link2Url )
+							knopPreview( 'mail', a.email ),
+							knopPreview( 'tel', a.telefoon )
 						) : null
 					)
 				)
