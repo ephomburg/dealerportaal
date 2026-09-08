@@ -1,8 +1,8 @@
-name: Deploy plugin naar live
+name: Deploy naar live
 
-# Synchroniseert alleen wp-content/plugins/homburg-dealerportaal/ naar de
-# live server via rsync-over-SSH. Raakt niets anders op productie
-# (WooCommerce, FileBird, uploads, wp-config, WordPress-core).
+# Synchroniseert de eigen plugin EN het eigen thema naar de live server via
+# rsync-over-SSH. Raakt niets anders op productie (WooCommerce, FileBird,
+# andere thema's, uploads, wp-config, WordPress-core).
 #
 # Benodigde repository-secrets (Settings > Secrets and variables > Actions):
 #   SSH_PRIVATE_KEY  volledige inhoud van .deploy/deploy_key (incl. BEGIN/END-regels)
@@ -10,12 +10,16 @@ name: Deploy plugin naar live
 #   REMOTE_USER      homburgd
 #   REMOTE_PORT      2222
 #   REMOTE_TARGET    /home/homburgd/public_html/wp-content/plugins/homburg-dealerportaal/
+#
+# Het themapad wordt afgeleid uit REMOTE_TARGET: /plugins/ -> /themes/. Plugin
+# en thema heten allebei "homburg-dealerportaal" in een standaard WP-indeling.
 
 on:
   push:
     branches: [main]
     paths:
       - 'app/public/wp-content/plugins/homburg-dealerportaal/**'
+      - 'app/public/wp-content/themes/homburg-dealerportaal/**'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
     inputs:
@@ -27,6 +31,11 @@ on:
 concurrency:
   group: deploy-live
   cancel-in-progress: false
+
+env:
+  PLUGIN_SRC: app/public/wp-content/plugins/homburg-dealerportaal/
+  THEME_SRC: app/public/wp-content/themes/homburg-dealerportaal/
+  SSH_OPTS: -o StrictHostKeyChecking=yes -o BatchMode=yes
 
 jobs:
   deploy:
@@ -43,29 +52,41 @@ jobs:
           ssh-keyscan -p "${{ secrets.REMOTE_PORT }}" -H "${{ secrets.REMOTE_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
           chmod 644 ~/.ssh/known_hosts
 
+      - name: Doelpaden bepalen
+        run: |
+          PLUGIN_TARGET='${{ secrets.REMOTE_TARGET }}'
+          THEME_TARGET="${PLUGIN_TARGET/\/plugins\//\/themes\/}"
+          echo "PLUGIN_TARGET=$PLUGIN_TARGET" >> "$GITHUB_ENV"
+          echo "THEME_TARGET=$THEME_TARGET"   >> "$GITHUB_ENV"
+          echo "Plugin -> $PLUGIN_TARGET"
+          echo "Thema  -> $THEME_TARGET"
+
       - name: Verbinding testen
         run: |
-          ssh -i ~/.ssh/deploy_key -p "${{ secrets.REMOTE_PORT }}" \
-            -o StrictHostKeyChecking=yes -o BatchMode=yes \
+          ssh -i ~/.ssh/deploy_key -p "${{ secrets.REMOTE_PORT }}" $SSH_OPTS \
             "${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}" \
             'echo "SSH OK op $(hostname) — $(pwd)"'
 
-      - name: Rsync (dry-run — toont wat er zou wijzigen)
+      - name: Rsync dry-run (toont wat er zou wijzigen)
         run: |
-          rsync -rlptzvi --delete --dry-run \
-            --exclude='.git*' --exclude='.DS_Store' \
-            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.REMOTE_PORT }} -o StrictHostKeyChecking=yes -o BatchMode=yes" \
-            "app/public/wp-content/plugins/homburg-dealerportaal/" \
-            "${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_TARGET }}"
+          RSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.REMOTE_PORT }} $SSH_OPTS"
+          echo "===== PLUGIN ====="
+          rsync -rlptzvi --delete --dry-run --exclude='.git*' --exclude='.DS_Store' \
+            -e "$RSH" "$PLUGIN_SRC" "${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:$PLUGIN_TARGET"
+          echo "===== THEMA ====="
+          rsync -rlptzvi --delete --dry-run --exclude='.git*' --exclude='.DS_Store' \
+            -e "$RSH" "$THEME_SRC" "${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:$THEME_TARGET"
 
-      - name: Rsync (echt) — overslaan bij dry_run
+      - name: Rsync echt — overslaan bij dry_run
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.dry_run == false }}
         run: |
-          rsync -rlptzvi --delete \
-            --exclude='.git*' --exclude='.DS_Store' \
-            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.REMOTE_PORT }} -o StrictHostKeyChecking=yes -o BatchMode=yes" \
-            "app/public/wp-content/plugins/homburg-dealerportaal/" \
-            "${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_TARGET }}"
+          RSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.REMOTE_PORT }} $SSH_OPTS"
+          echo "===== PLUGIN ====="
+          rsync -rlptzvi --delete --exclude='.git*' --exclude='.DS_Store' \
+            -e "$RSH" "$PLUGIN_SRC" "${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:$PLUGIN_TARGET"
+          echo "===== THEMA ====="
+          rsync -rlptzvi --delete --exclude='.git*' --exclude='.DS_Store' \
+            -e "$RSH" "$THEME_SRC" "${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:$THEME_TARGET"
 
       - name: Sleutel opruimen
         if: always()
