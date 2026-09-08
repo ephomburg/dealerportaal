@@ -110,4 +110,10 @@ class Downloads_Access_Test extends WP_UnitTestCase {
 		update_post_meta( $this->download_zonder_bestand_id, '_hdp_categorie', 'content' );
 		$this->assertSame( 'content', HDP_Downloads_CPT::get_categorie( $this->download_zonder_bestand_id ) );
 	}
+
+	public function test_get_regios_ondersteunt_franstalig_belgie_naast_nl_en_be() {
+		update_post_meta( $this->download_zonder_bestand_id, '_hdp_regios', 'nl,be,be-fr' );
+
+		$this->assertSame( array( 'nl', 'be', 'be-fr' ), HDP_Downloads_CPT::get_regios( $this->download_zonder_bestand_id ) );
+	}
 }

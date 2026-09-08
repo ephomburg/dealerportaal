@@ -4,6 +4,10 @@ app/public/wp-admin/
 app/public/wp-includes/
 app/public/wp-content/uploads/
 app/public/wp-content/plugins/woocommerce/
+app/public/wp-content/plugins/all-in-one-wp-migration/
+app/public/wp-content/plugins/duplicator/
+app/public/wp-content/ai1wm-backups/
+app/public/wp-content/backups-dup-lite/
 app/public/wp-content/languages/
 app/public/wp-content/themes/twentytwentyfive/
 app/public/wp-content/themes/twentytwentyfour/
@@ -22,9 +26,16 @@ downloads/
 app/public/wp-config.php
 app/.envrc
 
+# Deploy-sleutelpaar voor GitHub Actions (privésleutel gaat als GitHub-secret,
+# nooit in de repo). Alleen lokaal aanwezig om de secrets uit te knippen.
+.deploy/
+
 # Server- en Local-omgevingsbestanden (niet projectcode)
 conf/
 logs/
+
+# Lokale database-export (kan klantdata bevatten, omgevingsspecifiek)
+app/sql/
 
 # Tijdelijke testbestanden
 *.tmp

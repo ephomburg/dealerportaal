@@ -28,7 +28,10 @@ class HDP_Herbestellen {
 		}
 		?>
 		<section class="hdp-herbestellen-sectie" aria-label="<?php echo esc_attr( HDP_I18N::t( 'herbestellen_label' ) ); ?>">
-			<h2 class="hdp-herbestellen-titel"><?php echo esc_html( HDP_I18N::t( 'herbestellen_label' ) ); ?></h2>
+			<div class="hdp-herbestellen-kop">
+				<h2 class="hdp-herbestellen-titel"><?php echo esc_html( HDP_I18N::t( 'herbestellen_label' ) ); ?></h2>
+				<a class="hdp-herbestellen-alle" href="<?php echo esc_url( home_url( '/bestelgeschiedenis/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'bekijk_alle_bestellingen' ) ); ?> &rarr;</a>
+			</div>
 			<div class="hdp-herbestellen-grid">
 				<?php foreach ( $producten as $product ) : ?>
 					<article class="hdp-herbestel-kaart">

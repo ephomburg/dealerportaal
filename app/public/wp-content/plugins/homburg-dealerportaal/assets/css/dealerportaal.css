@@ -66,6 +66,27 @@
 }
 .hdp-btn:hover { background: var(--wp--preset--color--homburg-rood-donker); transform: translateY(-1px); color: var(--wp--preset--color--wit); }
 
+/* Bezig-status ná het indienen van een formulier (zie assets/js/dealerportaal.js).
+   currentColor voor de spinnerrand i.p.v. een vaste kleur, zodat dit voor elke
+   knopvariant (rood, wit/secundair) vanzelf goed contrasteert. */
+.hdp-btn-bezig { opacity: 0.75; pointer-events: none; cursor: default; }
+.hdp-btn-bezig::after {
+	content: "";
+	display: inline-block;
+	width: 14px;
+	height: 14px;
+	margin-left: 0.6rem;
+	vertical-align: -2px;
+	border: 2px solid currentColor;
+	border-right-color: transparent;
+	border-radius: 50%;
+	animation: hdp-spin 0.6s linear infinite;
+}
+@keyframes hdp-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+	.hdp-btn-bezig::after { animation-duration: 1.6s; }
+}
+
 .hdp-btn-secundair {
 	background: var(--wp--preset--color--wit);
 	color: var(--wp--preset--color--donkergrijs);
@@ -89,6 +110,119 @@
 }
 .hdp-btn-logout svg { width: 15px; height: 15px; stroke: currentColor; flex-shrink: 0; }
 .hdp-btn-logout:hover { background: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--wit); transform: translateY(-1px); }
+
+.hdp-btn-instellingen {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	background: var(--wp--preset--color--grijs-licht);
+	color: var(--wp--preset--color--donkergrijs);
+	border: none;
+	border-radius: 8px;
+	padding: 0.6rem 1.2rem;
+	font-weight: 600;
+	font-size: 0.85rem;
+	text-decoration: none;
+	cursor: pointer;
+	transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+.hdp-btn-instellingen svg { width: 15px; height: 15px; stroke: currentColor; flex-shrink: 0; }
+.hdp-btn-instellingen:hover { background: var(--wp--preset--color--rand); color: var(--wp--preset--color--donkergrijs); transform: translateY(-1px); }
+
+/* --------------------------------------------------------------------------
+   Instellingenpaneel — opent/sluit met een zuivere CSS checkbox-hack
+   (.hdp-instellingen-toggle:checked ~ ...), zodat hiervoor geen eigen
+   front-end JS nodig is, in lijn met de rest van het portaal. Hergebruikt
+   .hdp-login-kaart/.hdp-veld voor een consistente vormgeving met het
+   inlogscherm.
+   -------------------------------------------------------------------------- */
+.hdp-instellingen-toggle { position: absolute; opacity: 0; pointer-events: none; }
+/* De checkbox zelf blijft (bewust) met opacity:0 in de taborde, zodat
+   toetsenbordgebruikers 'm met Tab+Spatie kunnen bedienen; het is dus de
+   zichtbare label ernaast die een focusring moet krijgen. */
+.hdp-instellingen-toggle:focus-visible + .hdp-btn-instellingen {
+	outline: 2px solid var(--wp--preset--color--homburg-rood);
+	outline-offset: 2px;
+}
+
+.hdp-instellingen-overlay {
+	display: none;
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	align-items: center;
+	justify-content: center;
+	padding: 1.5rem;
+}
+.hdp-instellingen-toggle:checked ~ .hdp-instellingen-overlay { display: flex; }
+
+.hdp-instellingen-achtergrond {
+	position: absolute;
+	inset: 0;
+	background: rgba(10, 10, 12, 0.55);
+	cursor: pointer;
+}
+
+.hdp-instellingen-kaart {
+	position: relative;
+	max-height: calc(100dvh - 3rem);
+	overflow-y: auto;
+}
+.hdp-instellingen-sluiten {
+	position: absolute;
+	top: 1.1rem;
+	right: 1.2rem;
+	font-size: 1.6rem;
+	line-height: 1;
+	color: var(--wp--preset--color--grijs-tekst);
+	cursor: pointer;
+}
+.hdp-instellingen-sluiten:hover { color: var(--wp--preset--color--homburg-rood); }
+
+.hdp-instellingen-subtitel {
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+	margin: 1.4rem 0 0.9rem;
+	padding-top: 1.1rem;
+	border-top: 1px solid var(--wp--preset--color--rand);
+}
+
+.hdp-instellingen-huidig-email {
+	font-size: 0.85rem;
+	color: var(--wp--preset--color--grijs-tekst);
+	margin-bottom: 1rem;
+}
+.hdp-instellingen-huidig-email strong { color: var(--wp--preset--color--donkergrijs); }
+
+.hdp-instellingen-in-afwachting {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.8rem;
+	flex-wrap: wrap;
+	background: #fff8e6;
+	color: #8a6100;
+	border: 1px solid #f2dfa0;
+	border-radius: 6px;
+	padding: 0.7rem 0.9rem;
+	font-size: 0.85rem;
+	margin-bottom: 1.1rem;
+}
+.hdp-instellingen-in-afwachting form { margin: 0; }
+
+.hdp-instellingen-melding-ok {
+	background: #ecfdf1;
+	color: #1a7d3a;
+	border: 1px solid #b9ebc9;
+	border-radius: 6px;
+	padding: 0.7rem 0.9rem;
+	font-size: 0.85rem;
+	font-weight: 600;
+	margin-bottom: 1.1rem;
+}
 
 /* ==========================================================================
    LOGIN-SCHERM
@@ -115,15 +249,19 @@
 
 .hdp-veld { margin-bottom: 1.1rem; }
 .hdp-veld label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.35rem; }
-.hdp-veld input {
+.hdp-veld input,
+.hdp-veld select {
 	width: 100%;
 	padding: 0.75rem 0.9rem;
 	border: 2px solid var(--wp--preset--color--rand);
 	border-radius: 6px;
 	font-size: 0.95rem;
+	font-family: inherit;
+	background: var(--wp--preset--color--wit);
 	transition: border-color 0.2s;
 }
-.hdp-veld input:focus { border-color: var(--wp--preset--color--homburg-rood); outline: none; }
+.hdp-veld input:focus,
+.hdp-veld select:focus { border-color: var(--wp--preset--color--homburg-rood); outline: none; }
 
 .hdp-veld-invoer { position: relative; }
 .hdp-veld-invoer svg {
@@ -162,6 +300,93 @@
 .hdp-wachtwoord-vergeten a { color: var(--wp--preset--color--grijs-tekst); text-decoration: underline; }
 .hdp-wachtwoord-vergeten a:hover { color: var(--wp--preset--color--homburg-rood); }
 
+/* --------------------------------------------------------------------------
+   Fullscreen inlogscherm (.hdp-login-fullscreen) — de dealer-/downloads-/
+   contentpagina's zelf blijven een normaal WordPress-sjabloon met
+   header/footer; deze laag ligt er als vast, edge-to-edge scherm overheen
+   en verbergt header/footer via de "hdp-login-actief" body-class hieronder,
+   in plaats van dat het sjabloon zelf wordt aangepast. De "wachten op
+   goedkeuring"-kaart (zie class-hdp-portal-render.php) hergebruikt bewust
+   alleen .hdp-login-sectie/.hdp-login-kaart hierboven, niet deze laag.
+   -------------------------------------------------------------------------- */
+body.hdp-login-actief .hdp-site-header,
+body.hdp-login-actief .hdp-site-footer {
+	display: none;
+}
+body.hdp-login-actief {
+	overflow: hidden;
+}
+
+.hdp-login-fullscreen {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	height: 100dvh;
+	padding: 1.5rem;
+	overflow-y: auto;
+	background-size: cover;
+	background-position: center;
+}
+.hdp-login-fullscreen::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: rgba(10, 10, 12, 0.6);
+}
+
+.hdp-login-fullscreen .hdp-login-kaart {
+	position: relative;
+	background: rgba(20, 20, 22, 0.82);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-top: 1px solid rgba(255, 255, 255, 0.08);
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+.hdp-login-logo { display: block; height: 22px; width: auto; margin-bottom: 1.6rem; }
+.hdp-login-fullscreen .hdp-login-kaart h1,
+.hdp-login-fullscreen .hdp-login-kaart p.hdp-intro { color: var(--wp--preset--color--wit); }
+.hdp-login-fullscreen .hdp-login-kaart p.hdp-intro { opacity: 0.7; }
+
+.hdp-login-fullscreen .hdp-veld label {
+	color: rgba(255, 255, 255, 0.6);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	font-size: 0.72rem;
+}
+.hdp-login-fullscreen .hdp-veld input {
+	background: rgba(255, 255, 255, 0.06);
+	border-color: rgba(255, 255, 255, 0.14);
+	color: var(--wp--preset--color--wit);
+}
+.hdp-login-fullscreen .hdp-veld input:focus {
+	border-color: var(--wp--preset--color--homburg-rood);
+	box-shadow: 0 0 0 3px rgba(192, 13, 13, 0.25);
+}
+.hdp-login-fullscreen .hdp-veld-invoer svg { stroke: rgba(255, 255, 255, 0.4); }
+.hdp-login-fullscreen .hdp-veld-invoer:focus-within svg { stroke: var(--wp--preset--color--homburg-rood); }
+
+.hdp-veld-onthoud { margin: -0.3rem 0 1.3rem; }
+.hdp-veld-onthoud label {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.85rem;
+	font-weight: 500;
+	cursor: pointer;
+}
+.hdp-veld-onthoud input[type="checkbox"] {
+	accent-color: var(--wp--preset--color--homburg-rood);
+	width: 15px;
+	height: 15px;
+	margin: 0;
+	cursor: pointer;
+}
+.hdp-login-fullscreen .hdp-veld-onthoud label { color: rgba(255, 255, 255, 0.75); }
+
+.hdp-login-fullscreen .hdp-wachtwoord-vergeten a { color: rgba(255, 255, 255, 0.5); }
+.hdp-login-fullscreen .hdp-wachtwoord-vergeten a:hover { color: var(--wp--preset--color--wit); }
+
 /* ==========================================================================
    PORTAAL (na inloggen)
    ========================================================================== */
@@ -184,6 +409,7 @@
 }
 .hdp-terug-boven:hover { color: var(--wp--preset--color--homburg-rood); }
 .hdp-welkom-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.hdp-welkom-acties { display: flex; align-items: center; gap: 0.6rem; }
 .hdp-welkom h1 { font-size: 1.6rem; font-weight: 700; }
 .hdp-welkom p { color: var(--wp--preset--color--grijs-tekst); font-size: 0.95rem; margin-top: 0.2rem; }
 .hdp-merken { font-weight: 600; }
@@ -196,13 +422,25 @@
 	grid-template-columns: repeat(4, 1fr);
 	gap: 1.5rem;
 }
+/* WordPress geeft elk kind van een "flow"-layoutblok (behalve het eerste)
+   automatisch margin-block-start mee, bedoeld voor blokken die verticaal
+   stapelen. Onze secties zijn grid-containers met een eigen gap, dus die
+   marge is hier overbodig — en duwde eerder elk kaartje behalve het eerste
+   binnen zijn rij omlaag, waardoor ze niet meer gelijk konden uitrekken. */
+.hdp-kaarten-sectie > *,
+.hdp-info-grid > * {
+	margin-block-start: 0;
+}
 
 .hdp-herbestellen-sectie {
 	max-width: 70%;
 	margin: 0 auto;
 	padding: 2.5rem 0 0;
 }
-.hdp-herbestellen-titel { font-size: 1.15rem; font-weight: 700; margin-bottom: 1.1rem; }
+.hdp-herbestellen-kop { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.1rem; flex-wrap: wrap; }
+.hdp-herbestellen-titel { font-size: 1.15rem; font-weight: 700; }
+.hdp-herbestellen-alle { font-size: 0.85rem; font-weight: 600; color: var(--wp--preset--color--homburg-rood); text-decoration: none; }
+.hdp-herbestellen-alle:hover { text-decoration: underline; }
 .hdp-herbestellen-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -298,6 +536,7 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 .hdp-info-grid {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
+	grid-auto-rows: 1fr;
 	gap: 1rem;
 }
 .hdp-info-kaart {
@@ -308,6 +547,7 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	display: flex;
 	align-items: flex-start;
 	gap: 1rem;
+	height: 100%;
 	transition: border-color 0.15s, box-shadow 0.15s;
 }
 .hdp-info-kaart:hover { border-color: var(--wp--preset--color--homburg-rood); box-shadow: var(--hdp-schaduw); }
@@ -467,6 +707,63 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 .hdp-terug { margin-top: 1.6rem; }
 
 /* ==========================================================================
+   BESTELGESCHIEDENIS
+   ========================================================================== */
+.hdp-bestel-lijst {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	overflow: hidden;
+}
+.hdp-bestel-item {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 1.1rem 1.4rem;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+	flex-wrap: wrap;
+}
+.hdp-bestel-item:last-child { border-bottom: none; }
+.hdp-bestel-info { flex: 1; min-width: 160px; display: flex; flex-direction: column; }
+.hdp-bestel-info strong { font-size: 0.95rem; font-weight: 700; }
+.hdp-bestel-info span { font-size: 0.8rem; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-bestel-totaal { font-size: 0.9rem; font-weight: 700; min-width: 90px; text-align: right; }
+.hdp-bestel-item .hdp-btn { flex-shrink: 0; }
+
+.hdp-bestel-status {
+	flex-shrink: 0;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	padding: 0.3rem 0.65rem;
+	border-radius: 999px;
+	background: var(--wp--preset--color--grijs-licht);
+	color: var(--wp--preset--color--donkergrijs);
+}
+.hdp-bestel-status-completed { background: #ecfdf1; color: #1a7d3a; }
+.hdp-bestel-status-processing,
+.hdp-bestel-status-on-hold { background: #fff8e6; color: #8a6100; }
+.hdp-bestel-status-cancelled,
+.hdp-bestel-status-failed,
+.hdp-bestel-status-refunded { background: #fdecec; color: var(--wp--preset--color--homburg-rood-donker); }
+
+.hdp-bestel-paginering {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+	margin-top: 1.5rem;
+}
+.hdp-bestel-paginacijfer { font-size: 0.85rem; color: var(--wp--preset--color--grijs-tekst); }
+
+@media (max-width: 600px) {
+	.hdp-bestel-item { justify-content: space-between; }
+	.hdp-bestel-totaal { text-align: left; }
+	.hdp-bestel-item .hdp-btn { width: 100%; }
+}
+
+/* ==========================================================================
    ADMINPORTAAL (tijdelijk, nog niet afgeschermd upload-scherm)
    ========================================================================== */
 .hdp-admin-sectie {
@@ -510,8 +807,11 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	margin-right: 1.5rem;
 }
 /* .hdp-veld input stelt input-velden standaard breed/omrand in (t.b.v.
-   tekstvelden); checkboxes moeten dat juist niet krijgen. */
-.hdp-veld input[type="checkbox"] {
+   tekstvelden); checkboxes/radio's (Regio, Categorie) moeten dat juist
+   niet krijgen — anders trekt de browser er een volle-breedte "tekstvak"
+   omheen en verdwijnt het bolletje/vinkje naar de rand. */
+.hdp-veld input[type="checkbox"],
+.hdp-veld input[type="radio"] {
 	width: auto;
 	padding: 0;
 	border: none;
@@ -519,6 +819,64 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 }
 
 .hdp-admin-recent-titel { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
+
+.hdp-gebruikers-lijst {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	overflow: hidden;
+	margin-bottom: 2.5rem;
+}
+.hdp-gebruiker-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 1rem;
+	padding: 1.1rem 1.4rem;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+	flex-wrap: wrap;
+}
+.hdp-gebruiker-item:last-child { border-bottom: none; }
+.hdp-gebruiker-info { flex: 1; min-width: 180px; display: flex; flex-direction: column; padding-top: 0.3rem; }
+.hdp-gebruiker-info span { font-size: 0.8rem; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-gebruiker-formulier { display: flex; align-items: center; gap: 0.6rem 1.2rem; flex-wrap: wrap; margin: 0; }
+.hdp-gebruiker-merken {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.3rem 0.9rem;
+	max-width: 420px;
+	font-size: 0.82rem;
+}
+.hdp-gebruiker-merken .hdp-admin-checkbox { margin-right: 0; }
+
+.hdp-gebruikers-zoek { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.hdp-gebruikers-zoek .hdp-zoekveld { flex: 1; max-width: 340px; }
+
+/* Los, standaand selectievakje voor bulkacties (goedkeuren van dealers,
+   wijzigen van downloads) — geen .hdp-veld-context, dus geen breedte-reset
+   nodig zoals bij de overige checkboxes in dit bestand. */
+.hdp-bulk-checkbox { width: 18px; height: 18px; flex-shrink: 0; cursor: pointer; }
+.hdp-gebruiker-item .hdp-bulk-checkbox { margin-top: 0.35rem; }
+.hdp-bulk-actie { margin: 0 0 2.5rem; }
+
+.hdp-bulk-downloads-balk {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	padding: 1.4rem 1.5rem;
+	margin-bottom: 1.2rem;
+	display: flex;
+	align-items: flex-end;
+	gap: 1.2rem;
+	flex-wrap: wrap;
+}
+.hdp-bulk-downloads-balk .hdp-veld { margin-bottom: 0; }
+
+@media (max-width: 600px) {
+	.hdp-gebruiker-formulier { width: 100%; }
+	.hdp-gebruiker-merken { max-width: none; }
+	.hdp-bulk-downloads-balk { align-items: stretch; }
+	.hdp-bulk-downloads-balk .hdp-btn { width: 100%; }
+}
 
 /* ==========================================================================
    RESPONSIVE
@@ -534,7 +892,7 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	.hdp-downloads { max-width: 100%; padding: 1.5rem 1rem; }
 	.hdp-info-sectie { max-width: 100%; padding: 1rem 1rem 2rem; }
 	.hdp-admin-sectie { max-width: 100%; padding: 1.5rem 1rem; }
-	.hdp-info-grid { grid-template-columns: 1fr; }
+	.hdp-info-grid { grid-template-columns: 1fr; grid-auto-rows: auto; }
 	.hdp-info-kaart { flex-direction: column; }
 	.hdp-welkom { padding: 1.6rem 0; }
 	.hdp-welkom-inner { padding: 0 1rem; }

@@ -54,7 +54,10 @@ class HDP_Portal_Render {
 				<div class="hdp-welkom-inner">
 					<div class="hdp-welkom-top">
 						<h1><?php echo esc_html( HDP_I18N::t( 'welkom_prefix' ) ); ?> <?php echo esc_html( $user->display_name ); ?></h1>
-						<a class="hdp-btn-logout" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>"><?php echo HDP_Icons::svg_icoon( 'uitloggen' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?><?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?></a>
+						<div class="hdp-welkom-acties">
+							<?php HDP_Account::render_instellingen_knop_en_paneel(); ?>
+							<a class="hdp-btn-logout" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>"><?php echo HDP_Icons::svg_icoon( 'uitloggen' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?><?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?></a>
+						</div>
 					</div>
 					<p><?php echo esc_html( $portaal_intro ); ?></p>
 					<?php if ( $merken ) : ?>

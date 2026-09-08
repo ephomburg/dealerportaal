@@ -104,10 +104,21 @@ class HDP_Login {
 
 	public static function render_login( $fout, $a ) {
 		$intro = HDP_I18N::kies( $a['loginIntro'], $a['loginIntroFr'] );
+
+		// Verbergt de site-header/-footer achter het fullscreen inlogscherm
+		// hieronder — die staan al vast in het themasjabloon (parts/header.html
+		// resp. footer.html) en worden dus niet via deze functie getekend.
+		add_filter(
+			'body_class',
+			static function ( $classes ) {
+				$classes[] = 'hdp-login-actief';
+				return $classes;
+			}
+		);
 		?>
-		<div class="hdp-hero alignfull" style="background-image:url('<?php echo esc_url( $a['heroAfbeelding'] ); ?>')" aria-hidden="true"></div>
-		<div class="hdp-login-sectie">
+		<div class="hdp-login-sectie hdp-login-fullscreen alignfull" style="background-image:url('<?php echo esc_url( $a['heroAfbeelding'] ); ?>')">
 			<div class="hdp-login-kaart">
+				<img class="hdp-login-logo" src="/wp-content/uploads/2026/07/Logo-HOMBURG_RGB-300x40.png" alt="Homburg">
 				<h1><?php echo esc_html( HDP_I18N::t( 'login_titel' ) ); ?></h1>
 				<p class="hdp-intro"><?php echo esc_html( $intro ); ?></p>
 
@@ -130,6 +141,12 @@ class HDP_Login {
 							<?php echo HDP_Icons::svg_icoon( 'login' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
 							<input type="password" id="wachtwoord" name="wachtwoord" autocomplete="current-password" required>
 						</div>
+					</div>
+					<div class="hdp-veld-onthoud">
+						<label>
+							<input type="checkbox" id="onthoud_mij" name="onthoud_mij" checked>
+							<?php echo esc_html( HDP_I18N::t( 'onthoud_mij' ) ); ?>
+						</label>
 					</div>
 					<button type="submit" class="hdp-btn"><?php echo esc_html( HDP_I18N::t( 'btn_inloggen' ) ); ?></button>
 				</form>

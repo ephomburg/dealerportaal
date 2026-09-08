@@ -1,0 +1,46 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "homburg/bestelgeschiedenis-pagina",
+	"title": "Dealerbestelgeschiedenis",
+	"category": "widgets",
+	"icon": "clipboard",
+	"description": "Toont de bestelgeschiedenis van de ingelogde dealer. Niet-ingelogde bezoekers zien het inlogscherm.",
+	"textdomain": "homburg-dealerportaal",
+	"attributes": {
+		"heroAfbeelding": {
+			"type": "string",
+			"default": "https://www.homburg-belgium.com/wp-content/uploads/2023/09/Homburg-Holland-precisielandbouw-man-in-veld.jpg"
+		},
+		"loginIntro": {
+			"type": "string",
+			"default": "Log in met uw dealeraccount voor toegang tot de webshop, productconfigurator en downloads."
+		},
+		"loginIntroFr": {
+			"type": "string",
+			"default": "Connectez-vous avec votre compte revendeur pour accéder à la boutique, au configurateur de produits et aux téléchargements."
+		},
+		"titel": {
+			"type": "string",
+			"default": "Bestelgeschiedenis"
+		},
+		"titelFr": {
+			"type": "string",
+			"default": "Historique des commandes"
+		},
+		"omschrijving": {
+			"type": "string",
+			"default": "Een overzicht van al uw eerdere bestellingen bij Homburg."
+		},
+		"omschrijvingFr": {
+			"type": "string",
+			"default": "Un aperçu de toutes vos commandes précédentes chez Homburg."
+		}
+	},
+	"supports": {
+		"html": false,
+		"multiple": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

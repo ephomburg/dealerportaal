@@ -112,6 +112,52 @@ class HDP_Downloads_Render {
 			return '<p class="hdp-nog-niet">' . esc_html( HDP_I18N::t( $leeg_sleutel ) ) . '</p>';
 		}
 
+		// Taalgebonden zichtbaarheid: een NL-taalbezoeker ziet bestanden
+		// getagd met regio 'nl' of 'be', een FR-taalbezoeker alleen 'be-fr'
+		// — zo verschijnt een bestand automatisch bij de juiste taalgroep in
+		// plaats van dat de dealer dat zelf via de regiofilter moet uitzoeken.
+		// Bestanden zonder regio-tag (van vóór dit onderscheid, of bewust
+		// voor iedereen bedoeld) blijven in beide talen zichtbaar.
+		$toegestane_regios = HDP_I18N::is_frans() ? array( 'be-fr' ) : array( 'nl', 'be' );
+		$downloads         = array_values(
+			array_filter(
+				$downloads,
+				static function ( $download ) use ( $toegestane_regios ) {
+					$regios = HDP_Downloads_CPT::get_regios( $download->ID );
+					return ! $regios || array_intersect( $regios, $toegestane_regios );
+				}
+			)
+		);
+
+		if ( ! $downloads ) {
+			$leeg_sleutel = 'content' === $categorie ? 'geen_content_taal' : 'geen_downloads_taal';
+			return '<p class="hdp-nog-niet">' . esc_html( HDP_I18N::t( $leeg_sleutel ) ) . '</p>';
+		}
+
+		// Merkgebonden zichtbaarheid: een dealer met een ingestelde
+		// merkenlijst (hdp_merken) ziet alleen bestanden van die merken (of
+		// zonder merk-tag) — zelfde "geen tag/geen restrictie = zichtbaar
+		// voor iedereen"-principe als bij taal/regio hierboven. Een dealer
+		// zonder ingestelde merken blijft alles zien, zodat dealers die nog
+		// niet aan een merk gekoppeld zijn niet per ongeluk niets meer zien.
+		$toegestane_merken = HDP_Merken::naar_array( get_user_meta( get_current_user_id(), 'hdp_merken', true ) );
+		if ( $toegestane_merken ) {
+			$downloads = array_values(
+				array_filter(
+					$downloads,
+					static function ( $download ) use ( $toegestane_merken ) {
+						$merk = HDP_Downloads_CPT::get_merk( $download->ID );
+						return ! $merk || in_array( $merk, $toegestane_merken, true );
+					}
+				)
+			);
+
+			if ( ! $downloads ) {
+				$leeg_sleutel = 'content' === $categorie ? 'geen_content_merk' : 'geen_downloads_merk';
+				return '<p class="hdp-nog-niet">' . esc_html( HDP_I18N::t( $leeg_sleutel ) ) . '</p>';
+			}
+		}
+
 		// Merken voor de filterchips worden automatisch afgeleid uit de
 		// downloads zelf — als Homburg later een nieuw merk invult bij een
 		// download, verschijnt de chip vanzelf, zonder codewijziging.
@@ -136,8 +182,12 @@ class HDP_Downloads_Render {
 					<span class="hdp-filtergroep-label"><?php echo esc_html( HDP_I18N::t( 'filter_regio' ) ); ?></span>
 					<div class="hdp-chips" id="hdp-regio-chips">
 						<button type="button" class="hdp-chip hdp-chip-actief" data-regio="alle"><?php echo esc_html( HDP_I18N::t( 'filter_alles' ) ); ?></button>
-						<button type="button" class="hdp-chip" data-regio="nl"><?php echo esc_html( HDP_I18N::t( 'filter_nederland' ) ); ?></button>
-						<button type="button" class="hdp-chip" data-regio="be"><?php echo esc_html( HDP_I18N::t( 'filter_belgie' ) ); ?></button>
+						<?php if ( HDP_I18N::is_frans() ) : ?>
+							<button type="button" class="hdp-chip" data-regio="be-fr"><?php echo esc_html( HDP_I18N::t( 'filter_belgie_fr' ) ); ?></button>
+						<?php else : ?>
+							<button type="button" class="hdp-chip" data-regio="nl"><?php echo esc_html( HDP_I18N::t( 'filter_nederland' ) ); ?></button>
+							<button type="button" class="hdp-chip" data-regio="be"><?php echo esc_html( HDP_I18N::t( 'filter_belgie' ) ); ?></button>
+						<?php endif; ?>
 					</div>
 				</div>
 				<?php if ( $merken ) : ?>

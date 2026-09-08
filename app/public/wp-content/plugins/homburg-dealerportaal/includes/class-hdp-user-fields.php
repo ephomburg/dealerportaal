@@ -42,8 +42,13 @@ class HDP_User_Fields {
 			<tr>
 				<th><label for="hdp_merken">Toegestane merken</label></th>
 				<td>
-					<input type="text" name="hdp_merken" id="hdp_merken" value="<?php echo esc_attr( $merken ); ?>" class="regular-text">
-					<p class="description">Kommagescheiden lijst, bijv. "Merk A, Merk B"</p>
+					<?php $gekozen_merken = HDP_Merken::naar_array( $merken ); ?>
+					<?php foreach ( HDP_Merken::lijst() as $merk ) : ?>
+						<label>
+							<input type="checkbox" name="hdp_merken[]" value="<?php echo esc_attr( $merk ); ?>" <?php checked( in_array( $merk, $gekozen_merken, true ) ); ?>>
+							<?php echo esc_html( $merk ); ?>
+						</label><br>
+					<?php endforeach; ?>
 				</td>
 			</tr>
 			<tr>
@@ -65,11 +70,16 @@ class HDP_User_Fields {
 			return;
 		}
 
-		update_user_meta( $user_id, 'hdp_goedgekeurd', isset( $_POST['hdp_goedgekeurd'] ) ? '1' : '' );
+		$was_goedgekeurd   = (bool) get_user_meta( $user_id, 'hdp_goedgekeurd', true );
+		$wordt_goedgekeurd = isset( $_POST['hdp_goedgekeurd'] );
+		update_user_meta( $user_id, 'hdp_goedgekeurd', $wordt_goedgekeurd ? '1' : '' );
 
-		if ( isset( $_POST['hdp_merken'] ) ) {
-			update_user_meta( $user_id, 'hdp_merken', sanitize_text_field( wp_unslash( $_POST['hdp_merken'] ) ) );
+		if ( $wordt_goedgekeurd && ! $was_goedgekeurd ) {
+			HDP_Roles::stuur_goedkeuringsmail( get_userdata( $user_id ) );
 		}
+
+		$merken = isset( $_POST['hdp_merken'] ) ? HDP_Merken::uit_selectie( wp_unslash( $_POST['hdp_merken'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- HDP_Merken::uit_selectie() filtert de waarden zelf via array_intersect() tegen de vaste merkenlijst.
+		update_user_meta( $user_id, 'hdp_merken', $merken );
 
 		if ( isset( $_POST['hdp_korting'] ) ) {
 			update_user_meta( $user_id, 'hdp_korting', sanitize_text_field( wp_unslash( $_POST['hdp_korting'] ) ) );
