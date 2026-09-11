@@ -158,7 +158,6 @@ function homburg_wc_shop_werkbalk_open() {
 								</li>
 							<?php endforeach; ?>
 						</ul>
-						<button type="submit" class="hdp-shop-merken-toepassen"><?php esc_html_e( 'Filter toepassen', 'homburg-dealerportaal-theme' ); ?></button>
 						<?php if ( $actieve_merken ) : ?>
 							<a class="hdp-shop-merken-wissen" href="<?php echo esc_url( remove_query_arg( array( 'merk' ) ) ); ?>"><?php esc_html_e( 'Filter wissen', 'homburg-dealerportaal-theme' ); ?></a>
 						<?php endif; ?>
@@ -187,12 +186,15 @@ function homburg_wc_shop_werkbalk_open() {
 					<?php foreach ( $actieve_merken as $slug ) : ?>
 						<input type="hidden" name="merk[]" value="<?php echo esc_attr( $slug ); ?>">
 					<?php endforeach; ?>
-					<input
-						type="search"
-						name="zoek"
-						value="<?php echo esc_attr( $zoekterm ); ?>"
-						placeholder="<?php esc_attr_e( 'Zoek op naam of artikelnummer…', 'homburg-dealerportaal-theme' ); ?>"
-					>
+					<div class="hdp-shop-zoeken__veld">
+						<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+						<input
+							type="search"
+							name="zoek"
+							value="<?php echo esc_attr( $zoekterm ); ?>"
+							placeholder="<?php esc_attr_e( 'Zoek op naam of artikelnummer…', 'homburg-dealerportaal-theme' ); ?>"
+						>
+					</div>
 					<button type="submit"><?php esc_html_e( 'Zoeken', 'homburg-dealerportaal-theme' ); ?></button>
 				</form>
 				<div class="hdp-shop-weergave" role="group" aria-label="<?php esc_attr_e( 'Weergave', 'homburg-dealerportaal-theme' ); ?>">
@@ -204,6 +206,20 @@ function homburg_wc_shop_werkbalk_open() {
 					</button>
 				</div>
 	<?php
+}
+
+add_action( 'woocommerce_before_shop_loop', 'homburg_wc_shop_balk_breek', 15 );
+/**
+ * Een expliciet regeleinde tussen de zoekrij (zoeken + weergave) en de
+ * resultaattelling/sortering-rij, die WooCommerce's eigen hooks op
+ * prioriteit 20/30 direct als kind van ".hdp-shop-balk" toevoegen — zonder
+ * dit breekpunt zou flexbox proberen alle vier op één regel te passen.
+ */
+function homburg_wc_shop_balk_breek() {
+	if ( ! is_shop() && ! is_product_taxonomy() ) {
+		return;
+	}
+	echo '<div class="hdp-shop-balk__breek" aria-hidden="true"></div>';
 }
 
 add_action( 'woocommerce_before_shop_loop', 'homburg_wc_shop_balk_sluiten', 35 );
@@ -267,9 +283,7 @@ function homburg_wc_shop_inline_js() {
 	} catch (e) {}
 	toepassen(opgeslagen);
 
-	// Merkfilter direct toepassen bij het aan-/uitvinken i.p.v. pas na een
-	// klik op "Filter toepassen" — die knop blijft gewoon staan (ook fijn
-	// zonder JS, en als duidelijk "dit doet iets"-anker).
+	// Merkfilter direct toepassen bij het aan-/uitvinken.
 	var merkForm = document.querySelector('.hdp-shop-merken-form');
 	if (merkForm) {
 		merkForm.querySelectorAll('input[type="checkbox"]').forEach(function (vak) {

@@ -14,6 +14,26 @@ class HDP_Downloads_CPT {
 	const POST_TYPE = 'hdp_download';
 	const QUERY_VAR = 'hdp_download';
 
+	/**
+	 * Vaste merkenlijst voor het indelen van downloads/content — bewust een
+	 * andere (kortere, eigen benaming) lijst dan HDP_Merken::lijst(), die
+	 * gaat over welke merken een dealer-account mag zien. Hier gaat het om
+	 * onder welk merk een bestand op de downloadspagina wordt getoond.
+	 * Vervangt het vrije tekstveld van vroeger (typefouten/inconsistente
+	 * merknamen gaven dan ook inconsistente filterknoppen op de pagina zelf).
+	 */
+	public static function merk_opties() {
+		return array(
+			'Algemeen',
+			'Homburg Draincleaners',
+			'HARDI',
+			'Väderstad',
+			'Bogballe',
+			'RABE',
+			'Tefen',
+		);
+	}
+
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register_post_type' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_box' ) );
@@ -77,7 +97,16 @@ class HDP_Downloads_CPT {
 		</p>
 		<p>
 			<label for="hdp_merk"><strong>Merk</strong></label><br>
-			<input type="text" name="hdp_merk" id="hdp_merk" value="<?php echo esc_attr( $merk ); ?>" class="widefat" placeholder="bijv. Merk A">
+			<?php $opties = self::merk_opties(); ?>
+			<select name="hdp_merk" id="hdp_merk" class="widefat">
+				<option value="">— Geen merk —</option>
+				<?php if ( $merk && ! in_array( $merk, $opties, true ) ) : ?>
+					<option value="<?php echo esc_attr( $merk ); ?>" selected><?php echo esc_html( $merk ); ?> (niet meer in de lijst)</option>
+				<?php endif; ?>
+				<?php foreach ( $opties as $optie ) : ?>
+					<option value="<?php echo esc_attr( $optie ); ?>" <?php selected( $merk, $optie ); ?>><?php echo esc_html( $optie ); ?></option>
+				<?php endforeach; ?>
+			</select>
 		</p>
 		<p>
 			<strong>Regio</strong><br>

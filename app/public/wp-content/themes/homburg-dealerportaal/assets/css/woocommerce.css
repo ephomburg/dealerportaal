@@ -332,20 +332,6 @@ p.no-comments {
 	font-variant-numeric: tabular-nums;
 	text-align: right;
 }
-.hdp-shop-merken-toepassen {
-	width: 100%;
-	border: 0;
-	border-radius: 7px;
-	background: var(--wp--preset--color--homburg-rood);
-	color: var(--wp--preset--color--wit);
-	font-family: inherit;
-	font-weight: 700;
-	font-size: 0.8rem;
-	padding: 0.55rem 0.6rem;
-	cursor: pointer;
-	transition: background 0.15s;
-}
-.hdp-shop-merken-toepassen:hover { background: var(--wp--preset--color--homburg-rood-donker); }
 .hdp-shop-merken-wissen {
 	display: block;
 	text-align: center;
@@ -359,25 +345,41 @@ p.no-comments {
 .hdp-shop-zoeken {
 	display: flex;
 	gap: 0.5rem;
-	flex: 1 1 320px;
-	max-width: 460px;
+	/* Groeit om de rij te vullen, zodat de "Zoeken"-knop en de
+	   weergaveschakelaar er vlak achteraan blijven staan i.p.v. dat er een
+	   kale opening in het midden van de balk ontstaat. */
+	flex: 1 1 260px;
 	/* Grid- (en flex-)kinderen krijgen standaard min-width:auto, waardoor ze
 	   niet smaller worden dan hun inhoud — bij een smal scherm duwt dat de
 	   hele paginabreedte op en ontstaat er horizontaal scrollen. */
 	min-width: 0;
 }
+.hdp-shop-zoeken__veld {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	flex: 1;
+	min-width: 0;
+	background: var(--wp--preset--color--grijs-licht);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: 6px;
+	padding: 0 0.7rem;
+}
+.hdp-shop-zoeken__veld svg { flex: none; color: var(--wp--preset--color--grijs-tekst); }
 .hdp-shop-zoeken input[type="search"] {
 	flex: 1;
 	/* <input> heeft van de browser zelf ook een min-width:auto (rond de
 	   170-200px); zonder deze regel blijft het veld op smalle schermen te
 	   breed en trekt het de hele werkbalk (en pagina) mee naar rechts uit. */
 	min-width: 0;
-	border: 2px solid var(--wp--preset--color--rand);
-	border-radius: 6px;
-	padding: 0.5rem 0.7rem;
+	border: 0;
+	background: transparent;
+	padding: 0.55rem 0;
 	font-family: inherit;
 	font-size: 0.85rem;
 }
+.hdp-shop-zoeken input[type="search"]:focus { outline: none; }
+.hdp-shop-zoeken__veld:focus-within { border-color: var(--wp--preset--color--homburg-rood); }
 .hdp-shop-zoeken button {
 	border: 0;
 	border-radius: 6px;
@@ -468,36 +470,37 @@ p.no-comments {
 	min-width: 0;
 }
 
-/* De donkere "Homburg-balk": zoekbalk + weergaveschakelaar op de eerste
-   rij, resultaattelling + sortering op de tweede — i.p.v. vier losse
-   regels boven het raster. Zelfde donkergrijs/rood als de header/footer. */
+/* De lichte werkbalk: zoekbalk + weergaveschakelaar op de eerste rij,
+   resultaattelling + sortering op de tweede — i.p.v. vier losse regels
+   boven het raster. Zelfde witte kaart-stijl als de rest van de pagina
+   (zie ul.products li.product.hdp-card) i.p.v. een donker contrastvlak. */
 .hdp-shop-balk {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) auto;
+	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
-	gap: 1rem 0.75rem;
+	column-gap: 0.75rem;
+	row-gap: 0.9rem;
 	min-width: 0;
-	/* Verloop voor richting + een zachte gloed linksboven voor wat diepte,
-	   i.p.v. een vlak effen vlak. */
-	background:
-		radial-gradient(120% 180% at 15% 0%, rgba(255, 255, 255, 0.07), transparent 60%),
-		linear-gradient(135deg, var(--wp--preset--color--donkergrijs), #3d4046);
-	border-bottom: 3px solid var(--wp--preset--color--homburg-rood);
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
 	border-radius: 10px;
 	padding: 1.1rem 1.25rem;
-	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), var(--hdp-wc-schaduw);
+	box-shadow: var(--hdp-wc-schaduw);
 }
-.hdp-shop-balk > *:not(.hdp-shop-zoeken):not(.hdp-shop-weergave):not(.woocommerce-result-count):not(.woocommerce-ordering) { grid-column: 1 / -1; }
+/* Forceert een regeleinde na de zoekrij (zoeken + weergave), zodat de
+   resultaattelling/sortering altijd op een eigen regel eronder vallen
+   i.p.v. dat flexbox probeert alles op één regel te persen. */
+.hdp-shop-balk__breek { flex-basis: 100%; width: 0; height: 0; margin: 0; padding: 0; }
 /* Dunne scheidingslijn tussen de zoekrij en de resultaattelling/sortering
    -rij — beide items op die 2e rij krijgen 'm, zodat de lijn over de
    volle breedte van de balk doorloopt. */
 .hdp-shop-balk .woocommerce-result-count,
 .hdp-shop-balk .woocommerce-ordering {
-	border-top: 1px solid rgba(255, 255, 255, 0.12);
+	border-top: 1px solid var(--wp--preset--color--grijs-licht);
 	padding-top: 0.9rem;
+	flex: 1 1 auto;
 }
-.hdp-shop-balk .woocommerce-result-count { color: #c9ccd2; }
-.hdp-shop-balk .woocommerce-ordering { justify-self: end; }
+.hdp-shop-balk .woocommerce-ordering { flex: none; margin-left: auto; }
 
 /* Actieve merkfilters als losse, opruimbare "chips" boven de resultaten
    — sneller te overzien/wijzigen dan alleen de aangevinkte vakjes in de
@@ -538,7 +541,7 @@ p.no-comments {
 	background: var(--wp--preset--color--donkergrijs) !important;
 }
 
-.hdp-shop-weergave { display: flex; gap: 0.4rem; }
+.hdp-shop-weergave { display: flex; flex: none; gap: 0.4rem; }
 .hdp-weergave-knop {
 	display: inline-flex;
 	align-items: center;
@@ -555,12 +558,14 @@ p.no-comments {
 .hdp-weergave-knop:hover { color: var(--wp--preset--color--donkergrijs); }
 .hdp-weergave-knop.is-actief {
 	border-color: var(--wp--preset--color--homburg-rood);
-	color: var(--wp--preset--color--homburg-rood);
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
 }
 
 @media (max-width: 480px) {
-	.hdp-shop-balk { grid-template-columns: 1fr; }
-	.hdp-shop-zoeken { max-width: none; }
+	/* Op een smal scherm past de zoekbalk niet meer naast de
+	   weergaveschakelaar — dan krijgt de zoekrij een eigen volle regel. */
+	.hdp-shop-zoeken { flex-basis: 100%; }
 }
 
 /* ==========================================================================

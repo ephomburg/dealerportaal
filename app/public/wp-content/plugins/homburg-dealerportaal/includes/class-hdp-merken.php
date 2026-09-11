@@ -31,7 +31,7 @@ class HDP_Merken {
 			'Stanhay',
 			'Tefen',
 			'The Handler',
-			'Vaderstad',
+			'Väderstad',
 			'Zürn',
 		);
 	}

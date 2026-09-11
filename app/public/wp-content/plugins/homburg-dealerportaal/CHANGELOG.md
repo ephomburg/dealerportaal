@@ -8,6 +8,12 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.43.0
+- Downloads voor dealers: het vrije tekstveld "Merk" vervangen door een vaste keuzelijst (Algemeen, Homburg Draincleaners, HARDI, Väderstad, Bogballe, RABE, Tefen) — op de bewerkpagina, in het front-end uploadformulier en bij bulk-bewerken.
+- Spelling "Väderstad" gelijkgetrokken (met puntjes) in de dealer-merkenlijst, zodat die straks 1-op-1 matcht met de merknaam uit PowerAll.
+- Winkelpagina: de werkbalk boven de productgrid kreeg een lichte, rustige opmaak (witte balk i.p.v. donker, zoekveld met icoon, gevulde rode actieve weergave-knop) i.p.v. het donkere contrastvlak.
+- Winkelpagina: overbodige "Filter toepassen"-knop bij het merkfilter verwijderd (vinkjes filteren al automatisch).
+
 ## 1.42.0
 Grote update aan de webshop-kant van het dealerportaal (WooCommerce-integratie in het thema) plus wat plugin-fixes; hieronder de belangrijkste, gebundeld per onderwerp.
 

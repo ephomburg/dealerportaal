@@ -304,7 +304,7 @@ class HDP_Admin_Upload {
 		$nieuw_merk    = '';
 		if ( $merk_wijzigen ) {
 			$nieuw_merk = sanitize_text_field( wp_unslash( $post['hdp_bulk_merk'] ) );
-			if ( '' !== $nieuw_merk && ! in_array( $nieuw_merk, HDP_Merken::lijst(), true ) ) {
+			if ( '' !== $nieuw_merk && ! in_array( $nieuw_merk, HDP_Downloads_CPT::merk_opties(), true ) ) {
 				$merk_wijzigen = false;
 			}
 		}
@@ -416,7 +416,7 @@ class HDP_Admin_Upload {
 					<label for="hdp_merk">Merk</label>
 					<select id="hdp_merk" name="hdp_merk">
 						<option value="">— Geen merk —</option>
-						<?php foreach ( HDP_Merken::lijst() as $merk ) : ?>
+						<?php foreach ( HDP_Downloads_CPT::merk_opties() as $merk ) : ?>
 							<option value="<?php echo esc_attr( $merk ); ?>"><?php echo esc_html( $merk ); ?></option>
 						<?php endforeach; ?>
 					</select>
@@ -563,7 +563,7 @@ class HDP_Admin_Upload {
 				<select id="hdp_bulk_merk" name="hdp_bulk_merk">
 					<option value="__ongewijzigd__">— Niet wijzigen —</option>
 					<option value="">— Geen merk —</option>
-					<?php foreach ( HDP_Merken::lijst() as $merk ) : ?>
+					<?php foreach ( HDP_Downloads_CPT::merk_opties() as $merk ) : ?>
 						<option value="<?php echo esc_attr( $merk ); ?>"><?php echo esc_html( $merk ); ?></option>
 					<?php endforeach; ?>
 				</select>
