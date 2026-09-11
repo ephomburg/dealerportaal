@@ -22,9 +22,33 @@ add_action(
 	}
 );
 
+// Blokstijl-varianten die met één klik in de editor te kiezen zijn.
+// inline_style wordt alleen geladen als de variant daadwerkelijk gebruikt is.
+add_action(
+	'init',
+	function () {
+		register_block_style(
+			'core/button',
+			array(
+				'name'         => 'omlijnd',
+				'label'        => 'Omlijnd',
+				'inline_style' => '.wp-block-button.is-style-omlijnd .wp-block-button__link{background-color:transparent;border:2px solid var(--wp--preset--color--homburg-rood);color:var(--wp--preset--color--homburg-rood);}.wp-block-button.is-style-omlijnd .wp-block-button__link:hover{background-color:var(--wp--preset--color--homburg-rood);border-color:var(--wp--preset--color--homburg-rood);color:var(--wp--preset--color--wit);}',
+			)
+		);
+	}
+);
+
 // WooCommerce-integratie: alleen geladen wanneer WooCommerce actief is,
 // logisch gescheiden zodat productzichtbaarheid/toegangscontrole hier
 // later bij kan zonder de rest van het thema te raken.
 require_once get_theme_file_path( 'includes/woocommerce/setup.php' );
 require_once get_theme_file_path( 'includes/woocommerce/product-brand.php' );
 require_once get_theme_file_path( 'includes/woocommerce/product-card.php' );
+require_once get_theme_file_path( 'includes/woocommerce/product-image.php' );
+require_once get_theme_file_path( 'includes/woocommerce/product-single.php' );
+require_once get_theme_file_path( 'includes/woocommerce/shop-filters.php' );
+require_once get_theme_file_path( 'includes/woocommerce/cart-icon.php' );
+require_once get_theme_file_path( 'includes/woocommerce/reorder.php' );
+require_once get_theme_file_path( 'includes/woocommerce/search-autosuggest.php' );
+require_once get_theme_file_path( 'includes/woocommerce/bulk-order.php' );
+require_once get_theme_file_path( 'includes/woocommerce/favorites.php' );

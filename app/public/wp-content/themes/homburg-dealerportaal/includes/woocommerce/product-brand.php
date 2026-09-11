@@ -64,11 +64,10 @@ function homburg_wc_merk_op_productkaart() {
 	echo '<span class="hdp-wc-merk">' . esc_html( $merken[0]->name ) . '</span>';
 }
 
-add_action( 'woocommerce_single_product_summary', 'homburg_wc_merk_op_productpagina', 6 );
+add_action( 'woocommerce_single_product_summary', 'homburg_wc_merk_op_productpagina', 4 );
 /**
- * Toont het merk onder de producttitel op de losse productpagina.
- * Prioriteit 6 plaatst het net na de titel (prioriteit 5) en vóór de
- * prijs (10).
+ * Toont het merk als klein label boven de producttitel op de losse
+ * productpagina (prioriteit 4, vóór de titel op 5).
  */
 function homburg_wc_merk_op_productpagina() {
 	global $product;

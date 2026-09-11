@@ -30,15 +30,21 @@ class HDP_Blocks {
 
 	public static function enqueue_assets() {
 		$post = get_post();
-		if ( ! $post
-			|| ( ! has_block( 'homburg/dealerportaal', $post )
-				&& ! has_block( 'homburg/downloads-pagina', $post )
-				&& ! has_block( 'homburg/content-pagina', $post )
-				&& ! has_block( 'homburg/info-kaart', $post )
-				&& ! has_block( 'homburg/contact-kaart', $post )
-				&& ! has_block( 'homburg/portaal-kaart', $post )
-				&& ! has_block( 'homburg/bestelgeschiedenis-pagina', $post ) )
-		) {
+		$heeft_portaal_blok = $post && (
+			has_block( 'homburg/dealerportaal', $post )
+			|| has_block( 'homburg/downloads-pagina', $post )
+			|| has_block( 'homburg/content-pagina', $post )
+			|| has_block( 'homburg/info-kaart', $post )
+			|| has_block( 'homburg/contact-kaart', $post )
+			|| has_block( 'homburg/portaal-kaart', $post )
+			|| has_block( 'homburg/bestelgeschiedenis-pagina', $post )
+		);
+
+		// Ook laden (los van de blokken hierboven) wanneer een ingelogde
+		// bezoeker de header ziet — die toont dan het instellingen-paneel
+		// (checkbox/overlay-opmaak komt uit dit bestand), ongeacht op welke
+		// pagina (dus ook winkel/productpagina's e.d.).
+		if ( ! $heeft_portaal_blok && ! is_user_logged_in() ) {
 			return;
 		}
 

@@ -26,7 +26,7 @@ $link1_url   = isset( $attributes['link1Url'] ) ? $attributes['link1Url'] : '';
 $link2_label = isset( $attributes['link2Label'] ) ? $attributes['link2Label'] : '';
 $link2_url   = isset( $attributes['link2Url'] ) ? $attributes['link2Url'] : '';
 ?>
-<article class="hdp-info-kaart">
+<article <?php echo get_block_wrapper_attributes( array( 'class' => 'hdp-info-kaart' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- core escapet dit al. ?>>
 	<?php HDP_Icons::render_icoon( $icoon, 'hdp-info-icoon' ); ?>
 	<div class="hdp-info-body">
 		<?php if ( $titel ) : ?>

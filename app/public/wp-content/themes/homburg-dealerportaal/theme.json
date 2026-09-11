@@ -8,6 +8,8 @@
 			"wideSize": "90%"
 		},
 		"color": {
+			"custom": true,
+			"customGradient": false,
 			"palette": [
 				{ "slug": "homburg-rood", "name": "Homburg rood", "color": "#c00d0d" },
 				{ "slug": "homburg-rood-donker", "name": "Homburg rood (donker)", "color": "#9a0a0a" },
@@ -18,7 +20,29 @@
 				{ "slug": "rand", "name": "Randkleur", "color": "#e2e4e8" }
 			]
 		},
+		"spacing": {
+			"units": [ "px", "rem", "em", "%" ],
+			"padding": true,
+			"margin": true,
+			"blockGap": true,
+			"customSpacingSize": true,
+			"spacingSizes": [
+				{ "slug": "20", "size": "0.5rem", "name": "XS" },
+				{ "slug": "30", "size": "1rem", "name": "S" },
+				{ "slug": "40", "size": "1.5rem", "name": "M" },
+				{ "slug": "50", "size": "2.5rem", "name": "L" },
+				{ "slug": "60", "size": "4rem", "name": "XL" }
+			]
+		},
+		"border": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true
+		},
 		"typography": {
+			"customFontSize": true,
+			"lineHeight": true,
 			"fontFamilies": [
 				{
 					"slug": "montserrat",

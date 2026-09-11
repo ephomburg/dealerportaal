@@ -58,6 +58,25 @@ class HDP_Editor {
 		'core/page-list',
 	);
 
+	/**
+	 * Homburg-rood voor de editor-accentkleur. Overschrijft de admin-thema-
+	 * CSS-variabelen die WordPress overal in de blok-editor gebruikt: de
+	 * "+"-inservoegknop, de blok-selectierand, primaire knoppen, focus-
+	 * ringen, de gemarkeerde regel in de lijstweergave, links in panelen.
+	 */
+	const ACCENT_CSS = 'html body,html body.wp-admin,html .interface-interface-skeleton,html .block-editor__container,html .editor-styles-wrapper{'
+		. '--wp-admin-theme-color:#c00d0d!important;'
+		. '--wp-admin-theme-color--rgb:192,13,13!important;'
+		. '--wp-admin-theme-color-darker-10:#a90b0b!important;'
+		. '--wp-admin-theme-color-darker-20:#920a0a!important;'
+		. '--wp-block-synced-color:#c00d0d!important;'
+		. '}'
+		// Directe val-terug voor de meest zichtbare elementen, mocht een
+		// build de kleur hardgecodeerd hebben i.p.v. via de variabele.
+		. 'body .components-button.is-primary{background-color:#c00d0d!important;border-color:#c00d0d!important;}'
+		. 'body .components-button.is-primary:hover{background-color:#a90b0b!important;border-color:#a90b0b!important;}'
+		. 'body .components-button.is-primary:active,body .components-button.is-primary.is-pressed{background-color:#920a0a!important;}';
+
 	public static function init() {
 		add_filter( 'allowed_block_types_all', array( __CLASS__, 'beperk_blokken' ), 10, 2 );
 
@@ -65,6 +84,28 @@ class HDP_Editor {
 		add_filter( 'should_load_remote_block_patterns', '__return_false' );
 		add_action( 'after_setup_theme', array( __CLASS__, 'schrap_kern_patronen' ), 20 );
 		add_action( 'init', array( __CLASS__, 'beperk_patronen' ), 20 );
+
+		// Editor-huisstijl: accentkleur naar Homburg-rood.
+		// - admin_head (prio 999): als laatste <style> in de editor-chrome,
+		//   zodat het WordPress-kleurenschema er niet overheen komt.
+		// - enqueue_block_assets: hetzelfde in het iframe-canvas (selectierand).
+		add_action( 'admin_head', array( __CLASS__, 'editor_accent_head' ), 999 );
+		add_action( 'enqueue_block_assets', array( __CLASS__, 'editor_accent_canvas' ) );
+	}
+
+	public static function editor_accent_head() {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || ! method_exists( $screen, 'is_block_editor' ) || ! $screen->is_block_editor() ) {
+			return;
+		}
+		echo '<style id="hdp-editor-accent">' . self::ACCENT_CSS . '</style>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische CSS zonder variabele invoer.
+	}
+
+	public static function editor_accent_canvas() {
+		if ( ! is_admin() ) {
+			return; // Alleen het editor-canvas, niet de front-end.
+		}
+		wp_add_inline_style( 'wp-block-library', self::ACCENT_CSS );
 	}
 
 	public static function beperk_blokken( $toegestaan, $context ) {

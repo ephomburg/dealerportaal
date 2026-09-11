@@ -2,7 +2,7 @@
 Theme Name: Homburg Dealerportaal
 Description: Eigen blokthema voor het Homburg-dealerportaal, gebouwd op het originele HTML-ontwerp (rood/donkergrijs, Montserrat). Geen bloggerichte onderdelen; puur gericht op de dealerportaalsite.
 Author: Homburg Machinehandel BV
-Version: 1.14.0
+Version: 1.20.0
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -13,6 +13,20 @@ Text Domain: homburg-dealerportaal-theme
    (block-gap) t.o.v. de header; die moet hier op nul voor een naadloze
    overgang van header naar de inhoud (bijv. de hero-afbeelding). */
 .wp-site-blocks > main { margin-block-start: 0; }
+
+/* "Sticky footer": op een korte pagina (bijv. na filteren nog maar een
+   paar producten) kroop de footer voorheen omhoog naar het einde van de
+   inhoud, met een kaal grijs gat eronder tot de rand van het scherm. Dit
+   duwt 'm nu altijd naar de onderkant van het scherm, en laat 'm bij
+   langere pagina's gewoon normaal meescrollen (dus geen position:fixed,
+   dat zou juist over de inhoud heen blijven plakken). */
+html { height: 100%; }
+.wp-site-blocks {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+.wp-site-blocks > main { flex: 1 0 auto; }
 
 .hdp-site-header, .hdp-site-header * {
 	font-family: 'Montserrat', Arial, sans-serif;
@@ -63,6 +77,112 @@ Text Domain: homburg-dealerportaal-theme
 .hdp-menu-knop svg { width: 14px; height: 14px; flex-shrink: 0; }
 .hdp-menu-knop:hover { background: var(--wp--preset--color--homburg-rood-donker); }
 
+/* Winkelmandje-icoon in de header — alleen gerenderd op webshop-pagina's
+   (zie blocks/site-header/render.php in de plugin). Het aantal-bolletje
+   wordt na een AJAX-toevoeging live bijgewerkt via WooCommerce's eigen
+   "cart fragments"-mechanisme (zie includes/woocommerce/cart-icon.php). */
+.hdp-mandje-knop {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.1rem;
+	height: 2.1rem;
+	border-radius: 6px;
+	color: var(--wp--preset--color--wit);
+	transition: background 0.2s;
+}
+.hdp-mandje-knop:hover { background: rgba(255, 255, 255, 0.12); }
+.hdp-mandje-knop svg { width: 20px; height: 20px; }
+/* Favorieten-icoon in de header — hergebruikt dezelfde bolletje-opmaak
+   als het winkelmandje. Aantal komt uit homburg_wc_favoriete_ids() (zie
+   includes/woocommerce/favorites.php); wordt na het (de)markeren van een
+   favoriet direct bijgewerkt door diezelfde JS, geen paginaherlaad nodig. */
+.hdp-favorieten-knop {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.1rem;
+	height: 2.1rem;
+	border-radius: 6px;
+	color: var(--wp--preset--color--wit);
+	transition: background 0.2s;
+}
+.hdp-favorieten-knop:hover { background: rgba(255, 255, 255, 0.12); }
+.hdp-favorieten-knop svg { width: 19px; height: 19px; }
+.hdp-favorieten-aantal {
+	position: absolute;
+	top: -2px;
+	right: -2px;
+	min-width: 1.15rem;
+	height: 1.15rem;
+	padding: 0 0.25rem;
+	border-radius: 999px;
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+	font-size: 0.66rem;
+	font-weight: 700;
+	line-height: 1.15rem;
+	text-align: center;
+	border: 2px solid var(--wp--preset--color--donkergrijs);
+}
+
+.hdp-mandje-aantal {
+	position: absolute;
+	top: -2px;
+	right: -2px;
+	min-width: 1.15rem;
+	height: 1.15rem;
+	padding: 0 0.25rem;
+	border-radius: 999px;
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+	font-size: 0.66rem;
+	font-weight: 700;
+	line-height: 1.15rem;
+	text-align: center;
+	border: 2px solid var(--wp--preset--color--donkergrijs);
+}
+
+/* Instellingen + Uitloggen in de header — gestapeld, i.p.v. bij de
+   "Welkom"-titel op de homepage (zie class-hdp-portal-render.php). De
+   knop/paneel-structuur (checkbox-hack, geen JS) komt uit
+   HDP_Account::render_instellingen_knop_en_paneel(); hier alleen de
+   lichte kaart-stijl herzien voor deze donkere achtergrond. */
+.hdp-header-account {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: center;
+	gap: 0.2rem;
+	border-left: 1px solid rgba(255, 255, 255, 0.25);
+	padding-left: 0.9rem;
+	margin-left: 0.2rem;
+}
+.hdp-header-account .hdp-btn-instellingen {
+	background: none;
+	padding: 0;
+	color: #b9bcc2;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.01em;
+}
+.hdp-header-account .hdp-btn-instellingen svg { width: 12px; height: 12px; }
+.hdp-header-account .hdp-btn-instellingen:hover { background: none; color: var(--wp--preset--color--wit); transform: none; }
+.hdp-header-uitloggen {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	color: #8f939b;
+	font-size: 0.68rem;
+	font-weight: 600;
+	text-decoration: none;
+	transition: color 0.2s;
+}
+.hdp-header-uitloggen svg { width: 11px; height: 11px; stroke: currentColor; flex-shrink: 0; }
+.hdp-header-uitloggen:hover { color: var(--wp--preset--color--wit); }
+
 .hdp-taalswitch {
 	display: flex;
 	align-items: center;
@@ -96,7 +216,11 @@ Text Domain: homburg-dealerportaal-theme
 	box-sizing: border-box;
 }
 .hdp-site-footer {
-	background: var(--wp--preset--color--donkergrijs);
+	/* Subtiele diepte i.p.v. een vlak donkergrijs — zelfde soort behandeling
+	   als de donkere balk op de winkelpagina, voor een consistente uitstraling. */
+	background:
+		radial-gradient(120% 180% at 15% 0%, rgba(255, 255, 255, 0.05), transparent 60%),
+		var(--wp--preset--color--donkergrijs);
 	color: #c9ccd2;
 	border-top: 4px solid var(--wp--preset--color--homburg-rood);
 	margin-top: 3rem;

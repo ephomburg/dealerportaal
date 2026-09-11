@@ -22,7 +22,7 @@ $email       = isset( $attributes['email'] ) ? trim( $attributes['email'] ) : ''
 $telefoon    = isset( $attributes['telefoon'] ) ? trim( $attributes['telefoon'] ) : '';
 $telefoon_href = $telefoon ? 'tel:' . preg_replace( '/[^\d+]/', '', $telefoon ) : '';
 ?>
-<article class="hdp-info-kaart">
+<article <?php echo get_block_wrapper_attributes( array( 'class' => 'hdp-info-kaart' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- core escapet dit al. ?>>
 	<?php HDP_Icons::render_icoon( $icoon, 'hdp-info-icoon' ); ?>
 	<div class="hdp-info-body">
 		<?php if ( $titel ) : ?>

@@ -8,6 +8,32 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.42.0
+Grote update aan de webshop-kant van het dealerportaal (WooCommerce-integratie in het thema) plus wat plugin-fixes; hieronder de belangrijkste, gebundeld per onderwerp.
+
+**Winkelpagina**
+- Zoeken op naam/artikelnummer met live suggesties terwijl je typt, filteren op merk met verwijderbare "chips" boven de resultaten, en een raster/lijst-weergavekeuze (onthouden per bezoeker).
+- Alles gebundeld in één donkere Homburg-balk (zoeken, weergave, resultaattelling, sortering) i.p.v. losse regels.
+- Paginering, merkfilter en de productkaart zelf visueel verbeterd (en een aantal WooCommerce-eigenaardigheden rechtgezet die de Homburg-huisstijl overschreven, zoals de standaard-paarse paginering en dubbele/ongelijke knopbreedtes in de lijstweergave).
+
+**Favorieten en snel bestellen**
+- Persoonlijke favorietenlijst: een hartje op elke productkaart en de productpagina, een hartje-icoon met aantal in de header, en een eigen opgeschoonde "Mijn favorieten"-pagina (zonder het volledige account-menu ernaast).
+- "Snel bestellen" (nieuw tabblad onder Mijn account): een lijst artikelnummers in één keer plakken/intypen (optioneel met aantal, bijv. "10714 x3") om in één keer aan de winkelmand toe te voegen.
+- "Opnieuw bestellen" nu ook in het bestellingenoverzicht zelf (niet alleen op de losse orderpagina), en bruikbaar bij "in behandeling"/"on hold" i.p.v. alleen "voltooid".
+
+**Header en overige pagina's**
+- Winkelmandje-icoon met live aantal in de header.
+- Instellingen + Uitloggen verplaatst van de homepage naar de header (gestapeld, naast winkelmandje/favorieten) — overal op de site bereikbaar.
+- "Terug naar de winkel"-knop op winkelmand, afrekenen en de productpagina.
+- Coupons volledig uitgezet (niet van toepassing bij Homburg).
+- Sticky footer: blijft altijd onderaan het scherm i.p.v. omhoog te kruipen op een korte pagina.
+- Homepage: hero loopt vloeiend over in de welkomstsectie i.p.v. een brede lege overgangsstrook.
+- "Naar de webshop"-kaart opent niet langer geforceerd in een nieuw tabblad (de configurator, die wél extern is, blijft dat gewoon doen).
+
+## 1.41.0
+- Opmaakknoppen per kaart: `portaal-kaart`, `info-kaart` en `contact-kaart` ondersteunen nu de standaard WordPress-instellingen voor **achtergrond-/tekstkleur, binnenmarge (padding), buitenmarge en rand/hoekafronding** — per losse kaart in te stellen via het zijpaneel, zonder CSS. De `render.php` van deze blokken zet nu `get_block_wrapper_attributes()` op de wrapper zodat die instellingen ook op de front-end doorkomen. Zonder instellingen ziet de kaart er exact hetzelfde uit als voorheen.
+- Editor-accentkleur naar Homburg-rood (`HDP_Editor`): de "+"-knop, blok-selectierand, primaire knoppen, focusringen en de gemarkeerde regel in de lijstweergave zijn nu rood i.p.v. WordPress-blauw. Alleen admin-CSS (editor-chrome + iframe-canvas), raakt de front-end niet.
+
 ## 1.40.0
 - `homburg/portaal-kaart` en `homburg/info-kaart` gebruiken nu `useBlockProps()` op hun wrapper in de editor. Daardoor is de hele kaart één klikbare blokgrens: klik = blok geselecteerd, Backspace/Delete verwijdert 'm, de blok-toolbar hangt aan de kaart. Voorheen landde een klik in het tekstveld en was het blok alleen via de lijstweergave te pakken.
 - Nieuw blok `homburg/contact-kaart`: als de infokaart, maar met losse velden **E-mail** en **Telefoon** die automatisch `mailto:` / `tel:`-knoppen worden — geen handmatige links meer typen.

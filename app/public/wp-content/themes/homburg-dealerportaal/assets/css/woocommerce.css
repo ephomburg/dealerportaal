@@ -7,7 +7,85 @@
 :root {
 	--hdp-wc-radius:  10px;
 	--hdp-wc-schaduw: 0 4px 18px rgba(43, 45, 49, 0.10);
+	--hdp-wc-blauwdruk: #eceff4;
+	--hdp-wc-rand-sterk: #c9ced6;
 }
+
+/* ==========================================================================
+   BLAUWDRUK-PLAAT — vervangt een generiek placeholder-plaatje wanneer een
+   product geen foto heeft: millimeterpapier-vlak met de categorie
+   linksboven en het artikelnummer groot in het midden. Puur HTML/CSS
+   (geen los bestand), dus per product anders en altijd scherp. Gebruikt op
+   de productkaart en de losse productpagina; zie
+   includes/woocommerce/product-image.php.
+   ========================================================================== */
+.hdp-plate {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 0.6rem;
+	background:
+		linear-gradient(var(--wp--preset--color--rand) 1px, transparent 1px) 0 0 / 22px 22px,
+		linear-gradient(90deg, var(--wp--preset--color--rand) 1px, transparent 1px) 0 0 / 22px 22px,
+		var(--hdp-wc-blauwdruk);
+}
+.hdp-plate::after {
+	content: "";
+	position: absolute;
+	right: 10px;
+	bottom: 10px;
+	width: 20px;
+	height: 20px;
+	border: 1px solid var(--hdp-wc-rand-sterk);
+	border-radius: 50%;
+	background:
+		linear-gradient(var(--hdp-wc-rand-sterk), var(--hdp-wc-rand-sterk)) center / 1px 20px no-repeat,
+		linear-gradient(var(--hdp-wc-rand-sterk), var(--hdp-wc-rand-sterk)) center / 20px 1px no-repeat;
+}
+.hdp-plate__cat {
+	position: absolute;
+	top: 8px;
+	left: 9px;
+	right: 9px;
+	font-size: 0.56rem;
+	font-weight: 600;
+	line-height: 1.25;
+	letter-spacing: 0.07em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-plate__sku {
+	font-weight: 700;
+	font-size: clamp(0.68rem, 1.6vw, 0.9rem);
+	/* .hdp-card__media (de ouder) zet line-height:0 om de standaard
+	   witruimte onder een <img> weg te halen; zonder deze regel erft een
+	   lang artikelnummer dat 0 mee zodra het naar 2 regels omslaat (vooral
+	   in de smalle lijstweergave), waardoor de regels over elkaar vallen. */
+	line-height: 1.25;
+	letter-spacing: 0.01em;
+	color: var(--wp--preset--color--donkergrijs);
+	word-break: break-word;
+	padding: 0 1.2rem;
+}
+.hdp-pdp-media .hdp-plate__sku { font-size: 1.35rem; }
+.hdp-pdp-media .hdp-plate__cat { font-size: 0.68rem; top: 14px; left: 16px; }
+.hdp-pdp-media .hdp-plate::after { right: 14px; bottom: 14px; width: 26px; height: 26px; }
+
+/* Uitlijnende cijfers voor artikelnummers en prijzen, zodat een rij
+   productkaarten netjes onder elkaar staat. Lettertype blijft Montserrat. */
+.hdp-wc-sku,
+.hdp-wc-sku-groot,
+ul.products li.product .price,
+.single-product .summary .price,
+.hdp-wc-specs {
+	font-variant-numeric: tabular-nums;
+}
+
+/* Meer lucht boven de inhoud: de kruimelpad+titel stonden vlak onder de
+   koptekst geplakt. */
+.single-product .woocommerce-breadcrumb { margin-top: 2rem; }
 
 /* ==========================================================================
    ALGEMEEN: meldingen, paginering, breadcrumb
@@ -50,40 +128,94 @@ p.no-comments {
 .woocommerce-breadcrumb a { color: var(--wp--preset--color--grijs-tekst); text-decoration: none; }
 .woocommerce-breadcrumb a:hover { color: var(--wp--preset--color--homburg-rood); }
 
+/* "Terug naar de winkel" — winkelmand, afrekenen, losse productpagina.
+   Zie homburg_wc_terug_naar_winkel_knop() in includes/woocommerce/setup.php. */
+.hdp-terug-naar-winkel {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin-bottom: 1.2rem;
+	color: var(--wp--preset--color--grijs-tekst);
+	text-decoration: none;
+	font-weight: 700;
+	font-size: 0.82rem;
+}
+.hdp-terug-naar-winkel svg { width: 15px; height: 15px; }
+.hdp-terug-naar-winkel:hover { color: var(--wp--preset--color--homburg-rood); }
+
+.woocommerce-pagination {
+	display: flex;
+	justify-content: center;
+}
+/* WooCommerce zet zelf een grijsig kader + verticale lijntjes tussen elk
+   nummer (".woocommerce nav.woocommerce-pagination ul/li" — 3-4 elementen
+   in de keten, wint van onze klasse-only selectors qua specificiteit).
+   Hieronder expliciet met !important teruggezet naar onze eigen pil-vorm. */
 .woocommerce-pagination ul.page-numbers {
 	display: flex;
-	gap: 0.4rem;
+	align-items: center;
+	gap: 0.3rem;
 	list-style: none;
-	padding: 0;
-	margin: 2rem 0 0;
+	padding: 0.4rem;
+	margin: 2.5rem 0 0 !important;
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand) !important;
+	border-radius: 999px;
+	box-shadow: var(--hdp-wc-schaduw);
 }
-.woocommerce-pagination .page-numbers li { display: inline-flex; }
+.woocommerce-pagination .page-numbers li {
+	display: inline-flex;
+	border-right: 0 !important;
+}
 .woocommerce-pagination .page-numbers a,
 .woocommerce-pagination .page-numbers span {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	min-width: 2.2rem;
-	height: 2.2rem;
-	padding: 0 0.6rem;
-	border-radius: 6px;
-	border: 2px solid var(--wp--preset--color--rand);
+	min-width: 2.3rem;
+	height: 2.3rem;
+	padding: 0 0.7rem !important;
+	border-radius: 999px;
+	border: 0;
 	color: var(--wp--preset--color--donkergrijs);
 	text-decoration: none;
-	font-weight: 600;
+	font-weight: 700;
 	font-size: 0.85rem;
+	transition: background 0.15s, color 0.15s;
 }
-.woocommerce-pagination .page-numbers a:hover { border-color: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--homburg-rood); }
+.woocommerce-pagination .page-numbers a:hover,
+.woocommerce-pagination .page-numbers a:focus {
+	background: var(--wp--preset--color--grijs-licht) !important;
+	color: var(--wp--preset--color--homburg-rood) !important;
+}
+/* WooCommerce zet zelf ".woocommerce nav.woocommerce-pagination ul li
+   span.current" (4 elementen in de keten) op een lichtpaarse achtergrond
+   — wint van onze regel hierboven ondanks evenveel classes, puur op
+   aantal elementen in de selector. !important is hier de simpelste,
+   betrouwbare manier om dat te overstemmen. */
 .woocommerce-pagination .page-numbers .current {
-	background: var(--wp--preset--color--homburg-rood);
-	border-color: var(--wp--preset--color--homburg-rood);
-	color: var(--wp--preset--color--wit);
+	background: var(--wp--preset--color--homburg-rood) !important;
+	color: var(--wp--preset--color--wit) !important;
 }
+.woocommerce-pagination .page-numbers .next,
+.woocommerce-pagination .page-numbers .prev {
+	font-size: 0;
+}
+.woocommerce-pagination .page-numbers .next::after,
+.woocommerce-pagination .page-numbers .prev::after {
+	font-size: 0.9rem;
+	content: "→";
+}
+.woocommerce-pagination .page-numbers .prev::after { content: "←"; }
 
+/* Resultaattelling + sortering samen op één rustige regel i.p.v. twee
+   losse regels boven elkaar (zie ook de grid-uitzondering hieronder bij
+   .hdp-shop-main). */
 .woocommerce-result-count,
 .woocommerce-ordering {
 	font-size: 0.85rem;
 	color: var(--wp--preset--color--grijs-tekst);
+	margin: 0;
 }
 .woocommerce-ordering select {
 	border: 2px solid var(--wp--preset--color--rand);
@@ -93,119 +225,695 @@ p.no-comments {
 }
 
 /* ==========================================================================
-   PRODUCTKAART (shop, categorie, zoekresultaten) — hergebruikt .hdp-kaart
+   WINKEL — zoeken, merkfilter (linkerkolom) en raster/lijst-weergave
+   Zie includes/woocommerce/shop-filters.php.
+   ========================================================================== */
+.hdp-shop-layout {
+	display: grid;
+	grid-template-columns: 220px minmax(0, 1fr);
+	gap: 2rem;
+	align-items: start;
+}
+@media (max-width: 780px) {
+	.hdp-shop-layout { grid-template-columns: minmax(0, 1fr); }
+}
+
+.hdp-shop-merken {
+	min-width: 0;
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: var(--hdp-wc-radius);
+	padding: 1.1rem 1.2rem 1.3rem;
+	/* Blijft in beeld tijdens het scrollen door een lange productlijst —
+	   bewust niet tegen de bovenkant geplakt maar rond het midden van het
+	   scherm, dat voelt minder opdringerig dan pal onder de header.
+	   Alleen relevant naast het raster (desktop) — op mobiel stapelt de
+	   kolom toch al boven de producten, dus daar weer uitgezet hieronder. */
+	position: sticky;
+	top: 28vh;
+	max-height: 68vh;
+	overflow-y: auto;
+}
+.hdp-shop-merken-details summary {
+	margin: 0 0 0.8rem;
+	padding-bottom: 0.7rem;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+	font-size: 0.78rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--wp--preset--color--donkergrijs);
+	cursor: default;
+	list-style: none;
+	/* Op desktop staat dit altijd open en oogt het niet als knop (geen
+	   pijltje) — zonder dit blijft een <summary> alsnog gewoon aanklikbaar
+	   en zou een per ongeluk klik het filter onverwacht dichtklappen. */
+	pointer-events: none;
+}
+.hdp-shop-merken-details summary::-webkit-details-marker { display: none; }
+.hdp-shop-merken-details summary::after {
+	content: "";
+	display: none;
+}
+@media (max-width: 780px) {
+	.hdp-shop-merken { position: static; max-height: none; overflow: visible; }
+	.hdp-shop-merken-details summary {
+		pointer-events: auto;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.hdp-shop-merken-details summary::after {
+		display: inline-block;
+		content: "";
+		width: 8px;
+		height: 8px;
+		border-right: 2px solid currentColor;
+		border-bottom: 2px solid currentColor;
+		transform: rotate(45deg);
+		transition: transform 0.15s;
+	}
+	.hdp-shop-merken-details[open] summary::after { transform: rotate(-135deg); }
+}
+.hdp-shop-merken-lijst {
+	list-style: none;
+	margin: 0 0 1rem;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+}
+.hdp-shop-merken-lijst li {
+	border-radius: 6px;
+	padding: 0.3rem 0.4rem;
+	transition: background 0.15s;
+}
+/* Aangevinkt merk krijgt een duidelijke achtergrond i.p.v. alleen het
+   vinkje — sneller te zien welke filters actief staan. */
+.hdp-shop-merken-lijst li:has(input:checked) { background: #fbeceb; }
+.hdp-shop-merken-lijst label {
+	display: grid;
+	/* Vaste kolommen (naam / aantal) i.p.v. inline naast elkaar — anders
+	   sprong het aantal mee omhoog/omlaag zodra een naam naar 2 regels
+	   omsloeg, en stond het niet mooi op één lijn onder elkaar. */
+	grid-template-columns: auto 1fr auto;
+	align-items: start;
+	column-gap: 0.5rem;
+	font-size: 0.85rem;
+	color: var(--wp--preset--color--donkergrijs);
+	cursor: pointer;
+}
+.hdp-shop-merken-lijst input[type="checkbox"] { accent-color: var(--wp--preset--color--homburg-rood); flex-shrink: 0; margin-top: 0.2rem; }
+.hdp-shop-merken-lijst em {
+	font-style: normal;
+	color: var(--wp--preset--color--grijs-tekst);
+	font-size: 0.78rem;
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+}
+.hdp-shop-merken-toepassen {
+	width: 100%;
+	border: 0;
+	border-radius: 7px;
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+	font-family: inherit;
+	font-weight: 700;
+	font-size: 0.8rem;
+	padding: 0.55rem 0.6rem;
+	cursor: pointer;
+	transition: background 0.15s;
+}
+.hdp-shop-merken-toepassen:hover { background: var(--wp--preset--color--homburg-rood-donker); }
+.hdp-shop-merken-wissen {
+	display: block;
+	text-align: center;
+	margin-top: 0.6rem;
+	font-size: 0.78rem;
+	color: var(--wp--preset--color--grijs-tekst);
+	text-decoration: underline;
+}
+.hdp-shop-merken-wissen:hover { color: var(--wp--preset--color--homburg-rood); }
+
+.hdp-shop-zoeken {
+	display: flex;
+	gap: 0.5rem;
+	flex: 1 1 320px;
+	max-width: 460px;
+	/* Grid- (en flex-)kinderen krijgen standaard min-width:auto, waardoor ze
+	   niet smaller worden dan hun inhoud — bij een smal scherm duwt dat de
+	   hele paginabreedte op en ontstaat er horizontaal scrollen. */
+	min-width: 0;
+}
+.hdp-shop-zoeken input[type="search"] {
+	flex: 1;
+	/* <input> heeft van de browser zelf ook een min-width:auto (rond de
+	   170-200px); zonder deze regel blijft het veld op smalle schermen te
+	   breed en trekt het de hele werkbalk (en pagina) mee naar rechts uit. */
+	min-width: 0;
+	border: 2px solid var(--wp--preset--color--rand);
+	border-radius: 6px;
+	padding: 0.5rem 0.7rem;
+	font-family: inherit;
+	font-size: 0.85rem;
+}
+.hdp-shop-zoeken button {
+	border: 0;
+	border-radius: 6px;
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+	font-family: inherit;
+	font-weight: 700;
+	font-size: 0.8rem;
+	padding: 0 1.1rem;
+	cursor: pointer;
+}
+.hdp-shop-zoeken button:hover { background: var(--wp--preset--color--homburg-rood-donker); }
+
+/* Live zoeksuggesties — toegevoegd door search-autosuggest.php als kind
+   van .hdp-shop-zoeken (die daarom position:relative krijgt via JS). */
+.hdp-zoek-suggesties {
+	position: absolute;
+	top: calc(100% + 0.4rem);
+	left: 0;
+	right: 0;
+	z-index: 20;
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: var(--hdp-wc-radius);
+	box-shadow: var(--hdp-wc-schaduw);
+	overflow: hidden;
+}
+.hdp-zoek-suggestie {
+	display: flex;
+	align-items: center;
+	gap: 0.7rem;
+	padding: 0.5rem 0.8rem;
+	text-decoration: none;
+	color: inherit;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+}
+.hdp-zoek-suggestie:last-child { border-bottom: 0; }
+.hdp-zoek-suggestie:hover { background: var(--wp--preset--color--grijs-licht); }
+.hdp-zoek-suggestie-img {
+	flex: 0 0 40px;
+	width: 40px;
+	height: 40px;
+	border-radius: 5px;
+	object-fit: cover;
+	background: var(--hdp-wc-blauwdruk);
+}
+.hdp-zoek-suggestie-img--leeg {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 0.5rem;
+	font-weight: 700;
+	text-align: center;
+	line-height: 1.1;
+	color: var(--wp--preset--color--grijs-tekst);
+	border: 1px solid var(--wp--preset--color--rand);
+	padding: 0.1rem;
+}
+.hdp-zoek-suggestie-tekst {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+}
+.hdp-zoek-suggestie-naam {
+	font-size: 0.85rem;
+	font-weight: 700;
+	color: var(--wp--preset--color--donkergrijs);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.hdp-zoek-suggestie-sku { font-size: 0.72rem; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-zoek-suggestie-prijs {
+	flex: 0 0 auto;
+	font-size: 0.82rem;
+	font-weight: 700;
+	color: var(--wp--preset--color--donkergrijs);
+	white-space: nowrap;
+}
+
+/* Chips, de donkere "Homburg-balk" (zoeken/weergave/resultaattelling/
+   sortering), het raster en de paginering vallen gewoon onder elkaar. */
+.hdp-shop-main {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	min-width: 0;
+}
+
+/* De donkere "Homburg-balk": zoekbalk + weergaveschakelaar op de eerste
+   rij, resultaattelling + sortering op de tweede — i.p.v. vier losse
+   regels boven het raster. Zelfde donkergrijs/rood als de header/footer. */
+.hdp-shop-balk {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 1rem 0.75rem;
+	min-width: 0;
+	/* Verloop voor richting + een zachte gloed linksboven voor wat diepte,
+	   i.p.v. een vlak effen vlak. */
+	background:
+		radial-gradient(120% 180% at 15% 0%, rgba(255, 255, 255, 0.07), transparent 60%),
+		linear-gradient(135deg, var(--wp--preset--color--donkergrijs), #3d4046);
+	border-bottom: 3px solid var(--wp--preset--color--homburg-rood);
+	border-radius: 10px;
+	padding: 1.1rem 1.25rem;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), var(--hdp-wc-schaduw);
+}
+.hdp-shop-balk > *:not(.hdp-shop-zoeken):not(.hdp-shop-weergave):not(.woocommerce-result-count):not(.woocommerce-ordering) { grid-column: 1 / -1; }
+/* Dunne scheidingslijn tussen de zoekrij en de resultaattelling/sortering
+   -rij — beide items op die 2e rij krijgen 'm, zodat de lijn over de
+   volle breedte van de balk doorloopt. */
+.hdp-shop-balk .woocommerce-result-count,
+.hdp-shop-balk .woocommerce-ordering {
+	border-top: 1px solid rgba(255, 255, 255, 0.12);
+	padding-top: 0.9rem;
+}
+.hdp-shop-balk .woocommerce-result-count { color: #c9ccd2; }
+.hdp-shop-balk .woocommerce-ordering { justify-self: end; }
+
+/* Actieve merkfilters als losse, opruimbare "chips" boven de resultaten
+   — sneller te overzien/wijzigen dan alleen de aangevinkte vakjes in de
+   zijbalk. Zie homburg_wc_chip_url_zonder() in shop-filters.php. */
+.hdp-shop-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+.hdp-shop-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.35rem 0.5rem 0.35rem 0.8rem;
+	border-radius: 999px;
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
+	color: var(--wp--preset--color--donkergrijs);
+	text-decoration: none;
+	font-size: 0.78rem;
+	font-weight: 600;
+	transition: border-color 0.15s, color 0.15s;
+}
+.hdp-shop-chip span { font-size: 1rem; line-height: 1; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-shop-chip:hover { border-color: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--homburg-rood); }
+.hdp-shop-chip:hover span { color: var(--wp--preset--color--homburg-rood); }
+.hdp-shop-chip--wis {
+	background: none;
+	border-style: dashed;
+	color: var(--wp--preset--color--grijs-tekst);
+	padding: 0.35rem 0.8rem;
+}
+.hdp-shop-chip--wis:hover { border-color: var(--wp--preset--color--homburg-rood); }
+
+/* Korte bevestiging op de bestelknop zelf na een geslaagde AJAX-toevoeging
+   (raster/lijst) — zie de "added_to_cart"-listener in shop-filters.php. */
+.hdp-card__btn.hdp-net-toegevoegd {
+	background: var(--wp--preset--color--donkergrijs) !important;
+}
+
+.hdp-shop-weergave { display: flex; gap: 0.4rem; }
+.hdp-weergave-knop {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.2rem;
+	height: 2.2rem;
+	border: 2px solid var(--wp--preset--color--rand);
+	border-radius: 6px;
+	background: var(--wp--preset--color--wit);
+	color: var(--wp--preset--color--grijs-tekst);
+	cursor: pointer;
+	transition: border-color 0.15s, color 0.15s;
+}
+.hdp-weergave-knop:hover { color: var(--wp--preset--color--donkergrijs); }
+.hdp-weergave-knop.is-actief {
+	border-color: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--homburg-rood);
+}
+
+@media (max-width: 480px) {
+	.hdp-shop-balk { grid-template-columns: 1fr; }
+	.hdp-shop-zoeken { max-width: none; }
+}
+
+/* ==========================================================================
+   PRODUCTKAART (shop, categorie, zoekresultaten, gerelateerd)
+   Eigen sjabloon: woocommerce/content-product.php
    ========================================================================== */
 ul.products {
 	display: grid;
-	grid-template-columns: repeat(3, 1fr);
-	gap: 1.5rem;
+	grid-template-columns: repeat(6, 1fr);
+	gap: 1rem;
 	list-style: none;
 	margin: 0;
 	padding: 0;
 }
-/* WooCommerce's eigen woocommerce-layout.css zet op li.product zelf een
-   float + vaste breedte-percentages (.columns-3 etc.) met een hogere
-   specificiteit dan een simpele "ul.products li.product"-selector, ook al
-   laadt dit bestand ná die van WooCommerce. !important is hier bewust
-   nodig om het eigen rastersysteem van WooCommerce volledig te vervangen
-   door onze eigen CSS-grid. */
-ul.products li.product {
+@media (max-width: 1300px) { ul.products { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 900px)  { ul.products { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 640px)  { ul.products { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 420px)  { ul.products { grid-template-columns: 1fr; } }
+/* WooCommerce zet op ul.products een onzichtbare ::before/::after als
+   "clearfix" voor zijn eigen (float-)lay-out. In een CSS-grid telt zo'n
+   pseudo-element gewoon mee als eerste rastervak, waardoor alle échte
+   producten één plek opschuiven en er linksboven een leeg vak ontstaat.
+   Hier uitgeschakeld. */
+.woocommerce ul.products::before,
+.woocommerce ul.products::after,
+ul.products::before,
+ul.products::after {
+	content: none;
+	display: none;
+}
+
+/* WooCommerce zet op li.product zelf een float + vaste breedte via
+   woocommerce-layout.css; !important vervangt dat door onze CSS-grid. */
+ul.products li.product.hdp-card {
+	position: relative;
 	float: none !important;
 	width: auto !important;
 	margin: 0 !important;
 	clear: none !important;
+	padding: 0;
+	gap: 0;
+	list-style: none;
 	background: var(--wp--preset--color--wit);
-	border-radius: var(--hdp-wc-radius);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: 12px;
 	box-shadow: var(--hdp-wc-schaduw);
-	border-top: 5px solid var(--wp--preset--color--homburg-rood);
-	padding: 1.6rem 1.5rem 1.8rem;
 	display: flex;
 	flex-direction: column;
-	gap: 0.6rem;
-	transition: transform 0.15s, box-shadow 0.15s;
-	list-style: none;
+	overflow: hidden;
+	transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
 }
-ul.products li.product:hover { transform: translateY(-3px); box-shadow: 0 8px 26px rgba(43, 45, 49, 0.16); }
-ul.products li.product img {
-	border-radius: 8px;
+ul.products li.product.hdp-card:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 8px 26px rgba(43, 45, 49, 0.16);
+	border-color: #c9ced6;
+}
+
+.hdp-card__media {
+	position: relative;
+	display: block;
+	line-height: 0;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+}
+.hdp-card__img {
+	width: 100%;
 	aspect-ratio: 1 / 1;
 	object-fit: cover;
-	width: 100%;
-	height: auto;
-	margin-bottom: 0.4rem;
+	display: block;
+	background: var(--hdp-wc-blauwdruk);
 }
-ul.products li.product .woocommerce-loop-product__title {
-	font-size: 1rem;
+.hdp-card__flag {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	font-size: 0.64rem;
 	font-weight: 700;
-	color: var(--wp--preset--color--donkergrijs);
-	margin: 0;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	padding: 0.15rem 0.45rem;
+	border-radius: 5px;
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
 }
-ul.products li.product a { text-decoration: none; }
 
+/* Favoriet-hartje — zie favorites.php. Op de kaart rechtsboven op het
+   beeldvlak (los van de <a class="hdp-card__media">, die aria-hidden is —
+   vandaar hier eigen positionering t.o.v. de hele kaart, niet het beeld). */
+.hdp-favoriet-knop {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	border: 0;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.9);
+	box-shadow: 0 1px 4px rgba(43, 45, 49, 0.18);
+	color: var(--wp--preset--color--grijs-tekst);
+	cursor: pointer;
+	transition: color 0.15s, transform 0.1s;
+}
+.hdp-favoriet-knop svg { width: 16px; height: 16px; }
+.hdp-favoriet-knop:hover { color: var(--wp--preset--color--homburg-rood); transform: scale(1.08); }
+.hdp-favoriet-knop.is-favoriet { color: var(--wp--preset--color--homburg-rood); }
+.hdp-favoriet-knop.is-favoriet svg { fill: currentColor; }
+
+.hdp-card__body {
+	padding: 0.75rem 0.8rem 0.85rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	flex: 1;
+}
+.hdp-card__brand {
+	font-size: 0.58rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--homburg-rood);
+	margin-bottom: 0.05rem;
+}
+.hdp-card__title {
+	font-size: 0.85rem;
+	font-weight: 700;
+	line-height: 1.3;
+	margin: 0;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	/* Zonder dit blijft een flex-kind standaard min-height:auto houden, dus
+	   past de doos zich aan de ongeknipte tekst aan i.p.v. aan de 2 regels
+	   — dan steekt een lange titel gewoon onder de rand uit. */
+	min-height: 0;
+}
+.hdp-card__title a { color: var(--wp--preset--color--donkergrijs); text-decoration: none; }
+.hdp-card__title a:hover { color: var(--wp--preset--color--homburg-rood); }
+.hdp-card__sku {
+	font-size: 0.7rem;
+	letter-spacing: 0.02em;
+	color: var(--wp--preset--color--grijs-tekst);
+	font-variant-numeric: tabular-nums;
+}
+.hdp-card__price {
+	margin-top: auto;
+	padding-top: 0.45rem;
+	font-size: 0.92rem;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	color: var(--wp--preset--color--donkergrijs);
+	font-variant-numeric: tabular-nums;
+}
+.hdp-card__price del { color: var(--wp--preset--color--grijs-tekst); font-weight: 400; opacity: 0.7; margin-right: 0.3rem; font-size: 0.85em; }
+.hdp-card__price ins { text-decoration: none; color: var(--wp--preset--color--homburg-rood); }
+.hdp-card__price .hdp-wc-btw { display: block; font-size: 0.68rem; font-weight: 400; margin-top: 0.1rem; }
+
+.hdp-card__btn.button {
+	display: block;
+	/* De knop is een <a>, geen <button> — een <a> krijgt van de browser
+	   niet automatisch box-sizing:border-box zoals echte formulierknoppen.
+	   Zonder deze regel telt de zij-padding hieronder BOVENOP de 100%
+	   breedte op, waardoor de knop net buiten de kaart (rechts) uitsteekt. */
+	box-sizing: border-box;
+	width: 100%;
+	text-align: center;
+	margin-top: 0.6rem;
+	padding: 0.55rem 0.6rem;
+	border: 0;
+	border-radius: 7px;
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit) !important;
+	font-weight: 700;
+	font-size: 0.76rem;
+	text-decoration: none !important;
+	transition: background 0.15s;
+}
+.hdp-card__btn.button:hover { background: var(--wp--preset--color--homburg-rood-donker); }
+.hdp-card .added_to_cart {
+	display: block;
+	text-align: center;
+	margin-top: 0.4rem;
+	font-size: 0.78rem;
+	font-weight: 600;
+	color: var(--wp--preset--color--homburg-rood);
+	text-decoration: none;
+}
+
+/* ==========================================================================
+   LIJSTWEERGAVE — geschakeld via de knoppen in de winkelwerkbalk
+   (ul.products.hdp-lijst-weergave), zie shop-filters.php.
+   ========================================================================== */
+/* Een compacte lijst i.p.v. de volle breedte van de hoofdkolom: rijen
+   blijven begrensd in breedte en de inhoud (beeld, tekst, prijs, knop)
+   groepeert links bij elkaar i.p.v. uit te rekken tot een brede rij met
+   een leeg gat in het midden. */
+ul.products.hdp-lijst-weergave {
+	grid-template-columns: 1fr !important;
+	gap: 0.5rem;
+	max-width: 820px;
+}
+/* "ul.products" erbij i.p.v. alleen ".hdp-lijst-weergave" zodat deze regel
+   minstens even specifiek is als de basisregel "ul.products
+   li.product.hdp-card" hierboven (die anders wint en flex-direction:column
+   laat staan — de kaart draait dan nooit echt om naar een rij). */
+ul.products.hdp-lijst-weergave li.product.hdp-card {
+	flex-direction: row;
+	/* center i.p.v. stretch: zonder dit trekt het (hoge) beeldvlak de hele
+	   rij hoger op dan de paar korte tekstregels nodig hebben. */
+	align-items: center;
+}
+.hdp-lijst-weergave .hdp-card__media {
+	flex: 0 0 64px;
+	width: 64px;
+	height: 64px;
+	/* los van de kaartrand i.p.v. bleeding-tot-de-rand, met een eigen
+	   kader — de rij is nu korter dan het beeld ooit hoog was. */
+	margin: 0.6rem 0 0.6rem 0.6rem;
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: 6px;
+	overflow: hidden;
+}
+.hdp-lijst-weergave .hdp-card__img { height: 100%; }
+.hdp-lijst-weergave .hdp-plate { padding: 0.2rem; }
+.hdp-lijst-weergave .hdp-plate__cat { display: none; }
+.hdp-lijst-weergave .hdp-plate__sku { font-size: 0.5rem; padding: 0 0.15rem; }
+.hdp-lijst-weergave .hdp-plate::after { display: none; }
+.hdp-lijst-weergave .hdp-card__flag { top: 3px; left: 3px; font-size: 0.5rem; padding: 0.1rem 0.3rem; }
+/* Vaste, compacte kolombreedte voor merk/titel/sku i.p.v. 1fr — anders
+   rekt die kolom zich uit tot de volle rijbreedte en komen prijs/knop
+   ver naar rechts te staan, met een leeg gat ertussen. Zonder 1fr-track
+   pakt de grid de kolommen bovendien links bij elkaar, dus prijs en knop
+   sluiten direct aan i.p.v. aan de rechterrand te blijven "plakken".
+   Een VASTE breedte (geen minmax/auto) i.p.v. laten meegroeien met de
+   titeltekst — anders komt die kolom bij elke rij net iets anders uit en
+   staan prijs/knop niet meer in een nette, rechte kolom onder elkaar. */
+.hdp-lijst-weergave .hdp-card__body {
+	display: grid;
+	/* Ook de prijskolom vast (niet "auto") — anders verschuift de knop
+	   toch weer een paar pixels per rij, nu op basis van het aantal
+	   cijfers in de prijs i.p.v. de titellengte. De prijs staat al
+	   rechts uitgelijnd, dus een kortere prijs laat gewoon wat ruimte
+	   links binnen zijn eigen kolom. */
+	grid-template-columns: 280px 100px auto;
+	/* Zonder dit rekt een grid de "auto"-kolommen (prijs, knop) standaard
+	   uit om overgebleven ruimte te vullen — bij een korte prijs (dus meer
+	   overgebleven ruimte) werd de knop daardoor per rij een andere breedte.
+	   "start" laat elke kolom gewoon zijn eigen inhoud volgen. */
+	justify-content: start;
+	align-items: center;
+	column-gap: 1.25rem;
+	row-gap: 0;
+	padding: 0.5rem 1rem;
+	/* .hdp-card__body is zelf ook een flex-kind van de rij (li); zonder dit
+	   kan het (net als eerder de zoekbalk) niet smaller worden dan zijn
+	   inhoud en duwt het de rij breder dan de beschikbare ruimte. */
+	min-width: 0;
+}
+.hdp-lijst-weergave .hdp-card__brand,
+.hdp-lijst-weergave .hdp-card__title,
+.hdp-lijst-weergave .hdp-card__sku {
+	grid-column: 1;
+}
+.hdp-lijst-weergave .hdp-card__brand { margin-bottom: 0.1rem; }
+/* Eén regel met "…": -webkit-line-clamp (voor de 2-regelige titel op de
+   kaartweergave) bleek binnen dit grid-rijtje soms een 2e regel gedeeltelijk
+   te laten doorschemeren i.p.v. 'm te knippen. white-space/text-overflow is
+   voor precies één regel de robuustere, standaard-oplossing. */
+.hdp-lijst-weergave .hdp-card__title {
+	display: block;
+	-webkit-line-clamp: unset;
+	min-height: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.hdp-lijst-weergave .hdp-card__title a { display: inline; }
+.hdp-lijst-weergave .hdp-card__price {
+	grid-column: 2;
+	grid-row: 1 / -1;
+	padding-top: 0;
+	text-align: right;
+	white-space: nowrap;
+}
+.hdp-lijst-weergave .hdp-card__price .hdp-wc-btw { text-align: right; }
+.hdp-lijst-weergave .hdp-card__btn.button {
+	grid-column: 3;
+	grid-row: 1 / -1;
+	width: auto;
+	margin: 0;
+	padding: 0.5rem 1rem;
+	white-space: nowrap;
+}
+.hdp-lijst-weergave .hdp-card .added_to_cart { grid-column: 1; margin: 0.2rem 0 0; }
+@media (max-width: 640px) {
+	ul.products.hdp-lijst-weergave li.product.hdp-card { align-items: stretch; }
+	.hdp-lijst-weergave .hdp-card__media { height: auto; margin: 0; border: 0; border-radius: 0; border-right: 1px solid var(--wp--preset--color--rand); }
+	.hdp-lijst-weergave .hdp-card__body {
+		grid-template-columns: minmax(0, 1fr) auto;
+		grid-template-areas:
+			"brand  price"
+			"title  price"
+			"sku    knop";
+	}
+	.hdp-lijst-weergave .hdp-card__brand { grid-area: brand; }
+	.hdp-lijst-weergave .hdp-card__title { grid-area: title; }
+	.hdp-lijst-weergave .hdp-card__sku { grid-area: sku; }
+	.hdp-lijst-weergave .hdp-card__price { grid-area: price; grid-row: auto; align-self: start; }
+	.hdp-lijst-weergave .hdp-card__btn.button { grid-area: knop; grid-row: auto; }
+}
+/* Merklabel op de losse productpagina (hook homburg_wc_merk_op_productpagina). */
 .hdp-wc-merk {
 	display: inline-block;
-	font-size: 0.68rem;
+	font-size: 0.72rem;
 	font-weight: 700;
-	letter-spacing: 0.06em;
+	letter-spacing: 0.09em;
 	text-transform: uppercase;
 	color: var(--wp--preset--color--homburg-rood);
 }
-.hdp-wc-merk--groot { font-size: 0.78rem; margin: 0.2rem 0 0.6rem; }
+.hdp-wc-merk--groot { font-size: 0.78rem; margin: 0.2rem 0 0.4rem; }
 
-.hdp-wc-kaart-meta {
-	display: flex;
-	flex-wrap: wrap;
+/* Favoriet-hartje op de productpagina — geen ronde overlay-knop zoals op
+   de kaart, maar een tekstknop vlak onder het artikelnummer. */
+.hdp-favoriet-knop--pdp {
+	/* Buiten deze regel om erft dit element ook de kaart-styling van de
+	   basis .hdp-favoriet-knop-klasse (position:absolute + top/right) —
+	   die hier expliciet weer uitzetten. */
+	position: static;
+	top: auto;
+	right: auto;
+	width: auto;
+	height: auto;
+	box-shadow: none;
+	display: inline-flex;
 	align-items: center;
-	gap: 0.6rem;
-	font-size: 0.78rem;
+	gap: 0.4rem;
+	margin: 0.7rem 0 0;
+	padding: 0;
+	border: 0;
+	background: none;
 	color: var(--wp--preset--color--grijs-tekst);
+	font-family: inherit;
+	font-size: 0.8rem;
+	font-weight: 600;
+	cursor: pointer;
 }
-.hdp-wc-sku { color: var(--wp--preset--color--grijs-tekst); }
-
-ul.products li.product .price {
-	font-size: 1.05rem;
-	font-weight: 700;
-	color: var(--wp--preset--color--donkergrijs);
-	margin: 0.2rem 0 0.4rem;
-}
-ul.products li.product .price del { color: var(--wp--preset--color--grijs-tekst); font-weight: 400; opacity: 0.7; }
-ul.products li.product .price ins { text-decoration: none; color: var(--wp--preset--color--homburg-rood); }
-
-.stock { font-size: 0.78rem; font-weight: 600; }
-.stock.in-stock { color: #1a7d3a; }
-.stock.out-of-stock { color: var(--wp--preset--color--homburg-rood-donker); }
-.stock.on-backorder { color: #a0740a; }
-
-ul.products li.product > a.button,
-ul.products li.product > a.hdp-wc-bekijk-knop,
-ul.products li.product .added_to_cart {
-	margin-top: auto;
-}
-ul.products li.product .button,
-.hdp-wc-bekijk-knop {
-	display: inline-block;
-	text-align: center;
-	border-radius: 6px;
-	padding: 0.7rem 1.2rem;
-	font-weight: 700;
-	font-size: 0.88rem;
-	text-decoration: none !important;
-	transition: background 0.15s, transform 0.15s;
-}
-ul.products li.product > a.button {
-	background: var(--wp--preset--color--homburg-rood);
-	color: var(--wp--preset--color--wit) !important;
-	border: none;
-	margin-top: 0.5rem;
-}
-ul.products li.product > a.button:hover { background: var(--wp--preset--color--homburg-rood-donker); }
-.hdp-wc-bekijk-knop {
-	background: var(--wp--preset--color--wit);
-	color: var(--wp--preset--color--donkergrijs) !important;
-	border: 2px solid var(--wp--preset--color--rand);
-	margin-top: 0.7rem;
-}
-.hdp-wc-bekijk-knop:hover { background: var(--wp--preset--color--grijs-licht); border-color: var(--wp--preset--color--donkergrijs); }
+.hdp-favoriet-knop--pdp svg { width: 17px; height: 17px; }
+.hdp-favoriet-knop--pdp:hover { color: var(--wp--preset--color--homburg-rood); }
+.hdp-favoriet-knop--pdp.is-favoriet { color: var(--wp--preset--color--homburg-rood); }
+.hdp-favoriet-knop--pdp.is-favoriet svg { fill: currentColor; }
 
 .woocommerce-no-products-found {
 	background: var(--wp--preset--color--wit);
@@ -219,51 +927,217 @@ ul.products li.product > a.button:hover { background: var(--wp--preset--color--h
 /* ==========================================================================
    LOSSE PRODUCTPAGINA
    ========================================================================== */
+/* Bovenkant productpagina: flex i.p.v. WooCommerce's floats. Beeld links
+   met vaste breedte, samenvatting rechts (begrensd zodat het een leesbare
+   kolom blijft, ook op een breed scherm), tabs en gerelateerde producten
+   eronder op volle breedte. De ".woocommerce"-voorvoegsels winnen het van
+   WooCommerce's eigen float-/breedteregels. */
+.woocommerce div.product {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: clamp(24px, 4vw, 48px);
+	max-width: 1000px;
+}
+.woocommerce div.product > .hdp-pdp-media {
+	flex: 0 0 auto;
+	width: 340px;
+	max-width: 100%;
+}
+.woocommerce div.product > .summary.entry-summary {
+	flex: 1 1 340px;
+	float: none;
+	width: auto;
+	max-width: 520px;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.55rem;
+}
+.woocommerce div.product > .woocommerce-tabs,
+.woocommerce div.product > .related,
+.woocommerce div.product > .up-sells,
+.woocommerce div.product > .woocommerce-product-details__short-description {
+	flex: 1 1 100%;
+	float: none;
+	width: auto;
+	max-width: 1000px;
+}
+
+.hdp-pdp-media__img {
+	width: 100%;
+	aspect-ratio: 1 / 1;
+	object-fit: cover;
+	display: block;
+	background: var(--hdp-wc-blauwdruk);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: var(--hdp-wc-radius);
+}
+
+@media (max-width: 760px) {
+	.woocommerce div.product > .hdp-pdp-media { width: 100%; }
+	.woocommerce div.product > .summary.entry-summary { max-width: 100%; }
+}
+
+/* ---- samenvatting rechts ---- */
 .single-product .summary h1.product_title {
 	font-size: 1.6rem;
-	font-weight: 700;
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	line-height: 1.2;
+	color: var(--wp--preset--color--donkergrijs);
+	margin: 0;
+}
+
+/* Artikelnummer groot + kopieerknop, direct onder de titel. */
+.hdp-wc-skuline {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	flex-wrap: wrap;
+	margin: 0.15rem 0 0.35rem;
+}
+.hdp-wc-sku-groot {
+	font-size: 1.05rem;
+	font-weight: 600;
+	letter-spacing: 0.03em;
+	font-variant-numeric: tabular-nums;
+	background: var(--wp--preset--color--grijs-licht);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: 7px;
+	padding: 0.28rem 0.6rem;
 	color: var(--wp--preset--color--donkergrijs);
 }
-.single-product .summary .price {
-	font-size: 1.4rem;
+.hdp-wc-kopieer {
+	font-size: 0.68rem;
 	font-weight: 700;
-	color: var(--wp--preset--color--homburg-rood);
-	margin: 0.6rem 0;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+	background: transparent;
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: 7px;
+	padding: 0.4rem 0.7rem;
+	cursor: pointer;
+	transition: border-color 0.15s, color 0.15s;
 }
-.single-product .summary .price del { color: var(--wp--preset--color--grijs-tekst); opacity: 0.7; font-size: 1rem; }
-.single-product div.images { border-radius: var(--hdp-wc-radius); overflow: hidden; }
-.single-product div.images img { border-radius: var(--hdp-wc-radius); }
+.hdp-wc-kopieer:hover { border-color: var(--wp--preset--color--donkergrijs); color: var(--wp--preset--color--donkergrijs); }
+.hdp-wc-kopieer.is-gekopieerd { border-color: #1a7d3a; color: #1a7d3a; }
 
-.single-product form.cart .quantity input.qty {
-	border: 2px solid var(--wp--preset--color--rand);
-	border-radius: 6px;
-	padding: 0.6rem 0.7rem;
-	width: 4.5rem;
-	font-family: inherit;
-	font-size: 0.95rem;
+/* Prijs in een licht kaderblok — geeft de productpagina rust en structuur. */
+.single-product .summary .price {
+	display: block;
+	background: var(--wp--preset--color--grijs-licht);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: var(--hdp-wc-radius);
+	padding: 0.9rem 1rem;
+	margin: 0.3rem 0 0.2rem;
+	font-size: 1.55rem;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	color: var(--wp--preset--color--homburg-rood);
+	font-variant-numeric: tabular-nums;
 }
+.single-product .summary .price del { color: var(--wp--preset--color--grijs-tekst); opacity: 0.7; font-size: 1rem; font-weight: 400; margin-right: 0.4rem; }
+.single-product .summary .price ins { text-decoration: none; }
+.single-product .summary .price .hdp-wc-btw {
+	display: block;
+	margin-top: 0.15rem;
+	font-size: 0.75rem;
+	font-weight: 500;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-wc-btw {
+	font-size: 0.72rem;
+	font-weight: 500;
+	color: var(--wp--preset--color--grijs-tekst);
+	letter-spacing: 0.01em;
+}
+
+/* koopregel: aantal + knop op één lijn, en een hairline eronder */
+.single-product form.cart {
+	display: flex;
+	align-items: stretch;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+	margin: 0.4rem 0 0.2rem;
+	padding-bottom: 1.1rem;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+}
+
+/* Aantal als één samenhangend blokje: [ - ][ getal ][ + ], rand om het
+   geheel i.p.v. om het losse invoerveld. */
+.single-product form.cart .quantity {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: stretch;
+	border: 1.5px solid var(--hdp-wc-rand-sterk);
+	border-radius: 8px;
+	overflow: hidden;
+	height: 100%;
+}
+.single-product form.cart .quantity input.qty {
+	border: 0;
+	border-radius: 0;
+	padding: 0;
+	width: 2.8rem;
+	text-align: center;
+	font-family: inherit;
+	font-weight: 600;
+	font-size: 0.95rem;
+	color: var(--wp--preset--color--donkergrijs);
+	background: var(--wp--preset--color--wit);
+	-moz-appearance: textfield;
+}
+.single-product form.cart .quantity input.qty::-webkit-outer-spin-button,
+.single-product form.cart .quantity input.qty::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+.hdp-qty-btn {
+	border: 0;
+	width: 2.4rem;
+	background: var(--wp--preset--color--grijs-licht);
+	color: var(--wp--preset--color--grijs-tekst);
+	font-size: 1.15rem;
+	line-height: 1;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.15s, color 0.15s;
+}
+.hdp-qty-btn:hover { background: var(--wp--preset--color--rand); color: var(--wp--preset--color--donkergrijs); }
+.hdp-qty-min { border-right: 1.5px solid var(--hdp-wc-rand-sterk); }
+.hdp-qty-plus { border-left: 1.5px solid var(--hdp-wc-rand-sterk); }
+
 .single-product .single_add_to_cart_button,
 .single-product form.cart .button {
+	flex: 1 1 220px;
 	background: var(--wp--preset--color--homburg-rood) !important;
 	color: var(--wp--preset--color--wit) !important;
 	border: none !important;
-	border-radius: 6px !important;
-	padding: 0.8rem 1.6rem !important;
+	border-radius: 8px !important;
+	padding: 0.85rem 1.6rem !important;
 	font-weight: 700 !important;
-	font-size: 0.95rem !important;
+	font-size: 0.92rem !important;
 	text-transform: none !important;
 	transition: background 0.2s;
 }
 .single-product .single_add_to_cart_button:hover { background: var(--wp--preset--color--homburg-rood-donker) !important; }
 
-.single-product .product_meta {
-	font-size: 0.82rem;
+/* "Specificaties"-tab: alleen de velden die het product heeft. */
+.hdp-wc-specs { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.hdp-wc-specs th {
+	text-align: left;
+	font-weight: 600;
 	color: var(--wp--preset--color--grijs-tekst);
-	border-top: 1px solid var(--wp--preset--color--rand);
-	margin-top: 1.5rem;
-	padding-top: 1rem;
+	width: 11rem;
+	padding: 0.65rem 1rem 0.65rem 0;
+	vertical-align: top;
 }
-.single-product .product_meta a { color: var(--wp--preset--color--grijs-tekst); }
+.hdp-wc-specs td { padding: 0.65rem 0; color: var(--wp--preset--color--donkergrijs); }
+.hdp-wc-specs tr + tr th,
+.hdp-wc-specs tr + tr td { border-top: 1px solid var(--wp--preset--color--rand); }
+.hdp-wc-specs a { color: var(--wp--preset--color--homburg-rood); text-decoration: none; }
 
 .woocommerce-tabs {
 	background: var(--wp--preset--color--wit);
@@ -276,10 +1150,49 @@ ul.products li.product > a.button:hover { background: var(--wp--preset--color--h
 .woocommerce-tabs ul.tabs li a { text-decoration: none; font-weight: 700; color: var(--wp--preset--color--grijs-tekst); padding-bottom: 0.6rem; display: inline-block; }
 .woocommerce-tabs ul.tabs li.active a { color: var(--wp--preset--color--homburg-rood); border-bottom: 2px solid var(--wp--preset--color--homburg-rood); }
 
+/* Gerelateerde producten / up-sells onderaan de productpagina: dwing hier
+   hetzelfde raster af als op de shop-pagina. Zonder dit staat WooCommerce's
+   eigen (float-)lay-out ze soms op volle breedte, waardoor de vierkante
+   placeholder-afbeelding tot schermhoogte uitrekt. */
 .related.products ul.products,
-.up-sells ul.products { margin-top: 1rem; }
+.up-sells ul.products {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 1.5rem;
+	margin-top: 1rem;
+}
+@media (max-width: 900px) {
+	.related.products ul.products,
+	.up-sells ul.products { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+	.related.products ul.products,
+	.up-sells ul.products { grid-template-columns: 1fr; }
+}
+
+/* "Mijn favorieten" is meestal een handvol producten, geen lange lijst
+   zoals de winkel — iets grotere kaarten in minder kolommen doen dat
+   recht i.p.v. het dichte 6-koloms winkelraster. */
+ul.products.hdp-favorieten-lijst { grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+@media (max-width: 1100px) { ul.products.hdp-favorieten-lijst { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 780px)  { ul.products.hdp-favorieten-lijst { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px)  { ul.products.hdp-favorieten-lijst { grid-template-columns: 1fr; } }
 .related.products > h2,
 .up-sells > h2 { font-size: 1.15rem; font-weight: 700; margin: 2.5rem 0 1.2rem; }
+
+/* Harde begrenzing: geen enkele productafbeelding of placeholder mag de
+   lay-out opblazen, ook niet als het raster onverhoopt niet grijpt. */
+.woocommerce ul.products li.product img,
+.woocommerce img.woocommerce-placeholder,
+.woocommerce-page img.woocommerce-placeholder {
+	max-width: 100%;
+	max-height: 320px;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 1 / 1;
+	object-fit: contain;
+	background: var(--wp--preset--color--grijs-licht);
+}
 
 /* ==========================================================================
    WINKELMAND / AFREKENEN (WooCommerce-blokken)
@@ -331,6 +1244,53 @@ ul.products li.product > a.button:hover { background: var(--wp--preset--color--h
 }
 .woocommerce-MyAccount-navigation a:hover { background: var(--wp--preset--color--grijs-licht); }
 .woocommerce-MyAccount-navigation .is-active a { background: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--wit); }
+
+/* "Mijn favorieten" gaat uitsluitend over favoriete webshopproducten —
+   geen zin om het volledige "Mijn account"-menu (bestellingen, downloads,
+   adressen, uitloggen...) ernaast te tonen. WooCommerce zet zelf al een
+   "woocommerce-favorieten" class op de <body> voor dit eindpunt (zie
+   is_wc_endpoint_url()), dus geen extra PHP-hook nodig om dit te scopen.
+   De echte oorzaak van de "zwevende, te smalle" inhoud: WooCommerce zet
+   nav/inhoud niet met flex/grid neer maar met ouderwetse CSS-floats en
+   vaste breedtes (float:left/30% resp. float:right/68% — zie
+   woocommerce-layout.css). Het onzichtbaar maken van de nav trekt die
+   breedte/float dus niet vanzelf recht; dat hieronder expliciet doen. */
+body.woocommerce-favorieten .woocommerce-MyAccount-navigation { display: none; }
+body.woocommerce-favorieten .woocommerce-MyAccount-content {
+	float: none;
+	width: 100%;
+}
+
+.hdp-favorieten-pagina h1 { margin: 0 0 0.3rem; font-size: 1.5rem; }
+.hdp-favorieten-aantal-tekst { color: var(--wp--preset--color--grijs-tekst); margin: 0 0 1.5rem; }
+.hdp-favorieten-leeg {
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: var(--hdp-wc-radius);
+	padding: 1.5rem;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+
+/* "Snel bestellen" — My Account-tabblad, zie bulk-order.php. */
+.hdp-snelbestellen-form textarea {
+	display: block;
+	width: 100%;
+	max-width: 560px;
+	border: 2px solid var(--wp--preset--color--rand);
+	border-radius: var(--hdp-wc-radius);
+	padding: 0.9rem 1rem;
+	font-family: 'Courier New', monospace;
+	font-size: 0.88rem;
+	line-height: 1.6;
+	resize: vertical;
+}
+.hdp-snelbestellen-form textarea:focus { border-color: var(--wp--preset--color--homburg-rood); outline: none; }
+.hdp-snelbestellen-hulp {
+	max-width: 560px;
+	margin: 0.5rem 0 1rem;
+	font-size: 0.8rem;
+	color: var(--wp--preset--color--grijs-tekst);
+}
 
 table.shop_table,
 .woocommerce-orders-table {
@@ -390,13 +1350,58 @@ table.shop_table td { padding: 0.8rem 1rem; border-top: 1px solid var(--wp--pres
 .woocommerce button.button:hover,
 .woocommerce input.button:hover { background: var(--wp--preset--color--homburg-rood-donker); }
 
+/* Actieknoppen in "Mijn bestellingen" (bekijken/betalen/annuleren/opnieuw
+   bestellen) zijn <a>'s, niet <button>/<input> — vielen zonder deze regel
+   terug op een kale onderstreepte link i.p.v. een knop. */
+.woocommerce a.button {
+	display: inline-block;
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit) !important;
+	border-radius: 6px;
+	padding: 0.45rem 0.9rem;
+	font-weight: 700;
+	font-size: 0.8rem;
+	text-decoration: none !important;
+	transition: background 0.15s;
+}
+.woocommerce a.button:hover { background: var(--wp--preset--color--homburg-rood-donker); }
+/* "Bekijken" en "Annuleren" zijn de minder urgente acties naast "Betalen"
+   en "Opnieuw bestellen" — als omlijnde knop laten ze de rode nadruk over
+   aan de acties die er echt toe doen. */
+.woocommerce a.button.view,
+.woocommerce a.button.cancel {
+	background: transparent;
+	color: var(--wp--preset--color--donkergrijs) !important;
+	border: 2px solid var(--wp--preset--color--rand);
+	padding: calc(0.45rem - 2px) calc(0.9rem - 2px);
+}
+.woocommerce a.button.view:hover,
+.woocommerce a.button.cancel:hover { border-color: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--homburg-rood) !important; }
+.woocommerce-orders-table__cell-order-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
 /* ==========================================================================
    RESPONSIVE
+   (het aantal kolommen van ul.products staat al bij de kaart-CSS zelf)
    ========================================================================== */
-@media (max-width: 900px) {
-	ul.products { grid-template-columns: repeat(2, 1fr); }
-}
 @media (max-width: 600px) {
-	ul.products { grid-template-columns: 1fr; }
 	.woocommerce-tabs ul.tabs { flex-wrap: wrap; gap: 1rem; }
+}
+
+/* ==========================================================================
+   Wint bewust van de maatvoerings-regels op .hdp-card__img/.hdp-pdp-media__img
+   (gelijke specificiteit; deze regels staan hier aan het eind zodat ze
+   winnen) — anders overschrijft "display:block"/de vlakke achtergrond van
+   die regels de blauwdruk-plaat.
+   ========================================================================== */
+.hdp-card__img.hdp-plate,
+.hdp-pdp-media__img.hdp-plate {
+	display: flex;
+	background:
+		linear-gradient(var(--wp--preset--color--rand) 1px, transparent 1px) 0 0 / 22px 22px,
+		linear-gradient(90deg, var(--wp--preset--color--rand) 1px, transparent 1px) 0 0 / 22px 22px,
+		var(--hdp-wc-blauwdruk);
 }

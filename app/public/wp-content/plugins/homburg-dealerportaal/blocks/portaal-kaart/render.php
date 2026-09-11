@@ -33,14 +33,20 @@ $gekoppeld_niet_ingevuld = false;
 if ( $instelling_sleutel ) {
 	$url_uit_instelling = HDP_Settings::get( $instelling_sleutel );
 	if ( $url_uit_instelling ) {
-		$url        = $url_uit_instelling;
-		$nieuwe_tab = true; // Instellingen-URL's zijn altijd extern (webshop/configurator).
+		$url = $url_uit_instelling;
+		// Niet langer automatisch geforceerd: de webshop draait sinds kort
+		// op dit domein zelf (WooCommerce), dus die hoort niet meer per se
+		// in een nieuw tabblad open te gaan. Of een kaart in een nieuw
+		// tabblad opent, bepaalt voortaan uitsluitend het blok zijn eigen
+		// "Open in nieuw tabblad"-attribuut ($nieuwe_tab hierboven) — zie
+		// patterns/portaalkaarten-sectie.php voor de configurator, die wél
+		// extern is en dat attribuut expliciet aan heeft staan.
 	} else {
 		$gekoppeld_niet_ingevuld = true;
 	}
 }
 ?>
-<article class="hdp-kaart">
+<article <?php echo get_block_wrapper_attributes( array( 'class' => 'hdp-kaart' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- core escapet dit al. ?>>
 	<?php HDP_Icons::render_icoon( $icoon ); ?>
 	<?php if ( $titel ) : ?>
 		<h2><?php echo wp_kses_post( $titel ); ?></h2>

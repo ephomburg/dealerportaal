@@ -44,7 +44,10 @@
 	content: "";
 	position: absolute;
 	inset: 0;
-	background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, var(--wp--preset--color--wit) 100%);
+	/* Vervaagt pas in het onderste stuk i.p.v. over de hele hoogte — de foto
+	   blijft zo langer helder en de overgang naar "Welkom" voelt korter/
+	   strakker i.p.v. een lange, uitgewassen overgangszone. */
+	background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 60%, var(--wp--preset--color--wit) 100%);
 }
 
 /* ==========================================================================
@@ -391,13 +394,20 @@ body.hdp-login-actief {
    PORTAAL (na inloggen)
    ========================================================================== */
 .hdp-welkom {
+	position: relative;
 	background: var(--wp--preset--color--wit);
 	border-bottom: 1px solid var(--wp--preset--color--rand);
-	padding: 2.2rem 0;
+	padding: 1.3rem 0 2.2rem;
+	/* Trekt de welkomstsectie iets omhoog, de vervagende onderkant van de
+	   hero in — zonder dit staan hero en "Welkom" los van elkaar met een
+	   brede, lege overgangsstrook ertussen. */
+	margin-top: -2rem;
 }
 /* Op pagina's zonder hero (bijv. downloads) staat deze sectie direct
    onder de header en mag hij iets meer lucht krijgen. */
-.hdp-welkom-zonder-hero { padding-top: 2.8rem; }
+/* Zonder hero erboven mag de negatieve margin (die normaal de hero in
+   trekt) niet mee — anders kruipt deze sectie onder de header vandaan. */
+.hdp-welkom-zonder-hero { padding-top: 2.8rem; margin-top: 0; }
 .hdp-welkom-inner { padding: 0 15%; }
 .hdp-terug-boven {
 	display: inline-block;
@@ -410,6 +420,21 @@ body.hdp-login-actief {
 .hdp-terug-boven:hover { color: var(--wp--preset--color--homburg-rood); }
 .hdp-welkom-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 .hdp-welkom-acties { display: flex; align-items: center; gap: 0.6rem; }
+/* "Uitloggen" stond hier even prominent als "Instellingen" — naast een
+   "Welkom"-titel is dat te veel gewicht voor de minst gebruikte van de
+   twee. Hier bewust een stille tekstlink i.p.v. de gevulde knop; in het
+   "wachten op goedkeuring"-scherm (waar het de enige actie is) blijft de
+   knop wél gewoon een echte knop. */
+.hdp-welkom-acties .hdp-btn-logout {
+	background: none;
+	padding: 0.4rem 0.2rem;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-welkom-acties .hdp-btn-logout:hover {
+	background: none;
+	color: var(--wp--preset--color--homburg-rood);
+	transform: none;
+}
 .hdp-welkom h1 { font-size: 1.6rem; font-weight: 700; }
 .hdp-welkom p { color: var(--wp--preset--color--grijs-tekst); font-size: 0.95rem; margin-top: 0.2rem; }
 .hdp-merken { font-weight: 600; }
