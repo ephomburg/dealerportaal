@@ -8,6 +8,11 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.45.2
+- Dashboard-kaarten: de knoppen ("Naar bestellingen" e.d.) staken over de rand van hun kaart uit. Oorzaak: `.hdp-btn` had geen `box-sizing: border-box`, dus de eigen binnenruimte (padding) van de knop kwam er bovenop de breedte van 100% bij — daarmee brak de knop net buiten de kaart. Nu overal gecorrigeerd, ook voor eventuele toekomstige volle-breedte-knoppen.
+- "Mijn account" navigatie/inhoud liep in float-hoogte uit elkaar zodra de inhoud langer werd dan de navigatie (goed zichtbaar op Dashboard/Bestellingen, toevallig niet op de korte Adressen-pagina) — omgezet naar een flex-indeling zodat beide kolommen altijd even hoog blijven, met een vaste breedte voor de navigatie i.p.v. een percentage.
+- "Mijn account" kreeg een paginatitel ("Mijn account") met scheidingslijn boven de navigatie/inhoud, i.p.v. daar direct mee te beginnen.
+
 ## 1.45.1
 - De vorige "Mijn account"-breedtefix (1.45.0) werkte in de praktijk niet: `wp:post-content` kreeg zelf een "constrained"-layout mee, waardoor WordPress' eigen generieke regel de kale `<div class="woocommerce">`-inhoud daarbinnen alsnog naar de smalle 70%-tekstbreedte terugbracht — het "align: wide"-attribuut kwam daardoor nooit tot zijn recht. Nu krijgt `.woocommerce` de breedte rechtstreeks via een eigen regel (gelijk aan de 70%-inhoudsbreedte van header/hero/kaarten elders op de site, dus nu wél gelijk uitgelijnd), en is de tekst-layout van post-content ongemoeid gelaten (zelfde aanpak als page-checkout.html).
 - Knoppen als "Bewerken"/"Toevoegen" (adresrijen) en "Bekijken" (recente bestellingen, ook op de bestaande bestelgeschiedenispagina) rekten zich uit over de volle rijbreedte i.p.v. netjes rechts uit te lijnen — kwam door de utility-class `.hdp-btn-klein`, die elders bewust `width:100%` gebruikt (de herbestelkaartjes) maar hier per ongeluk meeliftte. Expliciet gecorrigeerd voor beide plekken.

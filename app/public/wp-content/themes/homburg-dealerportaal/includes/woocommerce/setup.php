@@ -104,3 +104,15 @@ function homburg_wc_enqueue_assets() {
 		wp_get_theme()->get( 'Version' )
 	);
 }
+
+add_action( 'woocommerce_before_account_navigation', 'homburg_wc_myaccount_titel' );
+/**
+ * "Mijn account" begon zonder eigen titel meteen met de navigatie —
+ * hier alsnog een paginakop + scheidingslijn vóór navigatie/inhoud.
+ * Dit hook-punt zit al binnen de <div class="woocommerce">-wrapper van de
+ * shortcode, dus deze titel telt in de CSS mee als (eerste) kind van die
+ * flex-rij — zie .hdp-myaccount-kop in assets/css/woocommerce.css.
+ */
+function homburg_wc_myaccount_titel() {
+	echo '<div class="hdp-myaccount-kop"><h1>' . esc_html( get_the_title() ) . '</h1></div>';
+}

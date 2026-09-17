@@ -1247,7 +1247,26 @@ ul.products.hdp-favorieten-lijst { grid-template-columns: repeat(4, 1fr); gap: 1
    zelf, gelijk aan de 70%-inhoudsbreedte die de header/hero/kaarten elders
    op de site ook aanhouden (zie .hdp-header-inner/.hdp-kaarten-sectie),
    zodat linker-/rechterrand overal precies gelijk lopen. */
+/* WooCommerce zet navigatie en inhoud zelf nog met ouderwetse floats neer
+   (30%/68%, zie woocommerce-layout.css) — daardoor kreeg de witte
+   navigatiekaart nooit dezelfde hoogte als de inhoud ernaast (een korte
+   pagina als Adressen leek toevallig te kloppen, maar op elke langere
+   pagina — Dashboard, Bestellingen — stak de inhoud er zichtbaar onderuit).
+   Flex op de gezamenlijke ouder lost dat in één keer op: floats worden
+   genegeerd op flex-kinderen, en kolommen rekken standaard naar elkaars
+   hoogte (align-items: stretch, de standaardwaarde). Vaste breedte voor de
+   navigatie i.p.v. een percentage, zodat die niet meebeweegt met hoeveel
+   inhoud er is.
+
+   De titel (.hdp-myaccount-kop, zie homburg_wc_myaccount_titel() in
+   includes/woocommerce/setup.php) komt vóór de navigatie te staan en is
+   dus ZELF ook een kind van deze flex-rij — flex-wrap + flex-basis:100%
+   erop dwingt 'm op een eigen, volle-breedte regel boven navigatie/inhoud
+   i.p.v. ernaast. */
 body.woocommerce-account .woocommerce {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.6rem;
 	max-width: var(--wp--style--global--content-size, 70%);
 	margin-left: auto;
 	margin-right: auto;
@@ -1255,12 +1274,19 @@ body.woocommerce-account .woocommerce {
 	padding-bottom: 3rem;
 }
 
-/* Zonder eigen achtergrond zweeft de navigatie los op het grijze
-   paginavlak (net als de rest van de content-kolom) — hier daarom als
-   witte kaart afgebakend, net als de lijsten verderop op deze pagina's
-   (bestellingen, adressen). */
+.hdp-myaccount-kop {
+	flex: 1 1 100%;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+	padding-bottom: 1rem;
+	margin-bottom: 0.4rem;
+}
+.hdp-myaccount-kop h1 { margin: 0; font-size: 1.6rem; font-weight: 800; }
+
 .woocommerce-MyAccount-navigation {
 	box-sizing: border-box;
+	flex: 0 0 240px;
+	float: none;
+	width: auto;
 	background: var(--wp--preset--color--wit);
 	border-radius: var(--hdp-wc-radius);
 	box-shadow: var(--hdp-wc-schaduw);
@@ -1278,6 +1304,12 @@ body.woocommerce-account .woocommerce {
 }
 .woocommerce-MyAccount-navigation a:hover { background: var(--wp--preset--color--grijs-licht); }
 .woocommerce-MyAccount-navigation .is-active a { background: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--wit); }
+.woocommerce-MyAccount-content { flex: 1 1 auto; float: none; width: auto; min-width: 0; }
+
+@media (max-width: 782px) {
+	body.woocommerce-account .woocommerce { flex-direction: column; }
+	.woocommerce-MyAccount-navigation { flex-basis: auto; width: 100%; }
+}
 
 /* "Mijn favorieten" gaat uitsluitend over favoriete webshopproducten —
    geen zin om het volledige "Mijn account"-menu (bestellingen, downloads,

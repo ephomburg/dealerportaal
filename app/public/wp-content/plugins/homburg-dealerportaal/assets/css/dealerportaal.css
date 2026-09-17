@@ -54,6 +54,7 @@
    ALGEMENE KNOPPEN
    ========================================================================== */
 .hdp-btn {
+	box-sizing: border-box;
 	display: inline-block;
 	background: var(--wp--preset--color--homburg-rood);
 	color: var(--wp--preset--color--wit);
