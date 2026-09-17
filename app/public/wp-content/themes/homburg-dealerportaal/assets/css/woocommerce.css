@@ -1237,6 +1237,17 @@ ul.products.hdp-favorieten-lijst { grid-template-columns: repeat(4, 1fr); gap: 1
 /* ==========================================================================
    MIJN ACCOUNT / BESTELGESCHIEDENIS
    ========================================================================== */
+/* Zonder eigen achtergrond zweeft de navigatie los op het grijze
+   paginavlak (net als de rest van de content-kolom) — hier daarom als
+   witte kaart afgebakend, net als de lijsten verderop op deze pagina's
+   (bestellingen, adressen). */
+.woocommerce-MyAccount-navigation {
+	box-sizing: border-box;
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-wc-radius);
+	box-shadow: var(--hdp-wc-schaduw);
+	padding: 1rem;
+}
 .woocommerce-MyAccount-navigation ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.3rem; }
 .woocommerce-MyAccount-navigation a {
 	display: block;
@@ -1300,6 +1311,46 @@ body.woocommerce-favorieten .woocommerce-MyAccount-content {
 
 @media (max-width: 600px) {
 	.hdp-dashboard-kaarten { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+
+/* Adressen — "Mijn account" > Adressen (zie
+   woocommerce/myaccount/my-address.php). Vervangt WooCommerce's eigen
+   twee-koloms-floats door een lijst met rijen, zelfde opzet als
+   .hdp-bestel-lijst/.hdp-bestel-item hierboven. */
+.hdp-adressen-intro { color: var(--wp--preset--color--grijs-tekst); margin: 0 0 1.4rem; }
+
+.hdp-adressen-lijst {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-wc-radius);
+	box-shadow: var(--hdp-wc-schaduw);
+	overflow: hidden;
+}
+.hdp-adres-rij {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 1.15rem 1.4rem;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+	flex-wrap: wrap;
+}
+.hdp-adres-rij:last-child { border-bottom: none; }
+.hdp-adres-rij .hdp-kaart-icoon { width: 40px; height: 40px; flex-shrink: 0; }
+.hdp-adres-rij .hdp-kaart-icoon svg { width: 20px; height: 20px; }
+.hdp-adres-tekst { flex: 1; min-width: 200px; }
+.hdp-adres-tekst h2 { font-size: 0.92rem; font-weight: 700; margin: 0 0 0.2rem; }
+address.hdp-adres-gevuld { font-size: 0.85rem; color: var(--wp--preset--color--grijs-tekst); line-height: 1.5; }
+address.hdp-adres-leeg { font-size: 0.85rem; color: var(--wp--preset--color--grijs-tekst); font-style: italic; }
+.hdp-adres-rij .hdp-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	flex-shrink: 0;
+}
+.hdp-adres-rij .hdp-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+@media (max-width: 600px) {
+	.hdp-adres-rij { justify-content: space-between; }
+	.hdp-adres-rij .hdp-btn { width: 100%; justify-content: center; }
 }
 
 .hdp-favorieten-pagina h1 { margin: 0 0 0.3rem; font-size: 1.5rem; }

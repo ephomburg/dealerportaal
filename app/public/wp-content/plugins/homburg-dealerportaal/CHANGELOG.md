@@ -8,6 +8,12 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.45.0
+- "Mijn account" > Adressen: WooCommerce's kale, ongestylede twee-koloms-indeling vervangen door een rustige lijst met rijen (icoon, adres, Bewerken/Toevoegen-knop) — zelfde opzet als "Recente bestellingen" op het dashboard.
+- De navigatie links in "Mijn account" (Dashboard/Bestellingen/.../Uitloggen) stond los op de grijze pagina-achtergrond; staat nu in een witte kaart, net als de rest van de lijsten op deze pagina's.
+- "Mijn account" gebruikte overal maar zo'n 30% van de paginabreedte (de standaard, voor tekstpagina's bedoelde 70%-kolom, mét de klassieke 30/70-navigatie-indeling daarbinnen) — nu net als de afrekenpagina op de bredere 90%-kolom gezet.
+- Plugin kreeg er twee iconen bij (bewerken, toevoegen) t.b.v. de nieuwe adresrijen.
+
 ## 1.44.1
 - Footer: telefoonnummer Homburg Belgium gecorrigeerd naar +32 (0)15 55 98 35.
 
