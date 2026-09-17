@@ -220,7 +220,14 @@ function homburg_wc_favorieten_inhoud() {
 		<?php echo homburg_wc_terug_naar_winkel_html(); // phpcs:ignore WordPress.Security.EscapeOutput -- escapet intern. ?>
 		<h1><?php esc_html_e( 'Mijn favorieten', 'homburg-dealerportaal-theme' ); ?></h1>
 		<?php if ( ! $ids ) : ?>
-			<p class="hdp-favorieten-leeg"><?php esc_html_e( 'Je hebt nog geen favorieten. Klik op het hartje bij een product om het hier te bewaren.', 'homburg-dealerportaal-theme' ); ?></p>
+			<?php
+			echo HDP_Icons::render_lege_status( // phpcs:ignore WordPress.Security.EscapeOutput -- render_lege_status() escaped elk veld al zelf.
+				'hart',
+				__( 'Je hebt nog geen favorieten. Klik op het hartje bij een product om het hier te bewaren.', 'homburg-dealerportaal-theme' ),
+				get_permalink( wc_get_page_id( 'shop' ) ),
+				__( 'Ga naar de winkel', 'homburg-dealerportaal-theme' )
+			);
+			?>
 			<?php return; ?>
 		<?php endif; ?>
 		<?php

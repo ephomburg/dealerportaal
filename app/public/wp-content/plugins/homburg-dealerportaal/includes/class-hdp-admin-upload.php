@@ -518,14 +518,14 @@ class HDP_Admin_Upload {
 									<label class="hdp-admin-checkbox"><input type="checkbox" name="hdp_merken[]" value="<?php echo esc_attr( $merk ); ?>" <?php checked( in_array( $merk, $gekozen_merken, true ) ); ?>> <?php echo esc_html( $merk ); ?></label>
 								<?php endforeach; ?>
 							</div>
-							<button type="submit" class="hdp-btn hdp-btn-klein">Opslaan</button>
+							<button type="submit" class="hdp-btn hdp-btn-klein hdp-btn-vol">Opslaan</button>
 						</form>
 					</div>
 				<?php endforeach; ?>
 			</div>
 			<?php if ( $er_zijn_niet_goedgekeurden ) : ?>
 				<p class="hdp-bulk-actie">
-					<button type="submit" form="hdp-bulk-goedkeuren-form" class="hdp-btn hdp-btn-secundair hdp-btn-klein">Geselecteerden goedkeuren</button>
+					<button type="submit" form="hdp-bulk-goedkeuren-form" class="hdp-btn hdp-btn-secundair hdp-btn-klein hdp-btn-vol">Geselecteerden goedkeuren</button>
 				</p>
 			<?php endif; ?>
 		<?php endif; ?>
@@ -575,7 +575,7 @@ class HDP_Admin_Upload {
 				<label class="hdp-admin-checkbox"><input type="checkbox" name="hdp_bulk_regio_be" value="1"> België</label>
 				<label class="hdp-admin-checkbox"><input type="checkbox" name="hdp_bulk_regio_be_fr" value="1"> België (Franstalig)</label>
 			</div>
-			<button type="submit" class="hdp-btn hdp-btn-secundair hdp-btn-klein">Toepassen op geselecteerde</button>
+			<button type="submit" class="hdp-btn hdp-btn-secundair hdp-btn-klein hdp-btn-vol">Toepassen op geselecteerde</button>
 		</form>
 
 		<div class="hdp-download-lijst">

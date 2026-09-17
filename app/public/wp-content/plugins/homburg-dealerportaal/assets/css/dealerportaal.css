@@ -438,10 +438,24 @@ body.hdp-login-actief {
 }
 .hdp-welkom h1 { font-size: 1.6rem; font-weight: 700; }
 .hdp-welkom p { color: var(--wp--preset--color--grijs-tekst); font-size: 0.95rem; margin-top: 0.2rem; }
-.hdp-merken { font-weight: 600; }
+.hdp-merken { display: flex; align-items: center; flex-wrap: wrap; gap: 0.7rem; margin-top: 0.6rem; }
+.hdp-merken-label { font-weight: 600; }
+.hdp-merken-logos { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; }
+/* Logo ipv platte tekst zodra een merk er via Instellingen > Dealerportaal
+   een heeft (zie HDP_Settings::merk_logo_url()) — anders de tekstbadge
+   hieronder als nette terugval. */
+.hdp-merk-logo { max-height: 26px; max-width: 110px; width: auto; object-fit: contain; }
+.hdp-merk-badge {
+	font-weight: 600;
+	font-size: 0.85rem;
+	color: var(--wp--preset--color--donkergrijs);
+	background: var(--wp--preset--color--grijs-licht);
+	border-radius: 999px;
+	padding: 0.25rem 0.75rem;
+}
 
 .hdp-kaarten-sectie {
-	max-width: 70%;
+	max-width: var(--wp--style--global--content-size, 70%);
 	margin: 0 auto;
 	padding: 2.5rem 0;
 	display: grid;
@@ -459,7 +473,7 @@ body.hdp-login-actief {
 }
 
 .hdp-herbestellen-sectie {
-	max-width: 70%;
+	max-width: var(--wp--style--global--content-size, 70%);
 	margin: 0 auto;
 	padding: 2.5rem 0 0;
 }
@@ -488,7 +502,14 @@ body.hdp-login-actief {
 .hdp-herbestel-info { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; }
 .hdp-herbestel-info strong { font-size: 0.9rem; font-weight: 700; line-height: 1.3; }
 .hdp-herbestel-info span { font-size: 0.85rem; color: var(--wp--preset--color--grijs-tekst); }
-.hdp-btn-klein { padding: 0.55rem 1rem; font-size: 0.82rem; width: 100%; }
+/* Zuiver een maat-variant (kleiner lettertype/padding) — zet BEWUST geen
+   breedte, in tegenstelling tot voorheen (zie CHANGELOG 1.45.1/1.45.2): die
+   width:100% liftte per ongeluk mee naar knoppen in rijen/flex-balken waar
+   dat niet de bedoeling was. Waar een knop wél de volle breedte moet
+   krijgen (bijv. een verticale kaart), dat voortaan expliciet aanvragen
+   met .hdp-btn-vol. */
+.hdp-btn-klein { padding: 0.55rem 1rem; font-size: 0.82rem; }
+.hdp-btn-vol { width: 100%; }
 
 @media (max-width: 900px) {
 	.hdp-herbestellen-sectie { max-width: 90%; }
@@ -526,6 +547,26 @@ body.hdp-login-actief {
 .hdp-kaart .hdp-btn, .hdp-kaart .hdp-nog-niet { margin-top: auto; }
 .hdp-nog-niet { color: var(--wp--preset--color--grijs-tekst); font-size: 0.85rem; font-style: italic; }
 
+/* Gedeelde "nog niets hier"-kaart (zie HDP_Icons::render_lege_status()) —
+   icoon + tekst + optionele knop, i.p.v. overal losse cursieve tekstregels
+   zonder visueel houvast (downloads, favorieten, bestellingen). */
+.hdp-leeg-kaart {
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: var(--hdp-radius);
+	padding: 2rem 1.5rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 0.9rem;
+	max-width: 360px;
+	margin: 0 auto;
+}
+.hdp-leeg-kaart .hdp-kaart-icoon { width: 52px; height: 52px; }
+.hdp-leeg-kaart p { margin: 0; color: var(--wp--preset--color--grijs-tekst); font-size: 0.92rem; }
+.hdp-leeg-kaart .hdp-btn { width: auto; min-width: 180px; }
+
 /* ==========================================================================
    TAALWISSEL VOOR STATISCHE BLOKKEN (bijv. homburg/info-kaart)
    Deze blokken zijn geen PHP-rendering meer, dus staat zowel de NL- als de
@@ -542,7 +583,7 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
    AANVULLENDE INFORMATIE (bestellen, contact, technische documentatie)
    ========================================================================== */
 .hdp-info-sectie {
-	max-width: 70%;
+	max-width: var(--wp--style--global--content-size, 70%);
 	margin: 0 auto;
 	padding: 1rem 0 3.5rem;
 }
@@ -613,7 +654,7 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
    DOWNLOADS
    ========================================================================== */
 .hdp-downloads {
-	max-width: 70%;
+	max-width: var(--wp--style--global--content-size, 70%);
 	margin: 0 auto;
 	padding: 2.5rem 0 3rem;
 }
@@ -796,7 +837,7 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
    ADMINPORTAAL (tijdelijk, nog niet afgeschermd upload-scherm)
    ========================================================================== */
 .hdp-admin-sectie {
-	max-width: 70%;
+	max-width: var(--wp--style--global--content-size, 70%);
 	margin: 0 auto;
 	padding: 2.5rem 0 3.5rem;
 }

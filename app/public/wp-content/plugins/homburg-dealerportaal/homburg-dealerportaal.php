@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Homburg Dealerportaal
  * Description: Dealerportaal met echte inlogbeveiliging, dealerrechten (merken/korting) en beveiligde downloads voor Homburg-dealers.
- * Version:     1.45.2
+ * Version:     1.46.0
  * Author:      Homburg Machinehandel BV
  * Text Domain: homburg-dealerportaal
  */
@@ -56,6 +56,7 @@ add_action(
 		HDP_Account::init();
 		HDP_Site_Blocks::init();
 		HDP_Blocks::init();
+		HDP_Bestelgeschiedenis_Render::init();
 		HDP_Patterns::init();
 		HDP_Editor::init();
 		HDP_Admin_Upload::init();

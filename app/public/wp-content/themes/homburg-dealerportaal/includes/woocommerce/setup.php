@@ -97,12 +97,38 @@ function homburg_wc_enqueue_assets() {
 		return;
 	}
 
+	// woocommerce.css hergebruikt de knoppen/kaarten/iconen uit de plugin
+	// (dealerportaal.css) i.p.v. die hier te herhalen — dat bestand laadt
+	// normaal alleen voor ingelogde bezoekers of op de portaalpagina's zelf
+	// (zie HDP_Blocks::enqueue_assets), dus hier expliciet ook meenemen als
+	// afhankelijkheid. Zonder dit zou een uitgelogde webshopbezoeker de
+	// CSS-variabelen (--hdp-radius/--hdp-schaduw) mislopen die
+	// woocommerce.css gebruikt.
+	if ( defined( 'HDP_PLUGIN_URL' ) && defined( 'HDP_VERSION' ) ) {
+		wp_enqueue_style( 'hdp-dealerportaal', HDP_PLUGIN_URL . 'assets/css/dealerportaal.css', array(), HDP_VERSION );
+	}
+
 	wp_enqueue_style(
 		'homburg-woocommerce',
 		get_theme_file_uri( 'assets/css/woocommerce.css' ),
-		array( 'homburg-dealerportaal-theme' ),
+		array( 'homburg-dealerportaal-theme', 'hdp-dealerportaal' ),
 		wp_get_theme()->get( 'Version' )
 	);
+}
+
+add_filter( 'woocommerce_account_menu_items', 'homburg_wc_verberg_downloads_tabblad' );
+/**
+ * WooCommerce's eigen "Downloads"-tabblad gaat over digitale
+ * productdownloads (aankopen met een downloadbaar bestand erbij) — iets
+ * wat Homburg niet verkoopt, dus deze pagina toont altijd de melding "Geen
+ * downloads beschikbaar". De écht bruikbare downloads (brochures,
+ * handleidingen) staan op een aparte pagina (/downloads/, zie
+ * HDP_Downloads_Render) die hier niets mee te maken heeft — dit
+ * verwarrende, altijd-lege tabblad daarom gewoon uit het menu.
+ */
+function homburg_wc_verberg_downloads_tabblad( $items ) {
+	unset( $items['downloads'] );
+	return $items;
 }
 
 add_action( 'woocommerce_before_account_navigation', 'homburg_wc_myaccount_titel' );

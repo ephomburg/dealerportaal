@@ -30,7 +30,7 @@ class HDP_Herbestellen {
 		<section class="hdp-herbestellen-sectie" aria-label="<?php echo esc_attr( HDP_I18N::t( 'herbestellen_label' ) ); ?>">
 			<div class="hdp-herbestellen-kop">
 				<h2 class="hdp-herbestellen-titel"><?php echo esc_html( HDP_I18N::t( 'herbestellen_label' ) ); ?></h2>
-				<a class="hdp-herbestellen-alle" href="<?php echo esc_url( home_url( '/bestelgeschiedenis/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'bekijk_alle_bestellingen' ) ); ?> &rarr;</a>
+				<a class="hdp-herbestellen-alle" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', '', wc_get_page_permalink( 'myaccount' ) ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'bekijk_alle_bestellingen' ) ); ?> &rarr;</a>
 			</div>
 			<div class="hdp-herbestellen-grid">
 				<?php foreach ( $producten as $product ) : ?>
@@ -40,7 +40,7 @@ class HDP_Herbestellen {
 							<strong><?php echo esc_html( $product->get_name() ); ?></strong>
 							<span><?php echo wp_kses_post( $product->get_price_html() ); ?></span>
 						</div>
-						<a class="hdp-btn hdp-btn-klein" href="<?php echo esc_url( add_query_arg( 'add-to-cart', $product->get_id(), wc_get_cart_url() ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'herbestellen_knop' ) ); ?></a>
+						<a class="hdp-btn hdp-btn-klein hdp-btn-vol" href="<?php echo esc_url( add_query_arg( 'add-to-cart', $product->get_id(), wc_get_cart_url() ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'herbestellen_knop' ) ); ?></a>
 					</article>
 				<?php endforeach; ?>
 			</div>

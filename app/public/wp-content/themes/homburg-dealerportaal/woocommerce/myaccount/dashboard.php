@@ -37,42 +37,42 @@ $hdp_allowed_html = array(
 			<?php HDP_Icons::render_icoon( 'bestellen' ); ?>
 			<h2><?php esc_html_e( 'Bestellingen', 'homburg-dealerportaal-theme' ); ?></h2>
 			<p><?php esc_html_e( 'Bekijk je bestelgeschiedenis en de status van je orders.', 'homburg-dealerportaal-theme' ); ?></p>
-			<a class="hdp-btn hdp-btn-klein" href="<?php echo esc_url( wc_get_endpoint_url( 'orders' ) ); ?>"><?php esc_html_e( 'Naar bestellingen', 'homburg-dealerportaal-theme' ); ?></a>
+			<a class="hdp-btn hdp-btn-klein hdp-btn-vol" href="<?php echo esc_url( wc_get_endpoint_url( 'orders' ) ); ?>"><?php esc_html_e( 'Naar bestellingen', 'homburg-dealerportaal-theme' ); ?></a>
 		</div>
 
-		<div class="hdp-kaart">
+		<div class="hdp-kaart hdp-kaart--nadruk">
 			<?php HDP_Icons::render_icoon( 'bestellen' ); ?>
 			<h2><?php esc_html_e( 'Snel bestellen', 'homburg-dealerportaal-theme' ); ?></h2>
-			<p><?php esc_html_e( 'Plak of typ een lijst artikelnummers in één keer in je winkelmand.', 'homburg-dealerportaal-theme' ); ?></p>
-			<a class="hdp-btn hdp-btn-klein" href="<?php echo esc_url( wc_get_endpoint_url( 'snelbestellen' ) ); ?>"><?php esc_html_e( 'Snel bestellen', 'homburg-dealerportaal-theme' ); ?></a>
+			<p><?php esc_html_e( 'Ken je de artikelnummers al? Plak of typ ze in één keer in je winkelmand.', 'homburg-dealerportaal-theme' ); ?></p>
+			<a class="hdp-btn hdp-btn-klein hdp-btn-vol" href="<?php echo esc_url( wc_get_endpoint_url( 'snelbestellen' ) ); ?>"><?php esc_html_e( 'Snel bestellen', 'homburg-dealerportaal-theme' ); ?></a>
 		</div>
 
 		<div class="hdp-kaart">
 			<?php HDP_Icons::render_icoon( 'hart' ); ?>
 			<h2><?php esc_html_e( 'Mijn favorieten', 'homburg-dealerportaal-theme' ); ?></h2>
 			<p><?php esc_html_e( 'De producten die je hebt bewaard om snel terug te vinden.', 'homburg-dealerportaal-theme' ); ?></p>
-			<a class="hdp-btn hdp-btn-klein" href="<?php echo esc_url( wc_get_endpoint_url( 'favorieten' ) ); ?>"><?php esc_html_e( 'Bekijk favorieten', 'homburg-dealerportaal-theme' ); ?></a>
+			<a class="hdp-btn hdp-btn-klein hdp-btn-vol" href="<?php echo esc_url( wc_get_endpoint_url( 'favorieten' ) ); ?>"><?php esc_html_e( 'Bekijk favorieten', 'homburg-dealerportaal-theme' ); ?></a>
 		</div>
 
 		<div class="hdp-kaart">
 			<?php HDP_Icons::render_icoon( 'downloads' ); ?>
 			<h2><?php esc_html_e( 'Downloads', 'homburg-dealerportaal-theme' ); ?></h2>
 			<p><?php esc_html_e( 'Brochures, handleidingen en ander materiaal voor jouw merken.', 'homburg-dealerportaal-theme' ); ?></p>
-			<a class="hdp-btn hdp-btn-klein" href="<?php echo esc_url( wc_get_endpoint_url( 'downloads' ) ); ?>"><?php esc_html_e( 'Naar downloads', 'homburg-dealerportaal-theme' ); ?></a>
+			<a class="hdp-btn hdp-btn-klein hdp-btn-vol" href="<?php echo esc_url( home_url( '/downloads/' ) ); ?>"><?php esc_html_e( 'Naar downloads', 'homburg-dealerportaal-theme' ); ?></a>
 		</div>
 
 		<div class="hdp-kaart">
 			<?php HDP_Icons::render_icoon( 'adres' ); ?>
 			<h2><?php esc_html_e( 'Adressen', 'homburg-dealerportaal-theme' ); ?></h2>
 			<p><?php esc_html_e( 'Beheer je verzend- en factuuradres.', 'homburg-dealerportaal-theme' ); ?></p>
-			<a class="hdp-btn hdp-btn-klein" href="<?php echo esc_url( wc_get_endpoint_url( 'edit-address' ) ); ?>"><?php esc_html_e( 'Naar adressen', 'homburg-dealerportaal-theme' ); ?></a>
+			<a class="hdp-btn hdp-btn-klein hdp-btn-vol" href="<?php echo esc_url( wc_get_endpoint_url( 'edit-address' ) ); ?>"><?php esc_html_e( 'Naar adressen', 'homburg-dealerportaal-theme' ); ?></a>
 		</div>
 
 		<div class="hdp-kaart">
 			<?php HDP_Icons::render_icoon( 'gebruiker' ); ?>
 			<h2><?php esc_html_e( 'Accountdetails', 'homburg-dealerportaal-theme' ); ?></h2>
 			<p><?php esc_html_e( 'Wijzig je naam, e-mailadres en wachtwoord.', 'homburg-dealerportaal-theme' ); ?></p>
-			<a class="hdp-btn hdp-btn-klein" href="<?php echo esc_url( wc_get_endpoint_url( 'edit-account' ) ); ?>"><?php esc_html_e( 'Naar accountdetails', 'homburg-dealerportaal-theme' ); ?></a>
+			<a class="hdp-btn hdp-btn-klein hdp-btn-vol" href="<?php echo esc_url( wc_get_endpoint_url( 'edit-account' ) ); ?>"><?php esc_html_e( 'Naar accountdetails', 'homburg-dealerportaal-theme' ); ?></a>
 		</div>
 	</div>
 
@@ -98,10 +98,14 @@ $hdp_allowed_html = array(
 		</div>
 
 		<?php if ( ! $hdp_recente_bestellingen ) : ?>
-			<p class="hdp-nog-niet">
-				<?php esc_html_e( 'Je hebt nog geen bestellingen geplaatst.', 'homburg-dealerportaal-theme' ); ?>
-				<a href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>"><?php esc_html_e( 'Ga naar de winkel', 'homburg-dealerportaal-theme' ); ?></a>
-			</p>
+			<?php
+			echo HDP_Icons::render_lege_status( // phpcs:ignore WordPress.Security.EscapeOutput -- render_lege_status() escaped elk veld al zelf.
+				'bestellen',
+				__( 'Je hebt nog geen bestellingen geplaatst.', 'homburg-dealerportaal-theme' ),
+				get_permalink( wc_get_page_id( 'shop' ) ),
+				__( 'Ga naar de winkel', 'homburg-dealerportaal-theme' )
+			);
+			?>
 		<?php else : ?>
 			<div class="hdp-bestel-lijst">
 				<?php foreach ( $hdp_recente_bestellingen as $hdp_bestelling ) : ?>

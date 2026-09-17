@@ -2,12 +2,22 @@
 Theme Name: Homburg Dealerportaal
 Description: Eigen blokthema voor het Homburg-dealerportaal, gebouwd op het originele HTML-ontwerp (rood/donkergrijs, Montserrat). Geen bloggerichte onderdelen; puur gericht op de dealerportaalsite.
 Author: Homburg Machinehandel BV
-Version: 1.23.2
+Version: 1.24.0
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
 Text Domain: homburg-dealerportaal-theme
 */
+
+/* Globale box-sizing: zonder dit telt padding/border bovenop een
+   opgegeven breedte op (content-box, de browserstandaard) i.p.v. erbinnen
+   te vallen — de oorzaak van de knoppen die op 17-9-2026 over de rand van
+   hun kaart heen staken (width:100% + eigen padding). Eén globale reset
+   i.p.v. het per onderdeel los toevoegen, zodat dit niet nog een keer
+   ergens anders opduikt. */
+*, *::before, *::after {
+	box-sizing: border-box;
+}
 
 /* WordPress geeft de hoofdinhoud automatisch een kleine bovenmarge
    (block-gap) t.o.v. de header; die moet hier op nul voor een naadloze
@@ -38,7 +48,11 @@ html { height: 100%; }
 	border-bottom: 4px solid var(--wp--preset--color--homburg-rood);
 }
 .hdp-header-inner {
-	padding: 1.3rem 15%;
+	/* Zelfde 70%-inhoudsbreedte als de rest van de site (hero, kaarten,
+	   footer) — als zijdelingse padding i.p.v. max-width, uitgerekend uit
+	   dezelfde bron (theme.json contentSize) zodat 'ie nooit los kan lopen
+	   van de rest. */
+	padding: 1.3rem calc((100% - var(--wp--style--global--content-size, 70%)) / 2);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -229,7 +243,7 @@ html { height: 100%; }
    zodat de footer daar precies op aansluit i.p.v. een losse, gecentreerde
    flex-rij met willekeurige witruimtes. */
 .hdp-footer-boven {
-	max-width: 70%;
+	max-width: var(--wp--style--global--content-size, 70%);
 	margin: 0 auto;
 	padding: 3rem 0 2.5rem;
 	display: grid;

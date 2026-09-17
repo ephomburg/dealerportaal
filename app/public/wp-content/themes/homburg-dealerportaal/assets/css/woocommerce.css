@@ -5,8 +5,13 @@
    Alleen geladen op WooCommerce-pagina's (zie includes/woocommerce/setup.php).
    ========================================================================== */
 :root {
-	--hdp-wc-radius:  10px;
-	--hdp-wc-schaduw: 0 4px 18px rgba(43, 45, 49, 0.10);
+	/* Alias naar de canonieke tokens uit dealerportaal.css (plugin) i.p.v.
+	   dezelfde waarden hier nogmaals los te definiëren — dat bestand is nu
+	   een gegarandeerde afhankelijkheid van dit bestand (zie
+	   homburg_wc_enqueue_assets()), dus --hdp-radius/--hdp-schaduw staan
+	   altijd al klaar tegen de tijd dat deze regels draaien. */
+	--hdp-wc-radius:  var(--hdp-radius);
+	--hdp-wc-schaduw: var(--hdp-schaduw);
 	--hdp-wc-blauwdruk: #eceff4;
 	--hdp-wc-rand-sterk: #c9ced6;
 }
@@ -1347,6 +1352,24 @@ body.woocommerce-favorieten .woocommerce-MyAccount-content {
 .hdp-dashboard-kaarten .hdp-kaart h2 { font-size: 1rem; }
 .hdp-dashboard-kaarten .hdp-kaart p { font-size: 0.84rem; }
 
+/* Eén kaart met meer visueel gewicht ("Snel bestellen" — de actie die een
+   dealer het vaakst nodig heeft) i.p.v. zes identieke witte kaarten op een
+   rij: donkere achtergrond, wit icoon-badge, omgekeerde (witte) knop. */
+.hdp-kaart--nadruk {
+	background: var(--wp--preset--color--donkergrijs);
+	border-top-color: var(--wp--preset--color--homburg-rood);
+}
+.hdp-kaart--nadruk h2,
+.hdp-kaart--nadruk p { color: var(--wp--preset--color--wit); }
+.hdp-kaart--nadruk p { opacity: 0.75; }
+.hdp-kaart--nadruk .hdp-kaart-icoon { background: rgba(255, 255, 255, 0.12); }
+.hdp-kaart--nadruk .hdp-kaart-icoon svg { stroke: var(--wp--preset--color--wit); }
+.hdp-kaart--nadruk .hdp-btn {
+	background: var(--wp--preset--color--wit);
+	color: var(--wp--preset--color--donkergrijs);
+}
+.hdp-kaart--nadruk .hdp-btn:hover { background: var(--wp--preset--color--grijs-licht); }
+
 .hdp-dashboard-recent-kop {
 	display: flex;
 	align-items: center;
@@ -1406,15 +1429,16 @@ address.hdp-adres-leeg { font-size: 0.85rem; color: var(--wp--preset--color--gri
 
 .hdp-favorieten-pagina h1 { margin: 0 0 0.3rem; font-size: 1.5rem; }
 .hdp-favorieten-aantal-tekst { color: var(--wp--preset--color--grijs-tekst); margin: 0 0 1.5rem; }
-.hdp-favorieten-leeg {
-	background: var(--wp--preset--color--wit);
-	border: 1px solid var(--wp--preset--color--rand);
-	border-radius: var(--hdp-wc-radius);
-	padding: 1.5rem;
-	color: var(--wp--preset--color--grijs-tekst);
-}
 
 /* "Snel bestellen" — My Account-tabblad, zie bulk-order.php. */
+.hdp-snelbestellen-zoeken { max-width: 560px; margin-bottom: 1.4rem; }
+.hdp-snelbestellen-zoeken label { display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; }
+/* .hdp-zoek-suggestie is elders (search-autosuggest.php) een <a> — hier
+   bewust een <button> (een klik voegt een regel toe, gaat nergens naartoe),
+   dus de standaard-knopopmaak van de browser hier resetten. */
+button.hdp-zoek-suggestie { width: 100%; background: none; border: none; border-bottom: 1px solid var(--wp--preset--color--rand); font: inherit; text-align: left; cursor: pointer; }
+button.hdp-zoek-suggestie:last-child { border-bottom: 0; }
+
 .hdp-snelbestellen-form textarea {
 	display: block;
 	width: 100%;

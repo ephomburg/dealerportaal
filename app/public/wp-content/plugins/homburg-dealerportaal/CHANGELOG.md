@@ -8,6 +8,26 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.46.0
+Grote, samenhangende update naar aanleiding van een uiterlijk/UX/code-audit; hieronder gebundeld per onderwerp i.p.v. per tussenstap (zie ook de werkafspraak in CHANGELOG hierboven over versiebump-per-afgeronde-wijziging).
+
+**Uiterlijk**
+- Eén dashboardkaart ("Snel bestellen") kreeg meer visueel gewicht (donkere kaart, omgekeerde knop) i.p.v. zes identieke witte kaarten op een rij.
+- Merken waarvoor een dealer geautoriseerd is tonen nu een logo i.p.v. platte tekst, zodra dat merk een logo heeft — nieuw instellingenscherm-onderdeel "Instellingen > Dealerportaal > Merklogo's" om per merk een logo te uploaden (valt terug op de tekstbadge zolang er geen logo is ingesteld).
+
+**Gebruiksvriendelijkheid**
+- De twee losse "bekijk je bestellingen"-schermen (het kale WooCommerce "Bestellingen"-tabblad en de uitgebreidere Bestelgeschiedenis-pagina) zijn samengevoegd: "Mijn account" > "Bestellingen" toont voortaan de doorzoekbare, filterbare lijst. De losse pagina /bestelgeschiedenis/ verwijst nu (301) door naar de nieuwe locatie.
+- WooCommerce's eigen "Downloads"-tabblad in Mijn account (dat over digitale productdownloads gaat, iets wat Homburg niet verkoopt, en dus altijd leeg was) is uit het menu gehaald; de "Downloads"-kaart op het dashboard linkt nu naar de échte downloadpagina.
+- "Snel bestellen" kreeg een zoekveld met live suggesties (hergebruikt dezelfde zoekfunctie als de winkelpagina) om een artikel op te zoeken en toe te voegen zonder het nummer te hoeven weten — de textarea voor het plakken van een lijst blijft gewoon werken zoals voorheen.
+- Consistente "hier staat nog niets"-status (icoon + tekst + eventueel een knop) op downloads, favorieten, bestellingen en het dashboard, i.p.v. overal losse cursieve tekstregels.
+
+**Techniek/onderhoud**
+- Eén globale `box-sizing: border-box`-reset i.p.v. een reset die alleen een paar losse wrapperklassen dekte (de oorzaak van de over-de-kaart-heen-stekende knoppen eerder deze week).
+- De utility-klasse `.hdp-btn-klein` deed er per ongeluk `width:100%` bij (bedoeld voor de herbestelkaartjes) — nu een eerlijk gescheiden `.hdp-btn-vol` voor waar dat écht gewenst is.
+- Herhaalde `70%`/`15%`-inhoudsbreedtes op zes plekken vervangen door dezelfde bron (`--wp--style--global--content-size` uit theme.json) i.p.v. los van elkaar te kunnen gaan afwijken.
+- De thema-eigen `--hdp-wc-radius`/`--hdp-wc-schaduw`-tokens waren een losse kopie van de plugin's `--hdp-radius`/`--hdp-schaduw` met dezelfde waarde; nu een echte alias (en de plugin-stylesheet is een gegarandeerde afhankelijkheid geworden van de thema-WooCommerce-stylesheet, i.p.v. toevallig al geladen te zijn).
+- `wp-content/duplicator-backups/` (volledige sitebackups, tot 50+ MB) stond niet in `.gitignore` — nu wel.
+
 ## 1.45.2
 - Dashboard-kaarten: de knoppen ("Naar bestellingen" e.d.) staken over de rand van hun kaart uit. Oorzaak: `.hdp-btn` had geen `box-sizing: border-box`, dus de eigen binnenruimte (padding) van de knop kwam er bovenop de breedte van 100% bij — daarmee brak de knop net buiten de kaart. Nu overal gecorrigeerd, ook voor eventuele toekomstige volle-breedte-knoppen.
 - "Mijn account" navigatie/inhoud liep in float-hoogte uit elkaar zodra de inhoud langer werd dan de navigatie (goed zichtbaar op Dashboard/Bestellingen, toevallig niet op de korte Adressen-pagina) — omgezet naar een flex-indeling zodat beide kolommen altijd even hoog blijven, met een vaste breedte voor de navigatie i.p.v. een percentage.

@@ -109,7 +109,7 @@ class HDP_Downloads_Render {
 
 		if ( ! $downloads ) {
 			$leeg_sleutel = 'content' === $categorie ? 'nog_geen_content' : 'nog_geen_downloads';
-			return '<p class="hdp-nog-niet">' . esc_html( HDP_I18N::t( $leeg_sleutel ) ) . '</p>';
+			return HDP_Icons::render_lege_status( 'content' === $categorie ? 'content' : 'downloads', HDP_I18N::t( $leeg_sleutel ) );
 		}
 
 		// Taalgebonden zichtbaarheid: een NL-taalbezoeker ziet bestanden
@@ -131,7 +131,7 @@ class HDP_Downloads_Render {
 
 		if ( ! $downloads ) {
 			$leeg_sleutel = 'content' === $categorie ? 'geen_content_taal' : 'geen_downloads_taal';
-			return '<p class="hdp-nog-niet">' . esc_html( HDP_I18N::t( $leeg_sleutel ) ) . '</p>';
+			return HDP_Icons::render_lege_status( 'content' === $categorie ? 'content' : 'downloads', HDP_I18N::t( $leeg_sleutel ) );
 		}
 
 		// Merkgebonden zichtbaarheid: een dealer met een ingestelde
@@ -154,7 +154,7 @@ class HDP_Downloads_Render {
 
 			if ( ! $downloads ) {
 				$leeg_sleutel = 'content' === $categorie ? 'geen_content_merk' : 'geen_downloads_merk';
-				return '<p class="hdp-nog-niet">' . esc_html( HDP_I18N::t( $leeg_sleutel ) ) . '</p>';
+				return HDP_Icons::render_lege_status( 'content' === $categorie ? 'content' : 'downloads', HDP_I18N::t( $leeg_sleutel ) );
 			}
 		}
 

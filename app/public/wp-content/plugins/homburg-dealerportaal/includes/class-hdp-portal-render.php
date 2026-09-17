@@ -57,7 +57,19 @@ class HDP_Portal_Render {
 					</div>
 					<p><?php echo esc_html( $portaal_intro ); ?></p>
 					<?php if ( $merken ) : ?>
-						<p class="hdp-merken"><?php echo esc_html( HDP_I18N::t( 'geautoriseerd_voor' ) ); ?> <?php echo esc_html( $merken ); ?></p>
+						<div class="hdp-merken">
+							<span class="hdp-merken-label"><?php echo esc_html( HDP_I18N::t( 'geautoriseerd_voor' ) ); ?></span>
+							<div class="hdp-merken-logos">
+								<?php foreach ( HDP_Merken::naar_array( $merken ) as $hdp_merk ) : ?>
+									<?php $hdp_logo_url = HDP_Settings::merk_logo_url( $hdp_merk ); ?>
+									<?php if ( $hdp_logo_url ) : ?>
+										<img class="hdp-merk-logo" src="<?php echo esc_url( $hdp_logo_url ); ?>" alt="<?php echo esc_attr( $hdp_merk ); ?>">
+									<?php else : ?>
+										<span class="hdp-merk-badge"><?php echo esc_html( $hdp_merk ); ?></span>
+									<?php endif; ?>
+								<?php endforeach; ?>
+							</div>
+						</div>
 					<?php endif; ?>
 				</div>
 			</section>

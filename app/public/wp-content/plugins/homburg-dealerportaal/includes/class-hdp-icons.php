@@ -62,4 +62,29 @@ class HDP_Icons {
 		<div class="<?php echo esc_attr( $badge_class ); ?>" aria-hidden="true"><?php echo $svg; // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG-paden (geen gebruikersinvoer). ?></div>
 		<?php
 	}
+
+	/**
+	 * Consistente "hier staat nog niets"-status (icoon + tekst, optioneel
+	 * met een duidelijke vervolgstap) — vervangt de losse, kale
+	 * <p class="hdp-nog-niet">-regels die verspreid over downloads,
+	 * favorieten en bestellingen allemaal net iets anders werden opgebouwd.
+	 *
+	 * @param string $icoon     Sleutel uit icoon_paden().
+	 * @param string $tekst     De boodschap zelf (al vertaald/geëscaped-vrije tekst).
+	 * @param string $link_url  Optioneel: URL voor een vervolgknop.
+	 * @param string $link_tekst Optioneel: tekst op die knop (verplicht als $link_url is gezet).
+	 */
+	public static function render_lege_status( $icoon, $tekst, $link_url = '', $link_tekst = '' ) {
+		ob_start();
+		?>
+		<div class="hdp-leeg-kaart">
+			<?php self::render_icoon( $icoon ); ?>
+			<p><?php echo esc_html( $tekst ); ?></p>
+			<?php if ( $link_url && $link_tekst ) : ?>
+				<a class="hdp-btn hdp-btn-klein" href="<?php echo esc_url( $link_url ); ?>"><?php echo esc_html( $link_tekst ); ?></a>
+			<?php endif; ?>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
 }

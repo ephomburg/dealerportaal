@@ -14,10 +14,36 @@ if ( ! defined( 'ABSPATH' ) ) {
  * bestellingen toont om snel opnieuw te bestellen) toont deze pagina
  * bewust élke bestelling, in elke status, zodat een dealer hier ook een
  * mislukte of geannuleerde bestelling kan terugvinden.
+ *
+ * render_bestellingen_lijst() (de lijst zelf, zonder welkomstkop) wordt
+ * sinds kort ook hergebruikt door woocommerce/myaccount/orders.php in het
+ * thema — er was geen zin in twéé losse "bekijk je bestellingen"-schermen
+ * (dit en het kale WooCommerce-tabblad). De losse pagina /bestelgeschiedenis/
+ * blijft daarom niet meer los bestaan; verwijs_bestelgeschiedenis_naar_myaccount()
+ * hieronder stuurt 'm door naar de "Bestellingen"-tab in Mijn account.
  */
 class HDP_Bestelgeschiedenis_Render {
 
 	const PER_PAGINA = 10;
+
+	public static function init() {
+		add_action( 'template_redirect', array( __CLASS__, 'verwijs_bestelgeschiedenis_naar_myaccount' ) );
+	}
+
+	/**
+	 * De losse /bestelgeschiedenis/-pagina bestaat nog (bijv. voor oude
+	 * bladwijzers/links), maar toont voortaan hetzelfde als "Mijn account"
+	 * > "Bestellingen" — 301 daar direct naartoe i.p.v. de content dubbel
+	 * te tonen.
+	 */
+	public static function verwijs_bestelgeschiedenis_naar_myaccount() {
+		if ( ! is_page( 'bestelgeschiedenis' ) ) {
+			return;
+		}
+
+		wp_safe_redirect( wc_get_endpoint_url( 'orders', '', wc_get_page_permalink( 'myaccount' ) ), 301 );
+		exit;
+	}
 
 	public static function render_bestelgeschiedenis_pagina( $a ) {
 		$mag_zien = is_user_logged_in() && HDP_Roles::mag_portaal_zien( get_current_user_id() );
@@ -53,7 +79,13 @@ class HDP_Bestelgeschiedenis_Render {
 		return ob_get_clean();
 	}
 
-	private static function render_bestellingen_lijst() {
+	/**
+	 * Public (was private): wordt nu ook rechtstreeks hergebruikt door
+	 * woocommerce/myaccount/orders.php in het thema, zodat "Bestellingen"
+	 * in Mijn account dezelfde zoek-/filterbare lijst toont i.p.v. de kale
+	 * WooCommerce-standaardtabel — één bestellingenoverzicht i.p.v. twee.
+	 */
+	public static function render_bestellingen_lijst() {
 		if ( ! function_exists( 'wc_get_orders' ) ) {
 			return '<p class="hdp-nog-niet">' . esc_html( HDP_I18N::t( 'bestel_geen_webshop' ) ) . '</p>';
 		}
@@ -134,13 +166,17 @@ class HDP_Bestelgeschiedenis_Render {
 
 		<?php if ( ! $resultaat->orders ) : ?>
 			<?php if ( $filter_actief ) : ?>
-				<p class="hdp-nog-niet"><?php echo esc_html( HDP_I18N::t( 'bestel_leeg_resultaat' ) ); ?></p>
+				<?php echo HDP_Icons::render_lege_status( 'bestellen', HDP_I18N::t( 'bestel_leeg_resultaat' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- render_lege_status() escaped elk veld al zelf. ?>
 			<?php else : ?>
 				<?php $webshop_url = HDP_Settings::get( 'webshop_url' ); ?>
-				<p class="hdp-nog-niet"><?php echo esc_html( HDP_I18N::t( 'bestel_geen_bestellingen' ) ); ?></p>
-				<?php if ( $webshop_url ) : ?>
-					<p><a class="hdp-btn" href="<?php echo esc_url( $webshop_url ); ?>"><?php echo esc_html( HDP_I18N::t( 'bestel_naar_webshop' ) ); ?></a></p>
-				<?php endif; ?>
+				<?php
+				echo HDP_Icons::render_lege_status( // phpcs:ignore WordPress.Security.EscapeOutput -- render_lege_status() escaped elk veld al zelf.
+					'bestellen',
+					HDP_I18N::t( 'bestel_geen_bestellingen' ),
+					$webshop_url,
+					$webshop_url ? HDP_I18N::t( 'bestel_naar_webshop' ) : ''
+				);
+				?>
 			<?php endif; ?>
 		<?php else : ?>
 			<div class="hdp-bestel-lijst">
