@@ -2,7 +2,7 @@
 Theme Name: Homburg Dealerportaal
 Description: Eigen blokthema voor het Homburg-dealerportaal, gebouwd op het originele HTML-ontwerp (rood/donkergrijs, Montserrat). Geen bloggerichte onderdelen; puur gericht op de dealerportaalsite.
 Author: Homburg Machinehandel BV
-Version: 1.25.0
+Version: 1.25.1
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -248,6 +248,34 @@ html { height: 100%; }
 }
 .hdp-account-menu-uitloggen svg { width: 15px; height: 15px; stroke: currentColor; flex-shrink: 0; }
 .hdp-account-menu-uitloggen:hover { background: var(--wp--preset--color--grijs-licht); }
+
+/* "Links"-menu: Homburg Holland/Belgium samengevoegd achter één rode
+   knop i.p.v. twee losse — zelfde checkbox-hack/paneel-uiterlijk als het
+   accountmenu hiernaast (vandaar de gedeelde .hdp-account-menu-toggle/
+   .hdp-account-menu-paneel-klassen; alleen de chevron-rotatie en het
+   sluitscriptje zijn hier apart, want dit is een eigen wrapper/toggle). */
+.hdp-links-menu { position: relative; }
+.hdp-links-menu-knop { cursor: pointer; }
+.hdp-links-menu-chevron { width: 12px; height: 12px; transition: transform 0.15s; }
+.hdp-account-menu-toggle:checked ~ .hdp-links-menu-knop .hdp-links-menu-chevron { transform: rotate(180deg); }
+.hdp-account-menu-toggle:focus-visible ~ .hdp-links-menu-knop { outline: 2px solid var(--wp--preset--color--wit); outline-offset: 2px; }
+.hdp-links-menu-paneel { min-width: 200px; }
+
+.hdp-dropdown-item {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0.75rem 1rem;
+	color: var(--wp--preset--color--donkergrijs);
+	font-size: 0.85rem;
+	font-weight: 600;
+	text-decoration: none;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+	transition: background 0.15s;
+}
+.hdp-dropdown-item:last-child { border-bottom: none; }
+.hdp-dropdown-item svg { width: 15px; height: 15px; stroke: var(--wp--preset--color--grijs-tekst); flex-shrink: 0; }
+.hdp-dropdown-item:hover { background: var(--wp--preset--color--grijs-licht); }
 
 .hdp-taalswitch {
 	display: flex;

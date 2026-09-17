@@ -677,7 +677,8 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 .hdp-info-kaart.is-style-tekst {
 	background: none;
 	border: none;
-	padding: 0;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+	padding: 0 0 1.3rem;
 	margin-block-start: 1.3rem;
 	/* .hdp-info-kaart (kaartversie) zet height:100% om in de oude grid met
 	   grid-auto-rows:1fr gelijk op te lopen — hier zit deze kaart i.p.v.
@@ -689,17 +690,23 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	height: auto;
 }
 .hdp-info-split .wp-block-column > .hdp-info-kaart.is-style-tekst:first-child { margin-block-start: 0; }
+.hdp-info-split .wp-block-column > .hdp-info-kaart.is-style-tekst:last-child { border-bottom: none; padding-bottom: 0; }
 .hdp-info-kaart.is-style-tekst:hover { box-shadow: none; }
-.hdp-info-kaart.is-style-tekst .hdp-info-icoon { display: none; }
-.hdp-info-kaart.is-style-tekst .hdp-info-links { margin-top: 0.3rem; }
+/* Kleiner icoon-badge i.p.v. helemaal verbergen — geeft elk punt een
+   visueel ankertje zodat het niet als losse, zwevende tekst oogt, zonder
+   de volle kaart-opmaak terug te halen. */
+.hdp-info-kaart.is-style-tekst .hdp-info-icoon { width: 26px; height: 26px; margin-top: 0.15rem; }
+.hdp-info-kaart.is-style-tekst .hdp-info-icoon svg { width: 13px; height: 13px; }
+.hdp-info-kaart.is-style-tekst .hdp-info-links { margin-top: 0.6rem; }
 .hdp-info-kaart.is-style-tekst .hdp-info-link {
-	display: inline;
-	background: none;
-	color: var(--wp--preset--color--homburg-rood);
-	font-weight: 700;
-	padding: 0;
-	border-radius: 0;
+	background: var(--wp--preset--color--grijs-licht);
+	color: var(--wp--preset--color--donkergrijs);
+	font-weight: 600;
+	font-size: 0.78rem;
+	padding: 0.35rem 0.7rem;
+	border-radius: 6px;
 }
+.hdp-info-kaart.is-style-tekst .hdp-info-link svg { display: inline-block; }
 .hdp-info-kaart.is-style-tekst .hdp-info-link svg { display: none; }
 .hdp-info-kaart.is-style-tekst .hdp-info-link:hover { background: none; color: var(--wp--preset--color--homburg-rood-donker); text-decoration: underline; }
 .hdp-info-kaart.is-style-tekst .hdp-info-link:not(:last-child)::after { content: " · "; color: var(--wp--preset--color--grijs-tekst); font-weight: 400; }

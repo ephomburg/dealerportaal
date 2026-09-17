@@ -21,26 +21,54 @@ $link_icoon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 			</span>
 		</a>
 		<nav class="hdp-hoofdmenu" aria-label="<?php echo esc_attr( HDP_I18N::t( 'nav_aria' ) ); ?>">
-			<a class="hdp-menu-knop" href="https://www.homburg-holland.com" target="_blank" rel="noopener noreferrer">
-				<?php echo $link_icoon; // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
-				Homburg Holland
-			</a>
-			<a class="hdp-menu-knop" href="https://www.homburg-belgium.com" target="_blank" rel="noopener noreferrer">
-				<?php echo $link_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-				Homburg Belgium
-			</a>
-			<?php if ( class_exists( 'WooCommerce' ) && ( is_woocommerce() || is_cart() || is_checkout() ) ) : ?>
-				<?php $hdp_aantal_mandje = WC()->cart ? WC()->cart->get_cart_contents_count() : 0; ?>
-				<a class="hdp-mandje-knop" href="<?php echo esc_url( wc_get_cart_url() ); ?>" aria-label="<?php esc_attr_e( 'Winkelmand', 'homburg-dealerportaal' ); ?>">
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1.5"/><circle cx="19" cy="21" r="1.5"/><path d="M2 3h3l2.6 12.5a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H6"/></svg>
-					<span class="hdp-mandje-aantal"<?php echo $hdp_aantal_mandje ? '' : ' hidden'; ?>><?php echo (int) $hdp_aantal_mandje; ?></span>
-				</a>
-			<?php endif; ?>
 			<?php if ( is_user_logged_in() && class_exists( 'WooCommerce' ) && function_exists( 'homburg_wc_favoriete_ids' ) ) : ?>
 				<?php $hdp_aantal_favorieten = count( homburg_wc_favoriete_ids() ); ?>
 				<a class="hdp-favorieten-knop" href="<?php echo esc_url( wc_get_account_endpoint_url( 'favorieten' ) ); ?>" aria-label="<?php esc_attr_e( 'Mijn favorieten', 'homburg-dealerportaal' ); ?>">
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
 					<span class="hdp-favorieten-aantal"<?php echo $hdp_aantal_favorieten ? '' : ' hidden'; ?>><?php echo (int) $hdp_aantal_favorieten; ?></span>
+				</a>
+			<?php endif; ?>
+			<div class="hdp-links-menu">
+				<input type="checkbox" id="hdp-links-menu-toggle" class="hdp-account-menu-toggle">
+				<label for="hdp-links-menu-toggle" class="hdp-menu-knop hdp-links-menu-knop">
+					<?php echo $link_icoon; // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
+					<?php esc_html_e( 'Links', 'homburg-dealerportaal' ); ?>
+					<svg class="hdp-links-menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+				</label>
+				<div class="hdp-account-menu-paneel hdp-links-menu-paneel">
+					<a class="hdp-dropdown-item" href="https://www.homburg-holland.com" target="_blank" rel="noopener noreferrer">
+						<?php echo $link_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+						Homburg Holland
+					</a>
+					<a class="hdp-dropdown-item" href="https://www.homburg-belgium.com" target="_blank" rel="noopener noreferrer">
+						<?php echo $link_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+						Homburg Belgium
+					</a>
+				</div>
+			</div>
+			<script>
+			(function () {
+				var toggle = document.getElementById( 'hdp-links-menu-toggle' );
+				if ( ! toggle ) { return; }
+
+				document.addEventListener( 'click', function ( e ) {
+					if ( toggle.checked && ! toggle.closest( '.hdp-links-menu' ).contains( e.target ) ) {
+						toggle.checked = false;
+					}
+				} );
+				document.addEventListener( 'keydown', function ( e ) {
+					if ( 'Escape' === e.key && toggle.checked ) {
+						toggle.checked = false;
+						toggle.focus();
+					}
+				} );
+			})();
+			</script>
+			<?php if ( class_exists( 'WooCommerce' ) && ( is_woocommerce() || is_cart() || is_checkout() ) ) : ?>
+				<?php $hdp_aantal_mandje = WC()->cart ? WC()->cart->get_cart_contents_count() : 0; ?>
+				<a class="hdp-mandje-knop" href="<?php echo esc_url( wc_get_cart_url() ); ?>" aria-label="<?php esc_attr_e( 'Winkelmand', 'homburg-dealerportaal' ); ?>">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1.5"/><circle cx="19" cy="21" r="1.5"/><path d="M2 3h3l2.6 12.5a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H6"/></svg>
+					<span class="hdp-mandje-aantal"<?php echo $hdp_aantal_mandje ? '' : ' hidden'; ?>><?php echo (int) $hdp_aantal_mandje; ?></span>
 				</a>
 			<?php endif; ?>
 			<?php if ( is_user_logged_in() ) : ?>
