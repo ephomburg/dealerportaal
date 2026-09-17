@@ -753,7 +753,10 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 .hdp-bestel-info strong { font-size: 0.95rem; font-weight: 700; }
 .hdp-bestel-info span { font-size: 0.8rem; color: var(--wp--preset--color--grijs-tekst); }
 .hdp-bestel-totaal { font-size: 0.9rem; font-weight: 700; min-width: 90px; text-align: right; }
-.hdp-bestel-item .hdp-btn { flex-shrink: 0; }
+/* width:auto expliciet nodig: .hdp-btn-klein (bijv. "Bekijken") zet zelf
+   width:100% (bedoeld voor de verticale herbestel-kaart hierboven), wat
+   deze knop anders over de volle rijbreedte zou uitrekken. */
+.hdp-bestel-item .hdp-btn { width: auto; flex-shrink: 0; }
 
 .hdp-bestel-status {
 	flex-shrink: 0;

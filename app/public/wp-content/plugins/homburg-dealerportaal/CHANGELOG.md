@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.45.1
+- De vorige "Mijn account"-breedtefix (1.45.0) werkte in de praktijk niet: `wp:post-content` kreeg zelf een "constrained"-layout mee, waardoor WordPress' eigen generieke regel de kale `<div class="woocommerce">`-inhoud daarbinnen alsnog naar de smalle 70%-tekstbreedte terugbracht — het "align: wide"-attribuut kwam daardoor nooit tot zijn recht. Nu krijgt `.woocommerce` de breedte rechtstreeks via een eigen regel (gelijk aan de 70%-inhoudsbreedte van header/hero/kaarten elders op de site, dus nu wél gelijk uitgelijnd), en is de tekst-layout van post-content ongemoeid gelaten (zelfde aanpak als page-checkout.html).
+- Knoppen als "Bewerken"/"Toevoegen" (adresrijen) en "Bekijken" (recente bestellingen, ook op de bestaande bestelgeschiedenispagina) rekten zich uit over de volle rijbreedte i.p.v. netjes rechts uit te lijnen — kwam door de utility-class `.hdp-btn-klein`, die elders bewust `width:100%` gebruikt (de herbestelkaartjes) maar hier per ongeluk meeliftte. Expliciet gecorrigeerd voor beide plekken.
+
 ## 1.45.0
 - "Mijn account" > Adressen: WooCommerce's kale, ongestylede twee-koloms-indeling vervangen door een rustige lijst met rijen (icoon, adres, Bewerken/Toevoegen-knop) — zelfde opzet als "Recente bestellingen" op het dashboard.
 - De navigatie links in "Mijn account" (Dashboard/Bestellingen/.../Uitloggen) stond los op de grijze pagina-achtergrond; staat nu in een witte kaart, net als de rest van de lijsten op deze pagina's.

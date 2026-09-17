@@ -1237,6 +1237,24 @@ ul.products.hdp-favorieten-lijst { grid-template-columns: repeat(4, 1fr); gap: 1
 /* ==========================================================================
    MIJN ACCOUNT / BESTELGESCHIEDENIS
    ========================================================================== */
+/* De [woocommerce_my_account]-shortcode zet gewoon een kale <div
+   class="woocommerce"> neer — geen blok, dus geen "align wide" mogelijk
+   via het bloksjabloon. page-my-account.html laat wp:post-content daarom
+   bewust ONgemoeid (geen eigen layout/align erop, zie template) zodat
+   deze div zelf niet al door WordPress' generieke "constrained
+   layout"-regel (die anders élk niet-uitgelijnd kind terugbrengt naar
+   content-size) wordt teruggeknepen — en krijgt de breedte hier expliciet
+   zelf, gelijk aan de 70%-inhoudsbreedte die de header/hero/kaarten elders
+   op de site ook aanhouden (zie .hdp-header-inner/.hdp-kaarten-sectie),
+   zodat linker-/rechterrand overal precies gelijk lopen. */
+body.woocommerce-account .woocommerce {
+	max-width: var(--wp--style--global--content-size, 70%);
+	margin-left: auto;
+	margin-right: auto;
+	padding-top: 2.5rem;
+	padding-bottom: 3rem;
+}
+
 /* Zonder eigen achtergrond zweeft de navigatie los op het grijze
    paginavlak (net als de rest van de content-kolom) — hier daarom als
    witte kaart afgebakend, net als de lijsten verderop op deze pagina's
@@ -1344,6 +1362,7 @@ address.hdp-adres-leeg { font-size: 0.85rem; color: var(--wp--preset--color--gri
 	display: inline-flex;
 	align-items: center;
 	gap: 0.4rem;
+	width: auto;
 	flex-shrink: 0;
 }
 .hdp-adres-rij .hdp-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
