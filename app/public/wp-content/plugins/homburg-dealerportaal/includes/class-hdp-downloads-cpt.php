@@ -25,7 +25,7 @@ class HDP_Downloads_CPT {
 	public static function merk_opties() {
 		return array(
 			'Algemeen',
-			'Homburg Draincleaners',
+			'Draincleaners',
 			'HARDI',
 			'Väderstad',
 			'Bogballe',
