@@ -1266,6 +1266,42 @@ body.woocommerce-favorieten .woocommerce-MyAccount-content {
 	width: 100%;
 }
 
+/* Dashboard — startscherm van "Mijn account" (zie
+   woocommerce/myaccount/dashboard.php). Hergebruikt de kaartstijl
+   (.hdp-kaart/.hdp-kaart-icoon) en de bestelrij-stijl (.hdp-bestel-*) van
+   het dealerportaal zelf (dealerportaal.css, staat al geladen zodra een
+   dealer is ingelogd) i.p.v. die hier opnieuw te definiëren. */
+.hdp-dashboard-groet { margin: 0 0 1.6rem; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-dashboard-groet strong { color: var(--wp--preset--color--donkergrijs); }
+
+.hdp-dashboard-kaarten {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+	gap: 1.1rem;
+	margin-bottom: 2.2rem;
+}
+.hdp-dashboard-kaarten .hdp-kaart { padding: 1.4rem 1.3rem; gap: 0.6rem; border-top-width: 4px; }
+.hdp-dashboard-kaarten .hdp-kaart-icoon { width: 42px; height: 42px; }
+.hdp-dashboard-kaarten .hdp-kaart-icoon svg { width: 21px; height: 21px; }
+.hdp-dashboard-kaarten .hdp-kaart h2 { font-size: 1rem; }
+.hdp-dashboard-kaarten .hdp-kaart p { font-size: 0.84rem; }
+
+.hdp-dashboard-recent-kop {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+	margin-bottom: 1rem;
+}
+.hdp-dashboard-recent-kop h2 { margin: 0; font-size: 1.05rem; font-weight: 700; }
+.hdp-dashboard-recent-kop a { font-size: 0.85rem; font-weight: 600; color: var(--wp--preset--color--homburg-rood); text-decoration: none; }
+.hdp-dashboard-recent-kop a:hover { text-decoration: underline; }
+
+@media (max-width: 600px) {
+	.hdp-dashboard-kaarten { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+
 .hdp-favorieten-pagina h1 { margin: 0 0 0.3rem; font-size: 1.5rem; }
 .hdp-favorieten-aantal-tekst { color: var(--wp--preset--color--grijs-tekst); margin: 0 0 1.5rem; }
 .hdp-favorieten-leeg {

@@ -8,6 +8,9 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.44.0
+- "Mijn account"-dashboard (het startscherm na inloggen op /my-account/) vervangen: i.p.v. de kale standaard-WooCommerce-tekst nu een welkomstregel, kaarten met snelkoppelingen naar Bestellingen/Snel bestellen/Mijn favorieten/Downloads/Adressen/Accountdetails, en een voorproefje van de 3 meest recente bestellingen — in dezelfde stijl als de rest van het dealerportaal. Thema-wijziging (`woocommerce/myaccount/dashboard.php` + `assets/css/woocommerce.css`), plugin kreeg er twee iconen (hart, adres) bij t.b.v. deze kaarten.
+
 ## 1.43.0
 - Downloads voor dealers: het vrije tekstveld "Merk" vervangen door een vaste keuzelijst (Algemeen, Homburg Draincleaners, HARDI, Väderstad, Bogballe, RABE, Tefen) — op de bewerkpagina, in het front-end uploadformulier en bij bulk-bewerken.
 - Spelling "Väderstad" gelijkgetrokken (met puntjes) in de dealer-merkenlijst, zodat die straks 1-op-1 matcht met de merknaam uit PowerAll.
