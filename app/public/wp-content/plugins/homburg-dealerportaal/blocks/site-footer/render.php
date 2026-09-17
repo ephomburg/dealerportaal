@@ -53,7 +53,7 @@ $socials = array(
 				<h3><?php echo esc_html( $be_titel ); ?></h3>
 				<p class="hdp-footer-adres">Liersesteenweg 211L<br>2220 Heist-op-den-Berg<br>België</p>
 				<div class="hdp-footer-contact">
-					<a href="tel:+32472942821"><?php echo $tel_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?>+32 (0)472 94 28 21</a>
+					<a href="tel:+3215559835"><?php echo $tel_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?>+32 (0)15 55 98 35</a>
 					<a href="mailto:info@homburg-belgium.com"><?php echo $mail_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?>info@homburg-belgium.com</a>
 				</div>
 			</div>

@@ -8,6 +8,9 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.44.1
+- Footer: telefoonnummer Homburg Belgium gecorrigeerd naar +32 (0)15 55 98 35.
+
 ## 1.44.0
 - "Mijn account"-dashboard (het startscherm na inloggen op /my-account/) vervangen: i.p.v. de kale standaard-WooCommerce-tekst nu een welkomstregel, kaarten met snelkoppelingen naar Bestellingen/Snel bestellen/Mijn favorieten/Downloads/Adressen/Accountdetails, en een voorproefje van de 3 meest recente bestellingen — in dezelfde stijl als de rest van het dealerportaal. Thema-wijziging (`woocommerce/myaccount/dashboard.php` + `assets/css/woocommerce.css`), plugin kreeg er twee iconen (hart, adres) bij t.b.v. deze kaarten.
 
