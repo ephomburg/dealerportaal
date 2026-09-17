@@ -43,20 +43,48 @@ $link_icoon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 					<span class="hdp-favorieten-aantal"<?php echo $hdp_aantal_favorieten ? '' : ' hidden'; ?>><?php echo (int) $hdp_aantal_favorieten; ?></span>
 				</a>
 			<?php endif; ?>
-			<?php if ( is_user_logged_in() && function_exists( 'wc_get_page_permalink' ) ) : ?>
-				<a class="hdp-menu-knop" href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>">
-					<?php echo HDP_Icons::svg_icoon( 'gebruiker' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
-					<?php esc_html_e( 'Mijn account', 'homburg-dealerportaal' ); ?>
-				</a>
-			<?php endif; ?>
-			<?php if ( is_user_logged_in() && class_exists( 'HDP_Account' ) ) : ?>
-				<div class="hdp-header-account">
-					<?php HDP_Account::render_instellingen_knop_en_paneel(); ?>
-					<a class="hdp-header-uitloggen" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>">
-						<?php echo HDP_Icons::svg_icoon( 'uitloggen' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
-						<?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?>
-					</a>
+			<?php if ( is_user_logged_in() ) : ?>
+				<div class="hdp-account-menu">
+					<input type="checkbox" id="hdp-account-menu-toggle" class="hdp-account-menu-toggle">
+					<div class="hdp-account-split">
+						<?php if ( function_exists( 'wc_get_page_permalink' ) ) : ?>
+							<a class="hdp-account-split-link" href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>">
+								<?php echo HDP_Icons::svg_icoon( 'gebruiker' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
+								<?php esc_html_e( 'Mijn account', 'homburg-dealerportaal' ); ?>
+							</a>
+						<?php endif; ?>
+						<label for="hdp-account-menu-toggle" class="hdp-account-split-toggle" aria-label="<?php esc_attr_e( 'Accountmenu', 'homburg-dealerportaal' ); ?>">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+						</label>
+					</div>
+					<div class="hdp-account-menu-paneel">
+						<?php if ( class_exists( 'HDP_Account' ) ) : ?>
+							<?php HDP_Account::render_instellingen_knop_en_paneel(); ?>
+						<?php endif; ?>
+						<a class="hdp-account-menu-uitloggen" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>">
+							<?php echo HDP_Icons::svg_icoon( 'uitloggen' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
+							<?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?>
+						</a>
+					</div>
 				</div>
+				<script>
+				(function () {
+					var toggle = document.getElementById( 'hdp-account-menu-toggle' );
+					if ( ! toggle ) { return; }
+
+					document.addEventListener( 'click', function ( e ) {
+						if ( toggle.checked && ! toggle.closest( '.hdp-account-menu' ).contains( e.target ) ) {
+							toggle.checked = false;
+						}
+					} );
+					document.addEventListener( 'keydown', function ( e ) {
+						if ( 'Escape' === e.key && toggle.checked ) {
+							toggle.checked = false;
+							toggle.focus();
+						}
+					} );
+				})();
+				</script>
 			<?php endif; ?>
 			<div class="hdp-taalswitch" role="group" aria-label="Taal / Langue">
 				<a href="<?php echo esc_url( add_query_arg( 'hdp_taal', 'nl' ) ); ?>" class="hdp-taal-knop<?php echo 'nl' === $huidige_taal ? ' hdp-taal-actief' : ''; ?>"<?php echo 'nl' === $huidige_taal ? ' aria-current="true"' : ''; ?>>NL</a>

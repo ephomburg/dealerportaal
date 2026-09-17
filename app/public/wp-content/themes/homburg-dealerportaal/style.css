@@ -2,7 +2,7 @@
 Theme Name: Homburg Dealerportaal
 Description: Eigen blokthema voor het Homburg-dealerportaal, gebouwd op het originele HTML-ontwerp (rood/donkergrijs, Montserrat). Geen bloggerichte onderdelen; puur gericht op de dealerportaalsite.
 Author: Homburg Machinehandel BV
-Version: 1.24.1
+Version: 1.25.0
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -163,43 +163,91 @@ html { height: 100%; }
 	border: 2px solid var(--wp--preset--color--donkergrijs);
 }
 
-/* Instellingen + Uitloggen in de header — gestapeld, i.p.v. bij de
-   "Welkom"-titel op de homepage (zie class-hdp-portal-render.php). De
-   knop/paneel-structuur (checkbox-hack, geen JS) komt uit
-   HDP_Account::render_instellingen_knop_en_paneel(); hier alleen de
-   lichte kaart-stijl herzien voor deze donkere achtergrond. */
-.hdp-header-account {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	justify-content: center;
-	gap: 0.2rem;
-	border-left: 1px solid rgba(255, 255, 255, 0.25);
-	padding-left: 0.9rem;
-	margin-left: 0.2rem;
-}
-.hdp-header-account .hdp-btn-instellingen {
-	background: none;
-	padding: 0;
-	color: #b9bcc2;
-	font-size: 0.72rem;
-	font-weight: 700;
-	letter-spacing: 0.01em;
-}
-.hdp-header-account .hdp-btn-instellingen svg { width: 12px; height: 12px; }
-.hdp-header-account .hdp-btn-instellingen:hover { background: none; color: var(--wp--preset--color--wit); transform: none; }
-.hdp-header-uitloggen {
+/* "Mijn account"-splitknop + accountmenu in de header: het linkerdeel
+   (rood, zelfde stijl als Homburg Holland/Belgium) is een gewone link naar
+   Mijn account, het rechterdeel (pijltje) klapt via een checkbox-hack
+   (geen JS, zelfde patroon als het instellingenpaneel hieronder) een
+   paneel open met Instellingen en Uitloggen. Taal blijft bewust bij de
+   los bestaande .hdp-taalswitch — die moet ook zichtbaar blijven voor
+   uitgelogde bezoekers (bijv. op het inlogscherm), en zou dus niet mee
+   verhuisd mogen worden naar dit alleen-voor-ingelogden-menu. */
+.hdp-account-menu { position: relative; }
+.hdp-account-menu-toggle { position: absolute; opacity: 0; pointer-events: none; }
+
+.hdp-account-split { display: flex; align-items: stretch; border-radius: 6px; overflow: hidden; }
+.hdp-account-split-link {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.3rem;
-	color: #8f939b;
-	font-size: 0.68rem;
+	gap: 0.4rem;
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+	text-decoration: none;
+	font-weight: 700;
+	font-size: 0.8rem;
+	padding: 0.5rem 0.9rem;
+	transition: background 0.2s;
+}
+.hdp-account-split-link:hover { background: var(--wp--preset--color--homburg-rood-donker); }
+.hdp-account-split-link svg { width: 14px; height: 14px; stroke: currentColor; flex-shrink: 0; }
+.hdp-account-split-toggle {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	background: var(--wp--preset--color--homburg-rood-donker);
+	color: var(--wp--preset--color--wit);
+	cursor: pointer;
+	border-left: 1px solid rgba(255, 255, 255, 0.25);
+	transition: background 0.2s;
+}
+.hdp-account-split-toggle:hover { background: #7d0808; }
+.hdp-account-split-toggle svg { width: 13px; height: 13px; transition: transform 0.15s; }
+.hdp-account-menu-toggle:checked ~ .hdp-account-split .hdp-account-split-toggle svg { transform: rotate(180deg); }
+.hdp-account-menu-toggle:focus-visible ~ .hdp-account-split .hdp-account-split-toggle { outline: 2px solid var(--wp--preset--color--wit); outline-offset: -2px; }
+
+.hdp-account-menu-paneel {
+	display: none;
+	position: absolute;
+	top: calc(100% + 0.6rem);
+	right: 0;
+	min-width: 220px;
+	background: var(--wp--preset--color--wit);
+	border-radius: 8px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+	overflow: hidden;
+	z-index: 30;
+	text-align: left;
+}
+.hdp-account-menu-toggle:checked ~ .hdp-account-menu-paneel { display: block; }
+
+.hdp-account-menu-paneel .hdp-btn-instellingen {
+	display: flex;
+	width: 100%;
+	gap: 0.6rem;
+	background: none;
+	border-radius: 0;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+	padding: 0.75rem 1rem;
+	color: var(--wp--preset--color--donkergrijs);
+	font-size: 0.85rem;
+	text-align: left;
+}
+.hdp-account-menu-paneel .hdp-btn-instellingen svg { width: 15px; height: 15px; stroke: var(--wp--preset--color--grijs-tekst); }
+.hdp-account-menu-paneel .hdp-btn-instellingen:hover { background: var(--wp--preset--color--grijs-licht); color: var(--wp--preset--color--donkergrijs); transform: none; }
+
+.hdp-account-menu-uitloggen {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0.75rem 1rem;
+	color: var(--wp--preset--color--homburg-rood);
+	font-size: 0.85rem;
 	font-weight: 600;
 	text-decoration: none;
-	transition: color 0.2s;
+	transition: background 0.15s;
 }
-.hdp-header-uitloggen svg { width: 11px; height: 11px; stroke: currentColor; flex-shrink: 0; }
-.hdp-header-uitloggen:hover { color: var(--wp--preset--color--wit); }
+.hdp-account-menu-uitloggen svg { width: 15px; height: 15px; stroke: currentColor; flex-shrink: 0; }
+.hdp-account-menu-uitloggen:hover { background: var(--wp--preset--color--grijs-licht); }
 
 .hdp-taalswitch {
 	display: flex;
