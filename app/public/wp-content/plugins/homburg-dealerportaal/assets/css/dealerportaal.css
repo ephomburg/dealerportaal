@@ -667,13 +667,26 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
    kaartjesgrid: links de algemene punten (bestellen, contact, technisch)
    als platte tekst (is-style-tekst, zie HDP_Blocks::registreer_blokstijlen()),
    rechts de onderdelenportals per merk als een eigen tegel-hub. */
-.hdp-info-split { gap: 2.6rem; }
+/* align-items:flex-start i.p.v. wp:columns' eigen standaard (stretch):
+   de twee kolommen horen niet even hoog te zijn — met stretch kreeg de
+   linkerkolom een hoogte opgelegd door de rechter (de merken-hub), wat
+   op zijn beurt de eerste .hdp-info-kaart (die nog height:100% erfde,
+   zie hieronder) veel te veel ruimte liet innemen. */
+.hdp-info-split { gap: 2.6rem; align-items: flex-start; }
 
 .hdp-info-kaart.is-style-tekst {
 	background: none;
 	border: none;
 	padding: 0;
 	margin-block-start: 1.3rem;
+	/* .hdp-info-kaart (kaartversie) zet height:100% om in de oude grid met
+	   grid-auto-rows:1fr gelijk op te lopen — hier zit deze kaart i.p.v.
+	   daarin gewoon in een normale, van-boven-naar-onder kolom. Die 100%
+	   loste hier op tegen de kolom die zelf door de flex-rij van
+	   wp:columns (align-items:stretch) even hoog wordt gerekt als de
+	   merken-hub kolom ernaast — de eerste kaart probeerde dus die hele
+	   hoogte te vullen en duwde de andere twee ver naar beneden. */
+	height: auto;
 }
 .hdp-info-split .wp-block-column > .hdp-info-kaart.is-style-tekst:first-child { margin-block-start: 0; }
 .hdp-info-kaart.is-style-tekst:hover { box-shadow: none; }

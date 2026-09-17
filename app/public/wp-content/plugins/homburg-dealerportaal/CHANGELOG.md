@@ -8,6 +8,9 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.47.2
+- "Overige informatie": de eerste tekstkaart links (Bestellen en levertijden) trok een enorme, lege ruimte onder zich, waardoor Contact magazijn/(Technische) informatie er ver onder kwamen te staan. Oorzaak: de kaartversie van `.hdp-info-kaart` zet `height:100%` (bedoeld voor het oude raster met gelijke rijhoogtes) — dat bleef ook gelden voor de nieuwe "platte tekst"-stijl, en de linkerkolom werd bovendien door wp:columns even hoog gerekt als de merken-hub ernaast. Beide gecorrigeerd.
+
 ## 1.47.1
 - Header: het icoontje op de nieuwe "Mijn account"-knop was onzichtbaar (HDP_Icons::svg_icoon() geeft zelf geen stroke-kleur mee, en de knop-CSS zette die ook niet) — nu zichtbaar.
 - Hero: de hoekmarkeringen op de foto zijn eruit gehaald; het naamplaatje sluit nu links aan op dezelfde marge als de rest van de pagina (header/footer) i.p.v. een los vast pixelgetal.
