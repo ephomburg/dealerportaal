@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.47.1
+- Header: het icoontje op de nieuwe "Mijn account"-knop was onzichtbaar (HDP_Icons::svg_icoon() geeft zelf geen stroke-kleur mee, en de knop-CSS zette die ook niet) — nu zichtbaar.
+- Hero: de hoekmarkeringen op de foto zijn eruit gehaald; het naamplaatje sluit nu links aan op dezelfde marge als de rest van de pagina (header/footer) i.p.v. een los vast pixelgetal.
+
 ## 1.47.0
 Voorpagina (/dealerportaal/) grondig herzien, in twee onderdelen:
 - **Hero:** de foto met losse witte "Welkom"-balk eronder vervangen door een "blauwdruk-plaat" — hoekmarkeringen op de foto en de welkomsttekst op een donker naamplaatje eroverheen, leunend op hetzelfde technisch-tekening-motief als de rasterplaceholder bij productfoto's. Geen aparte "Geautoriseerd voor: merken"-regel meer op deze plek (zie CHANGELOG-item hieronder als dat gemist wordt).

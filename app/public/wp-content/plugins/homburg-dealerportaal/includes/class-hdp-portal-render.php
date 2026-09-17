@@ -47,10 +47,6 @@ class HDP_Portal_Render {
 		$portaal_intro = HDP_I18N::kies( $a['portaalIntro'], $a['portaalIntroFr'] );
 		?>
 		<div class="hdp-hero-nieuw alignfull" style="background-image:url('<?php echo esc_url( $a['heroAfbeelding'] ); ?>')">
-			<div class="hdp-hero-hoek hdp-hero-hoek-tl" aria-hidden="true"></div>
-			<div class="hdp-hero-hoek hdp-hero-hoek-tr" aria-hidden="true"></div>
-			<div class="hdp-hero-hoek hdp-hero-hoek-bl" aria-hidden="true"></div>
-			<div class="hdp-hero-hoek hdp-hero-hoek-br" aria-hidden="true"></div>
 			<div class="hdp-hero-plaat">
 				<h1><?php echo esc_html( HDP_I18N::t( 'welkom_prefix' ) ); ?> <?php echo esc_html( $user->display_name ); ?></h1>
 				<p><?php echo esc_html( $portaal_intro ); ?></p>

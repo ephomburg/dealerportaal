@@ -47,15 +47,12 @@
    sectie erna. */
 .hdp-portaal.alignfull { margin-block-start: 0; }
 
-.hdp-hero-hoek { position: absolute; width: 34px; height: 34px; border: 2px solid var(--wp--preset--color--wit); opacity: 0.85; }
-.hdp-hero-hoek-tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
-.hdp-hero-hoek-tr { top: 20px; right: 20px; border-left: none; border-bottom: none; }
-.hdp-hero-hoek-bl { bottom: 20px; left: 20px; border-right: none; border-top: none; }
-.hdp-hero-hoek-br { bottom: 20px; right: 20px; border-left: none; border-top: none; }
-
 .hdp-hero-plaat {
 	position: absolute;
-	left: 20px;
+	/* Zelfde zijmarge als de headerlogo/footer (--content-size uit
+	   theme.json) i.p.v. een los vast pixelgetal, zodat de plaat links
+	   precies uitlijnt met de rest van de pagina. */
+	left: calc((100% - var(--wp--style--global--content-size, 70%)) / 2);
 	bottom: 20px;
 	max-width: 440px;
 	background: var(--wp--preset--color--donkergrijs);
@@ -1059,12 +1056,6 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	.hdp-hero-nieuw { height: 260px; min-height: 0; }
 	.hdp-hero-plaat { left: 12px; right: 12px; bottom: 12px; max-width: none; padding: 1.2rem 1.3rem; }
 	.hdp-hero-plaat h1 { font-size: 1.4rem; }
-	.hdp-hero-hoek { width: 22px; height: 22px; }
-	.hdp-hero-hoek-tl { top: 12px; left: 12px; }
-	.hdp-hero-hoek-tr { top: 12px; right: 12px; }
-	/* De plaat beslaat op mobiel de volle breedte onderaan, dus de onderste
-	   hoekmarkeringen zouden er toch achter verdwijnen. */
-	.hdp-hero-hoek-bl, .hdp-hero-hoek-br { display: none; }
 	.hdp-download-item { flex-wrap: wrap; }
 	.hdp-download-item .hdp-btn { width: 100%; }
 }
