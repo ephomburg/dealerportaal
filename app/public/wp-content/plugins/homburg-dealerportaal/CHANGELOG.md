@@ -8,6 +8,9 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.46.1
+- Duidelijke "Mijn account"-knop toegevoegd in de header (naast Homburg Holland/Belgium) — er was daarvoor geen zichtbare weg naar Mijn account, alleen het kleine "Instellingen"-tandwiel (dat een apart paneel opent, niet de accountpagina zelf).
+
 ## 1.46.0
 Grote, samenhangende update naar aanleiding van een uiterlijk/UX/code-audit; hieronder gebundeld per onderwerp i.p.v. per tussenstap (zie ook de werkafspraak in CHANGELOG hierboven over versiebump-per-afgeronde-wijziging).
 

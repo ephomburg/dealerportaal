@@ -43,6 +43,12 @@ $link_icoon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 					<span class="hdp-favorieten-aantal"<?php echo $hdp_aantal_favorieten ? '' : ' hidden'; ?>><?php echo (int) $hdp_aantal_favorieten; ?></span>
 				</a>
 			<?php endif; ?>
+			<?php if ( is_user_logged_in() && function_exists( 'wc_get_page_permalink' ) ) : ?>
+				<a class="hdp-menu-knop" href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>">
+					<?php echo HDP_Icons::svg_icoon( 'gebruiker' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
+					<?php esc_html_e( 'Mijn account', 'homburg-dealerportaal' ); ?>
+				</a>
+			<?php endif; ?>
 			<?php if ( is_user_logged_in() && class_exists( 'HDP_Account' ) ) : ?>
 				<div class="hdp-header-account">
 					<?php HDP_Account::render_instellingen_knop_en_paneel(); ?>
