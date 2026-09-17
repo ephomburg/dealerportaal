@@ -29,7 +29,7 @@ class HDP_Downloads_CPT {
 			'HARDI',
 			'Väderstad',
 			'Bogballe',
-			'RABE',
+			'Rabe',
 			'Tefen',
 		);
 	}

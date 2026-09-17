@@ -8,6 +8,9 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.46.2
+- Downloads: merk "RABE" gecorrigeerd naar "Rabe" (keuzelijst én de bestaande download die al onder dat merk stond).
+
 ## 1.46.1
 - Duidelijke "Mijn account"-knop toegevoegd in de header (naast Homburg Holland/Belgium) — er was daarvoor geen zichtbare weg naar Mijn account, alleen het kleine "Instellingen"-tandwiel (dat een apart paneel opent, niet de accountpagina zelf).
 
