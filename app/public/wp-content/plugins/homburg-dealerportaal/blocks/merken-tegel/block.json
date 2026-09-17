@@ -1,0 +1,23 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "homburg/merken-tegel",
+	"title": "Homburg merktegel",
+	"category": "widgets",
+	"icon": "tag",
+	"description": "Eén tegel in de merken-hub bij 'Overige informatie': merknaam, een korte linktekst en de URL naar het onderdelenportal van dat merk.",
+	"textdomain": "homburg-dealerportaal",
+	"attributes": {
+		"titel": { "type": "string", "default": "" },
+		"linkTekst": { "type": "string", "default": "" },
+		"linkTekstFr": { "type": "string", "default": "" },
+		"url": { "type": "string", "default": "" },
+		"kleur": { "type": "string", "default": "donker" },
+		"nieuweTab": { "type": "boolean", "default": true }
+	},
+	"supports": {
+		"html": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

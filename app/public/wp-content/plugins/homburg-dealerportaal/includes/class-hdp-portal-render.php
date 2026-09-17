@@ -44,36 +44,19 @@ class HDP_Portal_Render {
 			return;
 		}
 
-		$merken = get_user_meta( $user->ID, 'hdp_merken', true );
-
 		$portaal_intro = HDP_I18N::kies( $a['portaalIntro'], $a['portaalIntroFr'] );
 		?>
-		<div class="hdp-hero alignfull" style="background-image:url('<?php echo esc_url( $a['heroAfbeelding'] ); ?>')" aria-hidden="true"></div>
+		<div class="hdp-hero-nieuw alignfull" style="background-image:url('<?php echo esc_url( $a['heroAfbeelding'] ); ?>')">
+			<div class="hdp-hero-hoek hdp-hero-hoek-tl" aria-hidden="true"></div>
+			<div class="hdp-hero-hoek hdp-hero-hoek-tr" aria-hidden="true"></div>
+			<div class="hdp-hero-hoek hdp-hero-hoek-bl" aria-hidden="true"></div>
+			<div class="hdp-hero-hoek hdp-hero-hoek-br" aria-hidden="true"></div>
+			<div class="hdp-hero-plaat">
+				<h1><?php echo esc_html( HDP_I18N::t( 'welkom_prefix' ) ); ?> <?php echo esc_html( $user->display_name ); ?></h1>
+				<p><?php echo esc_html( $portaal_intro ); ?></p>
+			</div>
+		</div>
 		<div class="hdp-portaal alignfull">
-			<section class="hdp-welkom alignfull">
-				<div class="hdp-welkom-inner">
-					<div class="hdp-welkom-top">
-						<h1><?php echo esc_html( HDP_I18N::t( 'welkom_prefix' ) ); ?> <?php echo esc_html( $user->display_name ); ?></h1>
-					</div>
-					<p><?php echo esc_html( $portaal_intro ); ?></p>
-					<?php if ( $merken ) : ?>
-						<div class="hdp-merken">
-							<span class="hdp-merken-label"><?php echo esc_html( HDP_I18N::t( 'geautoriseerd_voor' ) ); ?></span>
-							<div class="hdp-merken-logos">
-								<?php foreach ( HDP_Merken::naar_array( $merken ) as $hdp_merk ) : ?>
-									<?php $hdp_logo_url = HDP_Settings::merk_logo_url( $hdp_merk ); ?>
-									<?php if ( $hdp_logo_url ) : ?>
-										<img class="hdp-merk-logo" src="<?php echo esc_url( $hdp_logo_url ); ?>" alt="<?php echo esc_attr( $hdp_merk ); ?>">
-									<?php else : ?>
-										<span class="hdp-merk-badge"><?php echo esc_html( $hdp_merk ); ?></span>
-									<?php endif; ?>
-								<?php endforeach; ?>
-							</div>
-						</div>
-					<?php endif; ?>
-				</div>
-			</section>
-
 			<?php HDP_Herbestellen::render(); ?>
 		</div>
 		<?php

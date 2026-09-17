@@ -13,9 +13,29 @@ class HDP_Blocks {
 
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'registreer_blokken' ) );
+		add_action( 'init', array( __CLASS__, 'registreer_blokstijlen' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
 		add_action( 'enqueue_block_assets', array( __CLASS__, 'enqueue_editor_assets' ) );
 		add_filter( 'render_block', array( __CLASS__, 'verberg_portaal_secties' ), 10, 2 );
+	}
+
+	/**
+	 * "Platte tekst"-stijlvariant voor homburg/info-kaart: dezelfde inhoud
+	 * (titel/tekst/links), maar zonder kaart-opmaak — voor de "lopende
+	 * tekst + merken-hub"-opzet van "Overige informatie" (zie
+	 * patterns/overige-informatie.php), waar niet elk stukje info een
+	 * eigen kader nodig heeft.
+	 */
+	public static function registreer_blokstijlen() {
+		foreach ( array( 'homburg/info-kaart', 'homburg/contact-kaart' ) as $blok ) {
+			register_block_style(
+				$blok,
+				array(
+					'name'  => 'tekst',
+					'label' => 'Platte tekst',
+				)
+			);
+		}
 	}
 
 	public static function registreer_blokken() {
@@ -26,6 +46,7 @@ class HDP_Blocks {
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/contact-kaart' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/portaal-kaart' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/bestelgeschiedenis' );
+		register_block_type( HDP_PLUGIN_DIR . 'blocks/merken-tegel' );
 	}
 
 	public static function enqueue_assets() {
@@ -38,6 +59,7 @@ class HDP_Blocks {
 			|| has_block( 'homburg/contact-kaart', $post )
 			|| has_block( 'homburg/portaal-kaart', $post )
 			|| has_block( 'homburg/bestelgeschiedenis-pagina', $post )
+			|| has_block( 'homburg/merken-tegel', $post )
 		);
 
 		// Ook laden (los van de blokken hierboven) wanneer een ingelogde

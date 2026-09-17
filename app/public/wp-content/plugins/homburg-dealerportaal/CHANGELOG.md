@@ -8,6 +8,11 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.47.0
+Voorpagina (/dealerportaal/) grondig herzien, in twee onderdelen:
+- **Hero:** de foto met losse witte "Welkom"-balk eronder vervangen door een "blauwdruk-plaat" — hoekmarkeringen op de foto en de welkomsttekst op een donker naamplaatje eroverheen, leunend op hetzelfde technisch-tekening-motief als de rasterplaceholder bij productfoto's. Geen aparte "Geautoriseerd voor: merken"-regel meer op deze plek (zie CHANGELOG-item hieronder als dat gemist wordt).
+- **"Overige informatie":** het raster van zes gelijke kaarten vervangen door een tweeluik — links lopende tekst voor bestellen/levertijden, contact en technische informatie (nieuwe "Platte tekst"-stijlvariant op de bestaande info-kaart/contact-kaart-blokken), rechts een "merken-hub" met vier stevige tegels (Väderstad, Bogballe, Draincleaners, HARDI & Rabe) naar de onderdelenportalen. Nieuw blok `homburg/merken-tegel` hiervoor; de bijbehorende blokpatroon (voor eventuele toekomstige pagina's) is meeveranderd.
+
 ## 1.46.3
 - Downloads: merk "Homburg Draincleaners" gecorrigeerd naar "Draincleaners" (keuzelijst én de bestaande download die al onder dat merk stond).
 

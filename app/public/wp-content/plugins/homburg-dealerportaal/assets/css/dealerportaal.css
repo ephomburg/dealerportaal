@@ -26,8 +26,14 @@
 /* Sfeerbeeld direct onder de header, edge-to-edge zoals in het origineel.
    De klasse "alignfull" is het ingebouwde mechanisme van het blokthema om
    uit de smalle inhoudskolom te breken. De achtergrondafbeelding komt
-   inline mee vanuit het blokattribuut (zie HDP_Blocks). */
-.hdp-hero.alignfull {
+   inline mee vanuit het blokattribuut (zie HDP_Blocks).
+   "Blauwdruk-plaat": leunt op hetzelfde technisch-tekening-motief als de
+   rasterplaceholder bij productfoto's zonder eigen beeld (--hdp-wc-blauwdruk
+   in woocommerce.css) — hoekmarkeringen en een "naamplaatje" met de
+   welkomsttekst, i.p.v. een foto met een aparte tekstsectie eronder. Bewust
+   een harde onderrand (geen vervagende overgang): dat past bij het
+   plaat-idee beter dan een zachte foto-overloop. */
+.hdp-hero-nieuw.alignfull {
 	position: relative;
 	height: 46vh;
 	min-height: 240px;
@@ -37,18 +43,28 @@
 	background-position: center 30%;
 }
 /* WordPress geeft blokken automatisch een kleine bovenmarge (block-gap);
-   die moet hier op nul, anders ontstaat er een naad tussen hero en
-   welkomstsectie. */
+   die moet hier op nul, anders ontstaat er een naad tussen hero en de
+   sectie erna. */
 .hdp-portaal.alignfull { margin-block-start: 0; }
-.hdp-hero::after {
-	content: "";
+
+.hdp-hero-hoek { position: absolute; width: 34px; height: 34px; border: 2px solid var(--wp--preset--color--wit); opacity: 0.85; }
+.hdp-hero-hoek-tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+.hdp-hero-hoek-tr { top: 20px; right: 20px; border-left: none; border-bottom: none; }
+.hdp-hero-hoek-bl { bottom: 20px; left: 20px; border-right: none; border-top: none; }
+.hdp-hero-hoek-br { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+
+.hdp-hero-plaat {
 	position: absolute;
-	inset: 0;
-	/* Vervaagt pas in het onderste stuk i.p.v. over de hele hoogte — de foto
-	   blijft zo langer helder en de overgang naar "Welkom" voelt korter/
-	   strakker i.p.v. een lange, uitgewassen overgangszone. */
-	background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 60%, var(--wp--preset--color--wit) 100%);
+	left: 20px;
+	bottom: 20px;
+	max-width: 440px;
+	background: var(--wp--preset--color--donkergrijs);
+	color: var(--wp--preset--color--wit);
+	padding: 1.6rem 1.8rem;
+	border-left: 4px solid var(--wp--preset--color--homburg-rood);
 }
+.hdp-hero-plaat h1 { font-size: 1.9rem; font-weight: 800; margin: 0 0 0.6rem; color: var(--wp--preset--color--wit); }
+.hdp-hero-plaat p { margin: 0; color: #c7c8cc; font-size: 0.9rem; }
 
 /* ==========================================================================
    ALGEMENE KNOPPEN
@@ -650,6 +666,80 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 .hdp-info-link svg { width: 13px; height: 13px; stroke: currentColor; flex-shrink: 0; }
 .hdp-info-link:hover { background: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--wit); }
 
+/* "Overige informatie" — lopende tekst + merken-hub i.p.v. één uniform
+   kaartjesgrid: links de algemene punten (bestellen, contact, technisch)
+   als platte tekst (is-style-tekst, zie HDP_Blocks::registreer_blokstijlen()),
+   rechts de onderdelenportals per merk als een eigen tegel-hub. */
+.hdp-info-split { gap: 2.6rem; }
+
+.hdp-info-kaart.is-style-tekst {
+	background: none;
+	border: none;
+	padding: 0;
+	margin-block-start: 1.3rem;
+}
+.hdp-info-split .wp-block-column > .hdp-info-kaart.is-style-tekst:first-child { margin-block-start: 0; }
+.hdp-info-kaart.is-style-tekst:hover { box-shadow: none; }
+.hdp-info-kaart.is-style-tekst .hdp-info-icoon { display: none; }
+.hdp-info-kaart.is-style-tekst .hdp-info-links { margin-top: 0.3rem; }
+.hdp-info-kaart.is-style-tekst .hdp-info-link {
+	display: inline;
+	background: none;
+	color: var(--wp--preset--color--homburg-rood);
+	font-weight: 700;
+	padding: 0;
+	border-radius: 0;
+}
+.hdp-info-kaart.is-style-tekst .hdp-info-link svg { display: none; }
+.hdp-info-kaart.is-style-tekst .hdp-info-link:hover { background: none; color: var(--wp--preset--color--homburg-rood-donker); text-decoration: underline; }
+.hdp-info-kaart.is-style-tekst .hdp-info-link:not(:last-child)::after { content: " · "; color: var(--wp--preset--color--grijs-tekst); font-weight: 400; }
+
+.hdp-merken-hub-titel {
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.09em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+	margin: 0 0 0.9rem;
+}
+.hdp-merken-hub {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 0.9rem;
+}
+.hdp-merken-hub > * { margin-block-start: 0; }
+.hdp-merktegel {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	gap: 1.4rem;
+	background: var(--wp--preset--color--donkergrijs);
+	color: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	padding: 1.2rem 1.3rem;
+	min-height: 110px;
+	text-decoration: none;
+	position: relative;
+	overflow: hidden;
+	transition: transform 0.15s;
+}
+.hdp-merktegel:hover { transform: translateY(-2px); }
+.hdp-merktegel::after {
+	content: "";
+	position: absolute;
+	right: -18px;
+	bottom: -18px;
+	width: 80px;
+	height: 80px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.06);
+}
+.hdp-merktegel-titel { font-size: 1rem; font-weight: 800; position: relative; z-index: 1; }
+.hdp-merktegel-link { font-size: 0.74rem; color: #b7b8bc; font-weight: 600; position: relative; z-index: 1; }
+.hdp-merktegel-rood { background: var(--wp--preset--color--homburg-rood); }
+.hdp-merktegel-rood .hdp-merktegel-link { color: rgba(255, 255, 255, 0.75); }
+.hdp-merktegel-link::after { content: " →"; }
+
 /* ==========================================================================
    DOWNLOADS
    ========================================================================== */
@@ -966,7 +1056,15 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	.hdp-info-kaart { flex-direction: column; }
 	.hdp-welkom { padding: 1.6rem 0; }
 	.hdp-welkom-inner { padding: 0 1rem; }
-	.hdp-hero { height: 220px; min-height: 0; }
+	.hdp-hero-nieuw { height: 260px; min-height: 0; }
+	.hdp-hero-plaat { left: 12px; right: 12px; bottom: 12px; max-width: none; padding: 1.2rem 1.3rem; }
+	.hdp-hero-plaat h1 { font-size: 1.4rem; }
+	.hdp-hero-hoek { width: 22px; height: 22px; }
+	.hdp-hero-hoek-tl { top: 12px; left: 12px; }
+	.hdp-hero-hoek-tr { top: 12px; right: 12px; }
+	/* De plaat beslaat op mobiel de volle breedte onderaan, dus de onderste
+	   hoekmarkeringen zouden er toch achter verdwijnen. */
+	.hdp-hero-hoek-bl, .hdp-hero-hoek-br { display: none; }
 	.hdp-download-item { flex-wrap: wrap; }
 	.hdp-download-item .hdp-btn { width: 100%; }
 }
