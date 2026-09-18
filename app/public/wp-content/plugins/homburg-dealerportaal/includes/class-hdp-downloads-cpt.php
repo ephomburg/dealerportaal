@@ -29,6 +29,7 @@ class HDP_Downloads_CPT {
 			'HARDI',
 			'Väderstad',
 			'Bogballe',
+			'Garford',
 			'Rabe',
 			'Tefen',
 		);
@@ -112,7 +113,8 @@ class HDP_Downloads_CPT {
 			<strong>Regio</strong><br>
 			<label><input type="checkbox" name="hdp_regio_nl" value="1" <?php checked( in_array( 'nl', $regios, true ) ); ?>> Nederland</label><br>
 			<label><input type="checkbox" name="hdp_regio_be" value="1" <?php checked( in_array( 'be', $regios, true ) ); ?>> België</label><br>
-			<label><input type="checkbox" name="hdp_regio_be_fr" value="1" <?php checked( in_array( 'be-fr', $regios, true ) ); ?>> België (Franstalig)</label>
+			<label><input type="checkbox" name="hdp_regio_be_fr" value="1" <?php checked( in_array( 'be-fr', $regios, true ) ); ?>> België (Franstalig)</label><br>
+			<label><input type="checkbox" name="hdp_regio_en" value="1" <?php checked( in_array( 'en', $regios, true ) ); ?>> Engels</label>
 		</p>
 		<?php
 	}
@@ -187,6 +189,9 @@ class HDP_Downloads_CPT {
 			}
 			if ( ! empty( $_POST['hdp_regio_be_fr'] ) ) {
 				$regios[] = 'be-fr';
+			}
+			if ( ! empty( $_POST['hdp_regio_en'] ) ) {
+				$regios[] = 'en';
 			}
 			update_post_meta( $post_id, '_hdp_regios', implode( ',', $regios ) );
 		}

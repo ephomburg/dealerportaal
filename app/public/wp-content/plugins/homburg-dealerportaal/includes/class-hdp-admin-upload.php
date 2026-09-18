@@ -159,6 +159,9 @@ class HDP_Admin_Upload {
 		if ( ! empty( $_POST['hdp_regio_be_fr'] ) ) {
 			$regios[] = 'be-fr';
 		}
+		if ( ! empty( $_POST['hdp_regio_en'] ) ) {
+			$regios[] = 'en';
+		}
 
 		$download_id = wp_insert_post(
 			array(
@@ -321,6 +324,9 @@ class HDP_Admin_Upload {
 			if ( ! empty( $post['hdp_bulk_regio_be_fr'] ) ) {
 				$nieuwe_regios[] = 'be-fr';
 			}
+			if ( ! empty( $post['hdp_bulk_regio_en'] ) ) {
+				$nieuwe_regios[] = 'en';
+			}
 		}
 
 		if ( ! $merk_wijzigen && ! $regio_wijzigen ) {
@@ -427,6 +433,7 @@ class HDP_Admin_Upload {
 					<label class="hdp-admin-checkbox"><input type="checkbox" name="hdp_regio_nl" value="1"> Nederland</label>
 					<label class="hdp-admin-checkbox"><input type="checkbox" name="hdp_regio_be" value="1"> België</label>
 					<label class="hdp-admin-checkbox"><input type="checkbox" name="hdp_regio_be_fr" value="1"> België (Franstalig)</label>
+					<label class="hdp-admin-checkbox"><input type="checkbox" name="hdp_regio_en" value="1"> Engels</label>
 				</div>
 
 				<button type="submit" class="hdp-btn">Uploaden</button>
@@ -574,6 +581,7 @@ class HDP_Admin_Upload {
 				<label class="hdp-admin-checkbox"><input type="checkbox" name="hdp_bulk_regio_nl" value="1"> Nederland</label>
 				<label class="hdp-admin-checkbox"><input type="checkbox" name="hdp_bulk_regio_be" value="1"> België</label>
 				<label class="hdp-admin-checkbox"><input type="checkbox" name="hdp_bulk_regio_be_fr" value="1"> België (Franstalig)</label>
+				<label class="hdp-admin-checkbox"><input type="checkbox" name="hdp_bulk_regio_en" value="1"> Engels</label>
 			</div>
 			<button type="submit" class="hdp-btn hdp-btn-secundair hdp-btn-klein hdp-btn-vol">Toepassen op geselecteerde</button>
 		</form>

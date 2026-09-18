@@ -240,6 +240,7 @@ class HDP_I18N {
 			'filter_nederland'  => array( 'nl' => 'Nederland', 'fr' => 'Pays-Bas' ),
 			'filter_belgie'     => array( 'nl' => 'België', 'fr' => 'Belgique' ),
 			'filter_belgie_fr'  => array( 'nl' => 'België (Frans)', 'fr' => 'Belgique (francophone)' ),
+			'filter_engels'     => array( 'nl' => 'Engels', 'fr' => 'Anglais' ),
 			'filter_merk'       => array( 'nl' => 'Merk', 'fr' => 'Marque' ),
 			'sorteren_label'    => array( 'nl' => 'Sorteren', 'fr' => 'Trier' ),
 			'sorteer_nieuw'     => array( 'nl' => 'Nieuwste eerst', 'fr' => "Plus récents d'abord" ),

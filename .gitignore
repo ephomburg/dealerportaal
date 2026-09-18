@@ -4,6 +4,7 @@ app/public/wp-admin/
 app/public/wp-includes/
 app/public/wp-content/uploads/
 app/public/wp-content/plugins/woocommerce/
+app/public/wp-content/plugins/filebird/
 app/public/wp-content/plugins/all-in-one-wp-migration/
 app/public/wp-content/plugins/duplicator/
 app/public/wp-content/ai1wm-backups/

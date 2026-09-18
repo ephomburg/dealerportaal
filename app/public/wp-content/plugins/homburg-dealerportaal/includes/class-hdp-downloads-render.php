@@ -111,8 +111,10 @@ class HDP_Downloads_Render {
 		// — zo verschijnt een bestand automatisch bij de juiste taalgroep in
 		// plaats van dat de dealer dat zelf via de regiofilter moet uitzoeken.
 		// Bestanden zonder regio-tag (van vóór dit onderscheid, of bewust
-		// voor iedereen bedoeld) blijven in beide talen zichtbaar.
-		$toegestane_regios = HDP_I18N::is_frans() ? array( 'be-fr' ) : array( 'nl', 'be' );
+		// voor iedereen bedoeld) blijven in beide talen zichtbaar. "en"
+		// (Engelstalige bestanden) staat los van de NL/FR-schermtaal — die
+		// blijven voor iedereen zichtbaar, ongeacht de taalkeuze.
+		$toegestane_regios = HDP_I18N::is_frans() ? array( 'be-fr', 'en' ) : array( 'nl', 'be', 'en' );
 		$downloads         = array_values(
 			array_filter(
 				$downloads,
@@ -182,6 +184,7 @@ class HDP_Downloads_Render {
 							<button type="button" class="hdp-chip" data-regio="nl"><?php echo esc_html( HDP_I18N::t( 'filter_nederland' ) ); ?></button>
 							<button type="button" class="hdp-chip" data-regio="be"><?php echo esc_html( HDP_I18N::t( 'filter_belgie' ) ); ?></button>
 						<?php endif; ?>
+						<button type="button" class="hdp-chip" data-regio="en"><?php echo esc_html( HDP_I18N::t( 'filter_engels' ) ); ?></button>
 					</div>
 				</div>
 				<?php if ( $merken ) : ?>
