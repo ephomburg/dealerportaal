@@ -131,6 +131,17 @@ function homburg_wc_verberg_downloads_tabblad( $items ) {
 	return $items;
 }
 
+add_filter( 'woocommerce_customer_email_verification_should_show_prompt', '__return_false' );
+/**
+ * WooCommerce's melding "Bevestig uw e-mailadres" op Mijn account →
+ * Bestellingen dient om eerdere gastbestellingen (zonder account) aan een
+ * account te koppelen — dit portaal kent geen gasten: alleen goedgekeurde,
+ * ingelogde dealers kunnen hier iets bestellen. De melding hoort dus nooit
+ * ergens op te slaan; verbergen via WooCommerce's eigen schakelaar hiervoor
+ * i.p.v. de tekst te laten staan (en te vertalen) voor een situatie die
+ * hier niet voorkomt.
+ */
+
 add_action( 'woocommerce_before_account_navigation', 'homburg_wc_myaccount_titel' );
 /**
  * "Mijn account" begon zonder eigen titel meteen met de navigatie —

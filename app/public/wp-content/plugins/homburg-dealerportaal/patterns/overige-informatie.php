@@ -26,13 +26,29 @@
 <!-- /wp:column -->
 
 <!-- wp:column -->
-<div class="wp-block-column"><!-- wp:heading {"level":3,"className":"hdp-merken-hub-titel hdp-taal-nl"} -->
-<h3 class="wp-block-heading hdp-merken-hub-titel hdp-taal-nl">Onderdelen per merk</h3>
+<div class="wp-block-column"><!-- wp:paragraph {"className":"hdp-merken-hub-eyebrow hdp-taal-nl"} -->
+<p class="hdp-merken-hub-eyebrow hdp-taal-nl">Onderdelen per merk</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"className":"hdp-merken-hub-eyebrow hdp-taal-fr"} -->
+<p class="hdp-merken-hub-eyebrow hdp-taal-fr">Pièces par marque</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"hdp-merken-hub-titel hdp-taal-nl"} -->
+<h3 class="wp-block-heading hdp-merken-hub-titel hdp-taal-nl">Direct naar de onderdelen</h3>
 <!-- /wp:heading -->
 
 <!-- wp:heading {"level":3,"className":"hdp-merken-hub-titel hdp-taal-fr"} -->
-<h3 class="wp-block-heading hdp-merken-hub-titel hdp-taal-fr">Pièces par marque</h3>
+<h3 class="wp-block-heading hdp-merken-hub-titel hdp-taal-fr">Directement vers les pièces</h3>
 <!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"hdp-merken-hub-intro hdp-taal-nl"} -->
+<p class="hdp-merken-hub-intro hdp-taal-nl">Bekijk per merk de onderdelen en bestel eenvoudig via de juiste portal.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"className":"hdp-merken-hub-intro hdp-taal-fr"} -->
+<p class="hdp-merken-hub-intro hdp-taal-fr">Consultez les pièces par marque et commandez facilement via le bon portail.</p>
+<!-- /wp:paragraph -->
 
 <!-- wp:group {"className":"hdp-merken-hub","layout":{"type":"default"}} -->
 <div class="wp-block-group hdp-merken-hub"><!-- wp:homburg/merken-tegel {"titel":"Väderstad","linkTekst":"Parts catalogue","url":"https://www.vaderstad.com/en/support/parts-catalogue-online","kleur":"rood"} /-->

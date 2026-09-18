@@ -2,7 +2,7 @@
 Theme Name: Homburg Dealerportaal
 Description: Eigen blokthema voor het Homburg-dealerportaal, gebouwd op het originele HTML-ontwerp (rood/donkergrijs, Montserrat). Geen bloggerichte onderdelen; puur gericht op de dealerportaalsite.
 Author: Homburg Machinehandel BV
-Version: 1.25.2
+Version: 1.25.9
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -42,6 +42,17 @@ html { height: 100%; }
 	font-family: 'Montserrat', Arial, sans-serif;
 	box-sizing: border-box;
 }
+/* WooCommerce zet op elke pagina met de body-class "woocommerce-page"
+   (dus bv. "Mijn account", maar niet de gewone dealerportaal-startpagina)
+   een standaard margin-bottom:.7em op ALLE <label>-elementen (bedoeld voor
+   echte formuliervelden). De knoppen hier (Links, Mijn account-pijltje,
+   Instellingen-knop) zijn ook <label>-elementen — een checkbox-truc i.p.v.
+   een JS-framework — en krijgen die ongewenste ruimte er per ongeluk ook
+   bij, wat ze op zulke pagina's lager/scheef laat staan t.o.v. knoppen
+   ernaast. .hdp-site-header .hdp-hoofdmenu label (2 classes + type) is
+   specifieker dan WooCommerce's .woocommerce-page label (1 class + type),
+   dus dit wint altijd, ongeacht de laadvolgorde van de stylesheets. */
+.hdp-site-header .hdp-hoofdmenu label { margin-bottom: 0; }
 .hdp-site-header {
 	background: var(--wp--preset--color--donkergrijs);
 	color: var(--wp--preset--color--wit);
@@ -327,6 +338,20 @@ html { height: 100%; }
 
 @media (max-width: 600px) {
 	.hdp-woordmerk-tekst span { display: none; }
+	/* Op smalle schermen past de knoppenrij (hartje/Links/mandje/account/
+	   taal) niet altijd op één regel naast het logo, dus die mag net als
+	   voorheen naar een 2e regel wrappen. Het probleem zat 'm niet in het
+	   wrappen zelf, maar in de uitklappanelen (Links/Mijn account): die
+	   hingen (position:absolute) onder hún EIGEN knop i.p.v. onder de
+	   hele knoppenrij, dus als bv. Links op regel 1 stond en Mijn account
+	   op regel 2 erdirect onder, viel het open paneel van Links bovenop
+	   die knop. Door hier de knoppen zelf hun eigen positioneringscontext
+	   te ontnemen (position:static) valt die terug op de knoppenrij zelf
+	   (.hdp-hoofdmenu, hieronder position:relative) — daardoor hangt een
+	   paneel altijd onder de VOLLEDIGE (eventueel naar 2 regels gewrapte)
+	   knoppenrij, nooit meer bovenop een knop op de regel erboven/eronder. */
+	.hdp-hoofdmenu { position: relative; row-gap: 0.6rem; }
+	.hdp-links-menu, .hdp-account-menu { position: static; }
 }
 
 /* ==========================================================================

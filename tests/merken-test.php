@@ -10,11 +10,11 @@
 class Merken_Test extends WP_UnitTestCase {
 
 	public function test_naar_array_zet_kommagescheiden_waarde_om() {
-		$this->assertSame( array( 'HARDI', 'Vaderstad' ), HDP_Merken::naar_array( 'HARDI, Vaderstad' ) );
+		$this->assertSame( array( 'HARDI', 'Väderstad' ), HDP_Merken::naar_array( 'HARDI, Väderstad' ) );
 	}
 
 	public function test_naar_array_trimt_spaties_en_negeert_lege_waarden() {
-		$this->assertSame( array( 'HARDI', 'Vaderstad' ), HDP_Merken::naar_array( ' HARDI ,, Vaderstad ,' ) );
+		$this->assertSame( array( 'HARDI', 'Väderstad' ), HDP_Merken::naar_array( ' HARDI ,, Väderstad ,' ) );
 	}
 
 	public function test_naar_array_van_lege_waarde_is_lege_array() {
@@ -23,7 +23,7 @@ class Merken_Test extends WP_UnitTestCase {
 	}
 
 	public function test_uit_selectie_zet_array_om_naar_kommagescheiden_string() {
-		$this->assertSame( 'HARDI, Vaderstad', HDP_Merken::uit_selectie( array( 'HARDI', 'Vaderstad' ) ) );
+		$this->assertSame( 'HARDI, Väderstad', HDP_Merken::uit_selectie( array( 'HARDI', 'Väderstad' ) ) );
 	}
 
 	public function test_uit_selectie_filtert_onbekende_waarden_weg() {

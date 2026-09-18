@@ -37,7 +37,6 @@ class HDP_Portal_Render {
 					<?php HDP_Icons::render_icoon( 'wachten' ); ?>
 					<h1><?php echo esc_html( HDP_I18N::t( 'account_titel' ) ); ?></h1>
 					<p class="hdp-intro"><?php echo esc_html( HDP_I18N::t( 'account_tekst' ) ); ?></p>
-					<a class="hdp-btn-logout" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>"><?php echo HDP_Icons::svg_icoon( 'uitloggen' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?><?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?></a>
 				</div>
 			</div>
 			<?php

@@ -40,7 +40,7 @@ $hdp_allowed_html = array(
 			<a class="hdp-btn hdp-btn-klein hdp-btn-vol" href="<?php echo esc_url( wc_get_endpoint_url( 'orders' ) ); ?>"><?php esc_html_e( 'Naar bestellingen', 'homburg-dealerportaal-theme' ); ?></a>
 		</div>
 
-		<div class="hdp-kaart hdp-kaart--nadruk">
+		<div class="hdp-kaart">
 			<?php HDP_Icons::render_icoon( 'bestellen' ); ?>
 			<h2><?php esc_html_e( 'Snel bestellen', 'homburg-dealerportaal-theme' ); ?></h2>
 			<p><?php esc_html_e( 'Ken je de artikelnummers al? Plak of typ ze in één keer in je winkelmand.', 'homburg-dealerportaal-theme' ); ?></p>

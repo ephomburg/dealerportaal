@@ -111,23 +111,6 @@
 }
 .hdp-btn-secundair:hover { background: var(--wp--preset--color--grijs-licht); border-color: var(--wp--preset--color--donkergrijs); color: var(--wp--preset--color--donkergrijs); }
 
-.hdp-btn-logout {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.5rem;
-	background: var(--wp--preset--color--grijs-licht);
-	color: var(--wp--preset--color--donkergrijs);
-	border: none;
-	border-radius: 8px;
-	padding: 0.6rem 1.2rem;
-	font-weight: 600;
-	font-size: 0.85rem;
-	text-decoration: none;
-	transition: background 0.2s, color 0.2s, transform 0.15s;
-}
-.hdp-btn-logout svg { width: 15px; height: 15px; stroke: currentColor; flex-shrink: 0; }
-.hdp-btn-logout:hover { background: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--wit); transform: translateY(-1px); }
-
 .hdp-btn-instellingen {
 	display: inline-flex;
 	align-items: center;
@@ -296,7 +279,6 @@
 .hdp-veld-invoer:focus-within svg { stroke: var(--wp--preset--color--homburg-rood); }
 
 .hdp-login-kaart .hdp-kaart-icoon { margin-bottom: 1.1rem; }
-.hdp-login-kaart .hdp-btn-logout { margin-top: 0.4rem; }
 
 .hdp-login-fout {
 	display: none;
@@ -432,23 +414,6 @@ body.hdp-login-actief {
 	text-decoration: none;
 }
 .hdp-terug-boven:hover { color: var(--wp--preset--color--homburg-rood); }
-.hdp-welkom-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-.hdp-welkom-acties { display: flex; align-items: center; gap: 0.6rem; }
-/* "Uitloggen" stond hier even prominent als "Instellingen" — naast een
-   "Welkom"-titel is dat te veel gewicht voor de minst gebruikte van de
-   twee. Hier bewust een stille tekstlink i.p.v. de gevulde knop; in het
-   "wachten op goedkeuring"-scherm (waar het de enige actie is) blijft de
-   knop wél gewoon een echte knop. */
-.hdp-welkom-acties .hdp-btn-logout {
-	background: none;
-	padding: 0.4rem 0.2rem;
-	color: var(--wp--preset--color--grijs-tekst);
-}
-.hdp-welkom-acties .hdp-btn-logout:hover {
-	background: none;
-	color: var(--wp--preset--color--homburg-rood);
-	transform: none;
-}
 .hdp-welkom h1 { font-size: 1.6rem; font-weight: 700; }
 .hdp-welkom p { color: var(--wp--preset--color--grijs-tekst); font-size: 0.95rem; margin-top: 0.2rem; }
 .hdp-merken { display: flex; align-items: center; flex-wrap: wrap; gap: 0.7rem; margin-top: 0.6rem; }
@@ -711,51 +676,74 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 .hdp-info-kaart.is-style-tekst .hdp-info-link:hover { background: none; color: var(--wp--preset--color--homburg-rood-donker); text-decoration: underline; }
 .hdp-info-kaart.is-style-tekst .hdp-info-link:not(:last-child)::after { content: " · "; color: var(--wp--preset--color--grijs-tekst); font-weight: 400; }
 
-.hdp-merken-hub-titel {
+.hdp-merken-hub-eyebrow {
 	font-size: 0.72rem;
 	font-weight: 700;
 	letter-spacing: 0.09em;
 	text-transform: uppercase;
-	color: var(--wp--preset--color--grijs-tekst);
-	margin: 0 0 0.9rem;
+	color: var(--wp--preset--color--homburg-rood);
+	margin: 0 0 0.4rem;
 }
+.hdp-merken-hub-titel { font-size: 1.35rem; font-weight: 800; margin: 0 0 0.5rem; }
+.hdp-merken-hub-intro { color: var(--wp--preset--color--grijs-tekst); font-size: 0.9rem; margin: 0 0 1.3rem; }
 .hdp-merken-hub {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
 	gap: 0.9rem;
 }
 .hdp-merken-hub > * { margin-block-start: 0; }
+/* Basistegel: standaard een vlak gekleurd vlak met een subtiel diagonaal
+   streeppatroon — dient als de "hier hoort een foto"-plaatshouder zolang
+   er via de bloktoolbar (Foto kiezen) nog geen echte merkfoto is gekozen.
+   Zodra dat wel zo is (.hdp-merktegel-foto, zie hieronder) overschrijft de
+   inline background-image van het blok dit patroon gewoon. */
 .hdp-merktegel {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	gap: 1.4rem;
-	background: var(--wp--preset--color--donkergrijs);
+	gap: 1.6rem;
+	background-color: var(--wp--preset--color--donkergrijs);
+	background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 14px);
 	color: var(--wp--preset--color--wit);
 	border-radius: var(--hdp-radius);
 	padding: 1.2rem 1.3rem;
-	min-height: 110px;
+	min-height: 160px;
 	text-decoration: none;
 	position: relative;
 	overflow: hidden;
 	transition: transform 0.15s;
 }
+.hdp-merktegel-foto { background-size: cover; background-position: center; }
 .hdp-merktegel:hover { transform: translateY(-2px); }
-.hdp-merktegel::after {
+/* Donkere gradient over de (eventuele) foto heen, anders zijn titel en
+   pijl-knop niet meer betrouwbaar leesbaar boven op willekeurige foto's. */
+.hdp-merktegel::before {
 	content: "";
 	position: absolute;
-	right: -18px;
-	bottom: -18px;
-	width: 80px;
-	height: 80px;
-	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.06);
+	inset: 0;
+	background: linear-gradient(200deg, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.55) 100%);
 }
-.hdp-merktegel-titel { font-size: 1rem; font-weight: 800; position: relative; z-index: 1; }
-.hdp-merktegel-link { font-size: 0.74rem; color: #b7b8bc; font-weight: 600; position: relative; z-index: 1; }
-.hdp-merktegel-rood { background: var(--wp--preset--color--homburg-rood); }
+.hdp-merktegel-tekst { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 0.25rem; }
+.hdp-merktegel-titel { font-size: 1.05rem; font-weight: 800; }
+.hdp-merktegel-link { font-size: 0.76rem; color: #d7d8db; font-weight: 600; }
+.hdp-merktegel-rood { background-color: var(--wp--preset--color--homburg-rood); }
 .hdp-merktegel-rood .hdp-merktegel-link { color: rgba(255, 255, 255, 0.75); }
-.hdp-merktegel-link::after { content: " →"; }
+.hdp-merktegel-pijl {
+	position: relative;
+	z-index: 1;
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	background: var(--wp--preset--color--wit);
+	color: var(--wp--preset--color--donkergrijs);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	transition: background 0.15s;
+}
+.hdp-merktegel-pijl svg { width: 15px; height: 15px; }
+.hdp-merktegel:hover .hdp-merktegel-pijl { background: var(--wp--preset--color--grijs-licht); }
 
 /* ==========================================================================
    DOWNLOADS

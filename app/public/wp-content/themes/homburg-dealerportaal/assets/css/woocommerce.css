@@ -696,14 +696,27 @@ ul.products li.product.hdp-card:hover {
 	color: var(--wp--preset--color--homburg-rood);
 	margin-bottom: 0.05rem;
 }
-.hdp-card__title {
+/* .woocommerce ul.products li.product h3 (WooCommerce-kernstijl, o.a.
+   font-size:1em + padding:.5em 0) is specifieker dan een kale
+   .hdp-card__title-selector en won daardoor stiekem van onze eigen
+   font-size — de titel rendert dan ~2,4px per regel groter dan waar de
+   knip-hoogte hieronder op rekent, wat een lange titel liet dichtslibben/
+   half doorsnijden. Zelfde, bredere selector als WooCommerce zelf
+   gebruikt (plus onze eigen klasse) om daar gegarandeerd overheen te gaan. */
+.woocommerce ul.products li.product h3.hdp-card__title {
 	font-size: 0.85rem;
 	font-weight: 700;
 	line-height: 1.3;
 	margin: 0;
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
+	padding: 0;
+	/* Geen -webkit-line-clamp (was hier eerder geprobeerd): bij een lange,
+	   woordarme titel liet dat soms een derde regel half doorschemeren
+	   i.p.v. 'm netjes te knippen — zelfde eigenaardigheid als bij de
+	   lijstweergave hieronder, waar dat om diezelfde reden ook is vervangen.
+	   Een vaste hoogte van exact 2 regels (0.85rem * 1.3 * 2) + overflow:
+	   hidden knipt hard maar wel altijd op precies de regelgrens — nu de
+	   font-size hierboven ook echt wint, klopt die berekening ook weer. */
+	height: 2.21rem;
 	overflow: hidden;
 	/* Zonder dit blijft een flex-kind standaard min-height:auto houden, dus
 	   past de doos zich aan de ongeknipte tekst aan i.p.v. aan de 2 regels
@@ -838,13 +851,12 @@ ul.products.hdp-lijst-weergave li.product.hdp-card {
 	grid-column: 1;
 }
 .hdp-lijst-weergave .hdp-card__brand { margin-bottom: 0.1rem; }
-/* Eén regel met "…": -webkit-line-clamp (voor de 2-regelige titel op de
-   kaartweergave) bleek binnen dit grid-rijtje soms een 2e regel gedeeltelijk
-   te laten doorschemeren i.p.v. 'm te knippen. white-space/text-overflow is
-   voor precies één regel de robuustere, standaard-oplossing. */
-.hdp-lijst-weergave .hdp-card__title {
+/* Eén regel met "…" i.p.v. de vaste 2-regelige hoogte hierboven — zelfde
+   .woocommerce ul.products-specificiteit nodig om die vaste hoogte hier
+   ook echt te overschrijven (zie toelichting bij .hdp-card__title). */
+.woocommerce ul.products.hdp-lijst-weergave li.product h3.hdp-card__title {
 	display: block;
-	-webkit-line-clamp: unset;
+	height: auto;
 	min-height: 0;
 	white-space: nowrap;
 	overflow: hidden;
@@ -1158,7 +1170,14 @@ ul.products.hdp-lijst-weergave li.product.hdp-card {
 }
 .woocommerce-tabs ul.tabs { list-style: none; display: flex; gap: 1.5rem; padding: 0; margin: 0 0 1.2rem; border-bottom: 1px solid var(--wp--preset--color--rand); }
 .woocommerce-tabs ul.tabs li a { text-decoration: none; font-weight: 700; color: var(--wp--preset--color--grijs-tekst); padding-bottom: 0.6rem; display: inline-block; }
-.woocommerce-tabs ul.tabs li.active a { color: var(--wp--preset--color--homburg-rood); border-bottom: 2px solid var(--wp--preset--color--homburg-rood); }
+/* WooCommerce's eigen ".woocommerce div.product .woocommerce-tabs ul.tabs
+   li.active a" (specificiteit 0,5,4) is dieper genest dan de regel hier
+   (0,3,3) en zet zelf color:inherit — de rand-kleur hieronder kwam wel
+   door, maar de tekst bleef daardoor gewoon grijs i.p.v. rood. !important
+   op alleen de bestreden eigenschap i.p.v. de hele regel herhalen met een
+   even diepe/diepere selector (die breekt weer als WooCommerce zijn eigen
+   selector ooit wijzigt). */
+.woocommerce-tabs ul.tabs li.active a { color: var(--wp--preset--color--homburg-rood) !important; border-bottom: 2px solid var(--wp--preset--color--homburg-rood); }
 
 /* Gerelateerde producten / up-sells onderaan de productpagina: dwing hier
    hetzelfde raster af als op de shop-pagina. Zonder dit staat WooCommerce's
@@ -1308,7 +1327,10 @@ body.woocommerce-account .woocommerce {
 	font-size: 0.9rem;
 }
 .woocommerce-MyAccount-navigation a:hover { background: var(--wp--preset--color--grijs-licht); }
-.woocommerce-MyAccount-navigation .is-active a { background: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--wit); }
+/* WooCommerce's eigen woocommerce-blocktheme.css zet op de actieve
+   accountmenu-link zelf een onderstreping (specificiteit 0,3,2, hoger dan
+   de 0,2,1 hieronder) — die viel over de rode achtergrond hier heen. */
+.woocommerce-MyAccount-navigation .is-active a { background: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--wit); text-decoration: none !important; }
 .woocommerce-MyAccount-content { flex: 1 1 auto; float: none; width: auto; min-width: 0; }
 
 @media (max-width: 782px) {
@@ -1351,24 +1373,6 @@ body.woocommerce-favorieten .woocommerce-MyAccount-content {
 .hdp-dashboard-kaarten .hdp-kaart-icoon svg { width: 21px; height: 21px; }
 .hdp-dashboard-kaarten .hdp-kaart h2 { font-size: 1rem; }
 .hdp-dashboard-kaarten .hdp-kaart p { font-size: 0.84rem; }
-
-/* Eén kaart met meer visueel gewicht ("Snel bestellen" — de actie die een
-   dealer het vaakst nodig heeft) i.p.v. zes identieke witte kaarten op een
-   rij: donkere achtergrond, wit icoon-badge, omgekeerde (witte) knop. */
-.hdp-kaart--nadruk {
-	background: var(--wp--preset--color--donkergrijs);
-	border-top-color: var(--wp--preset--color--homburg-rood);
-}
-.hdp-kaart--nadruk h2,
-.hdp-kaart--nadruk p { color: var(--wp--preset--color--wit); }
-.hdp-kaart--nadruk p { opacity: 0.75; }
-.hdp-kaart--nadruk .hdp-kaart-icoon { background: rgba(255, 255, 255, 0.12); }
-.hdp-kaart--nadruk .hdp-kaart-icoon svg { stroke: var(--wp--preset--color--wit); }
-.hdp-kaart--nadruk .hdp-btn {
-	background: var(--wp--preset--color--wit);
-	color: var(--wp--preset--color--donkergrijs);
-}
-.hdp-kaart--nadruk .hdp-btn:hover { background: var(--wp--preset--color--grijs-licht); }
 
 .hdp-dashboard-recent-kop {
 	display: flex;
@@ -1461,14 +1465,23 @@ button.hdp-zoek-suggestie:last-child { border-bottom: 0; }
 
 table.shop_table,
 .woocommerce-orders-table {
-	width: 100%;
 	border-collapse: collapse;
 	background: var(--wp--preset--color--wit);
 	border-radius: var(--hdp-wc-radius);
 	overflow: hidden;
 	box-shadow: var(--hdp-wc-schaduw);
 }
-table.shop_table th {
+/* WooCommerce's eigen woocommerce-blocktheme.css zet .woocommerce-page
+   table.shop_table op width:70% (specificiteit 0,2,1) — een kale
+   "table.shop_table" (0,1,1) kan dat nooit winnen, dus de bestellingenlijst
+   in Mijn account stond met een kale rechterrand op 70% breedte i.p.v. de
+   bedoelde volle breedte. body.woocommerce-page (0,2,2) wint gegarandeerd. */
+body.woocommerce-page table.shop_table,
+body.woocommerce-page .woocommerce-orders-table { width: 100%; }
+/* Zelfde verhaal voor de padding: WooCommerce's eigen
+   ".woocommerce table.shop_table th/td" (0,2,2) versloeg de kale
+   "table.shop_table th/td" (0,1,2) hieronder. */
+body.woocommerce-page table.shop_table th {
 	background: var(--wp--preset--color--grijs-licht);
 	text-align: left;
 	font-size: 0.78rem;
@@ -1477,7 +1490,7 @@ table.shop_table th {
 	color: var(--wp--preset--color--grijs-tekst);
 	padding: 0.8rem 1rem;
 }
-table.shop_table td { padding: 0.8rem 1rem; border-top: 1px solid var(--wp--preset--color--rand); font-size: 0.88rem; }
+body.woocommerce-page table.shop_table td { padding: 0.8rem 1rem; border-top: 1px solid var(--wp--preset--color--rand); font-size: 0.88rem; }
 
 .woocommerce-orders-table__cell-order-status mark.order-status {
 	display: inline-block;

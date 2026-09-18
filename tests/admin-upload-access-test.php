@@ -99,14 +99,14 @@ class Admin_Upload_Access_Test extends WP_UnitTestCase {
 			array(
 				'hdp_gebruiker_id' => $dealer_id,
 				'hdp_goedgekeurd'  => '1',
-				'hdp_merken'       => array( 'HARDI', 'Vaderstad' ),
+				'hdp_merken'       => array( 'HARDI', 'Väderstad' ),
 			),
 			home_url( '/adminportaal/' )
 		);
 
 		$this->assertStringContainsString( 'hdp_upload_status=gelukt', $bestemming );
 		$this->assertSame( '1', get_user_meta( $dealer_id, 'hdp_goedgekeurd', true ) );
-		$this->assertSame( 'HARDI, Vaderstad', get_user_meta( $dealer_id, 'hdp_merken', true ) );
+		$this->assertSame( 'HARDI, Väderstad', get_user_meta( $dealer_id, 'hdp_merken', true ) );
 	}
 
 	public function test_niet_bestaand_merk_wordt_genegeerd() {
@@ -294,12 +294,12 @@ class Admin_Upload_Access_Test extends WP_UnitTestCase {
 		HDP_Admin_Upload::verwerk_bulk_downloads_kern(
 			array(
 				'hdp_bulk_download_ids' => array( $download_id ),
-				'hdp_bulk_merk'         => 'Vaderstad',
+				'hdp_bulk_merk'         => 'Väderstad',
 			),
 			home_url( '/adminportaal/' )
 		);
 
-		$this->assertSame( 'Vaderstad', HDP_Downloads_CPT::get_merk( $download_id ) );
+		$this->assertSame( 'Väderstad', HDP_Downloads_CPT::get_merk( $download_id ) );
 		$this->assertSame( array( 'nl' ), HDP_Downloads_CPT::get_regios( $download_id ) );
 	}
 

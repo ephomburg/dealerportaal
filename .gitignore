@@ -51,3 +51,12 @@ app/sql/
 # de repo als sjabloon.
 .phpunit.result.cache
 tests/wp-tests-config.php
+
+# E2E-tests (Playwright): node_modules, het testdealer-wachtwoord (.env,
+# .env.example staat wel in de repo als sjabloon), de opgeslagen inlogsessie,
+# en gegenereerde testrapporten/traces.
+tests/e2e/node_modules/
+tests/e2e/.env
+tests/e2e/.auth/
+tests/e2e/test-results/
+tests/e2e/playwright-report/

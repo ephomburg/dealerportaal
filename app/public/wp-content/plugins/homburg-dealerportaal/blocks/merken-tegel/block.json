@@ -13,7 +13,9 @@
 		"linkTekstFr": { "type": "string", "default": "" },
 		"url": { "type": "string", "default": "" },
 		"kleur": { "type": "string", "default": "donker" },
-		"nieuweTab": { "type": "boolean", "default": true }
+		"nieuweTab": { "type": "boolean", "default": true },
+		"afbeeldingId": { "type": "number", "default": 0 },
+		"afbeeldingUrl": { "type": "string", "default": "" }
 	},
 	"supports": {
 		"html": false

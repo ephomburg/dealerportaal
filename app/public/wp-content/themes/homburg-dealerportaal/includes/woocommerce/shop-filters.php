@@ -264,6 +264,17 @@ function homburg_wc_shop_inline_js() {
 
 	$js = <<<'JS'
 (function () {
+	// Op mobiel (zelfde 780px-omslagpunt als .hdp-shop-layout/.hdp-shop-merken
+	// in woocommerce.css, waar het filter van zijbalk naar een gestapeld blok
+	// boven de resultaten gaat) staat het merkenfilter standaard open — dat
+	// duwt zoekbalk, sortering en alle producten onder 14 aanvinkopties.
+	// Hier alsnog dichtklappen; de <details>/<summary> zelf (incl. het
+	// pijltje-icoon) is al langer klikbaar om 'm weer open te klappen.
+	var merkDetails = document.querySelector('.hdp-shop-merken-details');
+	if (merkDetails && window.matchMedia('(max-width: 780px)').matches) {
+		merkDetails.removeAttribute('open');
+	}
+
 	var SLEUTEL = 'hdp-shop-weergave';
 	var lijst = document.querySelector('ul.products');
 	var knoppen = document.querySelectorAll('[data-hdp-weergave]');

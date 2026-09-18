@@ -8,6 +8,25 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.49.4
+- Drie CSS-plekken waar WooCommerce's eigen kernstijl (hogere specificiteit) stiekem van onze eigen thema-CSS won, gecorrigeerd: de padding en breedte van bestel-tabellen (o.a. de "Bekijk bestelling"-pagina), de kleur van het actieve tabblad op de productpagina (bleef grijs i.p.v. rood), en een ongewenste onderstreping op het actieve item in het "Mijn account"-menu.
+- (Twee andere vermoede gevallen — de prijs op een productkaart, en de breedte van de bestellingenlijst zelf — bleken bij narekenen loos alarm: deze pagina's gebruiken hun eigen aangepaste opmaak zonder de HTML-structuur waar WooCommerce's regel op aangrijpt, dus daar was niets stuk.)
+- Testset (`tests/`) uitgebreid met browserniveau-tests (Playwright, in `tests/e2e/`) naast de bestaande PHPUnit-tests: inloggen, winkelen → winkelwagen → afrekenen, snel bestellen, en een regressietest voor het mobiele merkenfilter van hierboven. Zie `tests/e2e/README.md`. Ook 3 verouderde PHPUnit-tests hersteld die nog de oude spelling "Vaderstad" i.p.v. "Väderstad" gebruikten (sinds 1.43.0) en daardoor onterecht faalden.
+
+## 1.49.3
+- Winkel op mobiel: het merkenfilter (14 aanvinkopties) stond standaard volledig opengeklapt bóven de zoekbalk, sortering en producten — een dealer op zijn telefoon moest daar eerst voorbij scrollen. De bijbehorende in-/uitklapstijl (pijltje, aanklikbare kop) bestond al in de CSS voor mobiel, maar werd nooit gebruikt omdat het filter hard "open" stond; dat staat nu standaard dicht op mobiel (desktop ongewijzigd).
+
+## 1.49.2
+- Downloads, Content, Bestellingen en het "wachten op goedkeuring"-scherm hadden nog een eigen "Uitloggen"-knop, dubbelop met het uitloggen dat al onder "Mijn account" in de header zit (ook op dat laatste scherm, bleek na naslag — de aanname dat het daar de enige uitlogweg was klopte niet meer sinds de headerredesign). Overal verwijderd.
+
+## 1.49.1
+- Winkelwagen: "Your cart is currently empty!"/"New in store" op een lege winkelwagen stonden nooit vertaald — bleek bevroren standaardtekst in de paginainhoud zelf, opgelost met dezelfde NL/FR-schakeltruc als "Overige informatie".
+- Mijn account → Bestellingen: de WooCommerce-melding "Confirm your email address..." (bedoeld om gastbestellingen aan een account te koppelen) is verborgen i.p.v. vertaald — dit portaal kent geen gasten, alleen ingelogde dealers.
+- Winkel: bij producten met een lange titel liep de tekst soms half over het artikelnummer eronder heen. Oorzaak: WooCommerce's eigen basisstijl voor productitels (grotere letter, wat opvulling) was specifieker dan onze eigen opmaak en won stiekem, waardoor de knip-hoogte voor "titel op 2 regels" niet meer klopte met de werkelijk getoonde tekstgrootte. Onze opmaak wint nu gegarandeerd.
+
+## 1.49.0
+- "Overige informatie" / merken-hub: de vier merktegels (Väderstad, Bogballe, Draincleaners, HARDI & Rabe) kunnen nu een eigen achtergrondfoto krijgen — via een "Foto kiezen"-knop in de bloktoolbar (gewone WordPress-mediabibliotheek), zonder dat daar code voor nodig is. Zolang er geen foto is gekozen tonen ze een neutraal streeppatroon als plaatshouder i.p.v. de oude vlakke kleur. De kop erboven is uitgebreid van één regel ("Onderdelen per merk") naar een label + titel ("Direct naar de onderdelen") + korte introtekst, en elke tegel heeft nu een ronde pijl-knop i.p.v. de tekstuele "→".
+
 ## 1.48.2
 - Header: de "Links"-knop en de "Mijn account"-knop oogden niet bij elkaar horend (Links was één vlak rood vlak, Mijn account een tweekleurige splitknop). "Links" heeft nu dezelfde tweekleurige opmaak (lichter rood hoofddeel, donkerder rood pijltje-vak met scheidingslijn) als Mijn account.
 
