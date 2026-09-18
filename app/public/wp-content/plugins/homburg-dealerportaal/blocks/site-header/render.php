@@ -30,10 +30,14 @@ $link_icoon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 			<?php endif; ?>
 			<div class="hdp-links-menu">
 				<input type="checkbox" id="hdp-links-menu-toggle" class="hdp-account-menu-toggle">
-				<label for="hdp-links-menu-toggle" class="hdp-menu-knop hdp-links-menu-knop">
-					<?php echo $link_icoon; // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
-					<?php esc_html_e( 'Links', 'homburg-dealerportaal' ); ?>
-					<svg class="hdp-links-menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+				<label for="hdp-links-menu-toggle" class="hdp-links-menu-knop" aria-label="<?php esc_attr_e( 'Links naar Homburg Holland en Belgium', 'homburg-dealerportaal' ); ?>">
+					<span class="hdp-links-menu-hoofd">
+						<?php echo $link_icoon; // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
+						<?php esc_html_e( 'Links', 'homburg-dealerportaal' ); ?>
+					</span>
+					<span class="hdp-links-menu-chevron-vak">
+						<svg class="hdp-links-menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+					</span>
 				</label>
 				<div class="hdp-account-menu-paneel hdp-links-menu-paneel">
 					<a class="hdp-dropdown-item" href="https://www.homburg-holland.com" target="_blank" rel="noopener noreferrer">

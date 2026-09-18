@@ -8,6 +8,9 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.48.2
+- Header: de "Links"-knop en de "Mijn account"-knop oogden niet bij elkaar horend (Links was één vlak rood vlak, Mijn account een tweekleurige splitknop). "Links" heeft nu dezelfde tweekleurige opmaak (lichter rood hoofddeel, donkerder rood pijltje-vak met scheidingslijn) als Mijn account.
+
 ## 1.48.1
 - Header: favorietenknop staat nu helemaal links van de knoppenrij (vóór Links/Mijn account). Homburg Holland en Homburg Belgium zijn samengevoegd tot één rode "Links"-knop met een uitklapmenu, i.p.v. twee losse rode knoppen naast elkaar.
 - "Overige informatie": de lopende-tekstkolom oogde los/zwevend zonder enig visueel houvast — elk punt kreeg een klein icoontje terug, een dunne scheidingslijn tussen de punten, en de linkjes eronder zijn nu lichte label-chips i.p.v. kale onderstreepte tekst met bullet-puntjes ertussen.

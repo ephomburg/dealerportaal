@@ -2,7 +2,7 @@
 Theme Name: Homburg Dealerportaal
 Description: Eigen blokthema voor het Homburg-dealerportaal, gebouwd op het originele HTML-ontwerp (rood/donkergrijs, Montserrat). Geen bloggerichte onderdelen; puur gericht op de dealerportaalsite.
 Author: Homburg Machinehandel BV
-Version: 1.25.1
+Version: 1.25.2
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -255,8 +255,35 @@ html { height: 100%; }
    .hdp-account-menu-paneel-klassen; alleen de chevron-rotatie en het
    sluitscriptje zijn hier apart, want dit is een eigen wrapper/toggle). */
 .hdp-links-menu { position: relative; }
-.hdp-links-menu-knop { cursor: pointer; }
-.hdp-links-menu-chevron { width: 12px; height: 12px; transition: transform 0.15s; }
+/* Zelfde tweekleurige split-look als de "Mijn account"-knop hiernaast
+   (.hdp-account-split) — hier zit alles nog in één <label> (heel de
+   knop opent hetzelfde menu, er is geen apart directe-link-deel zoals
+   bij Mijn account), maar visueel moeten ze bij elkaar horen. */
+.hdp-links-menu-knop { display: flex; align-items: stretch; border-radius: 6px; overflow: hidden; cursor: pointer; }
+.hdp-links-menu-hoofd {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+	font-weight: 700;
+	font-size: 0.8rem;
+	padding: 0.5rem 0.9rem;
+	transition: background 0.2s;
+}
+.hdp-links-menu-hoofd svg { width: 14px; height: 14px; stroke: currentColor; flex-shrink: 0; }
+.hdp-links-menu-chevron-vak {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	background: var(--wp--preset--color--homburg-rood-donker);
+	border-left: 1px solid rgba(255, 255, 255, 0.25);
+	transition: background 0.2s;
+}
+.hdp-links-menu-knop:hover .hdp-links-menu-hoofd { background: var(--wp--preset--color--homburg-rood-donker); }
+.hdp-links-menu-knop:hover .hdp-links-menu-chevron-vak { background: #7d0808; }
+.hdp-links-menu-chevron { width: 13px; height: 13px; stroke: var(--wp--preset--color--wit); transition: transform 0.15s; }
 .hdp-account-menu-toggle:checked ~ .hdp-links-menu-knop .hdp-links-menu-chevron { transform: rotate(180deg); }
 .hdp-account-menu-toggle:focus-visible ~ .hdp-links-menu-knop { outline: 2px solid var(--wp--preset--color--wit); outline-offset: 2px; }
 .hdp-links-menu-paneel { min-width: 200px; }
