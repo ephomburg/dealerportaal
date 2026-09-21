@@ -80,6 +80,24 @@ class Downloads_Merk_Test extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'Algemene brochure zonder merk', $html );
 	}
 
+	/**
+	 * "Algemeen" is geen echt merk maar de markering "voor iedereen met
+	 * toegang tot het dealerportaal". Voorheen viel zo'n bestand door het
+	 * gewone merkfilter en zag een dealer met merkrechten het juist niet —
+	 * precies omgekeerd aan de bedoeling.
+	 */
+	public function test_algemeen_is_zichtbaar_voor_dealer_met_merkbeperking() {
+		update_user_meta( $this->dealer_id, 'hdp_merken', 'HARDI' );
+
+		$this->maak_download( 'Algemene voorwaarden 2026', HDP_Downloads_CPT::MERK_ALGEMEEN );
+		$this->maak_download( 'Vaderstad-prijslijst', 'Vaderstad' );
+
+		$html = HDP_Downloads_Render::render_downloads_pagina( $this->attributen );
+
+		$this->assertStringContainsString( 'Algemene voorwaarden 2026', $html );
+		$this->assertStringNotContainsString( 'Vaderstad-prijslijst', $html );
+	}
+
 	public function test_geen_geautoriseerde_downloads_toont_merkspecifieke_lege_staat() {
 		update_user_meta( $this->dealer_id, 'hdp_merken', 'HARDI' );
 

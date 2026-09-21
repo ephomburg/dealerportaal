@@ -15,6 +15,14 @@ class HDP_Downloads_CPT {
 	const QUERY_VAR = 'hdp_download';
 
 	/**
+	 * Geen echt merk maar een "voor alle dealers"-markering: bestanden met
+	 * dit merk vallen bewust buiten de merkrechten-controle (zie
+	 * mag_merk_zien()). Staat daarom óók niet in HDP_Merken::lijst(), want
+	 * je kunt het niet aan een dealer toewijzen.
+	 */
+	const MERK_ALGEMEEN = 'Algemeen';
+
+	/**
 	 * Vaste merkenlijst voor het indelen van downloads/content — bewust een
 	 * andere (kortere, eigen benaming) lijst dan HDP_Merken::lijst(), die
 	 * gaat over welke merken een dealer-account mag zien. Hier gaat het om
@@ -24,7 +32,7 @@ class HDP_Downloads_CPT {
 	 */
 	public static function merk_opties() {
 		return array(
-			'Algemeen',
+			self::MERK_ALGEMEEN,
 			'Draincleaners',
 			'HARDI',
 			'Väderstad',
@@ -126,6 +134,38 @@ class HDP_Downloads_CPT {
 
 	public static function get_merk( $post_id ) {
 		return get_post_meta( $post_id, '_hdp_merk', true );
+	}
+
+	/**
+	 * Mag deze gebruiker dit bestand inzien, op basis van de merkrechten van
+	 * zijn dealeraccount?
+	 *
+	 * Bewust één gedeelde bron van waarheid voor zowel de downloadspagina
+	 * (wat er in de lijst verschijnt) als resolve_download() (wat er
+	 * daadwerkelijk wordt uitgeleverd). Stonden die twee los van elkaar, dan
+	 * was het merkfilter op de pagina alleen cosmetisch: het bestand blijft
+	 * dan gewoon op te halen door het ID in de URL te veranderen.
+	 *
+	 * "Algemeen" en bestanden zonder merk zijn voor iedereen met
+	 * portaaltoegang bedoeld — die vallen dus nooit onder een merkbeperking.
+	 * Een dealer zonder ingestelde merken ziet eveneens alles (bestaand
+	 * gedrag: nog niet aan merken gekoppelde dealers mogen niet per ongeluk
+	 * niets meer zien).
+	 */
+	public static function mag_merk_zien( $post_id, $user_id = 0 ) {
+		$merk = self::get_merk( $post_id );
+		if ( ! $merk || self::MERK_ALGEMEEN === $merk ) {
+			return true;
+		}
+
+		$user_id    = $user_id ? (int) $user_id : get_current_user_id();
+		$toegestaan = HDP_Merken::naar_array( get_user_meta( $user_id, 'hdp_merken', true ) );
+
+		if ( ! $toegestaan ) {
+			return true;
+		}
+
+		return in_array( $merk, $toegestaan, true );
 	}
 
 	/** Bestaande downloads van vóór dit onderscheid hebben geen meta; die tellen als 'download'. */
@@ -240,6 +280,14 @@ class HDP_Downloads_CPT {
 			wp_die( esc_html__( 'Bestand niet gevonden.', 'homburg-dealerportaal' ), 'Niet gevonden', array( 'response' => 404 ) );
 		}
 
+		// Zonder deze controle is het merkfilter op de downloadspagina puur
+		// cosmetisch: het bestand blijft dan op te halen door het nummer in
+		// de URL op te hogen (de ID's lopen op). Een dealer kon zo bij de
+		// prijslijsten van merken die hij niet voert.
+		if ( ! self::mag_merk_zien( $download_id ) ) {
+			wp_die( esc_html__( 'U heeft geen toegang tot dit bestand.', 'homburg-dealerportaal' ), 'Geen toegang', array( 'response' => 403 ) );
+		}
+
 		$attachment_id = get_post_meta( $download_id, '_hdp_attachment_id', true );
 		$file          = $attachment_id ? get_attached_file( $attachment_id ) : '';
 
@@ -303,6 +351,14 @@ class HDP_Downloads_CPT {
 	 * gelijktijdige downloads te vermijden.
 	 */
 	private static function tel_download( $post_id ) {
+		// Beheerders tellen niet mee: de teller gaat over dealergebruik, en
+		// sinds beveiligde bestanden via dit endpoint getoond worden (zie
+		// HDP_Bestandsbeveiliging) zou elk voorbeeld in de mediabibliotheek
+		// anders als download meetellen.
+		if ( current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
 		if ( ! add_post_meta( $post_id, '_hdp_download_teller', 1, true ) ) {
 			global $wpdb;
 			$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + 1 WHERE post_id = %d AND meta_key = %s", $post_id, '_hdp_download_teller' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- atomaire increment; via get_post_meta()+update_post_meta() zou de teller bij gelijktijdige downloads kunnen overschrijven.

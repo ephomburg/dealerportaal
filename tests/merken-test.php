@@ -38,4 +38,39 @@ class Merken_Test extends WP_UnitTestCase {
 		$lijst = HDP_Merken::lijst();
 		$this->assertSame( count( $lijst ), count( array_unique( $lijst ) ) );
 	}
+
+	/**
+	 * De twee merklijsten mogen niet uit elkaar lopen. Een merk waarop je
+	 * downloads kunt taggen (HDP_Downloads_CPT::merk_opties(), ook de bron
+	 * van de FileBird-mapnamen) maar dat je niet aan een dealer kunt
+	 * toewijzen (HDP_Merken::lijst(), de checkboxes in wp-admin) levert
+	 * bestanden op die voor elke dealer mét merkrechten onzichtbaar zijn —
+	 * zonder enige melding. Omgekeerd mag wel: een merk waarvoor (nog) geen
+	 * downloads bestaan.
+	 */
+	public function test_elk_taggbaar_merk_is_ook_aan_een_dealer_toe_te_wijzen() {
+		$taggbaar = array_diff(
+			HDP_Downloads_CPT::merk_opties(),
+			array( HDP_Downloads_CPT::MERK_ALGEMEEN )
+		);
+
+		$onbekend = array_diff( $taggbaar, HDP_Merken::lijst() );
+
+		$this->assertSame(
+			array(),
+			array_values( $onbekend ),
+			'Deze merken staan wel in merk_opties() maar niet in HDP_Merken::lijst(), '
+				. 'dus downloads met dit merk zijn voor dealers met merkrechten onzichtbaar: '
+				. implode( ', ', $onbekend )
+		);
+	}
+
+	/**
+	 * "Algemeen" is bewust geen echt merk (het betekent "voor iedereen met
+	 * portaaltoegang") en mag dus niet als dealerrecht aan te vinken zijn.
+	 */
+	public function test_algemeen_is_geen_toewijsbaar_merk() {
+		$this->assertNotContains( HDP_Downloads_CPT::MERK_ALGEMEEN, HDP_Merken::lijst() );
+		$this->assertSame( '', HDP_Merken::uit_selectie( array( HDP_Downloads_CPT::MERK_ALGEMEEN ) ) );
+	}
 }

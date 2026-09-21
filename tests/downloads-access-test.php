@@ -116,4 +116,53 @@ class Downloads_Access_Test extends WP_UnitTestCase {
 
 		$this->assertSame( array( 'nl', 'be', 'be-fr' ), HDP_Downloads_CPT::get_regios( $this->download_zonder_bestand_id ) );
 	}
+
+	/**
+	 * Regressietest: het merkfilter op de downloadspagina verbergt een
+	 * bestand wel, maar het endpoint leverde het tóch uit als je het ID in
+	 * de URL raadde (de ID's lopen op). Een dealer kon zo bij prijslijsten
+	 * van merken die hij niet voert.
+	 */
+	public function test_dealer_zonder_recht_op_het_merk_krijgt_403() {
+		update_user_meta( $this->goedgekeurde_dealer_id, 'hdp_merken', 'Väderstad' );
+		update_post_meta( $this->download_met_bestand_id, '_hdp_merk', 'HARDI' );
+		wp_set_current_user( $this->goedgekeurde_dealer_id );
+
+		$this->expectException( WPDieException::class );
+		$this->expectExceptionCode( 403 );
+
+		HDP_Downloads_CPT::resolve_download( $this->download_met_bestand_id );
+	}
+
+	public function test_dealer_met_recht_op_het_merk_mag_wel_downloaden() {
+		update_user_meta( $this->goedgekeurde_dealer_id, 'hdp_merken', 'Väderstad, Bogballe' );
+		update_post_meta( $this->download_met_bestand_id, '_hdp_merk', 'Väderstad' );
+		wp_set_current_user( $this->goedgekeurde_dealer_id );
+
+		$bestand = HDP_Downloads_CPT::resolve_download( $this->download_met_bestand_id );
+
+		$this->assertSame( $this->download_met_bestand_id, $bestand['post_id'] );
+	}
+
+	/**
+	 * "Algemeen" is geen echt merk maar betekent "voor iedereen met
+	 * portaaltoegang" — dat mag dus nooit op merkrechten stuklopen.
+	 */
+	public function test_algemeen_is_beschikbaar_voor_elke_dealer_met_merkrechten() {
+		update_user_meta( $this->goedgekeurde_dealer_id, 'hdp_merken', 'Väderstad' );
+		update_post_meta( $this->download_met_bestand_id, '_hdp_merk', HDP_Downloads_CPT::MERK_ALGEMEEN );
+		wp_set_current_user( $this->goedgekeurde_dealer_id );
+
+		$bestand = HDP_Downloads_CPT::resolve_download( $this->download_met_bestand_id );
+
+		$this->assertSame( $this->download_met_bestand_id, $bestand['post_id'] );
+		$this->assertTrue( HDP_Downloads_CPT::mag_merk_zien( $this->download_met_bestand_id ) );
+	}
+
+	public function test_dealer_zonder_ingestelde_merken_mag_alles_zien() {
+		update_post_meta( $this->download_met_bestand_id, '_hdp_merk', 'HARDI' );
+		wp_set_current_user( $this->goedgekeurde_dealer_id );
+
+		$this->assertTrue( HDP_Downloads_CPT::mag_merk_zien( $this->download_met_bestand_id ) );
+	}
 }

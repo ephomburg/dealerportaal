@@ -130,28 +130,23 @@ class HDP_Downloads_Render {
 			return HDP_Icons::render_lege_status( 'content' === $categorie ? 'content' : 'downloads', HDP_I18N::t( $leeg_sleutel ) );
 		}
 
-		// Merkgebonden zichtbaarheid: een dealer met een ingestelde
-		// merkenlijst (hdp_merken) ziet alleen bestanden van die merken (of
-		// zonder merk-tag) — zelfde "geen tag/geen restrictie = zichtbaar
-		// voor iedereen"-principe als bij taal/regio hierboven. Een dealer
-		// zonder ingestelde merken blijft alles zien, zodat dealers die nog
-		// niet aan een merk gekoppeld zijn niet per ongeluk niets meer zien.
-		$toegestane_merken = HDP_Merken::naar_array( get_user_meta( get_current_user_id(), 'hdp_merken', true ) );
-		if ( $toegestane_merken ) {
-			$downloads = array_values(
-				array_filter(
-					$downloads,
-					static function ( $download ) use ( $toegestane_merken ) {
-						$merk = HDP_Downloads_CPT::get_merk( $download->ID );
-						return ! $merk || in_array( $merk, $toegestane_merken, true );
-					}
-				)
-			);
+		// Merkgebonden zichtbaarheid — via HDP_Downloads_CPT::mag_merk_zien(),
+		// exact dezelfde controle die resolve_download() bij het uitleveren
+		// van het bestand doet. Bewust gedeeld: staan die twee los, dan is
+		// dit filter alleen cosmetisch en blijft het bestand op te halen via
+		// het ID in de URL.
+		$downloads = array_values(
+			array_filter(
+				$downloads,
+				static function ( $download ) {
+					return HDP_Downloads_CPT::mag_merk_zien( $download->ID );
+				}
+			)
+		);
 
-			if ( ! $downloads ) {
-				$leeg_sleutel = 'content' === $categorie ? 'geen_content_merk' : 'geen_downloads_merk';
-				return HDP_Icons::render_lege_status( 'content' === $categorie ? 'content' : 'downloads', HDP_I18N::t( $leeg_sleutel ) );
-			}
+		if ( ! $downloads ) {
+			$leeg_sleutel = 'content' === $categorie ? 'geen_content_merk' : 'geen_downloads_merk';
+			return HDP_Icons::render_lege_status( 'content' === $categorie ? 'content' : 'downloads', HDP_I18N::t( $leeg_sleutel ) );
 		}
 
 		// Merken voor de filterchips worden automatisch afgeleid uit de
