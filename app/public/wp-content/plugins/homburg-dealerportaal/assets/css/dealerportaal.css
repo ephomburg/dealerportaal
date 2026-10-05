@@ -1842,3 +1842,95 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 	font-size: .92rem;
 }
 .hdp-garantie-geen-treffers.hdp-zichtbaar { display: block; }
+
+/* ── Storing en beoordelingsstatus ───────────────────────────────
+   De claimadministratie staat in een ander systeem. Ligt die er even uit,
+   dan zegt deze pagina dat eerlijk in plaats van lege lijsten te tonen —
+   anders denkt een dealer dat zijn claims verdwenen zijn. */
+.hdp-garantie-storing {
+	margin: 0 0 1.9rem;
+	padding: 1rem 1.2rem;
+	background: #fdecec;
+	border: 1px solid #f5c2c2;
+	border-left: 4px solid var(--wp--preset--color--homburg-rood);
+	border-radius: var(--hdp-radius);
+	color: var(--wp--preset--color--homburg-rood-donker);
+	font-size: .93rem;
+	line-height: 1.6;
+}
+
+/* Een machine die nog beoordeeld wordt of is afgewezen: dat bepaalt of een
+   claim erop verder kan, dus dat hoort de dealer te zien. */
+.hdp-machine-beoordeling {
+	flex-shrink: 0;
+	max-width: 15rem;
+	padding: .5rem .75rem;
+	border-radius: 6px;
+	font-size: .8rem;
+	line-height: 1.45;
+}
+.hdp-machine-beoordeling strong { display: block; }
+.hdp-machine-beoordeling span { display: block; margin-top: .15rem; }
+.hdp-machine-beoordeling-in_behandeling { background: #fdeccf; color: #7a4100; }
+.hdp-machine-beoordeling-afgewezen { background: #fdecec; color: var(--wp--preset--color--homburg-rood-donker); }
+
+@media (max-width: 48rem) {
+	.hdp-machine-beoordeling { max-width: 100%; width: 100%; }
+}
+
+/* ── Werkende formulieren ────────────────────────────────────────
+   De velden stonden uit zolang er nog niets was om naartoe te versturen;
+   nu gaan ze echt naar de claimadministratie. */
+.hdp-garantie-velden input,
+.hdp-garantie-velden textarea,
+.hdp-garantie-velden select,
+.hdp-machinekeuze select,
+.hdp-bericht-antwoord textarea {
+	background: var(--wp--preset--color--wit);
+	color: var(--wp--preset--color--donkergrijs);
+	cursor: auto;
+}
+.hdp-garantie-velden input:focus,
+.hdp-garantie-velden textarea:focus,
+.hdp-garantie-velden select:focus,
+.hdp-machinekeuze select:focus,
+.hdp-bericht-antwoord textarea:focus {
+	border-color: var(--wp--preset--color--homburg-rood);
+	outline: none;
+}
+.hdp-garantie-velden input[type="file"] {
+	padding: .6rem .9rem;
+	background: var(--wp--preset--color--grijs-licht);
+}
+
+.hdp-garantie-verzenden {
+	display: flex;
+	align-items: center;
+	gap: .75rem;
+	flex-wrap: wrap;
+	margin: 1.5rem 0 0;
+	padding-top: 1.25rem;
+	border-top: 1px solid var(--wp--preset--color--rand);
+}
+.hdp-garantie-verzenden button { border: none; cursor: pointer; font-family: inherit; }
+.hdp-bericht-antwoord button { border: none; cursor: pointer; font-family: inherit; }
+
+/* Uitkomst van een zojuist verstuurd formulier. */
+.hdp-garantie-gelukt {
+	margin: 0 0 1.9rem;
+	padding: 1rem 1.2rem;
+	background: #e2f3e6;
+	border: 1px solid #bfe2c8;
+	border-left: 4px solid #1d6b2d;
+	border-radius: var(--hdp-radius);
+	color: #19572a;
+	font-size: .93rem;
+	line-height: 1.6;
+}
+.hdp-garantie-gelukt span { display: block; margin-top: .35rem; font-weight: 400; }
+
+@media (max-width: 48rem) {
+	.hdp-garantie-verzenden { flex-direction: column; align-items: stretch; }
+	.hdp-garantie-verzenden .hdp-btn,
+	.hdp-garantie-verzenden button { width: 100%; text-align: center; }
+}

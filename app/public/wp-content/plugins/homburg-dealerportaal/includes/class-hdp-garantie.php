@@ -135,18 +135,6 @@ class HDP_Garantie {
 	}
 
 	/**
-	 * Voorbeeldclaims voor het ontwerp, zolang de koppeling met de
-	 * claimadministratie er nog niet is. Bewust herkenbaar nep (de
-	 * weergave zet er ook een melding boven), zodat niemand dit voor
-	 * echte claims aanziet.
-	 *
-	 * De opbouw is tegelijk het voorstel voor de database: een claim met
-	 * vaste gegevens, een lijst bijlagen, en een 'route' — elke statuswijziging
-	 * een eigen regel met wie het deed, wanneer, en een opmerking. Die
-	 * opmerking is het hele punt: Homburg schrijft hem in de app, de dealer
-	 * leest hem hier terug, bij de stap waar hij hoort.
-	 */
-	/**
 	 * De velden waarmee een machine voor garantie wordt aangemeld. Aparte
 	 * lijst van velden(): dat gaat over een claim, dit over de machine zelf.
 	 */
@@ -161,53 +149,13 @@ class HDP_Garantie {
 		);
 	}
 
-	/**
-	 * De aangemelde machines van deze dealer — straks een eigen tabel, met
-	 * de claims die eraan hangen. Nu nog voorbeelddata, net als de claims.
-	 *
-	 * Het serienummer is de sleutel: dat is waar een claim naar verwijst, en
-	 * het is wat een machine uniek maakt.
-	 */
-	public static function voorbeeldmachines() {
-		return array(
-			'HN4-220718-0391' => array(
-				'serienummer'  => 'HN4-220718-0391',
-				'machine'      => 'HARDI Navigator 4000',
-				'merk'         => 'HARDI',
-				'aankoopdatum' => '2022-07-18',
-				'garantie_tot' => '2027-07-18',
-				'hectares'     => '1.240',
-				'klant'        => 'Mts. Van Dijk, Zeewolde',
-			),
-			'TV8-210402-1174' => array(
-				'serienummer'  => 'TV8-210402-1174',
-				'machine'      => 'Väderstad Tempo V8',
-				'merk'         => 'Väderstad',
-				'aankoopdatum' => '2021-04-02',
-				'garantie_tot' => '2027-04-02',
-				'hectares'     => '860',
-				'klant'        => 'Akkerbouwbedrijf De Horst',
-			),
-			'BM35-190916-0042' => array(
-				'serienummer'  => 'BM35-190916-0042',
-				'machine'      => 'Bogballe M35W',
-				'merk'         => 'Bogballe',
-				'aankoopdatum' => '2019-09-16',
-				'garantie_tot' => '2024-09-16',
-				'hectares'     => '',
-				'klant'        => 'Loonbedrijf Kamps',
-			),
-			'GRC-200611-0863' => array(
-				'serienummer'  => 'GRC-200611-0863',
-				'machine'      => 'Garford Robocrop',
-				'merk'         => 'Garford',
-				'aankoopdatum' => '2020-06-11',
-				'garantie_tot' => '2025-06-11',
-				'hectares'     => '2.310',
-				'klant'        => 'Mts. Van Dijk, Zeewolde',
-			),
-		);
-	}
+	// --- Gegevens: komen uit de Supabase van de Homburg App -------------
+	//
+	// Daar houdt Homburg de garantieadministratie bij; dit portaal is de
+	// voordeur. Elke opvraag wordt gefilterd op het WordPress-accountnummer
+	// van de ingelogde dealer. Dat filter zit hier, op één plek, en nergens
+	// anders: claimnummers lopen op, dus zonder dat filter zou een dealer
+	// andermans claims kunnen openen door het nummer in de URL te veranderen.
 
 	/**
 	 * Machine plus serienummer, als één naam. De dealer heeft vaak meerdere
@@ -259,27 +207,253 @@ class HDP_Garantie {
 			'bijna'      => ! $verlopen && $maanden <= 6,
 			'maanden'    => $maanden,
 			'verstreken' => $verstreken,
-			'tot'        => $machine['garantie_tot'],
+			'tot'        => isset( $machine['garantie_tot'] ) ? $machine['garantie_tot'] : '',
 		);
 	}
 
-	/** De claims die bij één machine horen. */
-	public static function claims_van_machine( $serienummer ) {
-		return array_values(
-			array_filter(
-				self::voorbeeldclaims(),
-				static function ( $claim ) use ( $serienummer ) {
-					return isset( $claim['serienummer'] ) && $claim['serienummer'] === $serienummer;
-				}
+	/** Het accountnummer waarop gefilterd wordt; '' als er niemand (geldig) is ingelogd. */
+	private static function dealer_id( $user_id = 0 ) {
+		$user_id = $user_id ? (int) $user_id : get_current_user_id();
+
+		if ( ! $user_id || ! HDP_Roles::mag_portaal_zien( $user_id ) ) {
+			return '';
+		}
+
+		return (string) $user_id;
+	}
+
+	public static function beschikbaar() {
+		return HDP_Supabase::beschikbaar( HDP_Supabase::APP );
+	}
+
+	/** De dealergegevens zoals ze bij een machine of claim moeten worden meegestuurd. */
+	public static function dealervelden( $user_id = 0 ) {
+		$dealer_id = self::dealer_id( $user_id );
+		$user      = $dealer_id ? get_userdata( (int) $dealer_id ) : null;
+
+		if ( ! $user ) {
+			return array();
+		}
+
+		return array(
+			'dealer_id'      => $dealer_id,
+			'dealer_naam'    => $user->display_name ? $user->display_name : $user->user_login,
+			'dealer_bedrijf' => (string) get_user_meta( $user->ID, 'billing_company', true ),
+			'dealer_email'   => $user->user_email,
+		);
+	}
+
+	/** De aangemelde machines van deze dealer, nieuwste eerst. */
+	public static function machines( $user_id = 0 ) {
+		$dealer_id = self::dealer_id( $user_id );
+		if ( '' === $dealer_id ) {
+			return array();
+		}
+
+		$rijen = HDP_Supabase::selecteer(
+			HDP_Supabase::APP,
+			'machines',
+			array(
+				'select'    => '*',
+				'dealer_id' => 'eq.' . $dealer_id,
+				'order'     => 'aangemaakt_op.desc',
 			)
+		);
+
+		return is_wp_error( $rijen ) ? $rijen : array_map( array( __CLASS__, 'machine_uit_rij' ), $rijen );
+	}
+
+	/**
+	 * De claims van deze dealer, met de machinegegevens erbij. PostgREST kan
+	 * die in één opvraag meeleveren via de koppeling tussen de tabellen, dus
+	 * dat scheelt een tweede ronde naar de database.
+	 */
+	public static function claims( $user_id = 0 ) {
+		$dealer_id = self::dealer_id( $user_id );
+		if ( '' === $dealer_id ) {
+			return array();
+		}
+
+		$rijen = HDP_Supabase::selecteer(
+			HDP_Supabase::APP,
+			'claims',
+			array(
+				'select'    => '*,machines(machine,merk,serienummer,aankoopdatum,garantie_tot,klant,status,reden)',
+				'dealer_id' => 'eq.' . $dealer_id,
+				'order'     => 'ingediend_op.desc',
+			)
+		);
+
+		return is_wp_error( $rijen ) ? $rijen : array_map( array( __CLASS__, 'claim_uit_rij' ), $rijen );
+	}
+
+	/**
+	 * Eén claim, maar alleen als die van déze dealer is.
+	 *
+	 * Het filter op dealer_id staat bewust in de opvraag zelf en niet in een
+	 * controle achteraf: zo kan de database domweg niets anders teruggeven.
+	 *
+	 * @return array|null|WP_Error
+	 */
+	public static function claim_voor_dealer( $nummer, $user_id = 0 ) {
+		$dealer_id = self::dealer_id( $user_id );
+		if ( '' === $dealer_id || '' === trim( (string) $nummer ) ) {
+			return null;
+		}
+
+		$rijen = HDP_Supabase::selecteer(
+			HDP_Supabase::APP,
+			'claims',
+			array(
+				'select'    => '*,machines(machine,merk,serienummer,aankoopdatum,garantie_tot,klant,status,reden)',
+				'dealer_id' => 'eq.' . $dealer_id,
+				'nummer'    => 'eq.' . $nummer,
+				'limit'     => '1',
+			)
+		);
+
+		if ( is_wp_error( $rijen ) ) {
+			return $rijen;
+		}
+		if ( ! $rijen ) {
+			return null;
+		}
+
+		$claim = self::claim_uit_rij( $rijen[0] );
+
+		$claim['verloop']  = self::verloop_van( $rijen[0]['id'], $claim );
+		$claim['bijlagen'] = self::bijlagen_van( $rijen[0]['id'] );
+
+		return $claim;
+	}
+
+	/**
+	 * Het verloop van een claim, altijd via verloop_voor_dealer: die view
+	 * laat de interne notities van Homburg weg. Rechtstreeks uit verloop
+	 * lezen zou werken, maar dan hangt het aan een filter dat je kunt
+	 * vergeten — en dan lekt er een interne notitie naar een dealer.
+	 */
+	private static function verloop_van( $claim_id, $claim ) {
+		$rijen = HDP_Supabase::selecteer(
+			HDP_Supabase::APP,
+			'verloop_voor_dealer',
+			array(
+				'select'   => 'afzender,wie,status,opmerking,wanneer',
+				'claim_id' => 'eq.' . $claim_id,
+				'order'    => 'wanneer.asc,volgnr.asc',
+			)
+		);
+
+		if ( is_wp_error( $rijen ) ) {
+			$rijen = array();
+		}
+
+		$verloop = array();
+		foreach ( $rijen as $rij ) {
+			$verloop[] = array(
+				'afzender'  => $rij['afzender'],
+				'status'    => (string) $rij['status'],
+				'wie'       => (string) $rij['wie'],
+				'wanneer'   => $rij['wanneer'],
+				'opmerking' => (string) $rij['opmerking'],
+			);
+		}
+
+		// De administratie schrijft bij het indienen zelf geen regel; die
+		// eerste stap leiden we af uit de claim. Mocht daar later wél een
+		// regel voor komen, dan staat hij er al en voegen we niets toe —
+		// anders zou er tweemaal "Ingediend" in de route staan.
+		$heeft_ingediend = false;
+		foreach ( $verloop as $regel ) {
+			if ( 'ingediend' === $regel['status'] ) {
+				$heeft_ingediend = true;
+				break;
+			}
+		}
+
+		if ( ! $heeft_ingediend ) {
+			array_unshift(
+				$verloop,
+				array(
+					'afzender'  => 'dealer',
+					'status'    => 'ingediend',
+					'wie'       => $claim['dealer_naam'],
+					'wanneer'   => $claim['ingediend_op'],
+					'opmerking' => '',
+				)
+			);
+		}
+
+		return $verloop;
+	}
+
+	private static function bijlagen_van( $claim_id ) {
+		$rijen = HDP_Supabase::selecteer(
+			HDP_Supabase::APP,
+			'bijlagen',
+			array(
+				'select'   => 'bestandsnaam,pad',
+				'claim_id' => 'eq.' . $claim_id,
+				'order'    => 'aangemaakt_op.asc',
+			)
+		);
+
+		return is_wp_error( $rijen ) ? array() : wp_list_pluck( $rijen, 'bestandsnaam' );
+	}
+
+	/* --- Van databaserij naar wat de weergave verwacht ------------------ */
+
+	private static function machine_uit_rij( $rij ) {
+		return array(
+			'id'           => $rij['id'],
+			'serienummer'  => (string) $rij['serienummer'],
+			'machine'      => (string) $rij['machine'],
+			'merk'         => (string) $rij['merk'],
+			'aankoopdatum' => (string) $rij['aankoopdatum'],
+			'garantie_tot' => (string) $rij['garantie_tot'],
+			'hectares'     => (string) $rij['hectares'],
+			'klant'        => (string) $rij['klant'],
+			'status'       => (string) $rij['status'],
+			'reden'        => (string) $rij['reden'],
+		);
+	}
+
+	private static function claim_uit_rij( $rij ) {
+		$machine = isset( $rij['machines'] ) && is_array( $rij['machines'] ) ? $rij['machines'] : array();
+
+		return array(
+			'id'              => $rij['id'],
+			'nummer'          => (string) $rij['nummer'],
+			'status'          => self::geldige_status( (string) $rij['status'] ),
+			'klacht'          => (string) $rij['klacht'],
+			'onderdelen'      => (string) $rij['onderdelen'],
+			'hectares'        => (string) $rij['hectares'],
+			'behandelaar'     => (string) $rij['behandelaar'],
+			'ingediend'       => (string) $rij['ingediend_op'],
+			'ingediend_op'    => (string) $rij['ingediend_op'],
+			'dealer_naam'     => (string) $rij['dealer_naam'],
+			'machine_id'      => $rij['machine_id'],
+			'machine'         => isset( $machine['machine'] ) ? (string) $machine['machine'] : '',
+			'merk'            => isset( $machine['merk'] ) ? (string) $machine['merk'] : '',
+			'serienummer'     => isset( $machine['serienummer'] ) ? (string) $machine['serienummer'] : '',
+			'aankoopdatum'    => isset( $machine['aankoopdatum'] ) ? (string) $machine['aankoopdatum'] : '',
+			'machine_status'  => isset( $machine['status'] ) ? (string) $machine['status'] : '',
+			'machine_reden'   => isset( $machine['reden'] ) ? (string) $machine['reden'] : '',
+			'bijlagen'        => array(),
+			'verloop'         => array(),
 		);
 	}
 
 	/** Claims die nog lopen — dat is wat op het overzicht hoort te staan. */
-	public static function lopende_claims() {
+	public static function lopende_claims( $user_id = 0 ) {
+		$claims = self::claims( $user_id );
+		if ( is_wp_error( $claims ) ) {
+			return $claims;
+		}
+
 		return array_values(
 			array_filter(
-				self::voorbeeldclaims(),
+				$claims,
 				static function ( $claim ) {
 					return ! self::is_afgerond( $claim['status'] );
 				}
@@ -288,10 +462,15 @@ class HDP_Garantie {
 	}
 
 	/** Claims waar de dealer zelf aan zet is. */
-	public static function claims_die_wachten_op_dealer() {
+	public static function claims_die_wachten_op_dealer( $user_id = 0 ) {
+		$claims = self::claims( $user_id );
+		if ( is_wp_error( $claims ) ) {
+			return array();
+		}
+
 		return array_values(
 			array_filter(
-				self::voorbeeldclaims(),
+				$claims,
 				static function ( $claim ) {
 					return 'dealer' === self::ligt_bij( $claim );
 				}
@@ -299,193 +478,21 @@ class HDP_Garantie {
 		);
 	}
 
-	public static function voorbeeldclaims() {
-		return array(
-			'GAR-2026-0184' => array(
-				'nummer'       => 'GAR-2026-0184',
-				'machine'      => 'HARDI Navigator 4000',
-				'merk'         => 'HARDI',
-				'serienummer'  => 'HN4-220718-0391',
-				'aankoopdatum' => '2022-07-18',
-				'hectares'     => '1.240',
-				'klacht'       => 'Spuitboom zakt tijdens het werk aan de linkerzijde weg. Hydraulische cilinder lekt zichtbaar bij de onderste bevestiging.',
-				'onderdelen'   => 'Hydraulische cilinder links (art. 141-0392) en afdichtingsset.',
-				'ingediend'    => '2026-10-02',
-				'status'       => 'info_nodig',
-				'bijlagen'     => array( 'Cilinder lekkage 1.jpg', 'Cilinder lekkage 2.jpg', 'Typeplaatje machine.jpg' ),
-				'verloop'      => array(
-					array(
-						'afzender'  => 'dealer',
-						'status'    => 'ingediend',
-						'wie'       => 'Marijn van den Akker',
-						'wanneer'   => '2026-10-02 20:16',
-						'opmerking' => '',
-					),
-					array(
-						'afzender'  => 'homburg',
-						'status'    => 'in_behandeling',
-						'wie'       => 'Gerard de Boer',
-						'wanneer'   => '2026-10-03 08:41',
-						'opmerking' => 'Claim ontvangen. Ik kijk er vandaag naar.',
-					),
-					array(
-						'afzender'  => 'homburg',
-						'status'    => 'info_nodig',
-						'wie'       => 'Gerard de Boer',
-						'wanneer'   => '2026-10-03 09:12',
-						'opmerking' => 'Kunt u een foto sturen waarop het typeplaatje én het aantal hectares te zien zijn? De fabrikant vraagt daar bij deze serie altijd om.',
-					),
-				),
-			),
-			'GAR-2026-0177' => array(
-				'nummer'       => 'GAR-2026-0177',
-				'machine'      => 'Väderstad Tempo V8',
-				'merk'         => 'Väderstad',
-				'serienummer'  => 'TV8-210402-1174',
-				'aankoopdatum' => '2021-04-02',
-				'hectares'     => '860',
-				'klacht'       => 'Zaaihuis element 3 geeft onregelmatige afgifte, ook na afstellen en reinigen.',
-				'onderdelen'   => 'Zaaihuis compleet element 3.',
-				'ingediend'    => '2026-09-21',
-				'status'       => 'bij_fabrikant',
-				'bijlagen'     => array( 'Element 3 detail.jpg', 'Testrapport afgifte.pdf' ),
-				'verloop'      => array(
-					array(
-						'afzender'  => 'dealer',
-						'status'    => 'ingediend',
-						'wie'       => 'Marijn van den Akker',
-						'wanneer'   => '2026-09-21 14:03',
-						'opmerking' => '',
-					),
-					array(
-						'afzender'  => 'homburg',
-						'status'    => 'in_behandeling',
-						'wie'       => 'Gerard de Boer',
-						'wanneer'   => '2026-09-22 09:30',
-						'opmerking' => 'Compleet aangeleverd, dank. Ik leg hem voor aan Väderstad.',
-					),
-					array(
-						'afzender'  => 'homburg',
-						'status'    => 'bij_fabrikant',
-						'wie'       => 'Gerard de Boer',
-						'wanneer'   => '2026-09-24 11:05',
-						'opmerking' => 'Doorgestuurd naar Väderstad onder referentie VS-2026-8841. Reactietermijn is doorgaans twee weken.',
-					),
-					array(
-						'afzender'  => 'dealer',
-						'status'    => '',
-						'wie'       => 'Marijn van den Akker',
-						'wanneer'   => '2026-10-01 11:28',
-						'opmerking' => 'De klant vraagt ernaar — is er al iets bekend? De machine staat stil.',
-					),
-					array(
-						'afzender'  => 'homburg',
-						'status'    => '',
-						'wie'       => 'Gerard de Boer',
-						'wanneer'   => '2026-10-01 14:02',
-						'opmerking' => 'Nog niets terug. Ik heb vandaag gerappelleerd en kom er uiterlijk maandag op terug.',
-					),
-				),
-			),
-			'GAR-2026-0169' => array(
-				'nummer'       => 'GAR-2026-0169',
-				'machine'      => 'Bogballe M35W',
-				'merk'         => 'Bogballe',
-				'serienummer'  => 'BM35-190916-0042',
-				'aankoopdatum' => '2019-09-16',
-				'hectares'     => '',
-				'klacht'       => 'Weegcellen geven na vervanging van de display geen stabiele waarde meer.',
-				'onderdelen'   => 'Weegcelset compleet.',
-				'ingediend'    => '2026-09-09',
-				'status'       => 'goedgekeurd',
-				'bijlagen'     => array( 'Foutmelding display.jpg' ),
-				'verloop'      => array(
-					array(
-						'afzender'  => 'dealer',
-						'status'    => 'ingediend',
-						'wie'       => 'Marijn van den Akker',
-						'wanneer'   => '2026-09-09 10:22',
-						'opmerking' => '',
-					),
-					array(
-						'afzender'  => 'homburg',
-						'status'    => 'in_behandeling',
-						'wie'       => 'Gerard de Boer',
-						'wanneer'   => '2026-09-09 15:48',
-						'opmerking' => '',
-					),
-					array(
-						'afzender'  => 'homburg',
-						'status'    => 'goedgekeurd',
-						'wie'       => 'Gerard de Boer',
-						'wanneer'   => '2026-09-15 16:02',
-						'opmerking' => 'Goedgekeurd. De weegcelset is vandaag verzonden; retourneer de oude set met het bijgevoegde retourlabel.',
-					),
-				),
-			),
-			'GAR-2026-0151' => array(
-				'nummer'       => 'GAR-2026-0151',
-				'machine'      => 'Garford Robocrop',
-				'merk'         => 'Garford',
-				'serienummer'  => 'GRC-200611-0863',
-				'aankoopdatum' => '2020-06-11',
-				'hectares'     => '2.310',
-				'klacht'       => 'Camera-unit valt uit bij fel tegenlicht.',
-				'onderdelen'   => 'Camera-unit.',
-				'ingediend'    => '2026-08-26',
-				'status'       => 'afgewezen_fabrikant',
-				'bijlagen'     => array(),
-				'verloop'      => array(
-					array(
-						'afzender'  => 'dealer',
-						'status'    => 'ingediend',
-						'wie'       => 'Marijn van den Akker',
-						'wanneer'   => '2026-08-26 08:15',
-						'opmerking' => '',
-					),
-					array(
-						'afzender'  => 'homburg',
-						'status'    => 'bij_fabrikant',
-						'wie'       => 'Gerard de Boer',
-						'wanneer'   => '2026-08-27 13:40',
-						'opmerking' => 'Voorgelegd aan Garford.',
-					),
-					array(
-						'afzender'  => 'homburg',
-						'status'    => 'afgewezen_fabrikant',
-						'wie'       => 'Gerard de Boer',
-						'wanneer'   => '2026-09-04 09:55',
-						'opmerking' => 'Garford wijst af: de machine is buiten de garantietermijn van 60 maanden. Wel een coulanceprijs voor de camera-unit beschikbaar — ik bel u daarover.',
-					),
-				),
-			),
-		);
-	}
-
-	/**
-	 * Haalt één claim op voor de ingelogde dealer.
-	 *
-	 * De controle "hoort deze claim bij déze dealer" zit hier bewust nu al
-	 * in, vóór er echte data is. Claimnummers lopen op, dus zonder deze
-	 * controle zou een dealer de claims van een ander kunnen inzien door het
-	 * nummer in de URL te veranderen — exact de fout die bij de downloads
-	 * ook gemaakt bleek (zie HDP_Downloads_CPT::mag_merk_zien()). Als de
-	 * koppeling met de claimadministratie er komt, wordt dit de enige plek
-	 * waar die vraag beantwoord wordt.
-	 *
-	 * @return array|null De claim, of null als die niet bestaat of niet van
-	 *                    deze dealer is.
-	 */
-	public static function claim_voor_dealer( $nummer, $user_id = 0 ) {
-		$user_id = $user_id ? (int) $user_id : get_current_user_id();
-
-		if ( ! $user_id || ! HDP_Roles::mag_portaal_zien( $user_id ) ) {
-			return null;
+	/** De claims die bij één machine horen. */
+	public static function claims_van_machine( $serienummer, $user_id = 0 ) {
+		$claims = self::claims( $user_id );
+		if ( is_wp_error( $claims ) ) {
+			return array();
 		}
 
-		$claims = self::voorbeeldclaims();
-
-		return isset( $claims[ $nummer ] ) ? $claims[ $nummer ] : null;
+		return array_values(
+			array_filter(
+				$claims,
+				static function ( $claim ) use ( $serienummer ) {
+					return $claim['serienummer'] === $serienummer;
+				}
+			)
+		);
 	}
 
 	/**
@@ -507,10 +514,8 @@ class HDP_Garantie {
 
 	/**
 	 * Het gesprek bij een claim: alles uit het verloop waar tekst bij staat,
-	 * van beide kanten, in volgorde. Een statuswijziging mét opmerking staat
-	 * er dus ook in — dat is wat "overal een opmerking kunnen achterlaten"
-	 * betekent: de toelichting hangt aan de stap waar hij over gaat, en komt
-	 * tegelijk in het gesprek terecht.
+	 * van beide kanten, in volgorde. Interne notities van Homburg zitten hier
+	 * niet bij — die laat de view verloop_voor_dealer al weg.
 	 */
 	public static function berichten( $claim ) {
 		$verloop = isset( $claim['verloop'] ) ? $claim['verloop'] : array();
@@ -597,5 +602,230 @@ class HDP_Garantie {
 		}
 
 		return $stappen;
+	}
+
+	// --- Schrijven: wat de dealer indient --------------------------------
+	//
+	// Alles gaat rechtstreeks naar de claimadministratie; dit portaal bewaart
+	// zelf niets. De database weigert bewust van alles (een serienummer dat al
+	// bestaat, een claim op een afgewezen machine) — die meldingen gaan als
+	// WP_Error terug naar het formulier in plaats van verloren te gaan.
+
+	/** De opslagbak waarin foto's en facturen terechtkomen. Privé. */
+	const BIJLAGEN_BAK = 'garantie-bijlagen';
+
+	/** Wat een dealer mag aanleveren, en hoe groot. */
+	const BIJLAGE_TYPES  = array( 'jpg', 'jpeg', 'png', 'webp', 'heic', 'pdf' );
+	const BIJLAGE_MAX    = 10485760; // 10 MB per bestand.
+	const BIJLAGE_AANTAL = 10;
+
+	/**
+	 * Meldt een machine aan voor garantie.
+	 *
+	 * @param array $waarden Uit het formulier, al opgeschoond.
+	 * @return array|WP_Error De aangemaakte machine.
+	 */
+	public static function meld_machine_aan( $waarden ) {
+		$dealer = self::dealervelden();
+		if ( ! $dealer ) {
+			return new WP_Error( 'hdp_geen_toegang', HDP_I18N::t( 'garantie_fout_geen_toegang' ) );
+		}
+
+		$rij = array_merge(
+			$dealer,
+			array(
+				'machine'      => $waarden['machine'],
+				'merk'         => $waarden['merk'],
+				'serienummer'  => $waarden['serienummer'],
+				'aankoopdatum' => $waarden['aankoopdatum'],
+				'klant'        => $waarden['klant'],
+				'hectares'     => $waarden['hectares'],
+			)
+		);
+
+		$rijen = HDP_Supabase::voeg_toe( HDP_Supabase::APP, 'machines', array( $rij ) );
+
+		if ( is_wp_error( $rijen ) ) {
+			return $rijen;
+		}
+		if ( ! $rijen ) {
+			return new WP_Error( 'hdp_geen_antwoord', HDP_I18N::t( 'garantie_fout_algemeen' ) );
+		}
+
+		return $rijen[0];
+	}
+
+	/**
+	 * Dient een claim in op een eigen machine.
+	 *
+	 * Het serienummer komt uit het formulier, maar de machine wordt hier
+	 * opgezocht binnen de eigen machines — zo kan niemand een claim op
+	 * andermans machine indienen door een id mee te sturen.
+	 *
+	 * @return array|WP_Error De aangemaakte claim.
+	 */
+	public static function dien_claim_in( $waarden ) {
+		$dealer = self::dealervelden();
+		if ( ! $dealer ) {
+			return new WP_Error( 'hdp_geen_toegang', HDP_I18N::t( 'garantie_fout_geen_toegang' ) );
+		}
+
+		$machines = self::machines();
+		if ( is_wp_error( $machines ) ) {
+			return $machines;
+		}
+
+		$machine = null;
+		foreach ( $machines as $kandidaat ) {
+			if ( $kandidaat['serienummer'] === $waarden['machine'] ) {
+				$machine = $kandidaat;
+				break;
+			}
+		}
+
+		if ( ! $machine ) {
+			return new WP_Error( 'hdp_onbekende_machine', HDP_I18N::t( 'garantie_fout_machine' ) );
+		}
+
+		$rij = array_merge(
+			$dealer,
+			array(
+				'machine_id' => $machine['id'],
+				'klacht'     => $waarden['klacht'],
+				'onderdelen' => $waarden['onderdelen'],
+				'hectares'   => $waarden['hectares'],
+			)
+		);
+
+		$rijen = HDP_Supabase::voeg_toe( HDP_Supabase::APP, 'claims', array( $rij ) );
+
+		if ( is_wp_error( $rijen ) ) {
+			return $rijen;
+		}
+		if ( ! $rijen ) {
+			return new WP_Error( 'hdp_geen_antwoord', HDP_I18N::t( 'garantie_fout_algemeen' ) );
+		}
+
+		return $rijen[0];
+	}
+
+	/**
+	 * Een bericht van de dealer bij een claim.
+	 *
+	 * Zet bewust geen status: de dealer beantwoordt een vraag, Homburg
+	 * bepaalt wat dat voor de status betekent. De claim wordt eerst
+	 * opgezocht binnen de eigen claims, zodat je niet op andermans ticket
+	 * kunt schrijven door een nummer te raden.
+	 *
+	 * @return array|WP_Error
+	 */
+	public static function stuur_bericht( $nummer, $tekst ) {
+		$claim = self::claim_voor_dealer( $nummer );
+
+		if ( is_wp_error( $claim ) ) {
+			return $claim;
+		}
+		if ( ! $claim ) {
+			return new WP_Error( 'hdp_onbekend_ticket', HDP_I18N::t( 'garantie_ticket_onbekend' ) );
+		}
+
+		$tekst = trim( (string) $tekst );
+		if ( '' === $tekst ) {
+			return new WP_Error( 'hdp_leeg_bericht', HDP_I18N::t( 'garantie_fout_leeg_bericht' ) );
+		}
+
+		$user = wp_get_current_user();
+
+		$rijen = HDP_Supabase::voeg_toe(
+			HDP_Supabase::APP,
+			'verloop',
+			array(
+				array(
+					'claim_id'  => $claim['id'],
+					'afzender'  => 'dealer',
+					'wie'       => $user->display_name ? $user->display_name : $user->user_login,
+					'opmerking' => $tekst,
+				),
+			)
+		);
+
+		return is_wp_error( $rijen ) ? $rijen : $claim;
+	}
+
+	/**
+	 * Zet de meegestuurde bestanden in de opslag en legt ze vast bij de
+	 * claim of machine.
+	 *
+	 * Een mislukte bijlage laat de claim zelf staan: die is al ingediend en
+	 * weggooien zou erger zijn dan een ontbrekende foto. De dealer krijgt wel
+	 * te horen welke bestanden niet gelukt zijn.
+	 *
+	 * @param array  $bestanden Zoals $_FILES ze aanlevert.
+	 * @param string $soort     'claim' of 'machine'.
+	 * @return array Namen van de bestanden die niet gelukt zijn.
+	 */
+	public static function bewaar_bijlagen( $bestanden, $soort, $id ) {
+		$mislukt = array();
+
+		if ( empty( $bestanden['name'] ) || ! is_array( $bestanden['name'] ) ) {
+			return $mislukt;
+		}
+
+		$aantal = min( count( $bestanden['name'] ), self::BIJLAGE_AANTAL );
+
+		for ( $i = 0; $i < $aantal; $i++ ) {
+			$naam = sanitize_file_name( (string) $bestanden['name'][ $i ] );
+
+			if ( '' === $naam || UPLOAD_ERR_NO_FILE === (int) $bestanden['error'][ $i ] ) {
+				continue;
+			}
+
+			if ( UPLOAD_ERR_OK !== (int) $bestanden['error'][ $i ] || (int) $bestanden['size'][ $i ] > self::BIJLAGE_MAX ) {
+				$mislukt[] = $naam;
+				continue;
+			}
+
+			$extensie = strtolower( pathinfo( $naam, PATHINFO_EXTENSION ) );
+			if ( ! in_array( $extensie, self::BIJLAGE_TYPES, true ) ) {
+				$mislukt[] = $naam;
+				continue;
+			}
+
+			// Niet op de meegestuurde bestandsnaam vertrouwen: WordPress
+			// bepaalt zelf welk soort bestand dit werkelijk is.
+			$gecontroleerd = wp_check_filetype_and_ext( $bestanden['tmp_name'][ $i ], $naam );
+			$mime          = $gecontroleerd['type'] ? $gecontroleerd['type'] : 'application/octet-stream';
+
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- een net geüpload tijdelijk bestand; WP_Filesystem voegt hier niets toe.
+			$inhoud = file_get_contents( $bestanden['tmp_name'][ $i ] );
+			if ( false === $inhoud ) {
+				$mislukt[] = $naam;
+				continue;
+			}
+
+			// Eigen pad per bestand, zodat twee dealers met dezelfde
+			// bestandsnaam elkaar niet overschrijven.
+			$pad = $soort . 's/' . $id . '/' . wp_generate_password( 8, false ) . '-' . $naam;
+
+			$gelukt = HDP_Supabase::upload( HDP_Supabase::APP, self::BIJLAGEN_BAK, $pad, $inhoud, $mime );
+			if ( is_wp_error( $gelukt ) ) {
+				$mislukt[] = $naam;
+				continue;
+			}
+
+			$rij                   = array(
+				'bestandsnaam'  => $naam,
+				'pad'           => $pad,
+				'geupload_door' => 'dealer',
+			);
+			$rij[ $soort . '_id' ] = $id;
+
+			$vastgelegd = HDP_Supabase::voeg_toe( HDP_Supabase::APP, 'bijlagen', array( $rij ) );
+			if ( is_wp_error( $vastgelegd ) ) {
+				$mislukt[] = $naam;
+			}
+		}
+
+		return $mislukt;
 	}
 }

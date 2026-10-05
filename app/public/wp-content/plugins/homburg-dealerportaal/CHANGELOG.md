@@ -8,6 +8,26 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.57.0
+- **De dealer kan nu zelf indienen.** De drie formulieren staan open en schrijven rechtstreeks naar de claimadministratie: een machine aanmelden, een claim indienen, en reageren op een lopend ticket. Daarmee is de keten rond — wat een dealer hier instuurt, staat direct in de Homburg App bij Gerard, Erik en Benne, en wat zij daar schrijven komt hier terug.
+- Foto's en facturen gaan mee naar de afgeschermde opslag in Supabase: JPG, PNG, WEBP, HEIC of PDF, maximaal tien bestanden van 10 MB. Op de meegestuurde bestandsnaam wordt niet vertrouwd — WordPress bepaalt zelf wat voor bestand het werkelijk is. Elk bestand krijgt een eigen pad, zodat twee dealers met dezelfde bestandsnaam elkaar niet overschrijven.
+- Een claim gaat over een machine uit je **eigen** lijst: het portaal zoekt die op serienummer op binnen de machines van de ingelogde dealer, in plaats van een meegestuurd id te vertrouwen. Zonder dat zou je met een geraden id op andermans machine kunnen claimen. Hetzelfde geldt voor reageren op een ticket.
+- Na het opslaan wordt doorverwezen naar een nette URL. Daardoor dient een dealer bij het verversen van de pagina zijn claim niet nog een keer in.
+- Gaat er iets mis, dan blijft staan wat er al was ingevuld. Bij een lang klachtverhaal is dat het verschil tussen "even opnieuw" en "laat maar". De melding van de database gaat mee terug waar die bruikbaar is ("Dit serienummer is al aangemeld"), en wordt vervangen door iets begrijpelijks waar die dat niet is.
+- Claimen op een machine die nog beoordeeld wordt, mag — zoals afgesproken. In de keuzelijst staat er dan bij dat de aanmelding nog wordt beoordeeld.
+- Een bericht van de dealer zet bewust geen status: de dealer beantwoordt een vraag, Homburg bepaalt wat dat voor de status betekent. En een dealer kan nooit een interne notitie schrijven.
+
+## 1.56.0
+- **Het garantieportaal is gekoppeld aan de echte claimadministratie.** De voorbeelddata is weg; machines, claims en het gesprek komen nu uit de Supabase van de Homburg App, waar Homburg-medewerkers ze afhandelen. Claimnummers (T100001 enzovoort) worden daar uitgedeeld.
+- Nieuw: **HDP_Supabase**, een koppellaag met koppelingen *per naam*. Homburg heeft twee Supabase-projecten — één voor de Homburg App en één voor het portaal zelf — en elke module vraagt om degene die hij nodig heeft. Komt er later een derde bij, dan is dat één regel erbij.
+- De sleutel staat in `wp-config.php` (buiten git, niet in een deploy, niet in een database-export) met het instellingenscherm als terugval voor testomgevingen. Alle aanroepen gebeuren server-side in PHP; er gaat niets van de sleutel naar de browser.
+- **Elke opvraag is gefilterd op het accountnummer van de ingelogde dealer**, in de opvraag zelf en niet in een controle achteraf. Claimnummers lopen op, dus zonder dat filter zou een dealer andermans claims kunnen openen door het nummer in de URL te veranderen — dezelfde fout die bij de downloads gemaakt bleek (1.51.0). Een test controleert nu dat élke opvraag dat filter draagt.
+- Het gesprek wordt gelezen via de afgeschermde view `verloop_voor_dealer`, die de interne notities van Homburg weglaat. Rechtstreeks uit de logboektabel lezen zou ook werken, maar hangt dan aan een filter dat je kunt vergeten — en dan lekt er een interne notitie naar een dealer.
+- **Een storing bij de claimadministratie sleept de rest van het portaal niet mee.** De garantiepagina zegt dan eerlijk dat ze de gegevens even niet kan ophalen (in plaats van lege lijsten te tonen, waardoor een dealer denkt dat zijn claims verdwenen zijn); webshop en downloads werken gewoon door. De twee ingangen blijven staan, zodat aanmelden en indienen mogelijk blijven.
+- Machines die nog beoordeeld moeten worden of zijn afgewezen, zijn als zodanig herkenbaar in het overzicht — inclusief de reden van afwijzing. Dat bepaalt of een claim erop verder kan.
+- De testset bootst de claimadministratie na via WordPress’ eigen http-filter. De tests draaien daardoor zonder internet en controleren meteen *wát* er aan de administratie gevraagd wordt; juist daar zit de afscherming.
+- De indienformulieren zijn nog ontwerp (velden staan uit). Lezen gebeurt al wel echt.
+
 ## 1.55.1
 - Zoekveld op /garantie, dat claims én machines tegelijk filtert. Een dealer zoekt op wat hij in zijn hoofd heeft — een serienummer, een machinenaam, een claimnummer, een eindklant — en hoeft niet eerst te bedenken of dat bij claims of bij machines hoort. Zoeken gebeurt in de browser: de lijsten staan al op de pagina, dus een serverronde per toetsaanslag zou alleen maar trager voelen. Een sectiekop verdwijnt mee als er in die lijst niets overblijft.
 - De lopende claims zaten als één blok met scheidingslijntjes aan elkaar vast; het zijn nu losse kaarten met ruimte ertussen, net als de machines eronder. Elke claim is een eigen ding waar je op klikt, en dat hoort er ook zo uit te zien.

@@ -130,6 +130,80 @@ class HDP_I18N {
 			),
 
 			// Garantieportaal
+			// Garantie — formulieren
+			'garantie_kies'              => array( 'nl' => '— Maak een keuze —', 'fr' => '— Faites un choix —' ),
+			'garantie_annuleren'         => array( 'nl' => 'Annuleren', 'fr' => 'Annuler' ),
+			'garantie_bijlagen_hint'     => array(
+				'nl' => 'JPG, PNG, WEBP, HEIC of PDF. Maximaal 10 bestanden van 10 MB.',
+				'fr' => 'JPG, PNG, WEBP, HEIC ou PDF. Maximum 10 fichiers de 10 Mo.',
+			),
+			/* translators: %s zijn de bestandsnamen die niet gelukt zijn. */
+			'garantie_bijlagen_mislukt'  => array(
+				'nl' => 'Deze bestanden konden we niet opslaan: %s. U kunt ze alsnog meesturen via een bericht bij het ticket.',
+				'fr' => "Nous n'avons pas pu enregistrer ces fichiers : %s. Vous pouvez encore les envoyer via un message sur le ticket.",
+			),
+
+			'garantie_ok_machine'        => array(
+				'nl' => 'Uw machine is aangemeld. We beoordelen de aanmelding; u kunt er alvast een claim op indienen.',
+				'fr' => "Votre machine est enregistrée. Nous examinons l'enregistrement ; vous pouvez déjà introduire une demande.",
+			),
+			/* translators: %s is het ticketnummer. */
+			'garantie_ok_claim'          => array(
+				'nl' => 'Uw claim is ingediend onder nummer %s. U ziet hieronder de stand van zaken.',
+				'fr' => 'Votre demande a été introduite sous le numéro %s. Vous en voyez l’état ci-dessous.',
+			),
+			'garantie_ok_bericht'        => array(
+				'nl' => 'Uw bericht is verstuurd.',
+				'fr' => 'Votre message a été envoyé.',
+			),
+
+			'garantie_fout_geen_toegang' => array(
+				'nl' => 'U heeft geen toegang tot het garantieportaal.',
+				'fr' => "Vous n'avez pas accès au portail de garantie.",
+			),
+			/* translators: %s zijn de namen van de ontbrekende velden. */
+			'garantie_fout_ontbreekt'    => array(
+				'nl' => 'Vul eerst in: %s.',
+				'fr' => 'Complétez d’abord : %s.',
+			),
+			'garantie_fout_merk'         => array(
+				'nl' => 'Kies een merk uit de lijst.',
+				'fr' => 'Choisissez une marque dans la liste.',
+			),
+			'garantie_fout_machine'      => array(
+				'nl' => 'Kies de machine waar het om gaat.',
+				'fr' => 'Choisissez la machine concernée.',
+			),
+			'garantie_fout_klacht'       => array(
+				'nl' => 'Beschrijf kort wat er aan de hand is.',
+				'fr' => 'Décrivez brièvement le problème.',
+			),
+			'garantie_fout_leeg_bericht' => array(
+				'nl' => 'Typ eerst een bericht.',
+				'fr' => "Saisissez d'abord un message.",
+			),
+			'garantie_fout_serienummer_bestaat' => array(
+				'nl' => 'Dit serienummer is al aangemeld. Staat de machine niet in uw lijst? Neem dan even contact op.',
+				'fr' => 'Ce numéro de série est déjà enregistré. La machine ne figure pas dans votre liste ? Contactez-nous.',
+			),
+			'garantie_fout_algemeen'     => array(
+				'nl' => 'Er ging iets mis bij het opslaan. Probeer het nog een keer.',
+				'fr' => "Une erreur s'est produite lors de l'enregistrement. Réessayez.",
+			),
+
+			'garantie_storing_kop'     => array( 'nl' => 'Even niet beschikbaar.', 'fr' => 'Momentanément indisponible.' ),
+			'garantie_storing_tekst'   => array(
+				'nl' => 'We kunnen uw garantiegegevens op dit moment niet ophalen. Probeer het over een paar minuten opnieuw; lukt het dan nog niet, neem dan even contact op.',
+				'fr' => 'Nous ne pouvons pas récupérer vos données de garantie pour le moment. Réessayez dans quelques minutes ; si cela ne fonctionne toujours pas, contactez-nous.',
+			),
+			'garantie_machine_in_behandeling' => array(
+				'nl' => 'Aanmelding wordt beoordeeld',
+				'fr' => "L'enregistrement est en cours d'examen",
+			),
+			'garantie_machine_afgewezen'      => array(
+				'nl' => 'Aanmelding afgewezen',
+				'fr' => 'Enregistrement refusé',
+			),
 			'garantie_voorbeeld_kop'   => array( 'nl' => 'Voorbeeldweergave.', 'fr' => 'Aperçu.' ),
 			'garantie_voorbeeld_tekst' => array(
 				'nl' => 'De claims hieronder zijn verzonnen voorbeelden om het ontwerp te laten zien. Er is nog geen koppeling met de claimadministratie.',
