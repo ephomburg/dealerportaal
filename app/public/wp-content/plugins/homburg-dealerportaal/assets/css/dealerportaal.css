@@ -1319,6 +1319,10 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 .hdp-garantie-status-info-nodig     { background: #fdeccf; color: #7a4100; }
 .hdp-garantie-status-goedgekeurd    { background: #e2f3e6; color: #1d6b2d; }
 .hdp-garantie-status-afgewezen      { background: #fdecec; color: var(--wp--preset--color--homburg-rood-donker); }
+/* De twee vertakkingen via de fabrikant: eigen kleur, zodat ze niet als
+   kale tekst op het scherm staan. */
+.hdp-garantie-status-bij-fabrikant  { background: #e8e4fb; color: #46338f; }
+.hdp-garantie-status-afgewezen-fabrikant { background: #fdecec; color: var(--wp--preset--color--homburg-rood-donker); }
 
 /* ── Indienformulier ──────────────────────────────────────────── */
 .hdp-garantie-formulier {
@@ -1415,81 +1419,10 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	display: inline-block;
 }
 
-/* ── Route ───────────────────────────────────────────────────── */
-.hdp-route {
-	list-style: none;
-	margin: 0 0 2rem;
-	padding: 0;
-}
-.hdp-route-stap {
-	position: relative;
-	display: flex;
-	gap: .9rem;
-	padding-bottom: 1.3rem;
-}
-.hdp-route-stap:last-child { padding-bottom: 0; }
-/* De verbindingslijn tussen de bollen; de laatste krijgt er geen. */
-.hdp-route-stap::before {
-	content: "";
-	position: absolute;
-	left: 13px;
-	top: 28px;
-	bottom: 0;
-	width: 2px;
-	background: var(--wp--preset--color--rand);
-}
-.hdp-route-stap:last-child::before { display: none; }
-.hdp-route-gedaan::before { background: #1d6b2d; }
-
-.hdp-route-bol {
-	flex-shrink: 0;
-	width: 28px;
-	height: 28px;
-	border-radius: 50%;
-	border: 2px solid var(--wp--preset--color--rand);
-	background: var(--wp--preset--color--wit);
-	position: relative;
-	z-index: 1;
-}
-.hdp-route-gedaan .hdp-route-bol {
-	background: #1d6b2d;
-	border-color: #1d6b2d;
-}
-/* Vinkje in een afgeronde stap, getekend met twee lijntjes. */
-.hdp-route-gedaan .hdp-route-bol::after {
-	content: "";
-	position: absolute;
-	left: 8px;
-	top: 5px;
-	width: 7px;
-	height: 11px;
-	border: solid var(--wp--preset--color--wit);
-	border-width: 0 2px 2px 0;
-	transform: rotate(45deg);
-}
-.hdp-route-huidig .hdp-route-bol {
-	border-color: var(--wp--preset--color--homburg-rood);
-	box-shadow: 0 0 0 4px rgba(192, 13, 13, .14);
-}
-.hdp-route-huidig .hdp-route-bol::after {
-	content: "";
-	position: absolute;
-	inset: 6px;
-	border-radius: 50%;
-	background: var(--wp--preset--color--homburg-rood);
-}
-.hdp-route-afwijzing .hdp-route-bol { border-color: var(--wp--preset--color--homburg-rood-donker); }
-.hdp-route-afwijzing .hdp-route-bol::after { background: var(--wp--preset--color--homburg-rood-donker); }
-
-.hdp-route-inhoud { padding-top: .15rem; min-width: 0; }
-.hdp-route-inhoud strong { display: block; font-size: .98rem; }
-.hdp-route-huidig .hdp-route-inhoud strong { color: var(--wp--preset--color--homburg-rood); }
-.hdp-route-komt-nog .hdp-route-inhoud strong { color: var(--wp--preset--color--grijs-tekst); font-weight: 600; }
-.hdp-route-wie {
-	display: block;
-	font-size: .85rem;
-	color: var(--wp--preset--color--grijs-tekst);
-}
+/* De route-opmaak staat verderop, bij het ticketscherm: die is
+   horizontaal. Hier stond een tweede, verticale versie die daarmee
+   botste — een stap kreeg daar display:flex, waardoor label en naam
+   naast elkaar kwamen in plaats van onder elkaar. */
 
 /* ── Gesprek ─────────────────────────────────────────────────── */
 .hdp-gesprek { margin-bottom: 2rem; }
@@ -1627,13 +1560,18 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 .hdp-bijlage-icoon svg { width: 16px; height: 16px; stroke: var(--wp--preset--color--grijs-tekst); fill: none; }
 
 /* ── Wie is er aan zet ───────────────────────────────────────── */
+/* Staat in de zijkolom tussen de witte kaarten; zonder eigen vorm las het
+   als losse tekst in het niets. */
 .hdp-ticket-ligtbij {
 	margin: 0;
-	padding: .9rem 1.1rem;
+	padding: 1rem 1.2rem;
 	border-radius: var(--hdp-radius);
-	background: var(--wp--preset--color--grijs-licht);
+	background: var(--wp--preset--color--wit);
+	box-shadow: var(--hdp-schaduw);
+	border-left: 4px solid var(--wp--preset--color--rand);
 	color: var(--wp--preset--color--grijs-tekst);
-	font-size: .95rem;
+	font-size: .9rem;
+	line-height: 1.55;
 }
 .hdp-ticket-ligtbij-u {
 	background: #fff8ef;
@@ -1641,7 +1579,12 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	color: #8a4800;
 	font-weight: 600;
 }
-.hdp-ticket-ligtbij-klaar { background: #e2f3e6; color: #1d6b2d; font-weight: 600; }
+.hdp-ticket-ligtbij-klaar {
+	background: #e2f3e6;
+	border-left-color: #1d6b2d;
+	color: #1d6b2d;
+	font-weight: 600;
+}
 
 /* De rijen in het claimoverzicht zijn links naar hun ticket. */
 a.hdp-garantie-item {
@@ -1989,6 +1932,9 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 	display: flex;
 	align-items: flex-start;
 	list-style: none;
+	/* Niet breder dan dit: op een groot scherm dreven de vier stappen
+	   anders zo ver uit elkaar dat het geen route meer leest. */
+	max-width: 56rem;
 	margin: 1.3rem 0 0;
 	padding: 1.2rem 0 0;
 	border-top: 1px solid var(--wp--preset--color--rand);
@@ -2208,7 +2154,20 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 	color: var(--wp--preset--color--grijs-tekst);
 	cursor: pointer;
 }
-.hdp-bericht-bijlage span::before { content: "\0001F4CE  "; }
+.hdp-bericht-bijlage span {
+	display: inline-flex;
+	align-items: center;
+	gap: .35rem;
+}
+.hdp-bericht-bijlage svg {
+	width: 1.05em;
+	height: 1.05em;
+	stroke: currentColor;
+	fill: none;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
 .hdp-bericht-bijlage:hover span,
 .hdp-bericht-bijlage input:focus-visible + span {
 	color: var(--wp--preset--color--homburg-rood);

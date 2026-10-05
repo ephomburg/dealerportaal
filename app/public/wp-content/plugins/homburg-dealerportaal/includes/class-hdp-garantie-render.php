@@ -973,7 +973,15 @@ class HDP_Garantie_Render {
 					<button type="submit" class="hdp-btn"><?php echo esc_html( HDP_I18N::t( 'garantie_antwoord_versturen' ) ); ?></button>
 					<label class="hdp-bericht-bijlage">
 						<input type="file" name="bijlagen[]" multiple accept="<?php echo esc_attr( self::toegestane_bestanden() ); ?>">
-						<span><?php echo esc_html( HDP_I18N::t( 'garantie_bijlage_meesturen' ) ); ?></span>
+						<span>
+							<?php
+							// svg_icoon() in plaats van render_icoon(): die laatste
+							// wikkelt het icoon in een <div>, en dat mag niet
+							// binnen een <span>.
+							echo HDP_Icons::svg_icoon( 'bijlage' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG zonder gebruikersinvoer.
+							?>
+							<?php echo esc_html( HDP_I18N::t( 'garantie_bijlage_meesturen' ) ); ?>
+						</span>
 					</label>
 				</div>
 			</form>

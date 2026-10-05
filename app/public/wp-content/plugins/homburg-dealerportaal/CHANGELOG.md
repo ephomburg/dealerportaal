@@ -8,6 +8,13 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.58.1
+- De route op het ticketscherm stond nog niet goed: label en naam kwamen naast elkaar in plaats van onder elkaar. Oorzaak was een tweede, oudere definitie van diezelfde route verderop in de stylesheet — die zette een stap op `display: flex` en won daarmee van de nieuwe horizontale opmaak. De oude versie is weg; de route staat nu nog op één plek beschreven.
+- Twee statussen hadden nooit een kleur gekregen: **"Bij de fabrikant"** en **"Afgewezen door fabrikant"** stonden als kale tekst op het scherm. Die zijn in 1.54.0 aan de statuslijst toegevoegd maar niet aan de opmaak. Alle zeven hebben nu hun eigen kleur.
+- De paperclip bij "Bestand meesturen" verscheen als `ǴCE`: de CSS-code voor dat teken was te lang geschreven, waardoor de browser er een letter in las en de rest als tekst liet staan. Vervangen door een echt icoon uit de iconenset van het portaal, zoals overal elders.
+- "Dit ticket ligt bij Homburg" stond als losse tekst tussen de witte kaarten in de zijkolom; dat blok heeft nu dezelfde kaartvorm als de rest.
+- De route krijgt een maximumbreedte. Op een breed scherm dreven de vier stappen anders zo ver uit elkaar dat het geen route meer las.
+
 ## 1.58.0
 - **Het ticketscherm is een werkblad geworden in plaats van een document.** Links het gesprek, dat leeft en groeit; rechts een kolom met de feiten die blijft staan terwijl je leest. Eerder stond alles onder elkaar: je moest bij elk nieuw bericht verder scrollen om te zien wélke machine het ook alweer was, en de claimgegevens stonden ónder het gesprek. Het scherm was 2511 pixels hoog voor een claim met drie stappen en drie berichten; nu past het in één beeld op een laptop.
 - **"Dit ticket wacht op u" staat bovenaan** in plaats van onderaan de pagina, mét de vraag van Homburg erbij en een knop naar het antwoordvak. Dat is het belangrijkste feit van het scherm en stond onder de bijlagen.
