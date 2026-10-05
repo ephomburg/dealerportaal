@@ -1934,3 +1934,298 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 	.hdp-garantie-verzenden .hdp-btn,
 	.hdp-garantie-verzenden button { width: 100%; text-align: center; }
 }
+
+/* ==========================================================================
+   TICKETSCHERM — werkblad
+   Links het gesprek, dat leeft en groeit; rechts een kolom met de feiten die
+   blijft staan terwijl je leest. Eerder stond alles onder elkaar, waardoor je
+   bij elk nieuw bericht verder moest scrollen om te zien wélke machine het ook
+   alweer was — en stond "dit ticket wacht op u" onderaan in plaats van bovenaan.
+   ========================================================================== */
+.hdp-ticket-werkblad {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 21rem;
+	gap: 1.1rem;
+	align-items: start;
+	margin-bottom: 1.6rem;
+}
+.hdp-ticket-zijkolom {
+	display: grid;
+	gap: 1.1rem;
+	/* Blijft in beeld terwijl je het gesprek leest. */
+	position: sticky;
+	top: 1.5rem;
+}
+
+/* ── Kop ─────────────────────────────────────────────────────── */
+.hdp-ticket-kop {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	border-top: 5px solid var(--wp--preset--color--homburg-rood);
+	padding: 1.4rem 1.5rem;
+	margin-bottom: 1.1rem;
+}
+.hdp-ticket-kop-boven {
+	display: flex;
+	align-items: flex-start;
+	gap: 1.5rem;
+}
+.hdp-ticket-kop-tekst { flex: 1; min-width: 0; }
+.hdp-ticket-eyebrow {
+	margin: 0 0 .2rem;
+	font-size: .68rem;
+	font-weight: 700;
+	letter-spacing: .1em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-ticket-kop h2 { margin: 0 0 .25rem; font-size: 1.4rem; line-height: 1.2; }
+.hdp-ticket-meta { margin: 0; font-size: .87rem; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-status-groot { padding: .4rem .85rem; font-size: .8rem; flex-shrink: 0; }
+
+/* ── Route als horizontale balk ──────────────────────────────── */
+.hdp-route {
+	display: flex;
+	align-items: flex-start;
+	list-style: none;
+	margin: 1.3rem 0 0;
+	padding: 1.2rem 0 0;
+	border-top: 1px solid var(--wp--preset--color--rand);
+}
+.hdp-route-stap {
+	flex: 1;
+	position: relative;
+	padding-right: .5rem;
+	min-width: 0;
+}
+.hdp-route-stap:last-child { flex: 0 0 auto; padding-right: 0; }
+/* De lijn naar de volgende stap. */
+.hdp-route-stap::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 9px;
+	height: 3px;
+	background: var(--wp--preset--color--rand);
+}
+.hdp-route-stap:last-child::before { display: none; }
+.hdp-route-gedaan::before { background: #1d6b2d; }
+
+.hdp-route-bol {
+	position: relative;
+	z-index: 1;
+	display: block;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	border: 3px solid var(--wp--preset--color--rand);
+	background: var(--wp--preset--color--wit);
+}
+.hdp-route-gedaan .hdp-route-bol { background: #1d6b2d; border-color: #1d6b2d; }
+/* Vinkje, getekend met twee lijntjes. */
+.hdp-route-gedaan .hdp-route-bol::after {
+	content: "";
+	position: absolute;
+	left: 5px;
+	top: 2px;
+	width: 4px;
+	height: 8px;
+	border: solid var(--wp--preset--color--wit);
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
+}
+.hdp-route-huidig .hdp-route-bol {
+	border-color: var(--wp--preset--color--homburg-rood);
+	box-shadow: 0 0 0 4px rgba(192, 13, 13, .14);
+}
+.hdp-route-huidig .hdp-route-bol::after {
+	content: "";
+	position: absolute;
+	inset: 3px;
+	border-radius: 50%;
+	background: var(--wp--preset--color--homburg-rood);
+}
+.hdp-route-afwijzing .hdp-route-bol { border-color: var(--wp--preset--color--homburg-rood-donker); }
+.hdp-route-afwijzing .hdp-route-bol::after { background: var(--wp--preset--color--homburg-rood-donker); }
+
+.hdp-route-stap strong {
+	display: block;
+	margin-top: .5rem;
+	font-size: .84rem;
+	line-height: 1.3;
+}
+.hdp-route-huidig strong { color: var(--wp--preset--color--homburg-rood); }
+.hdp-route-komt-nog strong { color: #8b8f96; font-weight: 600; }
+.hdp-route-wie {
+	display: block;
+	font-size: .76rem;
+	color: var(--wp--preset--color--grijs-tekst);
+	line-height: 1.4;
+}
+
+/* ── Kaarten in de zijkolom en het gesprek ───────────────────── */
+.hdp-ticket-kaart {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	overflow: hidden;
+}
+.hdp-ticket-kaart h3 {
+	margin: 0;
+	padding: .8rem 1.2rem;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+	font-size: .72rem;
+	font-weight: 700;
+	letter-spacing: .1em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: .5rem;
+}
+.hdp-ticket-aantal { color: var(--wp--preset--color--donkergrijs); }
+.hdp-ticket-kaart-body { padding: 1.1rem 1.2rem; }
+
+/* ── "U bent aan zet" ────────────────────────────────────────── */
+.hdp-ticket-actie {
+	background: #fff8ef;
+	border: 1px solid #f3dcc0;
+	border-left: 4px solid #b25e00;
+	border-radius: var(--hdp-radius);
+	padding: 1rem 1.2rem;
+}
+.hdp-ticket-actie strong { display: block; color: #8a4800; font-size: .96rem; margin-bottom: .25rem; }
+.hdp-ticket-actie p {
+	margin: 0 0 .85rem;
+	font-size: .86rem;
+	color: #8a4800;
+	line-height: 1.5;
+}
+.hdp-ticket-actie .hdp-btn { padding: .55rem 1rem; font-size: .85rem; }
+
+/* ── Machinekaart ────────────────────────────────────────────── */
+.hdp-ticket-machinenaam { display: block; font-size: .97rem; }
+.hdp-ticket-serienummer {
+	display: block;
+	font-size: .8rem;
+	color: var(--wp--preset--color--grijs-tekst);
+	margin-bottom: .8rem;
+}
+.hdp-ticket-kaart-body .hdp-machine-garantie-label { display: block; margin-bottom: .3rem; }
+.hdp-ticket-kaart-body .hdp-machine-beoordeling { margin-top: .9rem; max-width: none; }
+
+.hdp-ticket-feiten { margin: .9rem 0 0; display: grid; gap: .5rem; }
+.hdp-ticket-feiten > div {
+	display: flex;
+	justify-content: space-between;
+	gap: 1rem;
+	font-size: .84rem;
+}
+.hdp-ticket-feiten dt { color: var(--wp--preset--color--grijs-tekst); }
+.hdp-ticket-feiten dd { margin: 0; font-weight: 600; text-align: right; }
+
+.hdp-ticket-klacht dt {
+	font-size: .76rem;
+	color: var(--wp--preset--color--grijs-tekst);
+	margin-bottom: .15rem;
+}
+.hdp-ticket-klacht dd { margin: 0 0 .85rem; font-size: .89rem; line-height: 1.55; }
+.hdp-ticket-klacht dd:last-child { margin-bottom: 0; }
+
+.hdp-bijlage-toevoegen { margin: .9rem 0 0; font-size: .85rem; }
+.hdp-bijlage-toevoegen a { color: var(--wp--preset--color--homburg-rood); font-weight: 600; }
+
+/* ── Gesprek ─────────────────────────────────────────────────── */
+.hdp-gesprek { margin-bottom: 0; }
+.hdp-gesprek-leeg-ruim { padding: 1.1rem 1.2rem; margin: 0; }
+
+.hdp-bericht {
+	background: transparent;
+	border: none;
+	border-bottom: 1px solid #eef0f2;
+	border-radius: 0;
+	padding: 1rem 1.2rem;
+	margin: 0;
+}
+.hdp-bericht:last-of-type { border-bottom: none; }
+/* Een eigen bericht leest als een antwoord: lichte achtergrond, geen inspringing
+   meer — in twee kolommen is daar geen ruimte voor en het leest zonder net zo goed. */
+.hdp-bericht-dealer {
+	background: #fafbfc;
+	border-left: none;
+	margin-left: 0;
+}
+
+.hdp-bericht-avatar {
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background: var(--wp--preset--color--grijs-tekst);
+	color: var(--wp--preset--color--wit);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: .72rem;
+	font-weight: 700;
+	flex-shrink: 0;
+}
+.hdp-bericht-avatar-homburg { background: var(--wp--preset--color--homburg-rood); }
+.hdp-bericht-kop { gap: .55rem; margin-bottom: .4rem; align-items: center; }
+.hdp-bericht-kop strong { font-size: .89rem; }
+.hdp-bericht-kop .hdp-garantie-status { font-size: .7rem; padding: .1rem .45rem; }
+.hdp-bericht-tekst { max-width: 62ch; font-size: .93rem; }
+
+/* ── Antwoordvak ─────────────────────────────────────────────── */
+.hdp-bericht-antwoord {
+	margin: 0;
+	border: none;
+	border-top: 1px solid var(--wp--preset--color--rand);
+	border-radius: 0;
+	background: #fafbfc;
+	padding: 1rem 1.2rem;
+	scroll-margin-top: 1.5rem;
+}
+.hdp-bericht-antwoord textarea { background: var(--wp--preset--color--wit); }
+
+/* Het uploadveld zelf verbergen; de label ernaast is de knop. */
+.hdp-bericht-bijlage input[type="file"] {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+	pointer-events: none;
+}
+.hdp-bericht-bijlage {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: .35rem;
+	font-size: .85rem;
+	font-weight: 600;
+	color: var(--wp--preset--color--grijs-tekst);
+	cursor: pointer;
+}
+.hdp-bericht-bijlage span::before { content: "\0001F4CE  "; }
+.hdp-bericht-bijlage:hover span,
+.hdp-bericht-bijlage input:focus-visible + span {
+	color: var(--wp--preset--color--homburg-rood);
+	text-decoration: underline;
+}
+
+@media (max-width: 60rem) {
+	.hdp-ticket-werkblad { grid-template-columns: 1fr; }
+	/* Op een smal scherm hoort "u bent aan zet" als eerste in beeld, niet
+	   onder een gesprek van twintig berichten. */
+	.hdp-ticket-zijkolom { position: static; order: -1; }
+	.hdp-route { flex-wrap: wrap; gap: 1rem 0; }
+	.hdp-route-stap { flex: 1 1 45%; }
+	.hdp-route-stap::before { display: none; }
+}
+
+@media (max-width: 40rem) {
+	.hdp-ticket-kop-boven { flex-direction: column; gap: .75rem; }
+	.hdp-route-stap { flex: 1 1 100%; }
+}

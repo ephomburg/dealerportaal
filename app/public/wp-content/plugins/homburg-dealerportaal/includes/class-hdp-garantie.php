@@ -437,6 +437,7 @@ class HDP_Garantie {
 			'merk'            => isset( $machine['merk'] ) ? (string) $machine['merk'] : '',
 			'serienummer'     => isset( $machine['serienummer'] ) ? (string) $machine['serienummer'] : '',
 			'aankoopdatum'    => isset( $machine['aankoopdatum'] ) ? (string) $machine['aankoopdatum'] : '',
+			'garantie_tot'    => isset( $machine['garantie_tot'] ) ? (string) $machine['garantie_tot'] : '',
 			'machine_status'  => isset( $machine['status'] ) ? (string) $machine['status'] : '',
 			'machine_reden'   => isset( $machine['reden'] ) ? (string) $machine['reden'] : '',
 			'bijlagen'        => array(),
@@ -535,6 +536,38 @@ class HDP_Garantie {
 		}
 
 		return $berichten;
+	}
+
+	/**
+	 * Sinds wanneer staat deze claim op zijn huidige status?
+	 *
+	 * Dat is wat een dealer wil weten ("ligt dit al een week stil?") en het
+	 * stond nergens. Komt uit de laatste statuswijziging in het verloop; is
+	 * die er niet, dan uit het moment van indienen.
+	 */
+	public static function status_sinds( $claim ) {
+		$wijzigingen = self::statuswijzigingen( $claim );
+
+		for ( $i = count( $wijzigingen ) - 1; $i >= 0; $i-- ) {
+			if ( isset( $claim['status'] ) && $wijzigingen[ $i ]['status'] === $claim['status'] ) {
+				return $wijzigingen[ $i ]['wanneer'];
+			}
+		}
+
+		return isset( $claim['ingediend_op'] ) ? $claim['ingediend_op'] : '';
+	}
+
+	/** Hoeveel hele dagen staat deze claim al op dezelfde status? */
+	public static function dagen_in_status( $claim, $nu = 0 ) {
+		$sinds = strtotime( (string) self::status_sinds( $claim ) );
+
+		if ( ! $sinds ) {
+			return 0;
+		}
+
+		$nu = $nu ? (int) $nu : time();
+
+		return max( 0, (int) floor( ( $nu - $sinds ) / DAY_IN_SECONDS ) );
 	}
 
 	/** Bij wie ligt de bal? Bepaalt de regel onderaan het ticket. */
@@ -719,7 +752,7 @@ class HDP_Garantie {
 	 *
 	 * @return array|WP_Error
 	 */
-	public static function stuur_bericht( $nummer, $tekst ) {
+	public static function stuur_bericht( $nummer, $tekst, $bestanden = array() ) {
 		$claim = self::claim_voor_dealer( $nummer );
 
 		if ( is_wp_error( $claim ) ) {
@@ -729,9 +762,19 @@ class HDP_Garantie {
 			return new WP_Error( 'hdp_onbekend_ticket', HDP_I18N::t( 'garantie_ticket_onbekend' ) );
 		}
 
-		$tekst = trim( (string) $tekst );
-		if ( '' === $tekst ) {
+		$tekst       = trim( (string) $tekst );
+		$heeft_files = ! empty( $bestanden['name'] ) && is_array( $bestanden['name'] ) && '' !== implode( '', $bestanden['name'] );
+
+		if ( '' === $tekst && ! $heeft_files ) {
 			return new WP_Error( 'hdp_leeg_bericht', HDP_I18N::t( 'garantie_fout_leeg_bericht' ) );
+		}
+
+		// Alleen bestanden, geen tekst: de administratie eist bij een regel
+		// zonder status een toelichting, en een lege regel in het gesprek
+		// leest ook nergens naar. Dus noemen we wat er is meegestuurd.
+		if ( '' === $tekst ) {
+			$namen = array_filter( array_map( 'sanitize_file_name', $bestanden['name'] ) );
+			$tekst = sprintf( HDP_I18N::t( 'garantie_bericht_alleen_bijlagen' ), implode( ', ', $namen ) );
 		}
 
 		$user = wp_get_current_user();
@@ -749,7 +792,15 @@ class HDP_Garantie {
 			)
 		);
 
-		return is_wp_error( $rijen ) ? $rijen : $claim;
+		if ( is_wp_error( $rijen ) ) {
+			return $rijen;
+		}
+
+		if ( $heeft_files ) {
+			$claim['bijlagen_mislukt'] = self::bewaar_bijlagen( $bestanden, 'claim', $claim['id'] );
+		}
+
+		return $claim;
 	}
 
 	/**

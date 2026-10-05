@@ -578,12 +578,14 @@ class HDP_Garantie_Render {
 	// --- Eén ticket -----------------------------------------------------
 
 	/**
-	 * Het detailscherm van één garantieticket: kop, de route met waar het
-	 * ligt, het gesprek, de claimgegevens en de bijlagen.
+	 * Het detailscherm van één garantieticket.
 	 *
-	 * Opbouw bewust gelijk aan het declaratiescherm dat Homburg al gebruikt
-	 * (kop, route, regels, bijlagen, "ligt nu bij"), zodat het meteen
-	 * vertrouwd leest.
+	 * Opzet als werkblad en niet als document: links het gesprek, dat leeft
+	 * en groeit, rechts een kolom met de feiten die blijft staan terwijl je
+	 * leest. Eerder stond alles onder elkaar, waardoor je bij elk nieuw
+	 * bericht verder moest scrollen om te zien wélke machine het ook alweer
+	 * was — en stond "dit ticket wacht op u" onderaan de pagina in plaats
+	 * van bovenaan.
 	 */
 	private static function render_ticket( $nummer ) {
 		$claim = HDP_Garantie::claim_voor_dealer( $nummer );
@@ -602,9 +604,6 @@ class HDP_Garantie_Render {
 		}
 
 		if ( ! $claim ) {
-			// Ticketnummers lopen op. Niet bestaan en niet van jou zijn geven
-			// daarom hetzelfde antwoord: anders kun je aan het verschil
-			// aflezen welke nummers wél bestaan.
 			return self::render_onbekend_ticket();
 		}
 
@@ -618,26 +617,19 @@ class HDP_Garantie_Render {
 			</section>
 			<section class="hdp-garantie hdp-ticket">
 				<?php self::render_meldingen(); ?>
+				<?php self::render_ticket_kop( $claim ); ?>
 
-				<header class="hdp-ticket-kop">
-					<p class="hdp-ticket-eyebrow"><?php echo esc_html( HDP_I18N::t( 'garantie_ticket' ) ); ?></p>
-					<?php // Serienummer in de titel: een dealer heeft vaak meerdere machines van hetzelfde type staan. ?>
-					<h2><?php echo esc_html( HDP_Garantie::machinenaam( $claim['machine'], $claim['serienummer'] ) ); ?></h2>
-					<p class="hdp-ticket-meta">
-						<span class="hdp-ticket-nummer"><?php echo esc_html( $claim['nummer'] ); ?></span> &middot;
-						<?php echo esc_html( $claim['merk'] ); ?> &middot;
-						<?php echo esc_html( HDP_I18N::t( 'garantie_ingediend_op' ) ); ?> <?php echo esc_html( date_i18n( 'j F Y', strtotime( $claim['ingediend'] ) ) ); ?>
-					</p>
-					<span class="<?php echo esc_attr( HDP_Garantie::status_klasse( $claim['status'] ) ); ?>">
-						<?php echo esc_html( HDP_Garantie::status_label( $claim['status'] ) ); ?>
-					</span>
-				</header>
-
-				<?php self::render_route( $claim ); ?>
-				<?php self::render_gesprek( $claim ); ?>
-				<?php self::render_claimgegevens( $claim ); ?>
-				<?php self::render_bijlagen( $claim ); ?>
-				<?php self::render_ligt_bij( $claim ); ?>
+				<div class="hdp-ticket-werkblad">
+					<div class="hdp-ticket-gesprek">
+						<?php self::render_gesprek( $claim ); ?>
+					</div>
+					<aside class="hdp-ticket-zijkolom">
+						<?php self::render_aan_zet( $claim ); ?>
+						<?php self::render_machinekaart( $claim ); ?>
+						<?php self::render_claimgegevens( $claim ); ?>
+						<?php self::render_bijlagen( $claim ); ?>
+					</aside>
+				</div>
 
 				<p class="hdp-terug"><a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/garantie/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'garantie_terug_naar_overzicht' ) ); ?></a></p>
 			</section>
@@ -662,14 +654,56 @@ class HDP_Garantie_Render {
 	}
 
 	/**
-	 * De route: welke stappen zijn gezet, waar ligt het nu, en wat komt er
-	 * nog. Een afgeronde stap krijgt een vinkje, de huidige stap springt
-	 * eruit, en wat nog moet komen staat grijs.
+	 * De kop: om welke machine gaat het, waar staat het ticket, en hoelang
+	 * al. Met daaronder de route als balk over de volle breedte — als
+	 * verticale lijst gebruikte die een kleine kolom links en bleef de rest
+	 * van de band leeg.
+	 */
+	private static function render_ticket_kop( $claim ) {
+		$dagen = HDP_Garantie::dagen_in_status( $claim );
+		?>
+		<header class="hdp-ticket-kop">
+			<div class="hdp-ticket-kop-boven">
+				<div class="hdp-ticket-kop-tekst">
+					<p class="hdp-ticket-eyebrow">
+						<?php echo esc_html( HDP_I18N::t( 'garantie_ticket' ) ); ?>
+						<?php echo esc_html( $claim['nummer'] ); ?>
+					</p>
+					<h2><?php echo esc_html( HDP_Garantie::machinenaam( $claim['machine'], $claim['serienummer'] ) ); ?></h2>
+					<p class="hdp-ticket-meta">
+						<?php echo esc_html( $claim['merk'] ); ?> &middot;
+						<?php echo esc_html( HDP_I18N::t( 'garantie_ingediend_op' ) ); ?>
+						<?php echo esc_html( date_i18n( 'j F Y', strtotime( $claim['ingediend_op'] ) ) ); ?>
+						<?php if ( $dagen > 0 ) : ?>
+							&middot;
+							<?php
+							// Hoelang een ticket al op dezelfde status staat is
+							// precies wat je wilt weten en stond nergens.
+							echo '<strong>' . esc_html(
+								1 === $dagen
+									? HDP_I18N::t( 'garantie_dag_in_status' )
+									: sprintf( HDP_I18N::t( 'garantie_dagen_in_status' ), $dagen )
+							) . '</strong>';
+							?>
+						<?php endif; ?>
+					</p>
+				</div>
+				<span class="<?php echo esc_attr( HDP_Garantie::status_klasse( $claim['status'] ) ); ?> hdp-status-groot">
+					<?php echo esc_html( HDP_Garantie::status_label( $claim['status'] ) ); ?>
+				</span>
+			</div>
+			<?php self::render_route( $claim ); ?>
+		</header>
+		<?php
+	}
+
+	/**
+	 * De route als horizontale balk: welke stappen zijn gezet, waar ligt het
+	 * nu, en wat komt er nog.
 	 */
 	private static function render_route( $claim ) {
 		$stappen = HDP_Garantie::route( $claim );
 		?>
-		<h3 class="hdp-ticket-sectiekop"><?php echo esc_html( HDP_I18N::t( 'garantie_route' ) ); ?></h3>
 		<ol class="hdp-route">
 			<?php foreach ( $stappen as $stap ) : ?>
 				<?php
@@ -693,20 +727,198 @@ class HDP_Garantie_Render {
 				?>
 				<li class="<?php echo esc_attr( implode( ' ', $klassen ) ); ?>">
 					<span class="hdp-route-bol" aria-hidden="true"></span>
-					<div class="hdp-route-inhoud">
-						<strong><?php echo esc_html( $label ); ?></strong>
+					<strong><?php echo esc_html( $label ); ?></strong>
+					<span class="hdp-route-wie">
 						<?php if ( $stap['wie'] ) : ?>
-							<span class="hdp-route-wie">
-								<?php echo esc_html( $stap['wie'] ); ?>
-								<?php if ( $stap['wanneer'] ) : ?>
-									&middot; <?php echo esc_html( date_i18n( 'j M H:i', strtotime( $stap['wanneer'] ) ) ); ?>
-								<?php endif; ?>
-							</span>
+							<?php echo esc_html( $stap['wie'] ); ?>
+							<?php if ( $stap['wanneer'] ) : ?>
+								&middot; <?php echo esc_html( date_i18n( 'j M H:i', strtotime( $stap['wanneer'] ) ) ); ?>
+							<?php endif; ?>
+						<?php else : ?>
+							&nbsp;
 						<?php endif; ?>
-					</div>
+					</span>
 				</li>
 			<?php endforeach; ?>
 		</ol>
+		<?php
+	}
+
+	/** Wie er aan zet is, bovenaan de zijkolom in plaats van onderaan de pagina. */
+	private static function render_aan_zet( $claim ) {
+		$bij = HDP_Garantie::ligt_bij( $claim );
+
+		if ( ! $bij ) {
+			?>
+			<p class="hdp-ticket-ligtbij hdp-ticket-ligtbij-klaar"><?php echo esc_html( HDP_I18N::t( 'garantie_ligt_bij_klaar' ) ); ?></p>
+			<?php
+			return;
+		}
+
+		if ( 'homburg' === $bij ) {
+			?>
+			<p class="hdp-ticket-ligtbij"><?php echo esc_html( HDP_I18N::t( 'garantie_ligt_bij_homburg' ) ); ?></p>
+			<?php
+			return;
+		}
+
+		// De dealer is aan zet: dat verdient een eigen blok met de vraag
+		// erbij en een knop ernaartoe.
+		$vraag = self::laatste_vraag( $claim );
+		?>
+		<div class="hdp-ticket-actie">
+			<strong><?php echo esc_html( HDP_I18N::t( 'garantie_ligt_bij_u' ) ); ?></strong>
+			<?php if ( $vraag ) : ?>
+				<p><?php echo esc_html( $vraag ); ?></p>
+			<?php endif; ?>
+			<a class="hdp-btn" href="#hdp-ticket-antwoord"><?php echo esc_html( HDP_I18N::t( 'garantie_antwoord_label' ) ); ?></a>
+		</div>
+		<?php
+	}
+
+	/** De laatste vraag van Homburg, voor in het "u bent aan zet"-blok. */
+	private static function laatste_vraag( $claim ) {
+		$berichten = HDP_Garantie::berichten( $claim );
+
+		for ( $i = count( $berichten ) - 1; $i >= 0; $i-- ) {
+			if ( 'homburg' === $berichten[ $i ]['afzender'] ) {
+				return $berichten[ $i ]['tekst'];
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * De machine waar deze claim over gaat, met hoelang de garantie nog
+	 * loopt en hoeveel claims er eerder op liepen. Die gegevens stonden er
+	 * al in de administratie maar werden nergens getoond.
+	 */
+	private static function render_machinekaart( $claim ) {
+		$stand   = HDP_Garantie::garantiestand(
+			array(
+				'aankoopdatum' => $claim['aankoopdatum'],
+				'garantie_tot' => isset( $claim['garantie_tot'] ) ? $claim['garantie_tot'] : '',
+			)
+		);
+		$anderen = array_filter(
+			HDP_Garantie::claims_van_machine( $claim['serienummer'] ),
+			static function ( $ander ) use ( $claim ) {
+				return $ander['nummer'] !== $claim['nummer'];
+			}
+		);
+
+		$balk = 'hdp-machine-balk';
+		if ( $stand['verlopen'] ) {
+			$balk .= ' hdp-machine-balk-verlopen';
+		} elseif ( $stand['bijna'] ) {
+			$balk .= ' hdp-machine-balk-bijna';
+		}
+		?>
+		<section class="hdp-ticket-kaart">
+			<h3><?php echo esc_html( HDP_I18N::t( 'garantie_veld_machine' ) ); ?></h3>
+			<div class="hdp-ticket-kaart-body">
+				<strong class="hdp-ticket-machinenaam"><?php echo esc_html( $claim['machine'] ); ?></strong>
+				<span class="hdp-ticket-serienummer"><?php echo esc_html( $claim['serienummer'] ); ?></span>
+
+				<?php if ( $stand['tot'] ) : ?>
+					<span class="hdp-machine-garantie-label">
+						<?php if ( $stand['verlopen'] ) : ?>
+							<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_verlopen_op' ), date_i18n( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
+						<?php else : ?>
+							<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_tot_en_met' ), date_i18n( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
+							<?php if ( $stand['bijna'] ) : ?>
+								<strong>&mdash; <?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_nog_maanden' ), $stand['maanden'] ) ); ?></strong>
+							<?php endif; ?>
+						<?php endif; ?>
+					</span>
+					<span class="<?php echo esc_attr( $balk ); ?>"><i style="width:<?php echo esc_attr( (string) $stand['verstreken'] ); ?>%"></i></span>
+				<?php endif; ?>
+
+				<dl class="hdp-ticket-feiten">
+					<?php if ( $claim['aankoopdatum'] ) : ?>
+						<div>
+							<dt><?php echo esc_html( HDP_I18N::t( 'garantie_veld_aankoopdatum' ) ); ?></dt>
+							<dd><?php echo esc_html( date_i18n( 'j M Y', strtotime( $claim['aankoopdatum'] ) ) ); ?></dd>
+						</div>
+					<?php endif; ?>
+					<?php if ( $claim['hectares'] ) : ?>
+						<div>
+							<dt><?php echo esc_html( HDP_I18N::t( 'garantie_veld_hectares' ) ); ?></dt>
+							<dd><?php echo esc_html( $claim['hectares'] ); ?></dd>
+						</div>
+					<?php endif; ?>
+					<?php if ( $anderen ) : ?>
+						<div>
+							<dt><?php echo esc_html( HDP_I18N::t( 'garantie_andere_claims' ) ); ?></dt>
+							<dd><?php echo esc_html( (string) count( $anderen ) ); ?></dd>
+						</div>
+					<?php endif; ?>
+				</dl>
+
+				<?php if ( 'goedgekeurd' !== $claim['machine_status'] && $claim['machine_status'] ) : ?>
+					<div class="hdp-machine-beoordeling hdp-machine-beoordeling-<?php echo esc_attr( $claim['machine_status'] ); ?>">
+						<strong><?php echo esc_html( HDP_I18N::t( 'garantie_machine_' . $claim['machine_status'] ) ); ?></strong>
+						<?php if ( ! empty( $claim['machine_reden'] ) ) : ?>
+							<span><?php echo esc_html( $claim['machine_reden'] ); ?></span>
+						<?php endif; ?>
+					</div>
+				<?php endif; ?>
+			</div>
+		</section>
+		<?php
+	}
+
+	/** Wat de dealer bij het indienen heeft opgegeven. */
+	private static function render_claimgegevens( $claim ) {
+		?>
+		<section class="hdp-ticket-kaart">
+			<h3><?php echo esc_html( HDP_I18N::t( 'garantie_claimgegevens' ) ); ?></h3>
+			<div class="hdp-ticket-kaart-body">
+				<dl class="hdp-ticket-klacht">
+					<dt><?php echo esc_html( HDP_I18N::t( 'garantie_veld_klacht' ) ); ?></dt>
+					<dd><?php echo esc_html( $claim['klacht'] ); ?></dd>
+					<?php if ( $claim['onderdelen'] ) : ?>
+						<dt><?php echo esc_html( HDP_I18N::t( 'garantie_veld_onderdelen' ) ); ?></dt>
+						<dd><?php echo esc_html( $claim['onderdelen'] ); ?></dd>
+					<?php endif; ?>
+				</dl>
+			</div>
+		</section>
+		<?php
+	}
+
+	private static function render_bijlagen( $claim ) {
+		$bijlagen = isset( $claim['bijlagen'] ) ? $claim['bijlagen'] : array();
+		?>
+		<section class="hdp-ticket-kaart">
+			<h3>
+				<?php echo esc_html( HDP_I18N::t( 'garantie_bijlagen' ) ); ?>
+				<span class="hdp-ticket-aantal"><?php echo esc_html( (string) count( $bijlagen ) ); ?></span>
+			</h3>
+			<div class="hdp-ticket-kaart-body">
+				<?php if ( ! $bijlagen ) : ?>
+					<p class="hdp-gesprek-leeg"><?php echo esc_html( HDP_I18N::t( 'garantie_geen_bijlagen' ) ); ?></p>
+				<?php else : ?>
+					<ul class="hdp-bijlagen">
+						<?php foreach ( $bijlagen as $bijlage ) : ?>
+							<li class="hdp-bijlage">
+								<?php HDP_Icons::render_icoon( 'downloads', 'hdp-bijlage-icoon' ); ?>
+								<span><?php echo esc_html( $bijlage ); ?></span>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
+				<?php
+				// Een foto nasturen kon eerder niet: bijlagen gingen alleen
+				// mee bij het indienen. Terwijl Homburg er juist vaak om
+				// vraagt — daar liep het proces dood.
+				?>
+				<p class="hdp-bijlage-toevoegen">
+					<a href="#hdp-ticket-antwoord"><?php echo esc_html( HDP_I18N::t( 'garantie_bijlage_toevoegen' ) ); ?></a>
+				</p>
+			</div>
+		</section>
 		<?php
 	}
 
@@ -718,109 +930,76 @@ class HDP_Garantie_Render {
 	private static function render_gesprek( $claim ) {
 		$berichten = HDP_Garantie::berichten( $claim );
 		?>
-		<h3 class="hdp-ticket-sectiekop"><?php echo esc_html( HDP_I18N::t( 'garantie_gesprek' ) ); ?></h3>
-		<div class="hdp-gesprek">
+		<section class="hdp-ticket-kaart hdp-gesprek">
+			<h3>
+				<?php echo esc_html( HDP_I18N::t( 'garantie_gesprek' ) ); ?>
+				<span class="hdp-ticket-aantal"><?php echo esc_html( (string) count( $berichten ) ); ?></span>
+			</h3>
+
 			<?php if ( ! $berichten ) : ?>
-				<p class="hdp-gesprek-leeg"><?php echo esc_html( HDP_I18N::t( 'garantie_gesprek_leeg' ) ); ?></p>
+				<p class="hdp-gesprek-leeg hdp-gesprek-leeg-ruim"><?php echo esc_html( HDP_I18N::t( 'garantie_gesprek_leeg' ) ); ?></p>
 			<?php endif; ?>
+
 			<?php foreach ( $berichten as $bericht ) : ?>
 				<?php $van_dealer = 'dealer' === $bericht['afzender']; ?>
 				<article class="hdp-bericht<?php echo $van_dealer ? ' hdp-bericht-dealer' : ''; ?>">
 					<div class="hdp-bericht-kop">
-						<strong><?php echo esc_html( $bericht['wie'] ); ?></strong>
-						<span class="hdp-bericht-van"><?php echo esc_html( HDP_I18N::t( $van_dealer ? 'garantie_van_dealer' : 'garantie_van_homburg' ) ); ?></span>
+						<span class="hdp-bericht-avatar<?php echo $van_dealer ? '' : ' hdp-bericht-avatar-homburg'; ?>" aria-hidden="true">
+							<?php echo esc_html( self::initialen( $bericht['wie'] ) ); ?>
+						</span>
+						<strong><?php echo esc_html( $van_dealer ? HDP_I18N::t( 'garantie_van_dealer' ) : $bericht['wie'] ); ?></strong>
+						<?php if ( $bericht['status'] ) : ?>
+							<span class="<?php echo esc_attr( HDP_Garantie::status_klasse( $bericht['status'] ) ); ?>"><?php echo esc_html( HDP_Garantie::status_label( $bericht['status'] ) ); ?></span>
+						<?php endif; ?>
 						<?php if ( $bericht['wanneer'] ) : ?>
 							<time><?php echo esc_html( date_i18n( 'j M H:i', strtotime( $bericht['wanneer'] ) ) ); ?></time>
 						<?php endif; ?>
 					</div>
-					<?php if ( $bericht['status'] ) : ?>
-						<p class="hdp-bericht-bij">
-							<?php echo esc_html( HDP_I18N::t( 'garantie_bij_status' ) ); ?>
-							<span class="<?php echo esc_attr( HDP_Garantie::status_klasse( $bericht['status'] ) ); ?>"><?php echo esc_html( HDP_Garantie::status_label( $bericht['status'] ) ); ?></span>
-						</p>
-					<?php endif; ?>
 					<p class="hdp-bericht-tekst"><?php echo esc_html( $bericht['tekst'] ); ?></p>
 				</article>
 			<?php endforeach; ?>
 
-			<?php
-			// Antwoordvak: nog niet in gebruik, net als het indienformulier.
-			// Wel alvast getoond, want zonder dit is het geen ticket maar een
-			// mededeling — de dealer moet terug kunnen praten.
-			?>
-			<form class="hdp-bericht-antwoord" method="post" action="<?php echo esc_url( add_query_arg( 'ticket', $claim['nummer'], home_url( '/garantie/' ) ) ); ?>">
+			<form class="hdp-bericht-antwoord" id="hdp-ticket-antwoord" method="post" enctype="multipart/form-data"
+				action="<?php echo esc_url( add_query_arg( 'ticket', $claim['nummer'], home_url( '/garantie/' ) ) ); ?>">
 				<?php wp_nonce_field( HDP_Garantie_Formulier::NONCE ); ?>
 				<input type="hidden" name="<?php echo esc_attr( HDP_Garantie_Formulier::ACTIE_VELD ); ?>" value="bericht">
 				<input type="hidden" name="ticket" value="<?php echo esc_attr( $claim['nummer'] ); ?>">
-				<label for="hdp-ticket-antwoord"><?php echo esc_html( HDP_I18N::t( 'garantie_antwoord_label' ) ); ?></label>
-				<textarea id="hdp-ticket-antwoord" name="bericht" rows="3" required
+
+				<label for="hdp-ticket-antwoord-tekst"><?php echo esc_html( HDP_I18N::t( 'garantie_antwoord_label' ) ); ?></label>
+				<textarea id="hdp-ticket-antwoord-tekst" name="bericht" rows="3"
 					placeholder="<?php echo esc_attr( HDP_I18N::t( 'garantie_antwoord_hint' ) ); ?>"><?php echo esc_textarea( HDP_Garantie_Formulier::eerder( 'bericht' ) ); ?></textarea>
+
 				<div class="hdp-bericht-antwoord-knoppen">
 					<button type="submit" class="hdp-btn"><?php echo esc_html( HDP_I18N::t( 'garantie_antwoord_versturen' ) ); ?></button>
+					<label class="hdp-bericht-bijlage">
+						<input type="file" name="bijlagen[]" multiple accept="<?php echo esc_attr( self::toegestane_bestanden() ); ?>">
+						<span><?php echo esc_html( HDP_I18N::t( 'garantie_bijlage_meesturen' ) ); ?></span>
+					</label>
 				</div>
 			</form>
-		</div>
+		</section>
 		<?php
 	}
 
-	/** De gegevens die de dealer bij het indienen heeft opgegeven. */
-	private static function render_claimgegevens( $claim ) {
-		$regels = array(
-			'machine'      => $claim['machine'],
-			'serienummer'  => $claim['serienummer'],
-			'aankoopdatum' => $claim['aankoopdatum'] ? date_i18n( 'j F Y', strtotime( $claim['aankoopdatum'] ) ) : '',
-			'hectares'     => $claim['hectares'],
-			'klacht'       => $claim['klacht'],
-			'onderdelen'   => $claim['onderdelen'],
-		);
-		?>
-		<h3 class="hdp-ticket-sectiekop"><?php echo esc_html( HDP_I18N::t( 'garantie_claimgegevens' ) ); ?></h3>
-		<dl class="hdp-ticket-gegevens">
-			<?php foreach ( $regels as $naam => $waarde ) : ?>
-				<?php if ( '' !== (string) $waarde ) : ?>
-					<div class="hdp-ticket-gegeven<?php echo in_array( $naam, array( 'klacht', 'onderdelen' ), true ) ? ' hdp-ticket-gegeven-breed' : ''; ?>">
-						<dt><?php echo esc_html( HDP_I18N::t( 'garantie_veld_' . $naam ) ); ?></dt>
-						<dd><?php echo esc_html( $waarde ); ?></dd>
-					</div>
-				<?php endif; ?>
-			<?php endforeach; ?>
-		</dl>
-		<?php
-	}
+	/** Initialen voor het rondje bij een bericht. */
+	private static function initialen( $naam ) {
+		$delen     = preg_split( '/\s+/', trim( (string) $naam ) );
+		$initialen = '';
 
-	private static function render_bijlagen( $claim ) {
-		$bijlagen = isset( $claim['bijlagen'] ) ? $claim['bijlagen'] : array();
-		?>
-		<h3 class="hdp-ticket-sectiekop"><?php echo esc_html( HDP_I18N::t( 'garantie_bijlagen' ) ); ?></h3>
-		<?php if ( ! $bijlagen ) : ?>
-			<p class="hdp-gesprek-leeg"><?php echo esc_html( HDP_I18N::t( 'garantie_geen_bijlagen' ) ); ?></p>
-		<?php else : ?>
-			<ul class="hdp-bijlagen">
-				<?php foreach ( $bijlagen as $bijlage ) : ?>
-					<li class="hdp-bijlage">
-						<?php HDP_Icons::render_icoon( 'downloads', 'hdp-bijlage-icoon' ); ?>
-						<span><?php echo esc_html( $bijlage ); ?></span>
-					</li>
-				<?php endforeach; ?>
-			</ul>
-		<?php endif; ?>
-		<?php
-	}
-
-	/** Eén regel die zegt wie er aan zet is. */
-	private static function render_ligt_bij( $claim ) {
-		$bij = HDP_Garantie::ligt_bij( $claim );
-
-		if ( ! $bij ) {
-			?>
-			<p class="hdp-ticket-ligtbij hdp-ticket-ligtbij-klaar"><?php echo esc_html( HDP_I18N::t( 'garantie_ligt_bij_klaar' ) ); ?></p>
-			<?php
-			return;
+		foreach ( $delen as $deel ) {
+			if ( '' === $deel ) {
+				continue;
+			}
+			// Tussenvoegsels als "van den" zeggen niets; die slaan we over.
+			if ( mb_strtolower( $deel ) === $deel && count( $delen ) > 1 ) {
+				continue;
+			}
+			$initialen .= mb_strtoupper( mb_substr( $deel, 0, 1 ) );
+			if ( mb_strlen( $initialen ) >= 2 ) {
+				break;
+			}
 		}
-		?>
-		<p class="hdp-ticket-ligtbij<?php echo 'dealer' === $bij ? ' hdp-ticket-ligtbij-u' : ''; ?>">
-			<?php echo esc_html( HDP_I18N::t( 'dealer' === $bij ? 'garantie_ligt_bij_u' : 'garantie_ligt_bij_homburg' ) ); ?>
-		</p>
-		<?php
+
+		return $initialen ? $initialen : '?';
 	}
 }

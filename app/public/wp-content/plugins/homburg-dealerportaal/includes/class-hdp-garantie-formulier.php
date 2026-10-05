@@ -153,7 +153,7 @@ class HDP_Garantie_Formulier {
 		$nummer = self::tekst( 'ticket' );
 		$tekst  = self::tekst( 'bericht' );
 
-		$claim = HDP_Garantie::stuur_bericht( $nummer, $tekst );
+		$claim = HDP_Garantie::stuur_bericht( $nummer, $tekst, self::bestanden( 'bijlagen' ) );
 		if ( is_wp_error( $claim ) ) {
 			self::terug_met_fout( 'bericht', self::leesbaar( $claim ), array( 'bericht' => $tekst ), add_query_arg( 'ticket', $nummer, home_url( '/garantie/' ) ) );
 		}
@@ -161,7 +161,7 @@ class HDP_Garantie_Formulier {
 		self::terug_met_melding(
 			'bericht',
 			HDP_I18N::t( 'garantie_ok_bericht' ),
-			array(),
+			isset( $claim['bijlagen_mislukt'] ) ? $claim['bijlagen_mislukt'] : array(),
 			add_query_arg( 'ticket', $nummer, home_url( '/garantie/' ) )
 		);
 	}

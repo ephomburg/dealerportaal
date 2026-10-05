@@ -152,6 +152,17 @@ class HDP_I18N {
 				'nl' => 'Uw claim is ingediend onder nummer %s. U ziet hieronder de stand van zaken.',
 				'fr' => 'Votre demande a été introduite sous le numéro %s. Vous en voyez l’état ci-dessous.',
 			),
+			'garantie_dag_in_status'     => array( 'nl' => '1 dag op deze status', 'fr' => '1 jour à ce statut' ),
+			/* translators: %d is een aantal dagen. */
+			'garantie_dagen_in_status'   => array( 'nl' => '%d dagen op deze status', 'fr' => '%d jours à ce statut' ),
+			'garantie_andere_claims'     => array( 'nl' => 'Eerdere claims', 'fr' => 'Demandes précédentes' ),
+			'garantie_bijlage_toevoegen' => array( 'nl' => 'Foto of document nasturen', 'fr' => 'Envoyer une photo ou un document' ),
+			'garantie_bijlage_meesturen' => array( 'nl' => 'Bestand meesturen', 'fr' => 'Joindre un fichier' ),
+			/* translators: %s zijn de bestandsnamen. */
+			'garantie_bericht_alleen_bijlagen' => array(
+				'nl' => 'Bijlage(n) meegestuurd: %s',
+				'fr' => 'Pièce(s) jointe(s) envoyée(s) : %s',
+			),
 			'garantie_ok_bericht'        => array(
 				'nl' => 'Uw bericht is verstuurd.',
 				'fr' => 'Votre message a été envoyé.',

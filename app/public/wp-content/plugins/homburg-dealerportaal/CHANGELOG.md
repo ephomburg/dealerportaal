@@ -8,6 +8,14 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.58.0
+- **Het ticketscherm is een werkblad geworden in plaats van een document.** Links het gesprek, dat leeft en groeit; rechts een kolom met de feiten die blijft staan terwijl je leest. Eerder stond alles onder elkaar: je moest bij elk nieuw bericht verder scrollen om te zien wélke machine het ook alweer was, en de claimgegevens stonden ónder het gesprek. Het scherm was 2511 pixels hoog voor een claim met drie stappen en drie berichten; nu past het in één beeld op een laptop.
+- **"Dit ticket wacht op u" staat bovenaan** in plaats van onderaan de pagina, mét de vraag van Homburg erbij en een knop naar het antwoordvak. Dat is het belangrijkste feit van het scherm en stond onder de bijlagen.
+- De route is een **horizontale balk over de volle breedte** geworden. Als verticale lijst gebruikte die een smalle kolom links en bleef de rest van de band leeg.
+- **Bijlagen kunnen nu ook ná het indienen mee.** Dat was een gat in de gang van zaken, geen opmaakkwestie: Homburg vraagt in de praktijk vaak om een foto van het typeplaatje, maar een dealer kon er geen meer toevoegen — daar liep het proces dood. Stuur je alleen een bestand zonder tekst, dan zet het portaal er zelf een regel bij met de bestandsnamen, zodat het gesprek leesbaar blijft.
+- Drie dingen die al in de administratie stonden maar nergens getoond werden, staan er nu bij: **hoelang een ticket al op dezelfde status staat**, de **garantiebalk van de machine** (loopt de dekking bijna af?), en hoeveel **eerdere claims** er op diezelfde machine liepen.
+- Berichten hebben initialen in een rondje gekregen en een leesbare regellengte. Op een smal scherm schuift de rechterkolom boven het gesprek, zodat "u bent aan zet" als eerste in beeld komt.
+
 ## 1.57.0
 - **De dealer kan nu zelf indienen.** De drie formulieren staan open en schrijven rechtstreeks naar de claimadministratie: een machine aanmelden, een claim indienen, en reageren op een lopend ticket. Daarmee is de keten rond — wat een dealer hier instuurt, staat direct in de Homburg App bij Gerard, Erik en Benne, en wat zij daar schrijven komt hier terug.
 - Foto's en facturen gaan mee naar de afgeschermde opslag in Supabase: JPG, PNG, WEBP, HEIC of PDF, maximaal tien bestanden van 10 MB. Op de meegestuurde bestandsnaam wordt niet vertrouwd — WordPress bepaalt zelf wat voor bestand het werkelijk is. Elk bestand krijgt een eigen pad, zodat twee dealers met dezelfde bestandsnaam elkaar niet overschrijven.

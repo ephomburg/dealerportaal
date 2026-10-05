@@ -477,8 +477,117 @@ class Garantie_Test extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'hdp-ticket-kop', $html );
 		$this->assertStringContainsString( 'hdp-route', $html );
 		$this->assertStringContainsString( 'hdp-gesprek', $html );
-		$this->assertStringContainsString( 'hdp-ticket-gegevens', $html );
+		$this->assertStringContainsString( 'hdp-ticket-klacht', $html );
 		$this->assertStringContainsString( 'hdp-bericht-antwoord', $html );
+	}
+
+	/**
+	 * Het scherm is een werkblad: gesprek links, feiten rechts in een kolom
+	 * die blijft staan. Eerder stond alles onder elkaar, waardoor je bij elk
+	 * nieuw bericht verder moest scrollen om te zien wélke machine het was.
+	 */
+	public function test_ticketscherm_heeft_twee_kolommen() {
+		$this->als_goedgekeurde_dealer();
+		$_GET['ticket'] = 'T100001';
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		$this->assertStringContainsString( 'hdp-ticket-werkblad', $html );
+		$this->assertStringContainsString( 'hdp-ticket-gesprek', $html );
+		$this->assertStringContainsString( 'hdp-ticket-zijkolom', $html );
+	}
+
+	/**
+	 * "Dit ticket wacht op u" stond onderaan de pagina, onder de bijlagen.
+	 * Dat is het belangrijkste feit van het scherm en hoort bovenaan.
+	 */
+	public function test_wie_aan_zet_is_staat_boven_het_gesprek() {
+		$this->als_goedgekeurde_dealer();
+		$_GET['ticket'] = 'T100001';
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		$this->assertStringContainsString( 'hdp-ticket-actie', $html );
+		// En met de vraag van Homburg erbij, zodat je niet hoeft te zoeken.
+		$this->assertStringContainsString( 'Graag een foto van het typeplaatje.', $html );
+	}
+
+	public function test_machinekaart_toont_de_garantiestand_bij_het_ticket() {
+		$this->als_goedgekeurde_dealer();
+		$_GET['ticket'] = 'T100001';
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		$this->assertStringContainsString( 'hdp-ticket-machinenaam', $html );
+		$this->assertStringContainsString( 'hdp-machine-balk', $html );
+	}
+
+	/* --- Hoelang staat een ticket al stil? ----------------------------- */
+
+	public function test_dagen_in_status_telt_vanaf_de_laatste_statuswijziging() {
+		$claim = array(
+			'status'       => 'info_nodig',
+			'ingediend_op' => gmdate( 'c', strtotime( '-30 days' ) ),
+			'verloop'      => array(
+				array( 'status' => 'in_behandeling', 'wanneer' => gmdate( 'c', strtotime( '-20 days' ) ), 'wie' => '', 'afzender' => 'homburg', 'opmerking' => '' ),
+				array( 'status' => 'info_nodig', 'wanneer' => gmdate( 'c', strtotime( '-3 days' ) ), 'wie' => '', 'afzender' => 'homburg', 'opmerking' => '' ),
+			),
+		);
+
+		// Niet 30 (ingediend) en niet 20 (vorige status), maar 3.
+		$this->assertSame( 3, HDP_Garantie::dagen_in_status( $claim ) );
+	}
+
+	public function test_dagen_in_status_valt_terug_op_het_moment_van_indienen() {
+		$claim = array(
+			'status'       => 'ingediend',
+			'ingediend_op' => gmdate( 'c', strtotime( '-5 days' ) ),
+			'verloop'      => array(),
+		);
+
+		$this->assertSame( 5, HDP_Garantie::dagen_in_status( $claim ) );
+	}
+
+	/* --- Bijlage nasturen ---------------------------------------------- */
+
+	/**
+	 * Homburg vraagt om een foto, dus moet een dealer er een kunnen sturen.
+	 * Eerder konden bijlagen alleen mee bij het indienen — daar liep het
+	 * proces dood.
+	 */
+	public function test_antwoordvak_kan_een_bestand_meesturen() {
+		$this->als_goedgekeurde_dealer();
+		$_GET['ticket'] = 'T100001';
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		$this->assertStringContainsString( 'enctype="multipart/form-data"', $html );
+		$this->assertStringContainsString( 'name="bijlagen[]"', $html );
+	}
+
+	public function test_bericht_zonder_tekst_maar_met_bestand_krijgt_een_beschrijving() {
+		$this->als_goedgekeurde_dealer();
+
+		HDP_Garantie::stuur_bericht(
+			'T100001',
+			'',
+			array(
+				'name'     => array( 'typeplaatje.jpg' ),
+				'error'    => array( UPLOAD_ERR_NO_FILE ),
+				'size'     => array( 0 ),
+				'tmp_name' => array( '' ),
+			)
+		);
+
+		$regel = $this->geschreven['verloop'][0];
+		$this->assertStringContainsString( 'typeplaatje.jpg', $regel['opmerking'] );
+	}
+
+	public function test_bericht_zonder_tekst_en_zonder_bestand_wordt_geweigerd() {
+		$this->als_goedgekeurde_dealer();
+
+		$this->assertWPError( HDP_Garantie::stuur_bericht( 'T100001', '', array() ) );
+		$this->assertArrayNotHasKey( 'verloop', $this->geschreven );
 	}
 
 	public function test_onbekend_ticketnummer_geeft_geen_gegevens_prijs() {
