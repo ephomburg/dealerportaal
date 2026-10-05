@@ -28,6 +28,7 @@ $icoon                   = isset( $attributes['icoon'] ) ? $attributes['icoon'] 
 $url                     = isset( $attributes['url'] ) ? $attributes['url'] : '';
 $instelling_sleutel      = isset( $attributes['instellingSleutel'] ) ? $attributes['instellingSleutel'] : '';
 $nieuwe_tab              = ! empty( $attributes['nieuweTab'] );
+$breed                   = ! empty( $attributes['breed'] );
 $gekoppeld_niet_ingevuld = false;
 
 if ( $instelling_sleutel ) {
@@ -46,13 +47,30 @@ if ( $instelling_sleutel ) {
 	}
 }
 ?>
-<article <?php echo get_block_wrapper_attributes( array( 'class' => 'hdp-kaart' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- core escapet dit al. ?>>
+<article <?php echo get_block_wrapper_attributes( array( 'class' => 'hdp-kaart' . ( $breed ? ' hdp-kaart-breed' : '' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- core escapet dit al. ?>>
 	<?php HDP_Icons::render_icoon( $icoon ); ?>
-	<?php if ( $titel ) : ?>
-		<h2><?php echo wp_kses_post( $titel ); ?></h2>
-	<?php endif; ?>
-	<?php if ( $tekst ) : ?>
-		<p><?php echo wp_kses_post( $tekst ); ?></p>
+	<?php
+	// Een brede kaart loopt over de volle rij en legt icoon, tekst en knop
+	// naast elkaar; titel en tekst zitten dan in één blok zodat dat blok de
+	// ruimte tussen icoon en knop kan opvullen. De gewone kaart houdt zijn
+	// bestaande opbouw (alles onder elkaar), zodat daar niets aan verandert.
+	?>
+	<?php if ( $breed ) : ?>
+		<div class="hdp-kaart-tekst">
+			<?php if ( $titel ) : ?>
+				<h2><?php echo wp_kses_post( $titel ); ?></h2>
+			<?php endif; ?>
+			<?php if ( $tekst ) : ?>
+				<p><?php echo wp_kses_post( $tekst ); ?></p>
+			<?php endif; ?>
+		</div>
+	<?php else : ?>
+		<?php if ( $titel ) : ?>
+			<h2><?php echo wp_kses_post( $titel ); ?></h2>
+		<?php endif; ?>
+		<?php if ( $tekst ) : ?>
+			<p><?php echo wp_kses_post( $tekst ); ?></p>
+		<?php endif; ?>
 	<?php endif; ?>
 	<?php if ( $gekoppeld_niet_ingevuld ) : ?>
 		<p class="hdp-nog-niet"><?php echo esc_html( HDP_I18N::t( 'nog_niet_geconfigureerd' ) ); ?></p>

@@ -523,6 +523,35 @@ body.hdp-login-actief {
 .hdp-kaart h2 { font-size: 1.1rem; font-weight: 700; }
 .hdp-kaart p { color: var(--wp--preset--color--grijs-tekst); font-size: 0.88rem; flex: 1; }
 .hdp-kaart .hdp-btn, .hdp-kaart .hdp-nog-niet { margin-top: auto; }
+
+/* Kaart over de volle rij (attribuut "Over de volle breedte" op het
+   portaalkaart-blok). Bewust een eigenschap van de kaart zelf en niet een
+   regel die "de vijfde kaart" aanwijst: zo kan Homburg in de editor zelf
+   bepalen welke kaart breed staat, en blijft het kloppen als er later een
+   kaart bijkomt of verdwijnt.
+   grid-column: 1 / -1 spant de hele rij, ongeacht of het raster op dat
+   moment vier, twee of één kolom breed is. */
+.hdp-kaart-breed {
+	grid-column: 1 / -1;
+	flex-direction: row;
+	align-items: center;
+	gap: 1.4rem;
+}
+.hdp-kaart-breed .hdp-kaart-tekst {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+}
+/* De knop staat hier naast de tekst in plaats van eronder, dus de
+   "duw naar de onderkant"-regel van de gewone kaart moet hier weg. */
+.hdp-kaart-breed .hdp-btn,
+.hdp-kaart-breed .hdp-nog-niet {
+	margin-top: 0;
+	flex-shrink: 0;
+}
+.hdp-kaart-breed p { flex: none; }
 .hdp-nog-niet { color: var(--wp--preset--color--grijs-tekst); font-size: 0.85rem; font-style: italic; }
 
 /* Gedeelde "nog niets hier"-kaart (zie HDP_Icons::render_lege_status()) —
@@ -1059,6 +1088,9 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	.hdp-admin-sectie { max-width: 100%; padding: 1.5rem 1rem; }
 	.hdp-info-grid { grid-template-columns: 1fr; grid-auto-rows: auto; }
 	.hdp-info-kaart { flex-direction: column; }
+	/* In één kolom is er geen breedte om naast elkaar te zetten. */
+	.hdp-kaart-breed { flex-direction: column; align-items: stretch; gap: 0.9rem; }
+	.hdp-kaart-breed .hdp-btn { text-align: center; }
 	.hdp-welkom { padding: 1.6rem 0; }
 	.hdp-welkom-inner { padding: 0 1rem; }
 	.hdp-hero-nieuw { height: 260px; min-height: 0; }
@@ -1164,3 +1196,649 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	stroke: currentColor;
 	fill: none;
 }
+
+/* ==========================================================================
+   GARANTIEPORTAAL
+   Overzicht van claims met status + het indienformulier. Bewust de bredere
+   kolom (wide-size, 90%) in plaats van de 70%-tekstkolom: dit is een
+   werkpagina, geen artikel. Het formulier staat daarbinnen juist in twee
+   kolommen, omdat invoervelden over de volle breedte slechter te lezen zijn.
+   ========================================================================== */
+.hdp-garantie {
+	max-width: var(--wp--style--global--wide-size, 90%);
+	margin: 0 auto;
+	padding: 2.5rem 0 3rem;
+}
+
+/* Zolang de koppeling met de claimadministratie ontbreekt: onmiskenbaar
+   melden dat de rijen eronder verzonnen zijn. */
+.hdp-garantie-voorbeeld {
+	margin: 0 0 1.5rem;
+	padding: .9rem 1.1rem;
+	border: 1px dashed var(--wp--preset--color--rand);
+	border-radius: var(--hdp-radius);
+	background: var(--wp--preset--color--grijs-licht);
+	color: var(--wp--preset--color--grijs-tekst);
+	font-size: .9rem;
+	line-height: 1.6;
+}
+.hdp-garantie-voorbeeld strong { color: var(--wp--preset--color--donkergrijs); }
+
+.hdp-garantie-kop {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+	/* Ruimte boven een volgende sectie: zonder dit plakt "Mijn machines"
+	   tegen de claimlijst erboven aan. De eerste kop op de pagina heeft die
+	   aanloop niet nodig (zie :first-of-type hieronder). */
+	margin: 2.75rem 0 1rem;
+}
+.hdp-garantie-kop:first-of-type { margin-top: 0; }
+/* Zelfde sectiekop als op het ticketscherm: klein, in kapitalen, met de
+   rode streep eronder — zo lezen alle secties in het portaal hetzelfde. */
+.hdp-garantie-kop h2 {
+	margin: 0;
+	font-size: .78rem;
+	font-weight: 700;
+	letter-spacing: .1em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+	padding-bottom: .4rem;
+	border-bottom: 2px solid var(--wp--preset--color--homburg-rood);
+}
+
+/* ── Claimlijst ───────────────────────────────────────────────── */
+/* Losse kaarten in plaats van één blok met scheidingslijnen, net als bij
+   de machines eronder: elke claim is een eigen ding waar je op klikt, en
+   dat hoort er ook zo uit te zien. */
+.hdp-garantie-lijst {
+	display: grid;
+	gap: .75rem;
+}
+.hdp-garantie-item {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	padding: 1.1rem 1.4rem;
+	border-left: 4px solid transparent;
+}
+
+/* De enige status waarbij de dealer zelf aan zet is — die mag opvallen,
+   anders blijft een claim liggen omdat niemand merkt dat er iets gevraagd is. */
+.hdp-garantie-item-actie {
+	border-left-color: #b25e00;
+	background: #fff8ef;
+}
+
+.hdp-garantie-item-hoofd {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: .75rem;
+	margin-bottom: .4rem;
+}
+.hdp-garantie-nummer {
+	font-weight: 700;
+	font-size: .85rem;
+	letter-spacing: .03em;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-garantie-item-info {
+	display: flex;
+	flex-wrap: wrap;
+	gap: .2rem 1.5rem;
+	font-size: .9rem;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-garantie-item-info strong {
+	flex-basis: 100%;
+	font-size: 1rem;
+	color: var(--wp--preset--color--donkergrijs);
+}
+.hdp-garantie-actie-tekst {
+	margin: .6rem 0 0;
+	font-size: .9rem;
+	font-weight: 600;
+	color: #8a4800;
+}
+
+/* ── Statuslabels ─────────────────────────────────────────────── */
+.hdp-garantie-status {
+	flex-shrink: 0;
+	padding: .25rem .6rem;
+	border-radius: 999px;
+	font-size: .75rem;
+	font-weight: 700;
+	letter-spacing: .02em;
+	white-space: nowrap;
+}
+.hdp-garantie-status-ingediend      { background: #eceef1; color: #3f434a; }
+.hdp-garantie-status-in-behandeling { background: #e4eefb; color: #1d4e85; }
+.hdp-garantie-status-info-nodig     { background: #fdeccf; color: #7a4100; }
+.hdp-garantie-status-goedgekeurd    { background: #e2f3e6; color: #1d6b2d; }
+.hdp-garantie-status-afgewezen      { background: #fdecec; color: var(--wp--preset--color--homburg-rood-donker); }
+
+/* ── Indienformulier ──────────────────────────────────────────── */
+.hdp-garantie-formulier {
+	margin-top: 2rem;
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	padding: 1.6rem 1.5rem;
+}
+.hdp-garantie-formulier h2 { margin: 0 0 .4rem; font-size: 1.25rem; }
+.hdp-garantie-formulier-intro {
+	margin: 0 0 1.4rem;
+	color: var(--wp--preset--color--grijs-tekst);
+	font-size: .95rem;
+	line-height: 1.6;
+}
+.hdp-garantie-velden {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0 1.25rem;
+}
+.hdp-garantie-velden .hdp-veld-breed { grid-column: 1 / -1; }
+.hdp-garantie-velden textarea,
+.hdp-garantie-velden input[type="file"] {
+	width: 100%;
+	padding: .75rem .9rem;
+	border: 2px solid var(--wp--preset--color--rand);
+	border-radius: 6px;
+	font-size: .95rem;
+	font-family: inherit;
+	background: var(--wp--preset--color--wit);
+}
+.hdp-garantie-velden textarea { resize: vertical; }
+.hdp-veld-verplicht { color: var(--wp--preset--color--homburg-rood); }
+
+/* Alle velden staan uitgeschakeld zolang er niets is om naartoe te
+   versturen; dat mag je ook zien. */
+.hdp-garantie-velden :disabled {
+	background: var(--wp--preset--color--grijs-licht);
+	color: var(--wp--preset--color--grijs-tekst);
+	cursor: not-allowed;
+}
+.hdp-garantie-nogniet {
+	margin: 1.25rem 0 0;
+	padding: .8rem 1rem;
+	border-left: 4px solid var(--wp--preset--color--homburg-rood);
+	background: var(--wp--preset--color--grijs-licht);
+	font-size: .9rem;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+
+@media (max-width: 48rem) {
+	.hdp-garantie { max-width: 100%; padding-left: 1rem; padding-right: 1rem; }
+	.hdp-garantie-kop .hdp-btn { width: 100%; text-align: center; }
+	.hdp-garantie-item-hoofd { flex-direction: column; align-items: flex-start; gap: .4rem; }
+	.hdp-garantie-velden { grid-template-columns: 1fr; }
+}
+
+/* ==========================================================================
+   GARANTIETICKET — detailscherm van één claim
+   Opbouw bewust gelijk aan het declaratiescherm dat Homburg al gebruikt:
+   kop, route, gesprek, gegevens, bijlagen, en onderaan één regel die zegt
+   wie er aan zet is.
+   ========================================================================== */
+.hdp-ticket-kop {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	border-top: 5px solid var(--wp--preset--color--homburg-rood);
+	padding: 1.6rem 1.5rem;
+	margin-bottom: 1.75rem;
+}
+.hdp-ticket-eyebrow {
+	margin: 0 0 .35rem;
+	font-size: .7rem;
+	font-weight: 700;
+	letter-spacing: .1em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-ticket-kop h2 { margin: 0 0 .3rem; font-size: 1.45rem; line-height: 1.25; }
+.hdp-ticket-nummer { color: var(--wp--preset--color--grijs-tekst); font-weight: 400; }
+.hdp-ticket-meta { margin: 0 0 .9rem; color: var(--wp--preset--color--grijs-tekst); font-size: .9rem; }
+
+.hdp-ticket-sectiekop {
+	margin: 0 0 .9rem;
+	font-size: .78rem;
+	font-weight: 700;
+	letter-spacing: .1em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+	padding-bottom: .4rem;
+	border-bottom: 2px solid var(--wp--preset--color--homburg-rood);
+	display: inline-block;
+}
+
+/* ── Route ───────────────────────────────────────────────────── */
+.hdp-route {
+	list-style: none;
+	margin: 0 0 2rem;
+	padding: 0;
+}
+.hdp-route-stap {
+	position: relative;
+	display: flex;
+	gap: .9rem;
+	padding-bottom: 1.3rem;
+}
+.hdp-route-stap:last-child { padding-bottom: 0; }
+/* De verbindingslijn tussen de bollen; de laatste krijgt er geen. */
+.hdp-route-stap::before {
+	content: "";
+	position: absolute;
+	left: 13px;
+	top: 28px;
+	bottom: 0;
+	width: 2px;
+	background: var(--wp--preset--color--rand);
+}
+.hdp-route-stap:last-child::before { display: none; }
+.hdp-route-gedaan::before { background: #1d6b2d; }
+
+.hdp-route-bol {
+	flex-shrink: 0;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	border: 2px solid var(--wp--preset--color--rand);
+	background: var(--wp--preset--color--wit);
+	position: relative;
+	z-index: 1;
+}
+.hdp-route-gedaan .hdp-route-bol {
+	background: #1d6b2d;
+	border-color: #1d6b2d;
+}
+/* Vinkje in een afgeronde stap, getekend met twee lijntjes. */
+.hdp-route-gedaan .hdp-route-bol::after {
+	content: "";
+	position: absolute;
+	left: 8px;
+	top: 5px;
+	width: 7px;
+	height: 11px;
+	border: solid var(--wp--preset--color--wit);
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
+}
+.hdp-route-huidig .hdp-route-bol {
+	border-color: var(--wp--preset--color--homburg-rood);
+	box-shadow: 0 0 0 4px rgba(192, 13, 13, .14);
+}
+.hdp-route-huidig .hdp-route-bol::after {
+	content: "";
+	position: absolute;
+	inset: 6px;
+	border-radius: 50%;
+	background: var(--wp--preset--color--homburg-rood);
+}
+.hdp-route-afwijzing .hdp-route-bol { border-color: var(--wp--preset--color--homburg-rood-donker); }
+.hdp-route-afwijzing .hdp-route-bol::after { background: var(--wp--preset--color--homburg-rood-donker); }
+
+.hdp-route-inhoud { padding-top: .15rem; min-width: 0; }
+.hdp-route-inhoud strong { display: block; font-size: .98rem; }
+.hdp-route-huidig .hdp-route-inhoud strong { color: var(--wp--preset--color--homburg-rood); }
+.hdp-route-komt-nog .hdp-route-inhoud strong { color: var(--wp--preset--color--grijs-tekst); font-weight: 600; }
+.hdp-route-wie {
+	display: block;
+	font-size: .85rem;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+
+/* ── Gesprek ─────────────────────────────────────────────────── */
+.hdp-gesprek { margin-bottom: 2rem; }
+.hdp-gesprek-leeg {
+	margin: 0 0 1rem;
+	color: var(--wp--preset--color--grijs-tekst);
+	font-size: .92rem;
+}
+.hdp-bericht {
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-left: 4px solid var(--wp--preset--color--homburg-rood);
+	border-radius: var(--hdp-radius);
+	padding: 1rem 1.2rem;
+	margin-bottom: .85rem;
+}
+/* Een eigen bericht leest als een antwoord: ingesprongen en neutraal. */
+.hdp-bericht-dealer {
+	border-left-color: var(--wp--preset--color--donkergrijs);
+	background: var(--wp--preset--color--grijs-licht);
+	margin-left: 2.5rem;
+}
+.hdp-bericht-kop {
+	display: flex;
+	align-items: baseline;
+	gap: .5rem;
+	flex-wrap: wrap;
+	margin-bottom: .35rem;
+	font-size: .88rem;
+}
+.hdp-bericht-van {
+	font-size: .7rem;
+	font-weight: 700;
+	letter-spacing: .05em;
+	text-transform: uppercase;
+	padding: .1rem .45rem;
+	border-radius: 999px;
+	background: var(--wp--preset--color--grijs-licht);
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-bericht-dealer .hdp-bericht-van { background: var(--wp--preset--color--wit); }
+.hdp-bericht-kop time { margin-left: auto; font-size: .82rem; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-bericht-bij {
+	margin: 0 0 .45rem;
+	font-size: .8rem;
+	color: var(--wp--preset--color--grijs-tekst);
+	display: flex;
+	align-items: center;
+	gap: .4rem;
+	flex-wrap: wrap;
+}
+.hdp-bericht-tekst { margin: 0; line-height: 1.6; }
+
+.hdp-bericht-antwoord {
+	margin-top: 1.25rem;
+	padding: 1.1rem 1.2rem;
+	background: var(--wp--preset--color--wit);
+	border: 1px dashed var(--wp--preset--color--rand);
+	border-radius: var(--hdp-radius);
+}
+.hdp-bericht-antwoord label {
+	display: block;
+	font-weight: 600;
+	font-size: .85rem;
+	margin-bottom: .4rem;
+}
+.hdp-bericht-antwoord textarea {
+	width: 100%;
+	padding: .75rem .9rem;
+	border: 2px solid var(--wp--preset--color--rand);
+	border-radius: 6px;
+	font-size: .95rem;
+	font-family: inherit;
+	resize: vertical;
+	background: var(--wp--preset--color--grijs-licht);
+	color: var(--wp--preset--color--grijs-tekst);
+	cursor: not-allowed;
+}
+.hdp-bericht-antwoord-knoppen {
+	display: flex;
+	align-items: center;
+	gap: .9rem;
+	flex-wrap: wrap;
+	margin-top: .7rem;
+}
+/* Een knop die er nog niet is: zichtbaar uitgeschakeld, en geen link. */
+.hdp-btn-uit {
+	background: var(--wp--preset--color--rand);
+	color: var(--wp--preset--color--grijs-tekst);
+	cursor: not-allowed;
+}
+.hdp-bericht-antwoord-nogniet { font-size: .85rem; color: var(--wp--preset--color--grijs-tekst); }
+
+/* ── Claimgegevens ───────────────────────────────────────────── */
+.hdp-ticket-gegevens {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1.1rem 1.5rem;
+	margin: 0 0 2rem;
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	padding: 1.4rem 1.5rem;
+}
+.hdp-ticket-gegeven-breed { grid-column: 1 / -1; }
+.hdp-ticket-gegevens dt {
+	font-size: .78rem;
+	color: var(--wp--preset--color--grijs-tekst);
+	margin-bottom: .15rem;
+}
+.hdp-ticket-gegevens dd { margin: 0; font-weight: 600; line-height: 1.5; }
+.hdp-ticket-gegeven-breed dd { font-weight: 400; }
+
+/* ── Bijlagen ────────────────────────────────────────────────── */
+.hdp-bijlagen {
+	list-style: none;
+	margin: 0 0 2rem;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: .6rem;
+}
+.hdp-bijlage {
+	display: inline-flex;
+	align-items: center;
+	gap: .5rem;
+	padding: .55rem .9rem;
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: 6px;
+	font-size: .88rem;
+	font-weight: 600;
+}
+.hdp-bijlage-icoon { display: inline-flex; }
+.hdp-bijlage-icoon svg { width: 16px; height: 16px; stroke: var(--wp--preset--color--grijs-tekst); fill: none; }
+
+/* ── Wie is er aan zet ───────────────────────────────────────── */
+.hdp-ticket-ligtbij {
+	margin: 0;
+	padding: .9rem 1.1rem;
+	border-radius: var(--hdp-radius);
+	background: var(--wp--preset--color--grijs-licht);
+	color: var(--wp--preset--color--grijs-tekst);
+	font-size: .95rem;
+}
+.hdp-ticket-ligtbij-u {
+	background: #fff8ef;
+	border-left: 4px solid #b25e00;
+	color: #8a4800;
+	font-weight: 600;
+}
+.hdp-ticket-ligtbij-klaar { background: #e2f3e6; color: #1d6b2d; font-weight: 600; }
+
+/* De rijen in het claimoverzicht zijn links naar hun ticket. */
+a.hdp-garantie-item {
+	display: block;
+	color: inherit;
+	text-decoration: none;
+	transition: background-color .15s ease;
+}
+a.hdp-garantie-item:hover,
+a.hdp-garantie-item:focus-visible {
+	background: var(--wp--preset--color--grijs-licht);
+	box-shadow: 0 4px 16px rgba(43, 45, 49, .14);
+}
+a.hdp-garantie-item-actie:hover,
+a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
+
+@media (max-width: 48rem) {
+	.hdp-ticket-gegevens { grid-template-columns: 1fr; }
+	.hdp-bericht-dealer { margin-left: 1rem; }
+	.hdp-bericht-kop time { margin-left: 0; width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	a.hdp-garantie-item { transition: none; }
+}
+
+/* ==========================================================================
+   GARANTIE — overzichtspagina
+   Twee ingangen bovenaan, dan wat op de dealer wacht, dan de lopende claims
+   en de aangemelde machines. De formulieren staan op hun eigen scherm; onder
+   een lijst lazen ze als een naschrift in plaats van als een taak.
+   ========================================================================== */
+.hdp-garantie-ingangen {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1.25rem;
+	margin-bottom: 2rem;
+}
+.hdp-garantie-ingang {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	border-top: 5px solid var(--wp--preset--color--homburg-rood);
+	padding: 1.5rem 1.4rem;
+	display: flex;
+	flex-direction: column;
+	gap: .65rem;
+}
+.hdp-garantie-ingang h2 { margin: 0; font-size: 1.05rem; font-weight: 700; }
+.hdp-garantie-ingang p {
+	margin: 0;
+	flex: 1;
+	font-size: .88rem;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-garantie-ingang .hdp-btn { align-self: flex-start; }
+
+/* Wat op de dealer wacht: de eerste vraag bij het openen van deze pagina is
+   "moet ik iets doen?", dus staat het antwoord daarop vóór alle lijsten. */
+.hdp-garantie-aandacht {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 1rem 1.2rem;
+	margin-bottom: 1.9rem;
+	background: #fff8ef;
+	border: 1px solid #f3dcc0;
+	border-left: 4px solid #b25e00;
+	border-radius: var(--hdp-radius);
+}
+.hdp-aandacht-icoon {
+	width: 38px;
+	height: 38px;
+	border-radius: 8px;
+	background: #fdeccf;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+.hdp-aandacht-icoon svg { width: 20px; height: 20px; stroke: #b25e00; fill: none; }
+.hdp-aandacht-tekst { flex: 1; min-width: 0; }
+.hdp-aandacht-tekst strong { display: block; color: #8a4800; font-size: .98rem; }
+.hdp-aandacht-tekst span { display: block; font-size: .87rem; color: #8a4800; }
+.hdp-garantie-aandacht .hdp-btn { flex-shrink: 0; }
+
+.hdp-garantie-aantal {
+	display: inline-block;
+	margin-left: .3rem;
+	color: var(--wp--preset--color--homburg-rood);
+}
+.hdp-garantie-toon-alles {
+	font-size: .88rem;
+	font-weight: 600;
+	color: var(--wp--preset--color--homburg-rood);
+}
+
+/* ── Machines, met de resterende garantie als balk ───────────── */
+.hdp-machines {
+	display: grid;
+	gap: .75rem;
+	margin-bottom: 1.9rem;
+}
+.hdp-machine {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	padding: 1.1rem 1.3rem;
+	display: flex;
+	align-items: center;
+	gap: 1.1rem;
+}
+.hdp-machine-icoon {
+	width: 42px;
+	height: 42px;
+	border-radius: 8px;
+	background: var(--wp--preset--color--grijs-licht);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+.hdp-machine-icoon svg { width: 22px; height: 22px; stroke: var(--wp--preset--color--grijs-tekst); fill: none; }
+.hdp-machine-info { flex: 1; min-width: 0; }
+.hdp-machine-info strong { display: block; font-size: 1rem; }
+.hdp-machine-info span {
+	display: block;
+	font-size: .84rem;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+
+.hdp-machine-garantie { flex-shrink: 0; width: 13rem; }
+.hdp-machine-garantie-label {
+	display: block;
+	font-size: .78rem;
+	color: var(--wp--preset--color--grijs-tekst);
+	margin-bottom: .3rem;
+}
+.hdp-machine-garantie-label strong { color: #8a4800; }
+.hdp-machine-balk {
+	display: block;
+	height: 6px;
+	border-radius: 999px;
+	background: var(--wp--preset--color--rand);
+	overflow: hidden;
+}
+.hdp-machine-balk i { display: block; height: 100%; background: #1d6b2d; }
+.hdp-machine-balk-bijna i { background: #b25e00; }
+.hdp-machine-balk-verlopen i { background: #c9cbd0; }
+
+/* ── Formulierscherm ─────────────────────────────────────────── */
+.hdp-machinekeuze select,
+.hdp-garantie-velden select {
+	width: 100%;
+	padding: .75rem .9rem;
+	border: 2px solid var(--wp--preset--color--rand);
+	border-radius: 6px;
+	font-size: .95rem;
+	font-family: inherit;
+	background: var(--wp--preset--color--grijs-licht);
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-machinekeuze {
+	padding-bottom: 1.1rem;
+	margin-bottom: 1.1rem;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+}
+.hdp-veld-hint {
+	display: block;
+	margin-top: .4rem;
+	font-size: .84rem;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-veld-hint a { color: var(--wp--preset--color--homburg-rood); font-weight: 600; }
+
+@media (max-width: 48rem) {
+	.hdp-garantie-ingangen { grid-template-columns: 1fr; }
+	.hdp-garantie-aandacht { flex-wrap: wrap; }
+	.hdp-garantie-aandacht .hdp-btn { width: 100%; text-align: center; }
+	.hdp-machine { flex-wrap: wrap; }
+	.hdp-machine-garantie { width: 100%; }
+}
+
+/* ── Zoeken binnen garantie ──────────────────────────────────────
+   Eén veld voor beide lijsten: een dealer zoekt op wat hij in zijn hoofd
+   heeft (een serienummer, een machinenaam, een claimnummer) en wil niet
+   eerst hoeven bedenken of dat bij claims of bij machines hoort. */
+.hdp-garantie-zoeken { margin-bottom: 1.9rem; }
+.hdp-garantie-zoeken .hdp-zoekveld { max-width: 32rem; }
+.hdp-garantie-geen-treffers {
+	display: none;
+	margin: 1rem 0 0;
+	padding: 1rem 1.2rem;
+	background: var(--wp--preset--color--wit);
+	border: 1px dashed var(--wp--preset--color--rand);
+	border-radius: var(--hdp-radius);
+	color: var(--wp--preset--color--grijs-tekst);
+	font-size: .92rem;
+}
+.hdp-garantie-geen-treffers.hdp-zichtbaar { display: block; }

@@ -129,6 +129,147 @@ class HDP_I18N {
 				'fr' => "Cela prend plus de temps, ou vous êtes pressé ? N'hésitez pas à nous contacter.",
 			),
 
+			// Garantieportaal
+			'garantie_voorbeeld_kop'   => array( 'nl' => 'Voorbeeldweergave.', 'fr' => 'Aperçu.' ),
+			'garantie_voorbeeld_tekst' => array(
+				'nl' => 'De claims hieronder zijn verzonnen voorbeelden om het ontwerp te laten zien. Er is nog geen koppeling met de claimadministratie.',
+				'fr' => "Les demandes ci-dessous sont des exemples fictifs destinés à illustrer la présentation. Il n'y a pas encore de lien avec l'administration des demandes.",
+			),
+			'garantie_mijn_claims'     => array( 'nl' => 'Mijn garantieclaims', 'fr' => 'Mes demandes de garantie' ),
+			'garantie_btn_nieuw'       => array( 'nl' => 'Nieuwe claim indienen', 'fr' => 'Introduire une demande' ),
+			'garantie_serienummer'     => array( 'nl' => 'Serienummer:', 'fr' => 'Numéro de série :' ),
+			'garantie_ingediend_op'    => array( 'nl' => 'Ingediend op:', 'fr' => 'Introduite le :' ),
+			'garantie_actie_nodig'     => array(
+				'nl' => 'Wij hebben aanvullende informatie van u nodig om deze claim verder te kunnen behandelen.',
+				'fr' => "Nous avons besoin d'informations complémentaires de votre part pour traiter cette demande.",
+			),
+			'garantie_nieuwe_claim'    => array( 'nl' => 'Nieuwe garantieclaim', 'fr' => 'Nouvelle demande de garantie' ),
+			'garantie_formulier_intro' => array(
+				'nl' => "Vul de gegevens van de machine en de klacht zo volledig mogelijk in. Foto's versnellen de behandeling aanzienlijk.",
+				'fr' => 'Complétez les données de la machine et de la panne aussi précisément que possible. Des photos accélèrent considérablement le traitement.',
+			),
+			'garantie_nog_niet_actief' => array(
+				'nl' => 'Dit formulier is nog niet in gebruik — het laat alleen zien welke gegevens er gevraagd gaan worden.',
+				'fr' => "Ce formulaire n'est pas encore actif — il montre uniquement quelles données seront demandées.",
+			),
+
+			// Garantie — statussen. Dezelfde sleutels als HDP_Garantie::STATUSSEN
+			// en straks als de statuskolom in de claimadministratie.
+			'garantie_status_ingediend'      => array( 'nl' => 'Ingediend', 'fr' => 'Introduite' ),
+			'garantie_status_in_behandeling' => array( 'nl' => 'In behandeling', 'fr' => 'En traitement' ),
+			'garantie_status_info_nodig'     => array( 'nl' => 'Informatie nodig', 'fr' => 'Informations requises' ),
+			'garantie_status_goedgekeurd'    => array( 'nl' => 'Goedgekeurd', 'fr' => 'Approuvée' ),
+			'garantie_status_afgewezen'      => array( 'nl' => 'Afgewezen', 'fr' => 'Refusée' ),
+			'garantie_status_bij_fabrikant'  => array( 'nl' => 'Bij de fabrikant', 'fr' => 'Chez le fabricant' ),
+			'garantie_status_afgewezen_fabrikant' => array( 'nl' => 'Afgewezen door fabrikant', 'fr' => 'Refusée par le fabricant' ),
+
+			// Garantie — fases, voor de stappen die nog moeten komen.
+			'garantie_fase_ingediend'   => array( 'nl' => 'Indienen', 'fr' => 'Introduction' ),
+			'garantie_fase_behandeling' => array( 'nl' => 'Behandeling', 'fr' => 'Traitement' ),
+			'garantie_fase_besluit'     => array( 'nl' => 'Besluit', 'fr' => 'Décision' ),
+
+			// Garantie — overzichtspagina (twee ingangen)
+			'garantie_ingang_machine_titel' => array( 'nl' => 'Machine aanmelden', 'fr' => 'Enregistrer une machine' ),
+			'garantie_ingang_machine_tekst' => array(
+				'nl' => 'Meld een geleverde machine aan voor garantie. Daarna kunt u er claims op indienen zonder gegevens over te typen.',
+				'fr' => 'Enregistrez une machine livrée pour la garantie. Vous pourrez ensuite introduire des demandes sans retaper les données.',
+			),
+			'garantie_ingang_machine_knop'  => array( 'nl' => 'Machine aanmelden', 'fr' => 'Enregistrer une machine' ),
+			'garantie_ingang_claim_titel'   => array( 'nl' => 'Garantieclaim indienen', 'fr' => 'Introduire une demande de garantie' ),
+			'garantie_ingang_claim_tekst'   => array(
+				'nl' => "Is er een onderdeel stuk? Kies de machine, beschrijf de klacht en stuur foto's mee.",
+				'fr' => 'Une pièce est défectueuse ? Choisissez la machine, décrivez la panne et joignez des photos.',
+			),
+			'garantie_ingang_claim_knop'    => array( 'nl' => 'Claim indienen', 'fr' => 'Introduire une demande' ),
+
+			'garantie_wacht_een'    => array( 'nl' => 'Eén claim wacht op u', 'fr' => 'Une demande attend votre réponse' ),
+			/* translators: %d is het aantal claims. */
+			'garantie_wacht_meer'   => array( 'nl' => '%d claims wachten op u', 'fr' => '%d demandes attendent votre réponse' ),
+			'garantie_bekijken'     => array( 'nl' => 'Bekijken', 'fr' => 'Consulter' ),
+
+			'garantie_zoek_label'          => array( 'nl' => 'Zoeken in claims en machines', 'fr' => 'Rechercher dans les demandes et les machines' ),
+			'garantie_zoek_placeholder'    => array(
+				'nl' => 'Zoek op machine, serienummer of claimnummer',
+				'fr' => 'Rechercher par machine, numéro de série ou numéro de demande',
+			),
+			'garantie_zoek_geen_treffers'  => array(
+				'nl' => 'Niets gevonden. Probeer een deel van de machinenaam of het serienummer.',
+				'fr' => 'Aucun résultat. Essayez une partie du nom de la machine ou du numéro de série.',
+			),
+			'garantie_lopende_claims'      => array( 'nl' => 'Lopende claims', 'fr' => 'Demandes en cours' ),
+			'garantie_geen_lopende_claims' => array( 'nl' => 'U heeft op dit moment geen lopende claims.', 'fr' => "Vous n'avez actuellement aucune demande en cours." ),
+			/* translators: %d is het totale aantal claims. */
+			'garantie_toon_alle_claims'    => array( 'nl' => 'Alle claims tonen (%d)', 'fr' => 'Afficher toutes les demandes (%d)' ),
+
+			'garantie_mijn_machines'  => array( 'nl' => 'Mijn machines', 'fr' => 'Mes machines' ),
+			'garantie_geen_machines'  => array(
+				'nl' => 'U heeft nog geen machines aangemeld. Meld een machine aan om er claims op in te kunnen dienen.',
+				'fr' => "Vous n'avez pas encore enregistré de machine. Enregistrez-en une pour pouvoir introduire des demandes.",
+			),
+			'garantie_machine_lopend_een'  => array( 'nl' => '1 lopende claim', 'fr' => '1 demande en cours' ),
+			/* translators: %d is het aantal lopende claims. */
+			'garantie_machine_lopend'      => array( 'nl' => '%d lopende claims', 'fr' => '%d demandes en cours' ),
+			'garantie_machine_geen_lopend' => array( 'nl' => 'geen lopende claims', 'fr' => 'aucune demande en cours' ),
+			/* translators: %s is een datum. */
+			'garantie_tot_en_met'   => array( 'nl' => 'Garantie t/m %s', 'fr' => "Garantie jusqu'au %s" ),
+			/* translators: %s is een datum. */
+			'garantie_verlopen_op'  => array( 'nl' => 'Garantie verlopen %s', 'fr' => 'Garantie expirée le %s' ),
+			/* translators: %d is een aantal maanden. */
+			'garantie_nog_maanden'  => array( 'nl' => 'nog %d maanden', 'fr' => 'encore %d mois' ),
+
+			'garantie_terug_naar_garantie' => array( 'nl' => 'Terug naar garantie', 'fr' => 'Retour à la garantie' ),
+			'garantie_kies_machine'        => array( 'nl' => 'Om welke machine gaat het?', 'fr' => "De quelle machine s'agit-il ?" ),
+			'garantie_kies_machine_hint'   => array(
+				'nl' => 'Staat de machine er niet bij?',
+				'fr' => 'La machine ne figure pas dans la liste ?',
+			),
+			'garantie_veld_klant'          => array( 'nl' => 'Eindklant', 'fr' => 'Client final' ),
+			'garantie_veld_merk'           => array( 'nl' => 'Merk', 'fr' => 'Marque' ),
+
+			// Garantie — ticketscherm
+			'garantie_ticket'            => array( 'nl' => 'Garantieticket', 'fr' => 'Ticket de garantie' ),
+			'garantie_route'             => array( 'nl' => 'Route', 'fr' => 'Parcours' ),
+			'garantie_gesprek'           => array( 'nl' => 'Berichten', 'fr' => 'Messages' ),
+			'garantie_gesprek_leeg'      => array( 'nl' => 'Nog geen berichten bij dit ticket.', 'fr' => 'Pas encore de messages pour ce ticket.' ),
+			'garantie_claimgegevens'     => array( 'nl' => 'Claimgegevens', 'fr' => 'Données de la demande' ),
+			'garantie_bijlagen'          => array( 'nl' => 'Bijlagen', 'fr' => 'Pièces jointes' ),
+			'garantie_geen_bijlagen'     => array( 'nl' => 'Geen bijlagen bij dit ticket.', 'fr' => 'Aucune pièce jointe pour ce ticket.' ),
+			'garantie_van_homburg'       => array( 'nl' => 'Homburg', 'fr' => 'Homburg' ),
+			'garantie_van_dealer'        => array( 'nl' => 'U', 'fr' => 'Vous' ),
+			'garantie_bij_status'        => array( 'nl' => 'Bij status:', 'fr' => 'Pour le statut :' ),
+			'garantie_antwoord_label'    => array( 'nl' => 'Reageren op dit ticket', 'fr' => 'Répondre à ce ticket' ),
+			'garantie_antwoord_hint'     => array(
+				'nl' => 'Stel een vraag of stuur de gevraagde informatie door.',
+				'fr' => 'Posez une question ou transmettez les informations demandées.',
+			),
+			'garantie_antwoord_versturen' => array( 'nl' => 'Versturen', 'fr' => 'Envoyer' ),
+			'garantie_terug_naar_overzicht' => array( 'nl' => 'Terug naar mijn claims', 'fr' => 'Retour à mes demandes' ),
+			'garantie_ticket_onbekend'   => array(
+				'nl' => 'Dit ticket bestaat niet, of hoort niet bij uw account.',
+				'fr' => "Ce ticket n'existe pas ou n'appartient pas à votre compte.",
+			),
+			'garantie_ligt_bij_u'        => array(
+				'nl' => 'Dit ticket wacht op u.',
+				'fr' => 'Ce ticket attend votre réponse.',
+			),
+			'garantie_ligt_bij_homburg'  => array(
+				'nl' => 'Dit ticket ligt bij Homburg. U hoeft nu niets te doen.',
+				'fr' => "Ce ticket est chez Homburg. Vous n'avez rien à faire pour le moment.",
+			),
+			'garantie_ligt_bij_klaar'    => array(
+				'nl' => 'Dit ticket is afgehandeld.',
+				'fr' => 'Ce ticket est clôturé.',
+			),
+
+			// Garantie — formuliervelden. Sleutels komen overeen met HDP_Garantie::velden().
+			'garantie_veld_machine'      => array( 'nl' => 'Machine', 'fr' => 'Machine' ),
+			'garantie_veld_serienummer'  => array( 'nl' => 'Serienummer', 'fr' => 'Numéro de série' ),
+			'garantie_veld_aankoopdatum' => array( 'nl' => 'Aankoopdatum', 'fr' => "Date d'achat" ),
+			'garantie_veld_hectares'     => array( 'nl' => 'Aantal hectares', 'fr' => "Nombre d'hectares" ),
+			'garantie_veld_klacht'       => array( 'nl' => 'Wat is er aan de hand?', 'fr' => 'Quel est le problème ?' ),
+			'garantie_veld_onderdelen'   => array( 'nl' => 'Benodigde onderdelen', 'fr' => 'Pièces nécessaires' ),
+			'garantie_veld_fotos'        => array( 'nl' => "Foto's", 'fr' => 'Photos' ),
+
 			// Nieuw-markering
 			'badge_nieuw'       => array( 'nl' => 'Nieuw', 'fr' => 'Nouveau' ),
 			'nieuw_melding_een' => array(

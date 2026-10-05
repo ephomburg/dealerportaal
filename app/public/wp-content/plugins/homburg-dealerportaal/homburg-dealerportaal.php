@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Homburg Dealerportaal
  * Description: Dealerportaal met echte inlogbeveiliging, dealerrechten (merken/korting) en beveiligde downloads voor Homburg-dealers.
- * Version:     1.52.0
+ * Version:     1.55.1
  * Author:      Homburg Machinehandel BV
  * Text Domain: homburg-dealerportaal
  */
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Versienummer komt uit de plugin-header hierboven (Version:), zodat het
-// maar op één plek hoeft te worden bijgewerkt bij een release.
+// maar op Ã©Ã©n plek hoeft te worden bijgewerkt bij een release.
 define( 'HDP_VERSION', get_file_data( __FILE__, array( 'version' => 'Version' ) )['version'] );
 define( 'HDP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HDP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -36,6 +36,8 @@ require_once HDP_PLUGIN_DIR . 'includes/class-hdp-login.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-account.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-portal-render.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-downloads-render.php';
+require_once HDP_PLUGIN_DIR . 'includes/class-hdp-garantie.php';
+require_once HDP_PLUGIN_DIR . 'includes/class-hdp-garantie-render.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-site-blocks.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-blocks.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-patterns.php';

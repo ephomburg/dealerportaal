@@ -17,6 +17,7 @@
 		configurator: '<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.12-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.85a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01A1.7 1.7 0 0 0 10.05 3V3a2 2 0 1 1 4 0v.09c0 .68.4 1.29 1.03 1.56a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01c.27.62.88 1.03 1.56 1.03H21a2 2 0 1 1 0 4h-.09c-.68 0-1.29.4-1.51 1z"/>',
 		downloads: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>',
 		content: '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+		garantie: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11.5 14.5 16 10"/>',
 		link: '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>'
 	};
 	var ICOON_OPTIES = [
@@ -24,6 +25,7 @@
 		{ label: 'Tandwiel (configurator)', value: 'configurator' },
 		{ label: 'Download-pijl', value: 'downloads' },
 		{ label: 'Afbeelding (content)', value: 'content' },
+		{ label: 'Schild (garantie)', value: 'garantie' },
 		{ label: 'Link (extern)', value: 'link' }
 	];
 	var INSTELLING_OPTIES = [
@@ -41,7 +43,7 @@
 		edit: function ( props ) {
 			var a = props.attributes;
 			var setAttributes = props.setAttributes;
-			var blockProps = useBlockProps( { className: 'hdp-kaart' } );
+			var blockProps = useBlockProps( { className: 'hdp-kaart' + ( a.breed ? ' hdp-kaart-breed' : '' ) } );
 
 			return el(
 				Fragment,
@@ -51,12 +53,18 @@
 					{},
 					el(
 						PanelBody,
-						{ title: 'Icoon', initialOpen: true },
+						{ title: 'Weergave', initialOpen: true },
 						el( SelectControl, {
 							label: 'Icoon',
 							value: a.icoon,
 							options: ICOON_OPTIES,
 							onChange: function ( waarde ) { setAttributes( { icoon: waarde } ); }
+						} ),
+						el( ToggleControl, {
+							label: 'Over de volle breedte',
+							help: 'De kaart beslaat een hele rij, met icoon, tekst en knop naast elkaar. Handig voor een kaart die niet in het raster past of die nadruk verdient.',
+							checked: a.breed,
+							onChange: function ( waarde ) { setAttributes( { breed: waarde } ); }
 						} )
 					),
 					el(

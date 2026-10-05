@@ -103,7 +103,14 @@ class HDP_Login {
 	}
 
 	public static function render_login( $fout, $a ) {
-		$intro = HDP_I18N::kies( $a['loginIntro'], $a['loginIntroFr'] );
+		// Niet elk blok dat op dit inlogscherm kan uitkomen definieert een
+		// eigen introtekst (de downloads-, content- en garantiepagina's niet):
+		// dan hoort het scherm gewoon zonder intro te verschijnen in plaats
+		// van een PHP-waarschuwing op te leveren.
+		$intro = HDP_I18N::kies(
+			isset( $a['loginIntro'] ) ? $a['loginIntro'] : '',
+			isset( $a['loginIntroFr'] ) ? $a['loginIntroFr'] : ''
+		);
 
 		// Verbergt de site-header/-footer achter het fullscreen inlogscherm
 		// hieronder — die staan al vast in het themasjabloon (parts/header.html

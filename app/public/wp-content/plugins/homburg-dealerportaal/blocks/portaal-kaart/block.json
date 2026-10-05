@@ -5,25 +5,70 @@
 	"title": "Homburg portaalkaart",
 	"category": "widgets",
 	"icon": "grid-view",
-	"description": "Eén van de hoofdkaarten op het dealerportaal (Webshop, Productconfigurator, e.d.): icoon, titel, tekst en knop. Titel/tekst direct bewerkbaar in het canvas; Frans en de link staan in het zijpaneel.",
+	"description": "Eén van de hoofdkaarten op het dealerportaal (Webshop, Productconfigurator, e.d.): icoon, titel, tekst en knop. Titel/tekst direct bewerkbaar in het canvas; Frans, de link en de volle-breedte-stand staan in het zijpaneel.",
 	"textdomain": "homburg-dealerportaal",
 	"attributes": {
-		"icoon": { "type": "string", "default": "webshop" },
-		"titel": { "type": "string", "default": "" },
-		"titelFr": { "type": "string", "default": "" },
-		"tekst": { "type": "string", "default": "" },
-		"tekstFr": { "type": "string", "default": "" },
-		"knoptekst": { "type": "string", "default": "" },
-		"knoptekstFr": { "type": "string", "default": "" },
-		"url": { "type": "string", "default": "" },
-		"instellingSleutel": { "type": "string", "default": "" },
-		"nieuweTab": { "type": "boolean", "default": false }
+		"icoon": {
+			"type": "string",
+			"default": "webshop"
+		},
+		"titel": {
+			"type": "string",
+			"default": ""
+		},
+		"titelFr": {
+			"type": "string",
+			"default": ""
+		},
+		"tekst": {
+			"type": "string",
+			"default": ""
+		},
+		"tekstFr": {
+			"type": "string",
+			"default": ""
+		},
+		"knoptekst": {
+			"type": "string",
+			"default": ""
+		},
+		"knoptekstFr": {
+			"type": "string",
+			"default": ""
+		},
+		"url": {
+			"type": "string",
+			"default": ""
+		},
+		"instellingSleutel": {
+			"type": "string",
+			"default": ""
+		},
+		"nieuweTab": {
+			"type": "boolean",
+			"default": false
+		},
+		"breed": {
+			"type": "boolean",
+			"default": false
+		}
 	},
 	"supports": {
 		"html": false,
-		"spacing": { "padding": true, "margin": true },
-		"color": { "background": true, "text": true },
-		"border": { "color": true, "radius": true, "width": true, "style": true }
+		"spacing": {
+			"padding": true,
+			"margin": true
+		},
+		"color": {
+			"background": true,
+			"text": true
+		},
+		"border": {
+			"color": true,
+			"radius": true,
+			"width": true,
+			"style": true
+		}
 	},
 	"editorScript": "file:./index.js",
 	"render": "file:./render.php"

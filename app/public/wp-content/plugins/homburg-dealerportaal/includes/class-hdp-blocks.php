@@ -47,6 +47,7 @@ class HDP_Blocks {
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/portaal-kaart' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/bestelgeschiedenis' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/merken-tegel' );
+		register_block_type( HDP_PLUGIN_DIR . 'blocks/garantie' );
 	}
 
 	public static function enqueue_assets() {
@@ -60,6 +61,7 @@ class HDP_Blocks {
 			|| has_block( 'homburg/portaal-kaart', $post )
 			|| has_block( 'homburg/bestelgeschiedenis-pagina', $post )
 			|| has_block( 'homburg/merken-tegel', $post )
+			|| has_block( 'homburg/garantie-pagina', $post )
 		);
 
 		// Ook laden (los van de blokken hierboven) wanneer een ingelogde

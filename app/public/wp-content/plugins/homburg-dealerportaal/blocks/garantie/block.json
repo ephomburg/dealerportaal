@@ -1,0 +1,46 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "homburg/garantie-pagina",
+	"title": "Garantieportaal",
+	"category": "widgets",
+	"icon": "shield",
+	"description": "Het garantieportaal voor ingelogde, goedgekeurde dealers: overzicht van claims met status, en het indienformulier. Niet-ingelogde bezoekers zien het inlogscherm.",
+	"textdomain": "homburg-dealerportaal",
+	"attributes": {
+		"heroAfbeelding": {
+			"type": "string",
+			"default": "https://www.homburg-belgium.com/wp-content/uploads/2023/09/Homburg-Holland-precisielandbouw-man-in-veld.jpg"
+		},
+		"titel": {
+			"type": "string",
+			"default": "Garantie"
+		},
+		"titelFr": {
+			"type": "string",
+			"default": "Garantie"
+		},
+		"omschrijving": {
+			"type": "string",
+			"default": "Dien hier een garantieclaim in en volg de status van uw lopende claims."
+		},
+		"omschrijvingFr": {
+			"type": "string",
+			"default": "Introduisez ici une demande de garantie et suivez l'état de vos demandes en cours."
+		},
+		"loginIntro": {
+			"type": "string",
+			"default": "Log in met uw dealeraccount om een garantieclaim in te dienen of de status van uw claims te bekijken."
+		},
+		"loginIntroFr": {
+			"type": "string",
+			"default": "Connectez-vous avec votre compte concessionnaire pour introduire une demande de garantie ou suivre vos demandes."
+		}
+	},
+	"supports": {
+		"html": false,
+		"multiple": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}
