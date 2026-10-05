@@ -83,7 +83,19 @@ class HDP_Downloads_Render {
 	 * ('content') toont. Bestaande downloads van vóór dit onderscheid
 	 * hebben geen _hdp_categorie-meta; die tellen mee als 'download'.
 	 */
-	private static function render_downloads_lijst( $categorie = 'download' ) {
+	/**
+	 * De downloads die déze bezoeker mag zien, na categorie-, taal- en
+	 * merkfiltering — inclusief waaróp de lijst eventueel leeg liep, zodat de
+	 * pagina een passende lege staat kan tonen.
+	 *
+	 * Apart van het renderen omdat de teller "X nieuwe documenten" op de
+	 * portaalstartpagina exact dezelfde zichtbaarheid moet aanhouden. Zou die
+	 * zijn eigen query doen, dan kan hij "3 nieuw" melden terwijl de dealer er
+	 * op de downloadspagina nul ziet.
+	 *
+	 * @return array{downloads: WP_Post[], leeg: string} leeg is '', 'geen', 'taal' of 'merk'.
+	 */
+	public static function zichtbare_downloads( $categorie = 'download' ) {
 		$meta_query = 'content' === $categorie
 			? array( array( 'key' => '_hdp_categorie', 'value' => 'content' ) )
 			: array(
@@ -102,8 +114,7 @@ class HDP_Downloads_Render {
 		);
 
 		if ( ! $downloads ) {
-			$leeg_sleutel = 'content' === $categorie ? 'nog_geen_content' : 'nog_geen_downloads';
-			return HDP_Icons::render_lege_status( 'content' === $categorie ? 'content' : 'downloads', HDP_I18N::t( $leeg_sleutel ) );
+			return array( 'downloads' => array(), 'leeg' => 'geen' );
 		}
 
 		// Taalgebonden zichtbaarheid: een NL-taalbezoeker ziet bestanden
@@ -126,8 +137,7 @@ class HDP_Downloads_Render {
 		);
 
 		if ( ! $downloads ) {
-			$leeg_sleutel = 'content' === $categorie ? 'geen_content_taal' : 'geen_downloads_taal';
-			return HDP_Icons::render_lege_status( 'content' === $categorie ? 'content' : 'downloads', HDP_I18N::t( $leeg_sleutel ) );
+			return array( 'downloads' => array(), 'leeg' => 'taal' );
 		}
 
 		// Merkgebonden zichtbaarheid — via HDP_Downloads_CPT::mag_merk_zien(),
@@ -145,8 +155,26 @@ class HDP_Downloads_Render {
 		);
 
 		if ( ! $downloads ) {
-			$leeg_sleutel = 'content' === $categorie ? 'geen_content_merk' : 'geen_downloads_merk';
-			return HDP_Icons::render_lege_status( 'content' === $categorie ? 'content' : 'downloads', HDP_I18N::t( $leeg_sleutel ) );
+			return array( 'downloads' => array(), 'leeg' => 'merk' );
+		}
+
+		return array( 'downloads' => $downloads, 'leeg' => '' );
+	}
+
+	private static function render_downloads_lijst( $categorie = 'download' ) {
+		$resultaat = self::zichtbare_downloads( $categorie );
+		$downloads = $resultaat['downloads'];
+
+		if ( $resultaat['leeg'] ) {
+			$sleutels = array(
+				'geen' => 'content' === $categorie ? 'nog_geen_content' : 'nog_geen_downloads',
+				'taal' => 'content' === $categorie ? 'geen_content_taal' : 'geen_downloads_taal',
+				'merk' => 'content' === $categorie ? 'geen_content_merk' : 'geen_downloads_merk',
+			);
+			return HDP_Icons::render_lege_status(
+				'content' === $categorie ? 'content' : 'downloads',
+				HDP_I18N::t( $sleutels[ $resultaat['leeg'] ] )
+			);
 		}
 
 		// Merken voor de filterchips worden automatisch afgeleid uit de
@@ -217,10 +245,16 @@ class HDP_Downloads_Render {
 					data-titel="<?php echo esc_attr( strtolower( $download->post_title ) ); ?>"
 					data-merk="<?php echo esc_attr( $merk ); ?>"
 					data-regios="<?php echo esc_attr( implode( ' ', $regios ) ); ?>"
-					data-datum="<?php echo esc_attr( get_post_time( 'U', true, $download ) ); ?>">
+					data-datum="<?php echo esc_attr( get_post_time( 'U', true, $download ) ); ?>"
+					data-nieuw="<?php echo HDP_Downloads_CPT::is_nieuw( $download->ID ) ? '1' : '0'; ?>">
 					<span class="hdp-download-type"><?php echo esc_html( HDP_Downloads_CPT::type_label( $download->ID ) ); ?></span>
 					<span class="hdp-download-info">
-						<strong><?php echo esc_html( $download->post_title ); ?></strong>
+						<strong>
+							<?php echo esc_html( $download->post_title ); ?>
+							<?php if ( HDP_Downloads_CPT::is_nieuw( $download->ID ) ) : ?>
+								<span class="hdp-nieuw-badge"><?php echo esc_html( HDP_I18N::t( 'badge_nieuw' ) ); ?></span>
+							<?php endif; ?>
+						</strong>
 						<?php if ( $download->post_content ) : ?>
 							<span><?php echo esc_html( wp_strip_all_tags( $download->post_content ) ); ?></span>
 						<?php endif; ?>

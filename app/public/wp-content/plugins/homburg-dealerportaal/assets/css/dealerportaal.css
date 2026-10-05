@@ -1067,3 +1067,100 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	.hdp-download-item { flex-wrap: wrap; }
 	.hdp-download-item .hdp-btn { width: 100%; }
 }
+
+/* --------------------------------------------------------------------------
+   "Nieuw"-markering: een label bij recent toegevoegde bestanden (zie
+   HDP_Downloads_CPT::NIEUW_DAGEN) en de bijbehorende attentieregel op de
+   portaalstartpagina. Zonder dit blijft het automatisch binnenkomen van
+   bestanden via FileBird voor de dealer volledig onzichtbaar.
+   -------------------------------------------------------------------------- */
+.hdp-nieuw-badge {
+	display: inline-block;
+	vertical-align: middle;
+	margin-left: .5rem;
+	padding: .1rem .45rem;
+	border-radius: 999px;
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+	font-size: .7rem;
+	font-weight: 700;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	line-height: 1.5;
+}
+
+.hdp-nieuw-melding {
+	display: flex;
+	align-items: center;
+	gap: .75rem;
+	margin: 0 0 1.5rem;
+	padding: .9rem 1.1rem;
+	border: 1px solid var(--wp--preset--color--rand);
+	border-left: 4px solid var(--wp--preset--color--homburg-rood);
+	border-radius: 8px;
+	background: var(--wp--preset--color--wit);
+	color: var(--wp--preset--color--donkergrijs);
+	text-decoration: none;
+	font-weight: 600;
+	transition: border-color .15s ease, transform .15s ease;
+}
+.hdp-nieuw-melding:hover,
+.hdp-nieuw-melding:focus-visible {
+	border-color: var(--wp--preset--color--homburg-rood);
+}
+.hdp-nieuw-melding .hdp-nieuw-badge { margin-left: 0; }
+.hdp-nieuw-tekst { flex: 1; }
+.hdp-nieuw-pijl {
+	color: var(--wp--preset--color--homburg-rood);
+	font-size: 1.1rem;
+	transition: transform .15s ease;
+}
+.hdp-nieuw-melding:hover .hdp-nieuw-pijl { transform: translateX(3px); }
+
+@media (prefers-reduced-motion: reduce) {
+	.hdp-nieuw-melding,
+	.hdp-nieuw-pijl { transition: none; }
+	.hdp-nieuw-melding:hover .hdp-nieuw-pijl { transform: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Wachten-op-goedkeuringsscherm: was één regel tekst zonder vervolg, terwijl
+   dit voor een nieuwe dealer de allereerste ervaring van het portaal is.
+   -------------------------------------------------------------------------- */
+.hdp-wacht-stappen {
+	margin: 0 0 1.25rem;
+	color: var(--wp--preset--color--grijs-tekst);
+	line-height: 1.6;
+}
+.hdp-wacht-contact {
+	margin: 0 0 .5rem;
+	font-size: .95rem;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-wacht-gegevens {
+	display: flex;
+	flex-wrap: wrap;
+	gap: .5rem 1.25rem;
+	justify-content: center;
+	margin: 0;
+}
+.hdp-wacht-gegevens a {
+	display: inline-flex;
+	align-items: center;
+	gap: .4rem;
+	color: var(--wp--preset--color--homburg-rood);
+	font-weight: 600;
+	text-decoration: none;
+}
+.hdp-wacht-gegevens a:hover,
+.hdp-wacht-gegevens a:focus-visible { text-decoration: underline; }
+.hdp-wacht-gegevens .hdp-inline-icoon {
+	display: inline-flex;
+	align-items: center;
+}
+.hdp-wacht-gegevens .hdp-inline-icoon svg {
+	width: 1.05em;
+	height: 1.05em;
+	stroke: currentColor;
+	fill: none;
+}

@@ -168,6 +168,26 @@ class HDP_Downloads_CPT {
 		return in_array( $merk, $toegestaan, true );
 	}
 
+	/**
+	 * Hoeveel dagen een bestand als "nieuw" geldt.
+	 *
+	 * Bewust een vast venster en geen "sinds uw vorige bezoek"-teller per
+	 * dealer: dat laatste klinkt aardiger, maar telt bij elke tweede
+	 * paginalading al naar nul en is daardoor juist onbetrouwbaar. Drie weken
+	 * past bij het tempo waarin hier bestanden bijkomen, en betekent voor
+	 * iedereen hetzelfde.
+	 */
+	const NIEUW_DAGEN = 21;
+
+	/** Is dit bestand recent toegevoegd? Zie NIEUW_DAGEN. */
+	public static function is_nieuw( $post_id ) {
+		$toegevoegd = get_post_time( 'U', true, $post_id );
+		if ( ! $toegevoegd ) {
+			return false;
+		}
+		return ( time() - (int) $toegevoegd ) < ( self::NIEUW_DAGEN * DAY_IN_SECONDS );
+	}
+
 	/** Bestaande downloads van vóór dit onderscheid hebben geen meta; die tellen als 'download'. */
 	public static function get_categorie( $post_id ) {
 		$waarde = get_post_meta( $post_id, '_hdp_categorie', true );
@@ -269,15 +289,21 @@ class HDP_Downloads_CPT {
 	 * uiteindelijke exit uit te voeren (niet aanroepbaar binnen PHPUnit).
 	 */
 	public static function resolve_download( $download_id ) {
-		$mag_zien = is_user_logged_in() && HDP_Roles::mag_portaal_zien( get_current_user_id() );
+		// Bewust drie losse gevallen in plaats van één "geen toegang": een
+		// verlopen sessie, een account dat nog op goedkeuring wacht en een
+		// bestand van een ander merk vragen elk om een ander antwoord aan de
+		// dealer (zie HDP_Foutscherm).
+		if ( ! is_user_logged_in() ) {
+			HDP_Foutscherm::stop( 'niet_ingelogd', __( 'U bent niet meer ingelogd.', 'homburg-dealerportaal' ), 'Geen toegang', 403 );
+		}
 
-		if ( ! $mag_zien ) {
-			wp_die( esc_html__( 'U heeft geen toegang tot dit bestand.', 'homburg-dealerportaal' ), 'Geen toegang', array( 'response' => 403 ) );
+		if ( ! HDP_Roles::mag_portaal_zien( get_current_user_id() ) ) {
+			HDP_Foutscherm::stop( 'wacht_goedkeuring', __( 'Uw account is nog niet goedgekeurd.', 'homburg-dealerportaal' ), 'Geen toegang', 403 );
 		}
 
 		$post = get_post( $download_id );
 		if ( ! $post || self::POST_TYPE !== $post->post_type ) {
-			wp_die( esc_html__( 'Bestand niet gevonden.', 'homburg-dealerportaal' ), 'Niet gevonden', array( 'response' => 404 ) );
+			HDP_Foutscherm::stop( 'niet_gevonden', __( 'Bestand niet gevonden.', 'homburg-dealerportaal' ), 'Niet gevonden', 404 );
 		}
 
 		// Zonder deze controle is het merkfilter op de downloadspagina puur
@@ -285,14 +311,14 @@ class HDP_Downloads_CPT {
 		// de URL op te hogen (de ID's lopen op). Een dealer kon zo bij de
 		// prijslijsten van merken die hij niet voert.
 		if ( ! self::mag_merk_zien( $download_id ) ) {
-			wp_die( esc_html__( 'U heeft geen toegang tot dit bestand.', 'homburg-dealerportaal' ), 'Geen toegang', array( 'response' => 403 ) );
+			HDP_Foutscherm::stop( 'geen_merkrecht', __( 'Dit bestand hoort bij een merk dat niet aan uw account gekoppeld is.', 'homburg-dealerportaal' ), 'Geen toegang', 403 );
 		}
 
 		$attachment_id = get_post_meta( $download_id, '_hdp_attachment_id', true );
 		$file          = $attachment_id ? get_attached_file( $attachment_id ) : '';
 
 		if ( ! $attachment_id || ! $file || ! file_exists( $file ) ) {
-			wp_die( esc_html__( 'Bestand niet gevonden.', 'homburg-dealerportaal' ), 'Niet gevonden', array( 'response' => 404 ) );
+			HDP_Foutscherm::stop( 'niet_gevonden', __( 'Bestand niet gevonden.', 'homburg-dealerportaal' ), 'Niet gevonden', 404 );
 		}
 
 		self::tel_download( $download_id );

@@ -117,8 +117,28 @@ class HDP_I18N {
 			),
 			'account_titel'     => array( 'nl' => 'Account in behandeling', 'fr' => 'Compte en cours de validation' ),
 			'account_tekst'     => array(
-				'nl' => 'Uw account is nog niet goedgekeurd voor het dealerportaal. Neem contact op met Homburg Machinehandel.',
-				'fr' => "Votre compte n'a pas encore été approuvé pour le portail concessionnaire. Contactez Homburg Machinehandel.",
+				'nl' => 'Uw aanmelding is bij ons binnengekomen. We controleren even of uw gegevens bij een bekend dealeraccount horen.',
+				'fr' => 'Votre inscription nous est bien parvenue. Nous vérifions si vos données correspondent à un compte concessionnaire connu.',
+			),
+			'account_stappen'   => array(
+				'nl' => 'U hoeft hier niets voor te doen: zodra uw account is goedgekeurd krijgt u daar automatisch een e-mail over. Doorgaans gebeurt dat binnen één werkdag.',
+				'fr' => "Vous n'avez rien à faire : dès que votre compte sera approuvé, vous recevrez automatiquement un e-mail. Cela se fait généralement en un jour ouvrable.",
+			),
+			'account_duurt_lang' => array(
+				'nl' => 'Duurt het langer, of heeft u haast? Neem gerust even contact op.',
+				'fr' => "Cela prend plus de temps, ou vous êtes pressé ? N'hésitez pas à nous contacter.",
+			),
+
+			// Nieuw-markering
+			'badge_nieuw'       => array( 'nl' => 'Nieuw', 'fr' => 'Nouveau' ),
+			'nieuw_melding_een' => array(
+				'nl' => 'Er staat 1 nieuw document voor u klaar',
+				'fr' => 'Un nouveau document vous attend',
+			),
+			/* translators: %d is het aantal nieuwe documenten. */
+			'nieuw_melding_meer' => array(
+				'nl' => 'Er staan %d nieuwe documenten voor u klaar',
+				'fr' => '%d nouveaux documents vous attendent',
 			),
 			'btn_uitloggen'     => array( 'nl' => 'Uitloggen', 'fr' => 'Déconnexion' ),
 			'wachtwoord_vergeten' => array( 'nl' => 'Wachtwoord vergeten?', 'fr' => 'Mot de passe oublié ?' ),

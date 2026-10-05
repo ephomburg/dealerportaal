@@ -36,6 +36,10 @@ class HDP_Settings {
 		add_settings_field( 'webshop_url', 'Webshop-URL', array( __CLASS__, 'field_webshop_url' ), 'hdp-instellingen', 'hdp_urls' );
 		add_settings_field( 'configurator_url', 'Productconfigurator-URL', array( __CLASS__, 'field_configurator_url' ), 'hdp-instellingen', 'hdp_urls' );
 
+		add_settings_section( 'hdp_contact', 'Contactgegevens', array( __CLASS__, 'sectie_contact_intro' ), 'hdp-instellingen' );
+		add_settings_field( 'contact_email', 'E-mailadres', array( __CLASS__, 'field_contact_email' ), 'hdp-instellingen', 'hdp_contact' );
+		add_settings_field( 'contact_telefoon', 'Telefoonnummer', array( __CLASS__, 'field_contact_telefoon' ), 'hdp-instellingen', 'hdp_contact' );
+
 		add_settings_section( 'hdp_merklogos', "Merklogo's", array( __CLASS__, 'sectie_merklogos_intro' ), 'hdp-instellingen' );
 		foreach ( HDP_Merken::lijst() as $hdp_merk ) {
 			add_settings_field(
@@ -47,6 +51,10 @@ class HDP_Settings {
 				array( 'merk' => $hdp_merk )
 			);
 		}
+	}
+
+	public static function sectie_contact_intro() {
+		echo '<p>Worden getoond op schermen waar een dealer niet verder kan: het wachten-op-goedkeuringsscherm en de melding bij een bestand waar het account geen toegang toe heeft. Laat je ze leeg, dan blijven die schermen gewoon werken maar zonder contactregel.</p>';
 	}
 
 	public static function sectie_merklogos_intro() {
@@ -67,6 +75,8 @@ class HDP_Settings {
 		return array(
 			'webshop_url'      => isset( $input['webshop_url'] ) ? esc_url_raw( $input['webshop_url'] ) : '',
 			'configurator_url' => isset( $input['configurator_url'] ) ? esc_url_raw( $input['configurator_url'] ) : '',
+			'contact_email'    => isset( $input['contact_email'] ) ? sanitize_email( $input['contact_email'] ) : '',
+			'contact_telefoon' => isset( $input['contact_telefoon'] ) ? sanitize_text_field( $input['contact_telefoon'] ) : '',
 			'merk_logos'       => $merk_logos,
 		);
 	}
@@ -89,6 +99,22 @@ class HDP_Settings {
 			'<input type="url" name="%s[configurator_url]" value="%s" class="regular-text" placeholder="https://">',
 			esc_attr( self::OPTION ),
 			esc_attr( self::get( 'configurator_url' ) )
+		);
+	}
+
+	public static function field_contact_email() {
+		printf(
+			'<input type="email" name="%s[contact_email]" value="%s" class="regular-text" placeholder="verkoop@homburg-holland.com">',
+			esc_attr( self::OPTION ),
+			esc_attr( self::get( 'contact_email' ) )
+		);
+	}
+
+	public static function field_contact_telefoon() {
+		printf(
+			'<input type="text" name="%s[contact_telefoon]" value="%s" class="regular-text" placeholder="+31 (0)512 36 55 55">',
+			esc_attr( self::OPTION ),
+			esc_attr( self::get( 'contact_telefoon' ) )
 		);
 	}
 
