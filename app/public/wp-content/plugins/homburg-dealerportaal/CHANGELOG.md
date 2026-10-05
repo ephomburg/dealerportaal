@@ -8,6 +8,9 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.58.2
+- Het label **NIEUW** bij recente downloads was slecht leesbaar: wit op het felle huisrood haalt op 11 pixels te weinig contrast. Het label staat nu op donkerrood (8,7:1 in plaats van 6,4:1), is iets groter en heeft meer lucht om de letters. De twee kleuren staan hier als vaste waarde in plaats van via een themavariabele, zodat het label leesbaar blijft ook als die variabelen ergens niet doorkomen.
+
 ## 1.58.1
 - De route op het ticketscherm stond nog niet goed: label en naam kwamen naast elkaar in plaats van onder elkaar. Oorzaak was een tweede, oudere definitie van diezelfde route verderop in de stylesheet — die zette een stap op `display: flex` en won daarmee van de nieuwe horizontale opmaak. De oude versie is weg; de route staat nu nog op één plek beschreven.
 - Twee statussen hadden nooit een kleur gekregen: **"Bij de fabrikant"** en **"Afgewezen door fabrikant"** stonden als kale tekst op het scherm. Die zijn in 1.54.0 aan de statuslijst toegevoegd maar niet aan de opmaak. Alle zeven hebben nu hun eigen kleur.

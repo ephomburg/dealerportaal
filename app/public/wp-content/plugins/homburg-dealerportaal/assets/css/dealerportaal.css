@@ -1110,15 +1110,19 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	display: inline-block;
 	vertical-align: middle;
 	margin-left: .5rem;
-	padding: .1rem .45rem;
+	padding: .2rem .6rem;
 	border-radius: 999px;
-	background: var(--wp--preset--color--homburg-rood);
-	color: var(--wp--preset--color--wit);
-	font-size: .7rem;
+	/* Donkerrood in plaats van het felle huisrood: wit tekst daarop haalt
+	   8,7:1 contrast in plaats van 6,4:1, en op deze maat telt dat. Beide
+	   kleuren hier als vaste waarde, zodat het label leesbaar blijft ook
+	   als de themavariabelen ergens niet doorkomen. */
+	background: #9a0a0a;
+	color: #fff;
+	font-size: .74rem;
 	font-weight: 700;
-	letter-spacing: .02em;
+	letter-spacing: .04em;
 	text-transform: uppercase;
-	line-height: 1.5;
+	line-height: 1.45;
 }
 
 .hdp-nieuw-melding {
