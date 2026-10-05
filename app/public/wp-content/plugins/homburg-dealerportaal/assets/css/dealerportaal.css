@@ -893,7 +893,10 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 }
 .hdp-download-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .hdp-download-info strong { font-size: 0.95rem; font-weight: 600; }
-.hdp-download-info span { font-size: 0.8rem; color: var(--wp--preset--color--grijs-tekst); }
+/* Alleen de omschrijvingsregel direct onder de titel. Zonder het ">" raakte
+   deze regel ook de spans binnen de titel — zoals het NIEUW-label, dat
+   daardoor grijs werd in plaats van wit, en dat op donkerrood onleesbaar is. */
+.hdp-download-info > span { font-size: 0.8rem; color: var(--wp--preset--color--grijs-tekst); }
 .hdp-download-item .hdp-btn { padding: 0.55rem 1.1rem; font-size: 0.85rem; flex-shrink: 0; }
 .hdp-terug { margin-top: 1.6rem; }
 

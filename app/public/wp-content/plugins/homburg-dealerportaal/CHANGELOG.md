@@ -8,6 +8,9 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.58.3
+- Het NIEUW-label was nog steeds onleesbaar: de letters waren grijs, niet wit. Oorzaak was een regel die *alle* spans binnen een downloadregel grijs kleurde — bedoeld voor de omschrijving onder de titel, maar hij raakte ook het label binnen de titel, en die regel was specifieker dan het label zelf. De regel is nu beperkt tot directe kinderen, zodat hij alleen de omschrijving pakt.
+
 ## 1.58.2
 - Het label **NIEUW** bij recente downloads was slecht leesbaar: wit op het felle huisrood haalt op 11 pixels te weinig contrast. Het label staat nu op donkerrood (8,7:1 in plaats van 6,4:1), is iets groter en heeft meer lucht om de letters. De twee kleuren staan hier als vaste waarde in plaats van via een themavariabele, zodat het label leesbaar blijft ook als die variabelen ergens niet doorkomen.
 
