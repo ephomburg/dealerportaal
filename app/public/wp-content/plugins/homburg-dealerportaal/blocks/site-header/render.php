@@ -79,8 +79,9 @@ $link_icoon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 				<div class="hdp-account-menu">
 					<input type="checkbox" id="hdp-account-menu-toggle" class="hdp-account-menu-toggle">
 					<div class="hdp-account-split">
-						<?php if ( function_exists( 'wc_get_page_permalink' ) ) : ?>
-							<a class="hdp-account-split-link" href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>">
+						<?php if ( function_exists( 'wc_get_account_endpoint_url' ) ) : ?>
+							<?php // Rechtstreeks naar de bestellingen: /mijn-account/ stuurt daar toch naartoe (zie homburg_wc_myaccount_naar_bestellingen), dit scheelt een omleiding per klik. ?>
+							<a class="hdp-account-split-link" href="<?php echo esc_url( wc_get_account_endpoint_url( 'orders' ) ); ?>">
 								<?php echo HDP_Icons::svg_icoon( 'gebruiker' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
 								<?php esc_html_e( 'Mijn account', 'homburg-dealerportaal' ); ?>
 							</a>

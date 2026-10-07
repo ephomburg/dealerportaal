@@ -8,6 +8,11 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.60.0 / thema 1.26.0
+- **Een voordeur in plaats van twee.** "Mijn account" toonde een eigen tegeloverzicht in precies dezelfde kaartstijl als de startpagina — zes tegels, met "Downloads" zelfs op beide pagina's. Wie op "Mijn account" klikte, leek weer op de startpagina te belanden en moest zelf uitvogelen welke van de twee overzichten hij nu voor zich had.
+- De startpagina is nu de enige plek die zich als startpagina gedraagt. "Mijn account" opent meteen op de bestellingen — waar een dealer feitelijk voor komt — en is verder gewoon een accountgedeelte: adressen, accountdetails, favorieten en snel bestellen staan in de navigatiekolom ernaast. Er is dus niets onbereikbaar geworden.
+- "Dashboard" is uit het accountmenu gehaald, want dat item stuurde je door naar het item eronder. Een oude bladwijzer naar /my-account/ komt nog steeds goed uit: die wordt doorgestuurd. Uitgelogd blijft daar het inlogformulier staan.
+
 ## 1.59.0
 - **De hele uploadsmap is dicht voor wie niet is ingelogd.** Foto's, documenten en al het andere in de mediabibliotheek zijn niet langer op te halen met alleen een link. Tot nu toe gold dat alleen voor bestanden die aan een download gekoppeld waren; alles daarbuiten — productfoto's, losse prijslijsten, onderdelenboeken — stond gewoon open.
 - Dat gebeurt op de webserver zelf, door te kijken of er een inlogkoekje meekomt. Geen koekje, dan weigert hij meteen, zonder PHP en dus zonder snelheidsverlies. Een winkelpagina vol productfoto's zou anders evenzoveel keer WordPress moeten opstarten.

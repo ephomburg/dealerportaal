@@ -131,6 +131,49 @@ function homburg_wc_verberg_downloads_tabblad( $items ) {
 	return $items;
 }
 
+add_filter( 'woocommerce_account_menu_items', 'homburg_wc_verberg_dashboard_tabblad' );
+/**
+ * Haalt "Dashboard" uit het accountmenu — zie
+ * homburg_wc_myaccount_naar_bestellingen() hieronder voor het waarom. Een
+ * menu-item dat je doorstuurt naar het item eronder hoort er niet te staan.
+ */
+function homburg_wc_verberg_dashboard_tabblad( $items ) {
+	unset( $items['dashboard'] );
+	return $items;
+}
+
+add_action( 'template_redirect', 'homburg_wc_myaccount_naar_bestellingen' );
+/**
+ * Stuurt de kale /mijn-account/ door naar Bestellingen.
+ *
+ * Het portaal had twee voordeuren: de startpagina met tegels (webshop,
+ * downloads, garantie...) en daarnaast het WooCommerce-dashboard, dat in
+ * dezelfde kaartstijl nog een tegeloverzicht toonde — met "Downloads" zelfs
+ * in beide. Wie op "Mijn account" klikte, leek weer op de startpagina te
+ * komen.
+ *
+ * De startpagina is nu de enige hub. "Mijn account" opent op de
+ * bestellingen, waar een dealer feitelijk voor komt; de rest (adressen,
+ * accountdetails, favorieten, snel bestellen) blijft gewoon in de
+ * navigatiekolom ernaast staan. De doorverwijzing blijft bestaan voor wie
+ * /mijn-account/ nog als bladwijzer heeft.
+ */
+function homburg_wc_myaccount_naar_bestellingen() {
+	// Uitgelogd staat hier het inlogformulier; dat moet blijven.
+	if ( ! is_user_logged_in() || ! function_exists( 'is_account_page' ) ) {
+		return;
+	}
+
+	// is_wc_endpoint_url() zonder argument is alleen onwaar op /mijn-account/
+	// zelf, dus niet op de onderliggende tabbladen.
+	if ( ! is_account_page() || is_wc_endpoint_url() ) {
+		return;
+	}
+
+	wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
+	exit;
+}
+
 add_filter( 'woocommerce_customer_email_verification_should_show_prompt', '__return_false' );
 /**
  * WooCommerce's melding "Bevestig uw e-mailadres" op Mijn account →
