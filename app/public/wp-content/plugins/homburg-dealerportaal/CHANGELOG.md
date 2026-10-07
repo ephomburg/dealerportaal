@@ -8,6 +8,13 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.60.1
+- **De zelfcontrole van 1.59.0 keek bijna nergens naar.** Op live meldde hij "in orde" op grond van twee bestanden, terwijl een uitgelogde bezoeker er dertien te zien krijgt. Oorzaak: de header zet zijn logo zonder domeinnaam in de pagina (`/wp-content/uploads/...`) en de controle zocht alleen op de volledige URL mét domein — precies de afbeeldingen die op elke pagina staan, werden dus overgeslagen.
+- De controle kijkt nu ook op de winkelpagina, want het merklogo staat alleen daar.
+- En hij meldt alleen nog een bestand dat echt wordt afgeschermd (403). Een bestand dat niet bestaat (404) is een ander probleem en leverde anders een melding op die zei dat de witte lijst aangevuld moest worden — wat daar niets aan verhelpt.
+- **Witte lijst van 4 naar 3 termen.** De sfeerfoto op de achtergrond van het inlogscherm stond erop, maar die komt van homburg-belgium.com en staat helemaal niet in deze map. Die regel beschermde dus niets en zette alleen onnodig bestanden met die naam open.
+- Vier tests leggen dit vast, inclusief het geval dat de fout veroorzaakte.
+
 ## 1.60.0 / thema 1.26.0
 - **Een voordeur in plaats van twee.** "Mijn account" toonde een eigen tegeloverzicht in precies dezelfde kaartstijl als de startpagina — zes tegels, met "Downloads" zelfs op beide pagina's. Wie op "Mijn account" klikte, leek weer op de startpagina te belanden en moest zelf uitvogelen welke van de twee overzichten hij nu voor zich had.
 - De startpagina is nu de enige plek die zich als startpagina gedraagt. "Mijn account" opent meteen op de bestellingen — waar een dealer feitelijk voor komt — en is verder gewoon een accountgedeelte: adressen, accountdetails, favorieten en snel bestellen staan in de navigatiekolom ernaast. Er is dus niets onbereikbaar geworden.

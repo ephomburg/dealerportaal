@@ -53,8 +53,10 @@ class HDP_Bestandsbeveiliging {
 
 	/**
 	 * Bestanden in de uploadsmap die ook zonder inloggen bereikbaar moeten
-	 * blijven, want anders breekt het inlogscherm zelf: het logo, de favicon,
-	 * de sfeerfoto en het merklogo op de winkelpagina.
+	 * blijven, want anders breekt het inlogscherm zelf: het logo, de favicon
+	 * en het merklogo op de winkelpagina. (De sfeerfoto op de achtergrond
+	 * hoort hier niet bij: die komt van homburg-belgium.com en staat dus niet
+	 * in deze map.)
 	 *
 	 * Deze lijst is gemeten aan de uitgelogde pagina's, niet gegokt. Komt er
 	 * een afbeelding bij op het inlogscherm, dan hoort die hier ook bij —
@@ -63,7 +65,6 @@ class HDP_Bestandsbeveiliging {
 	const OPENBARE_BESTANDEN = array(
 		'Logo-HOMBURG',
 		'Godin-druppel-klein',
-		'Homburg-Holland-precisielandbouw-man-in-veld',
 		'dc',
 	);
 
@@ -205,29 +206,28 @@ class HDP_Bestandsbeveiliging {
 	 *                    zelf niet gelukt is.
 	 */
 	private static function gebroken_op_inlogscherm() {
-		$pagina = wp_remote_get(
-			home_url( '/' ),
-			array(
-				'timeout'   => 15,
-				'sslverify' => false,
-				// Zonder cookies, dus precies zoals een bezoeker het krijgt.
-				'cookies'   => array(),
-			)
-		);
-
-		if ( is_wp_error( $pagina ) ) {
-			return null;
+		// De startpagina plus de winkel: dat zijn de pagina's die een uitgelogde
+		// bezoeker te zien krijgt, en ze gebruiken niet dezelfde afbeeldingen
+		// (het merklogo staat alleen op de winkel).
+		$paginas = array( home_url( '/' ) );
+		if ( function_exists( 'wc_get_page_permalink' ) ) {
+			$winkel = wc_get_page_permalink( 'shop' );
+			if ( $winkel ) {
+				$paginas[] = $winkel;
+			}
 		}
 
-		$html    = wp_remote_retrieve_body( $pagina );
-		$uploads = wp_upload_dir();
-
-		if ( ! preg_match_all( '#' . preg_quote( $uploads['baseurl'], '#' ) . '/[^"\'\s)]+#', $html, $treffers ) ) {
-			return array();
+		$urls = array();
+		foreach ( $paginas as $pagina ) {
+			$gevonden = self::uploads_urls_op( $pagina );
+			if ( null === $gevonden ) {
+				return null;
+			}
+			$urls = array_merge( $urls, $gevonden );
 		}
 
 		$gebroken = array();
-		foreach ( array_unique( $treffers[0] ) as $url ) {
+		foreach ( array_unique( $urls ) as $url ) {
 			$antwoord = wp_remote_head(
 				$url,
 				array(
@@ -239,12 +239,63 @@ class HDP_Bestandsbeveiliging {
 			if ( is_wp_error( $antwoord ) ) {
 				return null;
 			}
-			if ( 200 !== (int) wp_remote_retrieve_response_code( $antwoord ) ) {
+
+			// Alleen 401/403 zegt iets over déze afscherming. Een 404 betekent
+			// dat het bestand niet bestaat — ook een probleem, maar een ander,
+			// en het hoort geen melding op te leveren die zegt dat de witte
+			// lijst aangevuld moet worden.
+			$code = (int) wp_remote_retrieve_response_code( $antwoord );
+			if ( 401 === $code || 403 === $code ) {
 				$gebroken[] = basename( wp_parse_url( $url, PHP_URL_PATH ) );
 			}
 		}
 
 		return $gebroken;
+	}
+
+	/**
+	 * Haalt één pagina cookieloos op en geeft elke uploads-URL erin terug.
+	 *
+	 * Zoekt op het pad (/wp-content/uploads/...) en niet op de volledige
+	 * URL-met-domein: de header zet zijn logo zonder domeinnaam in de pagina,
+	 * en dat zijn juist de afbeeldingen die op élke pagina staan. Op alleen de
+	 * volledige URL zoeken miste ze allemaal, waardoor de controle "in orde"
+	 * meldde op grond van twee favicons.
+	 *
+	 * @param string $pagina Volledige URL van de pagina.
+	 * @return array|null Lijst volledige URL's, of null als de pagina niet op
+	 *                    te halen was.
+	 */
+	private static function uploads_urls_op( $pagina ) {
+		$antwoord = wp_remote_get(
+			$pagina,
+			array(
+				'timeout'   => 15,
+				'sslverify' => false,
+				// Zonder cookies, dus precies zoals een bezoeker het krijgt.
+				'cookies'   => array(),
+			)
+		);
+
+		if ( is_wp_error( $antwoord ) ) {
+			return null;
+		}
+
+		$uploads = wp_upload_dir();
+		$pad     = wp_parse_url( $uploads['baseurl'], PHP_URL_PATH );
+		if ( ! $pad ) {
+			return array();
+		}
+
+		$patroon = '#' . preg_quote( $pad, '#' ) . '/[^"\'\s),>]+#';
+		if ( ! preg_match_all( $patroon, wp_remote_retrieve_body( $antwoord ), $treffers ) ) {
+			return array();
+		}
+
+		// Alles weer tot een volledige URL maken. Een pad van een ánder domein
+		// komt zo op onze eigen site uit, wat hoogstens een 404 oplevert en dus
+		// geen melding.
+		return array_map( 'home_url', $treffers[0] );
 	}
 
 	/**
