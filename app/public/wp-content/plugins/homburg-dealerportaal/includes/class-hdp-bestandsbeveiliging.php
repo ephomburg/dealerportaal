@@ -48,6 +48,25 @@ class HDP_Bestandsbeveiliging {
 	/** Bestandsnaam van het testbestand waarmee de afscherming gecontroleerd wordt. */
 	const CONTROLE_BESTAND = 'hdp-controle.txt';
 
+	/** Uitkomst van de controle op de uploadsmap: 'dicht' | 'open' | 'stuk' | 'onbekend'. */
+	const UPLOADS_CONTROLE_OPTIE = 'hdp_uploads_controle';
+
+	/**
+	 * Bestanden in de uploadsmap die ook zonder inloggen bereikbaar moeten
+	 * blijven, want anders breekt het inlogscherm zelf: het logo, de favicon,
+	 * de sfeerfoto en het merklogo op de winkelpagina.
+	 *
+	 * Deze lijst is gemeten aan de uitgelogde pagina's, niet gegokt. Komt er
+	 * een afbeelding bij op het inlogscherm, dan hoort die hier ook bij —
+	 * controleer_uploads_afscherming() merkt het als dat vergeten wordt.
+	 */
+	const OPENBARE_BESTANDEN = array(
+		'Logo-HOMBURG',
+		'Godin-druppel-klein',
+		'Homburg-Holland-precisielandbouw-man-in-veld',
+		'dc',
+	);
+
 	/** Bijlage-ID => download-ID, zodat de URL-filter niet per aanroep de database bevraagt. */
 	private static $download_cache = array();
 
@@ -66,9 +85,166 @@ class HDP_Bestandsbeveiliging {
 
 		if ( is_admin() ) {
 			add_action( 'admin_init', array( __CLASS__, 'migreer_bestaande_downloads' ) );
+			add_action( 'admin_init', array( __CLASS__, 'schrijf_uploads_afscherming' ) );
 			add_action( 'admin_init', array( __CLASS__, 'controleer_afscherming' ) );
+			add_action( 'admin_init', array( __CLASS__, 'controleer_uploads_afscherming' ) );
 			add_action( 'admin_notices', array( __CLASS__, 'toon_waarschuwing' ) );
 		}
+	}
+
+	// --- Laag 2: de hele uploadsmap dicht voor wie niet is ingelogd ------
+	//
+	// Laag 1 (hierboven) haalt prijslijsten en handleidingen uit de openbare
+	// map en laat ze alleen via PHP uit, mét controle op wie je bent. Dat is
+	// waterdicht maar kost een PHP-aanroep per bestand — voor een winkel vol
+	// productfoto's is dat te traag.
+	//
+	// Deze laag doet het andersom: de webserver kijkt zelf of er een
+	// inlogkoekje meekomt. Geen koekje, dan weigert hij meteen, zonder PHP en
+	// dus zonder snelheidsverlies. Dat stopt waar het om gaat — iemand met een
+	// link, een zoekmachine, een crawler.
+	//
+	// Wat het níét doet: controleren of dat koekje echt is. Wie er bewust een
+	// verzint komt erlangs. Daarom blijft laag 1 bestaan voor de bestanden
+	// waar dat wél moet kloppen.
+	//
+	//
+
+	/**
+	 * Zet (of actualiseert) de .htaccess in de uploadsmap.
+	 *
+	 * Wordt bij elk bezoek aan wp-admin nagelopen in plaats van één keer
+	 * weggeschreven: zo herstelt hij zichzelf als er iets mee gebeurt, en
+	 * komt een gewijzigde witte lijst vanzelf mee met een deploy.
+	 */
+	public static function schrijf_uploads_afscherming() {
+		$uploads = wp_upload_dir();
+		if ( ! empty( $uploads['error'] ) ) {
+			return;
+		}
+
+		$pad     = trailingslashit( $uploads['basedir'] ) . '.htaccess';
+		$gewenst = self::uploads_regels();
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- WP_Filesystem is hier niet geladen; zelfde aanpak als HDP_Log.
+		$huidig = file_exists( $pad ) ? (string) @file_get_contents( $pad ) : '';
+		if ( $huidig === $gewenst ) {
+			return;
+		}
+
+		@file_put_contents( $pad, $gewenst ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- zie hierboven.
+	}
+
+	/** De inhoud van die .htaccess. */
+	private static function uploads_regels() {
+		$openbaar = implode( '|', array_map( 'preg_quote', self::OPENBARE_BESTANDEN ) );
+
+		return "# Geschreven door de dealerportaal-plugin (HDP_Bestandsbeveiliging).\n"
+			. "# Handmatige wijzigingen worden overschreven; pas OPENBARE_BESTANDEN aan.\n"
+			. "#\n"
+			. "# Alles in deze map is alleen voor ingelogde dealers, op een paar\n"
+			. "# bestanden na die het inlogscherm zelf nodig heeft.\n"
+			. "<IfModule mod_rewrite.c>\n"
+			. "RewriteEngine On\n"
+			. "\n"
+			. "# 1. Wat het inlogscherm nodig heeft blijft openbaar.\n"
+			// (^|/) ankert op het begin van de bestandsnaam. Zonder dat zou een
+			// korte term als "dc" ook elk ander bestand doorlaten dat die
+			// letters ergens in de naam heeft staan.
+			. 'RewriteRule (^|/)(' . $openbaar . ')[^/]*$ - [L]' . "\n"
+			. "\n"
+			. "# 2. Komt er een inlogkoekje mee, dan gewoon uitleveren.\n"
+			. "RewriteCond %{HTTP_COOKIE} wordpress_logged_in_ [NC]\n"
+			. "RewriteRule ^ - [L]\n"
+			. "\n"
+			. "# 3. Al het andere: geen toegang.\n"
+			. "RewriteRule ^ - [F,L]\n"
+			. "</IfModule>\n";
+	}
+
+	/**
+	 * Controleert of die afscherming doet wat hij moet.
+	 *
+	 * Drie dingen: komt een gewoon bestand er niet door zonder inloggen,
+	 * komen de bestanden van het inlogscherm er wél door, en — het
+	 * belangrijkste — staat er op dat inlogscherm niets dat nu stuk is. Dat
+	 * laatste vangt de fout die je anders pas van een dealer hoort: een
+	 * afbeelding toegevoegd en de witte lijst vergeten.
+	 */
+	public static function controleer_uploads_afscherming() {
+		if ( get_transient( 'hdp_uploads_controle_gedaan' ) ) {
+			return;
+		}
+		set_transient( 'hdp_uploads_controle_gedaan', 1, DAY_IN_SECONDS );
+
+		$gebroken = self::gebroken_op_inlogscherm();
+
+		if ( null === $gebroken ) {
+			update_option( self::UPLOADS_CONTROLE_OPTIE, 'onbekend' );
+			return;
+		}
+
+		if ( $gebroken ) {
+			update_option( self::UPLOADS_CONTROLE_OPTIE, 'stuk' );
+			HDP_Log::schrijf(
+				'Uploadsafscherming: deze bestanden zijn op het inlogscherm niet meer op te halen: '
+					. implode( ', ', $gebroken ) . '. Vul ze aan in OPENBARE_BESTANDEN.',
+				'WAARSCHUWING'
+			);
+			return;
+		}
+
+		update_option( self::UPLOADS_CONTROLE_OPTIE, 'dicht' );
+	}
+
+	/**
+	 * Haalt het inlogscherm op zoals een uitgelogde bezoeker dat ziet, en
+	 * kijkt welke afbeeldingen daaruit niet meer bereikbaar zijn.
+	 *
+	 * @return array|null Lijst gebroken bestanden, of null als de controle
+	 *                    zelf niet gelukt is.
+	 */
+	private static function gebroken_op_inlogscherm() {
+		$pagina = wp_remote_get(
+			home_url( '/' ),
+			array(
+				'timeout'   => 15,
+				'sslverify' => false,
+				// Zonder cookies, dus precies zoals een bezoeker het krijgt.
+				'cookies'   => array(),
+			)
+		);
+
+		if ( is_wp_error( $pagina ) ) {
+			return null;
+		}
+
+		$html    = wp_remote_retrieve_body( $pagina );
+		$uploads = wp_upload_dir();
+
+		if ( ! preg_match_all( '#' . preg_quote( $uploads['baseurl'], '#' ) . '/[^"\'\s)]+#', $html, $treffers ) ) {
+			return array();
+		}
+
+		$gebroken = array();
+		foreach ( array_unique( $treffers[0] ) as $url ) {
+			$antwoord = wp_remote_head(
+				$url,
+				array(
+					'timeout'   => 10,
+					'sslverify' => false,
+					'cookies'   => array(),
+				)
+			);
+			if ( is_wp_error( $antwoord ) ) {
+				return null;
+			}
+			if ( 200 !== (int) wp_remote_retrieve_response_code( $antwoord ) ) {
+				$gebroken[] = basename( wp_parse_url( $url, PHP_URL_PATH ) );
+			}
+		}
+
+		return $gebroken;
 	}
 
 	/**
@@ -129,7 +305,24 @@ class HDP_Bestandsbeveiliging {
 
 	/** Zichtbare melding in wp-admin als de afscherming niet blijkt te werken. */
 	public static function toon_waarschuwing() {
-		if ( 'openbaar' !== get_option( self::CONTROLE_OPTIE ) || ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		if ( 'stuk' === get_option( self::UPLOADS_CONTROLE_OPTIE ) ) {
+			?>
+			<div class="notice notice-warning">
+				<p>
+					<strong>Dealerportaal: een afbeelding op het inlogscherm is niet meer zichtbaar.</strong>
+					De uploadsmap is afgeschermd voor bezoekers die niet zijn ingelogd, en er staat
+					nu iets op het inlogscherm dat daar niet bij hoort. Zie het logboek voor welke
+					bestanden het betreft.
+				</p>
+			</div>
+			<?php
+		}
+
+		if ( 'openbaar' !== get_option( self::CONTROLE_OPTIE ) ) {
 			return;
 		}
 		?>

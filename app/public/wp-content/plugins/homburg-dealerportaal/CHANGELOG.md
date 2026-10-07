@@ -8,6 +8,14 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.59.0
+- **De hele uploadsmap is dicht voor wie niet is ingelogd.** Foto's, documenten en al het andere in de mediabibliotheek zijn niet langer op te halen met alleen een link. Tot nu toe gold dat alleen voor bestanden die aan een download gekoppeld waren; alles daarbuiten — productfoto's, losse prijslijsten, onderdelenboeken — stond gewoon open.
+- Dat gebeurt op de webserver zelf, door te kijken of er een inlogkoekje meekomt. Geen koekje, dan weigert hij meteen, zonder PHP en dus zonder snelheidsverlies. Een winkelpagina vol productfoto's zou anders evenzoveel keer WordPress moeten opstarten.
+- **Wat deze laag niet doet:** controleren of dat koekje echt is. Wie er bewust een verzint komt erlangs. Voor prijslijsten en handleidingen blijft daarom de bestaande, zwaardere afscherming bestaan: die staan buiten de openbare map en gaan altijd langs een echte toegangscontrole.
+- Een korte witte lijst houdt openbaar wat het inlogscherm zelf nodig heeft: het Homburg-logo, de favicon, de sfeerfoto en het merklogo op de winkelpagina. Die lijst is gemeten aan de uitgelogde pagina's, niet gegokt, en matcht alleen op het begin van een bestandsnaam — anders zou een korte term als "dc" elk bestand met die letters doorlaten.
+- De plugin schrijft dat bestand zelf en loopt het bij elk bezoek aan wp-admin na, zodat het zichzelf herstelt en een gewijzigde witte lijst vanzelf meekomt met een deploy.
+- Dagelijkse zelfcontrole erbij: die haalt het inlogscherm op zoals een bezoeker dat ziet en kijkt of alle afbeeldingen daarop nog bereikbaar zijn. Vergeet iemand een nieuwe afbeelding op de witte lijst te zetten, dan staat dat in het logboek en bovenaan wp-admin — in plaats van dat je het van een dealer moet horen.
+
 ## 1.58.3
 - Het NIEUW-label was nog steeds onleesbaar: de letters waren grijs, niet wit. Oorzaak was een regel die *alle* spans binnen een downloadregel grijs kleurde — bedoeld voor de omschrijving onder de titel, maar hij raakte ook het label binnen de titel, en die regel was specifieker dan het label zelf. De regel is nu beperkt tot directe kinderen, zodat hij alleen de omschrijving pakt.
 
