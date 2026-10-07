@@ -149,8 +149,8 @@ class HDP_I18N {
 			),
 			/* translators: %s is het ticketnummer. */
 			'garantie_ok_claim'          => array(
-				'nl' => 'Uw claim is ingediend onder nummer %s. U ziet hieronder de stand van zaken.',
-				'fr' => 'Votre demande a été introduite sous le numéro %s. Vous en voyez l’état ci-dessous.',
+				'nl' => 'Uw claim is ingediend onder nummer %1$s. Stuurt u onderdelen retour naar Stiens? Vermeld dan %1$s op de zending — de claim kan pas behandeld worden zodra het onderdeel binnen is. Hieronder ziet u de stand van zaken.',
+				'fr' => 'Votre demande a été introduite sous le numéro %1$s. Vous renvoyez des pièces à Stiens ? Mentionnez alors %1$s sur l’envoi — la demande ne peut être traitée qu’une fois la pièce reçue. Vous voyez l’état ci-dessous.',
 			),
 			'garantie_dag_in_status'     => array( 'nl' => '1 dag op deze status', 'fr' => '1 jour à ce statut' ),
 			/* translators: %d is een aantal dagen. */
@@ -351,9 +351,27 @@ class HDP_I18N {
 			'garantie_veld_serienummer'  => array( 'nl' => 'Serienummer', 'fr' => 'Numéro de série' ),
 			'garantie_veld_aankoopdatum' => array( 'nl' => 'Aankoopdatum', 'fr' => "Date d'achat" ),
 			'garantie_veld_hectares'     => array( 'nl' => 'Aantal hectares', 'fr' => "Nombre d'hectares" ),
-			'garantie_veld_klacht'       => array( 'nl' => 'Wat is er aan de hand?', 'fr' => 'Quel est le problème ?' ),
-			'garantie_veld_onderdelen'   => array( 'nl' => 'Benodigde onderdelen', 'fr' => 'Pièces nécessaires' ),
+			// "Wat is er aan de hand?" suggereert dat je meldt tijdens het
+			// probleem. Een claim komt juist ná de reparatie, dus wat hier
+			// hoort te staan is het hele verhaal: wat er gebeurde, welke
+			// diagnose, en wat er vervangen is.
+			'garantie_veld_klacht'       => array( 'nl' => 'Te claimen defect', 'fr' => 'Défaut à déclarer' ),
+			'garantie_veld_klacht_hint'  => array(
+				'nl' => 'Beschrijf wat er gebeurd is, welke diagnose u heeft gesteld en wat u heeft vervangen. Bijvoorbeeld: storing wielsensor, diagnose gesteld, sensor vervangen.',
+				'fr' => "Décrivez ce qui s'est passé, le diagnostic posé et ce que vous avez remplacé. Par exemple : panne du capteur de roue, diagnostic posé, capteur remplacé.",
+			),
+			'garantie_veld_onderdelen'   => array( 'nl' => 'Te claimen onderdelen', 'fr' => 'Pièces à déclarer' ),
+			'garantie_veld_onderdelen_hint' => array(
+				'nl' => 'Eén onderdeel per regel, met onderdeelnummer, aantal en bedrag. Vermeld erbij of het van een Homburg-factuur komt; zo niet, stuur die factuur mee als bijlage.',
+				'fr' => "Une pièce par ligne, avec le numéro, la quantité et le montant. Indiquez s'il s'agit d'une facture Homburg ; sinon, joignez cette facture.",
+			),
 			'garantie_veld_fotos'        => array( 'nl' => "Foto's", 'fr' => 'Photos' ),
+			// Eigen hint voor de claim: op het machineformulier slaat "foto
+			// van het defect" nergens op, daar is nog niets stuk.
+			'garantie_fotos_hint'        => array(
+				'nl' => 'Stuur in elk geval een foto van het typeplaatje met het serienummer mee, en een foto van het defect zelf. Toegestaan: JPG, PNG, PDF.',
+				'fr' => 'Joignez en tout cas une photo de la plaque signalétique avec le numéro de série et une photo du défaut. Formats : JPG, PNG, PDF.',
+			),
 
 			// Nieuw-markering
 			'badge_nieuw'       => array( 'nl' => 'Nieuw', 'fr' => 'Nouveau' ),

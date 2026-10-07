@@ -143,8 +143,9 @@ class HDP_Bestelgeschiedenis_Render {
 			</div>
 			<div class="hdp-filterrij">
 				<div class="hdp-filtergroep">
-					<span class="hdp-filtergroep-label"><?php echo esc_html( HDP_I18N::t( 'bestel_filter_status_label' ) ); ?></span>
-					<select name="hdp_bs" class="hdp-sorteer-select">
+					<?php // Een <label for> i.p.v. een <span>: anders staat het woord "Status" er wel, maar hoort iemand met een schermlezer alleen "keuzemenu". ?>
+					<label class="hdp-filtergroep-label" for="hdp-bs"><?php echo esc_html( HDP_I18N::t( 'bestel_filter_status_label' ) ); ?></label>
+					<select id="hdp-bs" name="hdp_bs" class="hdp-sorteer-select">
 						<option value=""><?php echo esc_html( HDP_I18N::t( 'bestel_alle_statussen' ) ); ?></option>
 						<?php foreach ( $statussen as $sleutel => $label ) : ?>
 							<?php $kort = str_replace( 'wc-', '', $sleutel ); ?>

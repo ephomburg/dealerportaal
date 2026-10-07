@@ -501,7 +501,7 @@ class HDP_Garantie_Render {
 								<?php elseif ( 'file' === $veld['type'] ) : ?>
 									<input type="file" id="<?php echo esc_attr( $veld_id ); ?>" name="<?php echo esc_attr( 'machine' === $soort ? 'bijlagen' : 'fotos' ); ?>[]" multiple
 										accept="<?php echo esc_attr( self::toegestane_bestanden() ); ?>">
-									<span class="hdp-veld-hint"><?php echo esc_html( HDP_I18N::t( 'garantie_bijlagen_hint' ) ); ?></span>
+									<span class="hdp-veld-hint"><?php echo esc_html( HDP_I18N::t( 'claim' === $soort ? 'garantie_fotos_hint' : 'garantie_bijlagen_hint' ) ); ?></span>
 								<?php elseif ( 'merk' === $veld['type'] ) : ?>
 									<select id="<?php echo esc_attr( $veld_id ); ?>" name="<?php echo esc_attr( $naam ); ?>" required>
 										<option value=""><?php echo esc_html( HDP_I18N::t( 'garantie_kies' ) ); ?></option>
@@ -512,6 +512,9 @@ class HDP_Garantie_Render {
 								<?php else : ?>
 									<input type="<?php echo esc_attr( $veld['type'] ); ?>" id="<?php echo esc_attr( $veld_id ); ?>" name="<?php echo esc_attr( $naam ); ?>"
 										value="<?php echo esc_attr( $eerder ); ?>" <?php echo $verplicht ? 'required' : ''; ?>>
+								<?php endif; ?>
+								<?php if ( ! empty( $veld['hint'] ) ) : ?>
+									<span class="hdp-veld-hint"><?php echo esc_html( HDP_I18N::t( 'garantie_veld_' . $naam . '_hint' ) ); ?></span>
 								<?php endif; ?>
 							</p>
 						<?php endforeach; ?>

@@ -198,8 +198,9 @@ class HDP_Downloads_Render {
 			</div>
 			<div class="hdp-filterrij">
 				<div class="hdp-filtergroep">
-					<span class="hdp-filtergroep-label"><?php echo esc_html( HDP_I18N::t( 'filter_regio' ) ); ?></span>
-					<div class="hdp-chips" id="hdp-regio-chips">
+					<?php // Geen <label for>: dit zijn knoppen, geen invoerveld. Een groep met een naam is hier het juiste gereedschap, zodat de losse knoppen als "Regio: Nederland" worden aangekondigd. ?>
+					<span class="hdp-filtergroep-label" id="hdp-regio-label"><?php echo esc_html( HDP_I18N::t( 'filter_regio' ) ); ?></span>
+					<div class="hdp-chips" id="hdp-regio-chips" role="group" aria-labelledby="hdp-regio-label">
 						<button type="button" class="hdp-chip hdp-chip-actief" data-regio="alle"><?php echo esc_html( HDP_I18N::t( 'filter_alles' ) ); ?></button>
 						<?php if ( HDP_I18N::is_frans() ) : ?>
 							<button type="button" class="hdp-chip" data-regio="be-fr"><?php echo esc_html( HDP_I18N::t( 'filter_belgie_fr' ) ); ?></button>
@@ -212,8 +213,8 @@ class HDP_Downloads_Render {
 				</div>
 				<?php if ( $merken ) : ?>
 				<div class="hdp-filtergroep">
-					<span class="hdp-filtergroep-label"><?php echo esc_html( HDP_I18N::t( 'filter_merk' ) ); ?></span>
-					<div class="hdp-chips" id="hdp-merk-chips">
+					<span class="hdp-filtergroep-label" id="hdp-merk-label"><?php echo esc_html( HDP_I18N::t( 'filter_merk' ) ); ?></span>
+					<div class="hdp-chips" id="hdp-merk-chips" role="group" aria-labelledby="hdp-merk-label">
 						<?php foreach ( $merken as $merk ) : ?>
 							<button type="button" class="hdp-chip" data-merk="<?php echo esc_attr( $merk ); ?>"><?php echo esc_html( $merk ); ?></button>
 						<?php endforeach; ?>
@@ -221,7 +222,7 @@ class HDP_Downloads_Render {
 				</div>
 				<?php endif; ?>
 				<div class="hdp-filtergroep">
-					<span class="hdp-filtergroep-label"><?php echo esc_html( HDP_I18N::t( 'sorteren_label' ) ); ?></span>
+					<label class="hdp-filtergroep-label" for="hdp-sorteer"><?php echo esc_html( HDP_I18N::t( 'sorteren_label' ) ); ?></label>
 					<select id="hdp-sorteer" class="hdp-sorteer-select">
 						<option value="datum-nieuw"><?php echo esc_html( HDP_I18N::t( 'sorteer_nieuw' ) ); ?></option>
 						<option value="datum-oud"><?php echo esc_html( HDP_I18N::t( 'sorteer_oud' ) ); ?></option>

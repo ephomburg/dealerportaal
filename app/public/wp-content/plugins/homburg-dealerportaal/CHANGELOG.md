@@ -8,6 +8,25 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.62.0
+
+**De webshop was voor iedereen te bekijken — inclusief de dealerprijzen.**
+- Zonder in te loggen kon je de hele catalogus openen: productnamen, prijzen en bestelknoppen. Ook losse productpagina's gaven de prijs vrij. Op de live site stonden er twee producten, waarvan één met prijs; met de volledige catalogus erin zouden dat er 250 zijn.
+- Het waren vier deuren naar dezelfde kamer, en ze zijn alle vier dicht: de pagina's zelf (winkel, product, merk, categorie, winkelwagen, afrekenen en productzoeken) sturen een bezoeker zonder goedgekeurd dealeraccount naar het inlogscherm; de Store API en `/wp/v2/product` geven 401; en producten en productcategorieën staan niet meer in de sitemap, zodat ze ook niet via Google alsnog naar buiten komen.
+- De beheer-API `/wc/v3` blijft met rust gelaten: die vraagt al om een sleutel en daar kan een koppeling aan hangen. Een te brede afscherming legt zoiets stilletjes plat.
+- Dezelfde controle als de rest van het portaal gebruikt, dus een dealer die nog op goedkeuring wacht komt er net zomin in als op de downloadpagina. Elf tests leggen vast wie erbij mag en via welke routes.
+
+**Filters zijn nu ook bruikbaar met een schermlezer.**
+- Het statusfilter bij Bestellingen en het sorteerfilter bij Downloads hadden het woord ernaast staan maar niet eraan gekoppeld: je hoorde alleen "keuzemenu". Nu een echt label.
+- De regio- en merkknoppen bij Downloads zijn knoppengroepen, geen invoervelden; die hebben een groepsnaam gekregen in plaats van een label.
+
+**Garantie: drie punten uit de lijst van de serviceafdeling.**
+- Het aantal hectares is weg bij het aanmelden van een machine. Dat is daar een momentopname die meteen veroudert; wat telt is de stand op het moment van de klacht, en die vraagt het claimformulier al.
+- "Wat is er aan de hand?" heet nu **Te claimen defect**, met de uitleg erbij dat het om het hele verhaal gaat: wat er gebeurde, welke diagnose en wat er vervangen is. Een claim komt immers ná de reparatie.
+- "Benodigde onderdelen" heet nu **Te claimen onderdelen**, met de vraag om onderdeelnummer, aantal en bedrag per regel en om de factuur mee te sturen als het onderdeel niet van Homburg komt. Dit is een tussenstap: echte invoervelden per onderdeel vragen om een uitbreiding van de claimtabel in de app.
+- Bij foto's staat nu wat er minimaal bij hoort: het typeplaatje met het serienummer en het defect zelf.
+- De bevestiging na het indienen vermeldt dat onderdelen retour naar Stiens moeten onder vermelding van het ticketnummer, en dat de claim pas behandeld kan worden zodra dat onderdeel binnen is.
+
 ## 1.61.0 / thema 1.27.0
 
 **De webshop opent voortaan als lijst.**

@@ -118,8 +118,8 @@ class HDP_Garantie {
 			// Het aantal hectares vraagt de dealer wél opnieuw: dat is de
 			// stand op het moment van de klacht, niet die bij aanmelding.
 			'hectares'     => array( 'type' => 'number', 'verplicht' => false ),
-			'klacht'       => array( 'type' => 'textarea', 'verplicht' => true ),
-			'onderdelen'   => array( 'type' => 'textarea', 'verplicht' => false ),
+			'klacht'       => array( 'type' => 'textarea', 'verplicht' => true, 'hint' => true ),
+			'onderdelen'   => array( 'type' => 'textarea', 'verplicht' => false, 'hint' => true ),
 			'fotos'        => array( 'type' => 'file', 'verplicht' => false ),
 		);
 	}
@@ -145,7 +145,9 @@ class HDP_Garantie {
 			'serienummer'  => array( 'type' => 'text', 'verplicht' => true ),
 			'aankoopdatum' => array( 'type' => 'date', 'verplicht' => true ),
 			'klant'        => array( 'type' => 'text', 'verplicht' => false ),
-			'hectares'     => array( 'type' => 'number', 'verplicht' => false ),
+			// Geen hectares hier: bij aanmelding is die stand een
+			// momentopname die meteen veroudert. Wat telt is de stand op het
+			// moment van de klacht, en die vraagt het claimformulier.
 		);
 	}
 
@@ -672,7 +674,6 @@ class HDP_Garantie {
 				'serienummer'  => $waarden['serienummer'],
 				'aankoopdatum' => $waarden['aankoopdatum'],
 				'klant'        => $waarden['klant'],
-				'hectares'     => $waarden['hectares'],
 			)
 		);
 
