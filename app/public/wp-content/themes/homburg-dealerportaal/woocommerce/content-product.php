@@ -24,6 +24,21 @@ $sku       = $product->get_sku();
 $image_id  = $product->get_image_id();
 $brands    = get_the_terms( $product->get_id(), 'product_brand' );
 $brand     = ( $brands && ! is_wp_error( $brands ) ) ? $brands[0]->name : '';
+
+// De losse product_brand-taxonomie staat bij vrijwel geen onderdeel
+// ingevuld (zie shop-filters.php); het raster liet de merkregel daarom
+// meestal gewoon weg en toonde de categorie op het blauwdrukvlak. In de
+// lijst is "Merk" een eigen kolom, en een kolom die bij 9 van de 10 rijen
+// leeg blijft is erger dan geen kolom. Vandaar dezelfde terugval als het
+// blauwdrukvlak gebruikt.
+$is_categorie = false;
+if ( '' === $brand ) {
+	$categorieen = get_the_terms( $product->get_id(), 'product_cat' );
+	if ( $categorieen && ! is_wp_error( $categorieen ) ) {
+		$brand        = $categorieen[0]->name;
+		$is_categorie = true;
+	}
+}
 ?>
 <li <?php wc_product_class( 'hdp-card', $product ); ?>>
 	<a class="hdp-card__media" href="<?php echo esc_url( $permalink ); ?>" aria-hidden="true" tabindex="-1">
@@ -47,7 +62,8 @@ $brand     = ( $brands && ! is_wp_error( $brands ) ) ? $brands[0]->name : '';
 
 	<div class="hdp-card__body">
 		<?php if ( $brand ) : ?>
-			<span class="hdp-card__brand"><?php echo esc_html( $brand ); ?></span>
+			<?php // --cat markeert de terugval, zodat het raster hem kan verbergen: daar staat die categorie al op het blauwdrukvlak. ?>
+			<span class="hdp-card__brand<?php echo $is_categorie ? ' hdp-card__brand--cat' : ''; ?>"><?php echo esc_html( $brand ); ?></span>
 		<?php endif; ?>
 
 		<h3 class="hdp-card__title">
@@ -60,6 +76,27 @@ $brand     = ( $brands && ! is_wp_error( $brands ) ) ? $brands[0]->name : '';
 
 		<div class="hdp-card__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></div>
 
-		<?php woocommerce_template_loop_add_to_cart( array( 'class' => 'button hdp-card__btn' ) ); ?>
+		<?php
+		// Aantalveld voor de lijstweergave: een dealer bestelt zelden één
+		// bout. In de rasterweergave staat dit op display:none — daar is
+		// geen kolom voor. Alleen bij producten die je zo in de mand kunt
+		// leggen; bij een variabel product is de knop een link naar de
+		// productpagina en zegt een aantal nog niets.
+		if ( $product->is_purchasable() && $product->is_in_stock() && ! $product->is_type( 'variable' ) ) :
+			?>
+			<label class="hdp-card__aantal">
+				<span class="hdp-vh">
+					<?php
+					/* translators: %s: productnaam. */
+					printf( esc_html__( 'Aantal %s', 'homburg-dealerportaal-theme' ), esc_html( $product->get_name() ) );
+					?>
+				</span>
+				<input type="number" min="1" step="1" value="1" inputmode="numeric" data-hdp-aantal>
+			</label>
+			<?php
+		endif;
+
+		woocommerce_template_loop_add_to_cart( array( 'class' => 'button hdp-card__btn' ) );
+		?>
 	</div>
 </li>

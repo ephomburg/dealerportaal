@@ -1085,15 +1085,65 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	.hdp-admin-sectie { max-width: 90%; }
 }
 @media (max-width: 600px) {
-	.hdp-kaarten-sectie { max-width: 100%; grid-template-columns: 1fr; padding: 1.5rem 1rem; }
+	/* Twee tegels naast elkaar i.p.v. onder elkaar.
+	   Op de telefoon was elke tegel een blok van ruim 350 px hoog — icoon,
+	   titel, drie regels uitleg en een knop over de volle breedte — waardoor
+	   de startpagina 5006 px lang werd: ruim zes schermen scrollen om bij
+	   Garantie te komen. Dit is een hub, geen folder: de dealer weet na één
+	   keer waar hij heen moet en heeft aan het icoon met de naam genoeg. De
+	   uitleg blijft op de brede weergave staan, waar er wél ruimte voor is. */
+	.hdp-kaarten-sectie { max-width: 100%; grid-template-columns: repeat(2, 1fr); gap: 0.7rem; padding: 1.25rem 1rem; }
 	.hdp-downloads { max-width: 100%; padding: 1.5rem 1rem; }
 	.hdp-info-sectie { max-width: 100%; padding: 1rem 1rem 2rem; }
 	.hdp-admin-sectie { max-width: 100%; padding: 1.5rem 1rem; }
 	.hdp-info-grid { grid-template-columns: 1fr; grid-auto-rows: auto; }
 	.hdp-info-kaart { flex-direction: column; }
-	/* In één kolom is er geen breedte om naast elkaar te zetten. */
-	.hdp-kaart-breed { flex-direction: column; align-items: stretch; gap: 0.9rem; }
-	.hdp-kaart-breed .hdp-btn { text-align: center; }
+
+	.hdp-kaarten-sectie .hdp-kaart {
+		position: relative;
+		padding: 1rem 0.9rem;
+		gap: 0.5rem;
+		/* Rustiger dan de rode balk plus slagschaduw: in een raster van zes
+		   tegels naast elkaar telt die rand zes keer mee. */
+		border: 1px solid var(--wp--preset--color--rand);
+		border-top: 1px solid var(--wp--preset--color--rand);
+		box-shadow: none;
+	}
+	.hdp-kaarten-sectie .hdp-kaart .hdp-kaart-icoon { width: 38px; height: 38px; border-radius: 7px; }
+	.hdp-kaarten-sectie .hdp-kaart .hdp-kaart-icoon svg { width: 20px; height: 20px; }
+	.hdp-kaarten-sectie .hdp-kaart h2 { font-size: 0.95rem; line-height: 1.25; }
+	.hdp-kaarten-sectie .hdp-kaart p { display: none; }
+	/* De knop wordt een regel met een pijl; de tegel zelf is de knop
+	   geworden (zie ::after hieronder), dus een tweede vlak eromheen zou
+	   alleen ruimte kosten. De tekst blijft staan voor schermlezers en als
+	   bevestiging van waar je heen gaat. */
+	.hdp-kaarten-sectie .hdp-kaart .hdp-btn {
+		margin-top: auto;
+		padding: 0;
+		min-height: 0;
+		background: none;
+		border: 0;
+		box-shadow: none;
+		color: var(--wp--preset--color--grijs-tekst);
+		font-size: 0.74rem;
+		font-weight: 700;
+		text-align: left;
+	}
+	.hdp-kaarten-sectie .hdp-kaart .hdp-btn:hover { background: none; transform: none; color: var(--wp--preset--color--homburg-rood); }
+	/* Hele tegel aanklikbaar, met één echte link erin — zo blijft het een
+	   trefzeker doel van ~150 px i.p.v. alleen het regeltje onderaan. */
+	.hdp-kaarten-sectie .hdp-kaart .hdp-btn::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		border-radius: inherit;
+	}
+
+	/* De brede tegel (Garantie) doet op deze breedte gewoon mee in het
+	   raster; "over de volle breedte" slaat op de brede weergave. */
+	.hdp-kaart-breed { grid-column: auto; flex-direction: column; align-items: stretch; gap: 0.5rem; }
+	.hdp-kaart-breed .hdp-kaart-tekst { gap: 0.5rem; }
+	.hdp-kaart-breed .hdp-btn { text-align: left; margin-top: auto; }
 	.hdp-welkom { padding: 1.6rem 0; }
 	.hdp-welkom-inner { padding: 0 1rem; }
 	.hdp-hero-nieuw { height: 260px; min-height: 0; }

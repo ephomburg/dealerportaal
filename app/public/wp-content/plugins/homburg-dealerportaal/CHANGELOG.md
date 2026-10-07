@@ -8,6 +8,21 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.61.0 / thema 1.27.0
+
+**De webshop opent voortaan als lijst.**
+- Onderdelen hebben vrijwel nooit een foto, dus elke tegel reserveerde een groot vlak voor een grijze placeholder met het artikelnummer erin — een nummer dat er twee regels lager nog een keer stond. Dat vlak is weg; het nummer is een eigen kolom geworden.
+- Vaste kolommen: nummer, omschrijving, merk, prijs (rechts uitgelijnd, cijfers even breed), aantal en de bestelknop. Daarboven staan kolomkoppen, zodat duidelijk is waar een getal voor staat.
+- **48 onderdelen per pagina in plaats van 16.** Voor 250 onderdelen waren zestien pagina's nodig; nu zes. Een rij is 62 px hoog tegen ruim 310 px voor een tegel.
+- **Een aantalveld per rij.** Een dealer bestelt zelden één bout; het aantal gaat mee in de bestellink, dus zeven stuks is één handeling in plaats van zeven.
+- De bestelknop is omlijnd in plaats van rood: op één scherm staan er achtenveertig van, en dan betekent rood niets meer. Rood blijft voor de winkelwagen in de kop.
+- De merkkolom valt terug op de categorie, omdat de losse merk-taxonomie bij vrijwel geen onderdeel is ingevuld — een kolom die bij negen van de tien rijen leeg blijft is erger dan geen kolom. In de tegelweergave blijft die terugval verborgen; daar staat de categorie al op het blauwdrukvlak.
+- De tegelweergave blijft gewoon bestaan en is onveranderd; wie hem kiest, houdt hem (de keuze wordt onthouden). Een link met `?weergave=raster` werkt ook.
+
+**De startpagina op de telefoon is bijna een derde korter.**
+- De tegels stonden onder elkaar, elk ruim 350 px hoog met icoon, titel, drie regels uitleg en een knop over de volle breedte. De pagina werd daardoor 5006 px lang: ruim zes schermen scrollen om bij Garantie te komen.
+- Nu twee tegels naast elkaar met icoon en naam; de hele tegel is aanklikbaar. De uitleg blijft staan op de brede weergave, waar er ruimte voor is. De pagina is nog 3653 px.
+
 ## 1.60.1
 - **De zelfcontrole van 1.59.0 keek bijna nergens naar.** Op live meldde hij "in orde" op grond van twee bestanden, terwijl een uitgelogde bezoeker er dertien te zien krijgt. Oorzaak: de header zet zijn logo zonder domeinnaam in de pagina (`/wp-content/uploads/...`) en de controle zocht alleen op de volledige URL mét domein — precies de afbeeldingen die op elke pagina staan, werden dus overgeslagen.
 - De controle kijkt nu ook op de winkelpagina, want het merklogo staat alleen daar.

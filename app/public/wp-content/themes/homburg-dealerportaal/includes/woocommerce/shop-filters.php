@@ -236,6 +236,92 @@ function homburg_wc_shop_balk_sluiten() {
 	echo '</div>';
 }
 
+add_action( 'woocommerce_before_shop_loop', 'homburg_wc_lijst_kolomkoppen', 40 );
+/**
+ * Kolomkoppen boven de lijstweergave.
+ *
+ * In een lijst staat per rij alleen de waarde, niet waar die voor staat —
+ * zonder kop is de rechterkolom "een getal" in plaats van "de prijs". In
+ * de rasterweergave staat dit blok op display:none (zie woocommerce.css).
+ *
+ * aria-hidden: elke rij noemt zelf al artikelnummer, naam en prijs; de
+ * koppen zijn puur visueel en zouden voorgelezen alleen ruis zijn.
+ */
+function homburg_wc_lijst_kolomkoppen() {
+	if ( ! is_shop() && ! is_product_taxonomy() ) {
+		return;
+	}
+	?>
+	<div class="hdp-lijst-kop" aria-hidden="true">
+		<span><?php esc_html_e( 'Nummer', 'homburg-dealerportaal-theme' ); ?></span>
+		<span><?php esc_html_e( 'Omschrijving', 'homburg-dealerportaal-theme' ); ?></span>
+		<span><?php esc_html_e( 'Merk', 'homburg-dealerportaal-theme' ); ?></span>
+		<span class="hdp-lijst-kop__prijs"><?php esc_html_e( 'Prijs excl.', 'homburg-dealerportaal-theme' ); ?></span>
+		<span></span>
+	</div>
+	<?php
+}
+
+add_filter( 'loop_shop_per_page', 'homburg_wc_aantal_per_pagina', 20 );
+/**
+ * 48 onderdelen per pagina in plaats van 16.
+ *
+ * Een rij in de lijst is een fractie van de hoogte van een tegel, dus er
+ * passen er veel meer op een scherm. Met 16 per pagina waren er voor 250
+ * onderdelen zestien pagina te doorlopen; nu zes.
+ */
+function homburg_wc_aantal_per_pagina() {
+	return 48;
+}
+
+/**
+ * Welke weergave deze aanvraag krijgt: 'lijst' (standaard) of 'raster'.
+ *
+ * Onderdelen hebben vrijwel nooit een foto, dus een tegel reserveert een
+ * groot vlak voor een placeholder met het artikelnummer erin — een nummer
+ * dat er twee regels lager nog een keer staat. Een lijst toont hetzelfde
+ * in een fractie van de ruimte; het raster blijft bestaan voor wie het
+ * liever zo ziet.
+ *
+ * Dit wordt server-side bepaald zodat de pagina meteen goed staat; de
+ * voorkeur van een bezoeker die zelf raster koos staat in localStorage en
+ * wordt daarna door de JS hieronder toegepast.
+ */
+function homburg_wc_weergave() {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- alleen lezen, geen schrijfactie.
+	$uit_url = isset( $_GET['weergave'] ) ? sanitize_key( wp_unslash( $_GET['weergave'] ) ) : '';
+
+	return 'raster' === $uit_url ? 'raster' : 'lijst';
+}
+
+add_filter( 'woocommerce_product_loop_start', 'homburg_wc_lijst_class_op_loop' );
+/**
+ * Zet de lijst-class meteen in de HTML in plaats van hem door JavaScript
+ * te laten toevoegen — anders ziet een bezoeker eerst het raster en klapt
+ * de pagina daarna om.
+ */
+function homburg_wc_lijst_class_op_loop( $html ) {
+	if ( ( ! is_shop() && ! is_product_taxonomy() ) || 'lijst' !== homburg_wc_weergave() ) {
+		return $html;
+	}
+
+	return str_replace( 'class="products', 'class="products hdp-lijst-weergave', $html );
+}
+
+add_filter( 'body_class', 'homburg_wc_lijst_class_op_body' );
+/**
+ * Dezelfde keuze op <body>, zodat de kolomkoppen — die buiten ul.products
+ * staan en er in de HTML aan voorafgaan — zich erop kunnen richten. CSS
+ * kan niet terugkijken naar een later element.
+ */
+function homburg_wc_lijst_class_op_body( $classes ) {
+	if ( ( is_shop() || is_product_taxonomy() ) && 'lijst' === homburg_wc_weergave() ) {
+		$classes[] = 'hdp-shop-lijst';
+	}
+
+	return $classes;
+}
+
 add_action( 'woocommerce_after_shop_loop', 'homburg_wc_shop_werkbalk_sluiten', 100 );
 /**
  * Sluit de twee div's die homburg_wc_shop_werkbalk_open() opent — na de
@@ -282,17 +368,45 @@ function homburg_wc_shop_inline_js() {
 
 	function toepassen(weergave) {
 		lijst.classList.toggle('hdp-lijst-weergave', weergave === 'lijst');
+		// Ook op <body>, voor de kolomkoppen die vóór ul.products staan.
+		document.body.classList.toggle('hdp-shop-lijst', weergave === 'lijst');
 		knoppen.forEach(function (knop) {
 			knop.classList.toggle('is-actief', knop.dataset.hdpWeergave === weergave);
+			knop.setAttribute('aria-pressed', knop.dataset.hdpWeergave === weergave ? 'true' : 'false');
 		});
 	}
 
+	// Lijst is de standaard en staat al in de HTML (zie homburg_wc_weergave);
+	// dit herstelt alleen de keuze van een bezoeker die zelf raster koos.
 	var uitUrl = new URLSearchParams(window.location.search).get('weergave');
-	var opgeslagen = 'raster';
+	var opgeslagen = 'lijst';
 	try {
-		opgeslagen = uitUrl || localStorage.getItem(SLEUTEL) || 'raster';
+		opgeslagen = uitUrl || localStorage.getItem(SLEUTEL) || 'lijst';
 	} catch (e) {}
 	toepassen(opgeslagen);
+
+	// Het aantalveld in een lijstrij doorgeven aan WooCommerce.
+	//
+	// De bestelknop in de kaart is een gewone link (content-product.php geeft
+	// een eigen class mee, waardoor WooCommerce's ajax_add_to_cart-classes
+	// vervallen): klikken navigeert naar ?add-to-cart=123. Het aantal moet
+	// dus in die URL staan. data-quantity wordt voor de zekerheid ook gezet,
+	// zodat het blijft werken als de knop later wél via AJAX gaat.
+	document.addEventListener('input', function (e) {
+		var veld = e.target.closest ? e.target.closest('[data-hdp-aantal]') : null;
+		if (!veld) { return; }
+		var rij = veld.closest('.hdp-card__body');
+		var knop = rij && rij.querySelector('.hdp-card__btn');
+		if (!knop || !knop.getAttribute('href')) { return; }
+
+		var aantal = parseInt(veld.value, 10);
+		if (!(aantal > 0)) { aantal = 1; }
+		knop.dataset.quantity = aantal;
+
+		var url = new URL(knop.getAttribute('href'), window.location.href);
+		url.searchParams.set('quantity', aantal);
+		knop.setAttribute('href', url.pathname + url.search);
+	});
 
 	// Merkfilter direct toepassen bij het aan-/uitvinken.
 	var merkForm = document.querySelector('.hdp-shop-merken-form');
