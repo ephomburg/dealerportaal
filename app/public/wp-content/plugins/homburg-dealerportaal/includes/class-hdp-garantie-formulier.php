@@ -93,7 +93,6 @@ class HDP_Garantie_Formulier {
 			'serienummer'  => self::tekst( 'serienummer' ),
 			'aankoopdatum' => self::tekst( 'aankoopdatum' ),
 			'klant'        => self::tekst( 'klant' ),
-			'hectares'     => self::tekst( 'hectares' ),
 		);
 
 		$ontbreekt = self::ontbrekende_velden( $waarden, HDP_Garantie::machinevelden() );
@@ -120,26 +119,57 @@ class HDP_Garantie_Formulier {
 	}
 
 	private static function verwerk_claim() {
+		$soort     = HDP_Garantie::claimsoort( self::tekst( 'soort' ) );
+		$bestanden = self::bestanden( 'fotos' );
+
 		$waarden = array(
-			'machine'    => self::tekst( 'machinekeuze' ),
-			'klacht'     => self::tekst( 'klacht' ),
-			'onderdelen' => self::tekst( 'onderdelen' ),
-			'hectares'   => self::tekst( 'hectares' ),
+			'soort'              => $soort,
+			'machine'            => self::tekst( 'machinekeuze' ),
+			'onderdeel_probleem' => self::tekst( 'onderdeel_probleem' ),
+			'factuurnummer'      => self::tekst( 'factuurnummer' ),
+			'klacht'             => self::tekst( 'klacht' ),
+			'regels'             => self::claimregels(),
+			'te_claimen_tijd'    => self::getal( 'te_claimen_tijd' ),
+			'hectares'           => self::getal( 'hectares' ),
+			'klantreferentie'    => self::tekst( 'klantreferentie' ),
+			'opmerkingen'        => self::tekst( 'opmerkingen' ),
+			'onderdeel_retour'   => self::aangevinkt( 'onderdeel_retour' ),
 		);
 
-		if ( '' === $waarden['machine'] ) {
-			self::terug_met_fout( 'claim', HDP_I18N::t( 'garantie_fout_machine' ), $waarden );
+		$terug = add_query_arg(
+			array(
+				'nieuw' => 'claim',
+				'soort' => $soort,
+			),
+			home_url( '/garantie/' )
+		);
+
+		if ( HDP_Garantie::SOORT_MACHINE === $soort && '' === $waarden['machine'] ) {
+			self::terug_met_fout( 'claim', HDP_I18N::t( 'garantie_fout_machine' ), $waarden, $terug );
 		}
-		if ( '' === $waarden['klacht'] ) {
-			self::terug_met_fout( 'claim', HDP_I18N::t( 'garantie_fout_klacht' ), $waarden );
+
+		$ontbreekt = self::ontbrekende_velden( $waarden, HDP_Garantie::velden( $soort ) );
+		if ( $ontbreekt ) {
+			self::terug_met_fout( 'claim', self::melding_ontbrekend( $ontbreekt ), $waarden, $terug );
+		}
+
+		if ( HDP_Garantie::SOORT_ONDERDEEL === $soort && ! $waarden['regels'] ) {
+			self::terug_met_fout( 'claim', HDP_I18N::t( 'garantie_fout_geen_regels' ), $waarden, $terug );
+		}
+
+		// Onderdelen die niet van een Homburg-factuur komen, kunnen hier niet
+		// nagekeken worden; zonder de factuur van de leverancier valt er niets
+		// te claimen. Dus: dan moet er een bijlage mee.
+		if ( self::heeft_derden( $waarden['regels'] ) && ! self::heeft_bestand( $bestanden ) ) {
+			self::terug_met_fout( 'claim', HDP_I18N::t( 'garantie_fout_factuur_nodig' ), $waarden, $terug );
 		}
 
 		$claim = HDP_Garantie::dien_claim_in( $waarden );
 		if ( is_wp_error( $claim ) ) {
-			self::terug_met_fout( 'claim', self::leesbaar( $claim ), $waarden );
+			self::terug_met_fout( 'claim', self::leesbaar( $claim ), $waarden, $terug );
 		}
 
-		$mislukt = HDP_Garantie::bewaar_bijlagen( self::bestanden( 'fotos' ), 'claim', $claim['id'] );
+		$mislukt = HDP_Garantie::bewaar_bijlagen( $bestanden, 'claim', $claim['id'] );
 
 		self::terug_met_melding(
 			'garantie',
@@ -167,6 +197,130 @@ class HDP_Garantie_Formulier {
 	}
 
 	/* ---------------------------------------------------------------- */
+
+	/**
+	 * De regels van "te claimen onderdelen", als een lijst voor de database.
+	 *
+	 * Het formulier stuurt vier gelijke rijtjes (nummer, aantal, bedrag,
+	 * herkomst). Lege regels vallen af: er staan er altijd een paar klaar en
+	 * de meeste claims vullen die niet allemaal.
+	 *
+	 * Herkomst is bewust een keuzemenu en geen vinkje: een vinkje dat uit
+	 * staat stuurt niets mee, waardoor de rijtjes niet meer gelijk lopen en
+	 * bedrag 2 bij onderdeel 3 terechtkomt.
+	 *
+	 * @return array
+	 */
+	private static function claimregels() {
+		$nummers   = self::lijst( 'onderdeel_nummer' );
+		$aantallen = self::lijst( 'onderdeel_aantal' );
+		$bedragen  = self::lijst( 'onderdeel_bedrag' );
+		$herkomst  = self::lijst( 'onderdeel_herkomst' );
+
+		$regels = array();
+		foreach ( $nummers as $i => $nummer ) {
+			$nummer = trim( $nummer );
+			if ( '' === $nummer ) {
+				continue;
+			}
+
+			$aantal = isset( $aantallen[ $i ] ) ? (int) $aantallen[ $i ] : 1;
+
+			$regels[] = array(
+				'nummer'          => $nummer,
+				'aantal'          => max( 1, $aantal ),
+				'bedrag_cent'     => self::bedrag( isset( $bedragen[ $i ] ) ? $bedragen[ $i ] : '' ),
+				'homburg_factuur' => 'derden' !== ( isset( $herkomst[ $i ] ) ? $herkomst[ $i ] : 'homburg' ),
+			);
+		}
+
+		return $regels;
+	}
+
+	/** Of er minstens één regel van een andere leverancier bij zit. */
+	private static function heeft_derden( $regels ) {
+		foreach ( (array) $regels as $regel ) {
+			if ( empty( $regel['homburg_factuur'] ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/** Of er daadwerkelijk een bestand is meegestuurd. */
+	private static function heeft_bestand( $bestanden ) {
+		if ( empty( $bestanden['name'] ) ) {
+			return false;
+		}
+
+		foreach ( (array) $bestanden['name'] as $naam ) {
+			if ( '' !== trim( (string) $naam ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Een bedrag zoals een mens het typt: "1.021,31", "1021.31", "€ 12,99".
+	 *
+	 * Staat er een komma in, dan is dat het decimaalteken en is een punt een
+	 * duizendtalscheiding — dat is hier de gangbare schrijfwijze.
+	 *
+	 * Centen en geen kommagetal: 6,11 is als kommagetal niet precies op te
+	 * slaan (het wordt 6.1100000000000003) en dat loopt bij het optellen van
+	 * een claimregel of tien zichtbaar mis. Een geheel getal centen is exact.
+	 *
+	 * @param string $ruw Wat er is ingetypt.
+	 * @return int|null Hele centen.
+	 */
+	private static function bedrag( $ruw ) {
+		$ruw = trim( str_replace( array( "\xe2\x82\xac", "\xc2\xa0", ' ' ), '', (string) $ruw ) );
+		if ( '' === $ruw ) {
+			return null;
+		}
+
+		if ( false !== strpos( $ruw, ',' ) ) {
+			$ruw = str_replace( ',', '.', str_replace( '.', '', $ruw ) );
+		}
+
+		return is_numeric( $ruw ) ? (int) round( (float) $ruw * 100 ) : null;
+	}
+
+	/**
+	 * Een gewoon getalveld (uren, hectares); leeg blijft leeg i.p.v. 0.
+	 *
+	 * Bewust niet via bedrag(): dat rekent naar centen, en anderhalf uur is
+	 * geen 150.
+	 */
+	private static function getal( $veld ) {
+		$ruw = str_replace( ',', '.', self::tekst( $veld ) );
+
+		return is_numeric( $ruw ) ? $ruw : '';
+	}
+
+	private static function aangevinkt( $veld ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- check_admin_referer() is al gedraaid in verwerk().
+		return ! empty( $_POST[ $veld ] );
+	}
+
+	/** Een rijtje gelijknamige velden uit het formulier. */
+	private static function lijst( $veld ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- zie verwerk().
+		if ( ! isset( $_POST[ $veld ] ) || ! is_array( $_POST[ $veld ] ) ) {
+			return array();
+		}
+
+		$waarden = array();
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- elke waarde gaat hieronder apart door sanitize_text_field().
+		foreach ( wp_unslash( (array) $_POST[ $veld ] ) as $waarde ) {
+			$waarden[] = sanitize_text_field( $waarde );
+		}
+
+		return $waarden;
+	}
 
 	private static function tekst( $veld ) {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- check_admin_referer() is al gedraaid in verwerk().

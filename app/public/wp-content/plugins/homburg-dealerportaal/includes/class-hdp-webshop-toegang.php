@@ -54,6 +54,7 @@ class HDP_Webshop_Toegang {
 		add_filter( 'rest_pre_dispatch', array( __CLASS__, 'scherm_rest_af' ), 10, 3 );
 		add_filter( 'wp_sitemaps_post_types', array( __CLASS__, 'haal_producten_uit_sitemap' ) );
 		add_filter( 'wp_sitemaps_taxonomies', array( __CLASS__, 'haal_producttaxonomieen_uit_sitemap' ) );
+		add_filter( 'wp_sitemaps_add_provider', array( __CLASS__, 'haal_gebruikers_uit_sitemap' ), 10, 2 );
 	}
 
 	/**
@@ -142,6 +143,21 @@ class HDP_Webshop_Toegang {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Houdt de gebruikerslijst uit de sitemap.
+	 *
+	 * WordPress geeft daarin /author/<naam>/ prijs, dus de inlognaam van wie
+	 * hier publiceert. Op een besloten dealerportaal is dat niets voor
+	 * buiten, en auteursarchieven hebben hier sowieso geen functie.
+	 *
+	 * @param WP_Sitemaps_Provider $provider De aanbieder.
+	 * @param string               $naam     'posts', 'taxonomies' of 'users'.
+	 * @return WP_Sitemaps_Provider|false
+	 */
+	public static function haal_gebruikers_uit_sitemap( $provider, $naam ) {
+		return 'users' === $naam ? false : $provider;
 	}
 
 	/**

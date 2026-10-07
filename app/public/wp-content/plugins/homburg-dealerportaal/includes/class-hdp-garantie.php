@@ -105,33 +105,90 @@ class HDP_Garantie {
 	 *
 	 * 'type' is het soort invoerveld, 'verplicht' of het ingevuld moet zijn.
 	 */
-	public static function velden() {
+	/** De twee soorten claims. */
+	const SOORT_MACHINE   = 'machine';
+	const SOORT_ONDERDEEL = 'onderdeel';
+	const CLAIMSOORTEN    = array( self::SOORT_MACHINE, self::SOORT_ONDERDEEL );
+
+	/**
+	 * Wat er bij een onderdelenclaim mis kan zijn. Moet overeenkomen met de
+	 * check-constraint claims_probleem_check in de database van de app.
+	 */
+	const ONDERDEEL_PROBLEMEN = array(
+		'defect',
+		'beschadigd_aangekomen',
+		'onjuist_geleverd',
+		'onjuist_besteld',
+		'niet_ontvangen',
+	);
+
+	public static function velden( $soort = self::SOORT_MACHINE ) {
+		// Twee aparte lijsten in plaats van één met uitzonderingen: de
+		// volgorde is hier het ontwerp. Een monteur vertelt zijn verhaal in
+		// deze volgorde — wat was er aan de hand, wat heb ik eraan gedaan,
+		// wat kostte het — en het formulier hoort dat te volgen.
+		if ( self::SOORT_ONDERDEEL === $soort ) {
+			// Geen machine: een doos onderdelen die verkeerd aankomt hoort
+			// niet bij een serienummer. Het factuurnummer is hier wél
+			// verplicht — dat is het enige houvast om de levering terug te
+			// vinden.
+			return array(
+				'onderdeel_probleem' => array( 'type' => 'probleem', 'verplicht' => true ),
+				'factuurnummer'      => array( 'type' => 'text', 'verplicht' => true, 'hint' => true ),
+				'klacht'             => array( 'type' => 'textarea', 'verplicht' => true, 'hint' => true ),
+				'regels'             => array( 'type' => 'regels', 'verplicht' => false ),
+				'te_claimen_tijd'    => array( 'type' => 'uren', 'verplicht' => false, 'hint' => true ),
+				'klantreferentie'    => array( 'type' => 'text', 'verplicht' => false, 'hint' => true ),
+				'opmerkingen'        => array( 'type' => 'textarea', 'verplicht' => false, 'hint' => true ),
+				'onderdeel_retour'   => array( 'type' => 'checkbox', 'verplicht' => false, 'hint' => true ),
+				'fotos'              => array( 'type' => 'file', 'verplicht' => false ),
+			);
+		}
+
 		return array(
 			// Deze drie staan al bij de aangemelde machine en worden daar
 			// overgenomen: ze horen wél in de claim (en dus in de tabel),
 			// maar de dealer hoeft ze niet opnieuw in te typen. Dat scheelt
 			// werk én tikfouten in precies de velden waarop de fabrikant
 			// controleert.
-			'machine'      => array( 'type' => 'text', 'verplicht' => true, 'uit_machine' => true ),
-			'serienummer'  => array( 'type' => 'text', 'verplicht' => true, 'uit_machine' => true ),
-			'aankoopdatum' => array( 'type' => 'date', 'verplicht' => true, 'uit_machine' => true ),
+			'machine'          => array( 'type' => 'text', 'verplicht' => true, 'uit_machine' => true ),
+			'serienummer'      => array( 'type' => 'text', 'verplicht' => true, 'uit_machine' => true ),
+			'aankoopdatum'     => array( 'type' => 'date', 'verplicht' => true, 'uit_machine' => true ),
 			// Het aantal hectares vraagt de dealer wél opnieuw: dat is de
 			// stand op het moment van de klacht, niet die bij aanmelding.
-			'hectares'     => array( 'type' => 'number', 'verplicht' => false ),
-			'klacht'       => array( 'type' => 'textarea', 'verplicht' => true, 'hint' => true ),
-			'onderdelen'   => array( 'type' => 'textarea', 'verplicht' => false, 'hint' => true ),
-			'fotos'        => array( 'type' => 'file', 'verplicht' => false ),
+			'hectares'         => array( 'type' => 'number', 'verplicht' => false ),
+			'klacht'           => array( 'type' => 'textarea', 'verplicht' => true, 'hint' => true ),
+			'regels'           => array( 'type' => 'regels', 'verplicht' => false ),
+			// Hier optioneel: bij een machineclaim komen de onderdelen vaak
+			// van een werkbon zonder los factuurnummer.
+			'factuurnummer'    => array( 'type' => 'text', 'verplicht' => false, 'hint' => true ),
+			'te_claimen_tijd'  => array( 'type' => 'uren', 'verplicht' => false, 'hint' => true ),
+			'klantreferentie'  => array( 'type' => 'text', 'verplicht' => false, 'hint' => true ),
+			'opmerkingen'      => array( 'type' => 'textarea', 'verplicht' => false, 'hint' => true ),
+			'onderdeel_retour' => array( 'type' => 'checkbox', 'verplicht' => false, 'hint' => true ),
+			'fotos'            => array( 'type' => 'file', 'verplicht' => false ),
 		);
 	}
 
 	/** De velden die de dealer op het claimformulier zelf invult. */
-	public static function invulvelden() {
+	public static function invulvelden( $soort = self::SOORT_MACHINE ) {
 		return array_filter(
-			self::velden(),
+			self::velden( $soort ),
 			static function ( $veld ) {
 				return empty( $veld['uit_machine'] );
 			}
 		);
+	}
+
+	/**
+	 * Of dit een soort claim is die we kennen; alles anders wordt een
+	 * machineclaim, want dat is wat er vóór deze uitbreiding bestond.
+	 *
+	 * @param string $soort Ruwe waarde, bijvoorbeeld uit de URL.
+	 * @return string
+	 */
+	public static function claimsoort( $soort ) {
+		return in_array( $soort, self::CLAIMSOORTEN, true ) ? $soort : self::SOORT_MACHINE;
 	}
 
 	/**
@@ -698,38 +755,71 @@ class HDP_Garantie {
 	 *
 	 * @return array|WP_Error De aangemaakte claim.
 	 */
+	/**
+	 * Een leeg veld hoort als NULL in de database te staan, niet als lege
+	 * tekst: bij een getalkolom weigert Postgres een lege string, en bij een
+	 * tekstkolom is "niets ingevuld" iets anders dan "bewust leeggelaten".
+	 *
+	 * @param mixed $waarde Ruwe waarde uit het formulier.
+	 * @return mixed|null
+	 */
+	private static function of_niets( $waarde ) {
+		return ( '' === $waarde || null === $waarde ) ? null : $waarde;
+	}
+
 	public static function dien_claim_in( $waarden ) {
 		$dealer = self::dealervelden();
 		if ( ! $dealer ) {
 			return new WP_Error( 'hdp_geen_toegang', HDP_I18N::t( 'garantie_fout_geen_toegang' ) );
 		}
 
-		$machines = self::machines();
-		if ( is_wp_error( $machines ) ) {
-			return $machines;
-		}
-
-		$machine = null;
-		foreach ( $machines as $kandidaat ) {
-			if ( $kandidaat['serienummer'] === $waarden['machine'] ) {
-				$machine = $kandidaat;
-				break;
-			}
-		}
-
-		if ( ! $machine ) {
-			return new WP_Error( 'hdp_onbekende_machine', HDP_I18N::t( 'garantie_fout_machine' ) );
-		}
+		$soort = self::claimsoort( isset( $waarden['soort'] ) ? $waarden['soort'] : '' );
 
 		$rij = array_merge(
 			$dealer,
 			array(
-				'machine_id' => $machine['id'],
-				'klacht'     => $waarden['klacht'],
-				'onderdelen' => $waarden['onderdelen'],
-				'hectares'   => $waarden['hectares'],
+				'soort'                 => $soort,
+				'klacht'                => $waarden['klacht'],
+				'te_claimen_onderdelen' => isset( $waarden['regels'] ) ? array_values( (array) $waarden['regels'] ) : array(),
+				'te_claimen_tijd'       => self::of_niets( isset( $waarden['te_claimen_tijd'] ) ? $waarden['te_claimen_tijd'] : '' ),
+				'factuurnummer'         => self::of_niets( isset( $waarden['factuurnummer'] ) ? $waarden['factuurnummer'] : '' ),
+				'klantreferentie'       => self::of_niets( isset( $waarden['klantreferentie'] ) ? $waarden['klantreferentie'] : '' ),
+				'opmerkingen'           => self::of_niets( isset( $waarden['opmerkingen'] ) ? $waarden['opmerkingen'] : '' ),
+				'onderdeel_retour'      => ! empty( $waarden['onderdeel_retour'] ),
 			)
 		);
+
+		if ( self::SOORT_ONDERDEEL === $soort ) {
+			$probleem = isset( $waarden['onderdeel_probleem'] ) ? $waarden['onderdeel_probleem'] : '';
+			if ( ! in_array( $probleem, self::ONDERDEEL_PROBLEMEN, true ) ) {
+				return new WP_Error( 'hdp_onbekend_probleem', HDP_I18N::t( 'garantie_fout_probleem' ) );
+			}
+			$rij['onderdeel_probleem'] = $probleem;
+		} else {
+			// Een machineclaim hangt altijd aan een aangemelde machine van
+			// déze dealer. De machine opzoeken binnen zijn eigen lijst is
+			// meteen de controle daarop: staat het serienummer er niet bij,
+			// dan is het niet zijn machine.
+			$machines = self::machines();
+			if ( is_wp_error( $machines ) ) {
+				return $machines;
+			}
+
+			$machine = null;
+			foreach ( $machines as $kandidaat ) {
+				if ( $kandidaat['serienummer'] === $waarden['machine'] ) {
+					$machine = $kandidaat;
+					break;
+				}
+			}
+
+			if ( ! $machine ) {
+				return new WP_Error( 'hdp_onbekende_machine', HDP_I18N::t( 'garantie_fout_machine' ) );
+			}
+
+			$rij['machine_id'] = $machine['id'];
+			$rij['hectares']   = self::of_niets( isset( $waarden['hectares'] ) ? $waarden['hectares'] : '' );
+		}
 
 		$rijen = HDP_Supabase::voeg_toe( HDP_Supabase::APP, 'claims', array( $rij ) );
 

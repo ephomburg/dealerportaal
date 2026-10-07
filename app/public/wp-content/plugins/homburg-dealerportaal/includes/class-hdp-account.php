@@ -327,7 +327,8 @@ class HDP_Account {
 			<label for="hdp-instellingen-toggle" class="hdp-instellingen-achtergrond" aria-hidden="true"></label>
 			<div class="hdp-instellingen-kaart hdp-login-kaart" role="dialog" aria-modal="true" aria-labelledby="hdp-instellingen-titel">
 				<label for="hdp-instellingen-toggle" class="hdp-instellingen-sluiten" aria-label="<?php echo esc_attr( HDP_I18N::t( 'sluiten' ) ); ?>">&times;</label>
-				<h1 id="hdp-instellingen-titel"><?php echo esc_html( HDP_I18N::t( 'instellingen_titel' ) ); ?></h1>
+				<?php // Een h2, geen h1: dit venster zit in de header en staat dus op élke pagina. Als h1 was "Accountinstellingen" overal de eerste kop van de pagina — ook op de winkel en bij garantie. Het venster houdt zijn naam via aria-labelledby. ?>
+				<h2 id="hdp-instellingen-titel"><?php echo esc_html( HDP_I18N::t( 'instellingen_titel' ) ); ?></h2>
 				<p class="hdp-intro"><?php echo esc_html( HDP_I18N::t( 'instellingen_intro' ) ); ?></p>
 
 				<?php self::render_melding( $status, $melding, $groep, 'profiel' ); ?>

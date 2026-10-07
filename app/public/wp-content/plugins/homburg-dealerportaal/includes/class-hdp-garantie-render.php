@@ -41,7 +41,12 @@ class HDP_Garantie_Render {
 			return self::render_formulier( 'machine' );
 		}
 		if ( 'claim' === $nieuw ) {
-			return self::render_formulier( 'claim' );
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- alleen lezen.
+			$gekozen = isset( $_GET['soort'] ) ? sanitize_key( wp_unslash( $_GET['soort'] ) ) : '';
+			if ( ! in_array( $gekozen, HDP_Garantie::CLAIMSOORTEN, true ) ) {
+				return self::render_soortkeuze();
+			}
+			return self::render_formulier( 'claim', $gekozen );
 		}
 
 		$titel        = HDP_I18N::kies( $a['titel'], $a['titelFr'] );
@@ -435,6 +440,135 @@ class HDP_Garantie_Render {
 	}
 
 	/**
+	 * Eerst de vraag waar de claim over gaat.
+	 *
+	 * Een machineclaim en een onderdelenclaim vragen om heel andere dingen:
+	 * de een om een serienummer en reparatietijd, de ander om een
+	 * factuurnummer en wat er mis is met de levering. Die in één formulier
+	 * proppen met velden die aan- en uitspringen levert een scherm op waar
+	 * niemand doorheen komt. Dus: één vraag vooraf, en daarna een formulier
+	 * dat alleen vraagt wat er bij hoort.
+	 */
+	private static function render_soortkeuze() {
+		ob_start();
+		?>
+		<div class="hdp-portaal alignfull">
+			<section class="hdp-welkom alignfull hdp-welkom-zonder-hero">
+				<div class="hdp-welkom-inner">
+					<a class="hdp-terug-boven" href="<?php echo esc_url( home_url( '/garantie/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'garantie_terug_naar_garantie' ) ); ?></a>
+					<h1><?php echo esc_html( HDP_I18N::t( 'garantie_kies_soort_titel' ) ); ?></h1>
+					<p><?php echo esc_html( HDP_I18N::t( 'garantie_kies_soort_tekst' ) ); ?></p>
+				</div>
+			</section>
+			<section class="hdp-garantie">
+				<?php self::render_meldingen(); ?>
+				<div class="hdp-garantie-ingangen">
+					<?php
+					$keuzes = array(
+						HDP_Garantie::SOORT_MACHINE   => 'garantie',
+						HDP_Garantie::SOORT_ONDERDEEL => 'bestellen',
+					);
+					?>
+					<?php foreach ( $keuzes as $keuze => $icoon ) : ?>
+						<article class="hdp-garantie-ingang">
+							<?php HDP_Icons::render_icoon( $icoon ); ?>
+							<h2><?php echo esc_html( HDP_I18N::t( 'garantie_soort_' . $keuze . '_titel' ) ); ?></h2>
+							<p><?php echo esc_html( HDP_I18N::t( 'garantie_soort_' . $keuze . '_tekst' ) ); ?></p>
+							<a class="hdp-btn" href="<?php echo esc_url( add_query_arg( array( 'nieuw' => 'claim', 'soort' => $keuze ), home_url( '/garantie/' ) ) ); ?>">
+								<?php echo esc_html( HDP_I18N::t( 'garantie_soort_' . $keuze . '_knop' ) ); ?>
+							</a>
+						</article>
+					<?php endforeach; ?>
+				</div>
+			</section>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * De regels van "te claimen onderdelen".
+	 *
+	 * Vier kolommen per regel, en een paar lege regels klaar. De herkomst is
+	 * een keuzemenu en geen vinkje: een vinkje dat uit staat stuurt niets
+	 * mee, waardoor de rijtjes niet meer gelijk lopen en bedrag 2 bij
+	 * onderdeel 3 belandt.
+	 *
+	 * @param array $eerder Wat er na een afgekeurde invoer al stond.
+	 */
+	private static function render_claimregels( $eerder ) {
+		$eerder = is_array( $eerder ) ? array_values( $eerder ) : array();
+		// Altijd een lege regel onderaan om in te vullen, en minstens drie.
+		$aantal = max( 3, count( $eerder ) + 1 );
+		?>
+		<span class="hdp-veld-hint"><?php echo esc_html( HDP_I18N::t( 'garantie_regels_hint' ) ); ?></span>
+		<div class="hdp-claimregels" id="hdp-claimregels">
+			<div class="hdp-claimregel hdp-claimregel-kop" aria-hidden="true">
+				<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_nummer' ) ); ?></span>
+				<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_aantal' ) ); ?></span>
+				<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_bedrag' ) ); ?></span>
+				<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_herkomst' ) ); ?></span>
+			</div>
+			<?php for ( $i = 0; $i < $aantal; $i++ ) : ?>
+				<?php
+				$regel  = isset( $eerder[ $i ] ) ? (array) $eerder[ $i ] : array();
+				$nummer = isset( $regel['nummer'] ) ? $regel['nummer'] : '';
+				$stuks  = isset( $regel['aantal'] ) ? $regel['aantal'] : '';
+				// Opgeslagen in centen; hier weer als "1021,31" in het veld.
+				$bedrag  = isset( $regel['bedrag_cent'] ) && null !== $regel['bedrag_cent']
+					? number_format( $regel['bedrag_cent'] / 100, 2, ',', '' )
+					: '';
+				$derden  = isset( $regel['homburg_factuur'] ) && ! $regel['homburg_factuur'];
+				$regelnr = $i + 1;
+				?>
+				<div class="hdp-claimregel">
+					<label>
+						<span class="hdp-vh"><?php printf( esc_html( HDP_I18N::t( 'garantie_regel_nummer_van' ) ), (int) $regelnr ); ?></span>
+						<input type="text" name="onderdeel_nummer[]" value="<?php echo esc_attr( $nummer ); ?>" autocomplete="off">
+					</label>
+					<label>
+						<span class="hdp-vh"><?php printf( esc_html( HDP_I18N::t( 'garantie_regel_aantal_van' ) ), (int) $regelnr ); ?></span>
+						<input type="number" min="1" step="1" name="onderdeel_aantal[]" value="<?php echo esc_attr( $stuks ); ?>">
+					</label>
+					<label>
+						<span class="hdp-vh"><?php printf( esc_html( HDP_I18N::t( 'garantie_regel_bedrag_van' ) ), (int) $regelnr ); ?></span>
+						<input type="text" inputmode="decimal" name="onderdeel_bedrag[]" value="<?php echo esc_attr( $bedrag ); ?>" placeholder="0,00">
+					</label>
+					<label>
+						<span class="hdp-vh"><?php printf( esc_html( HDP_I18N::t( 'garantie_regel_herkomst_van' ) ), (int) $regelnr ); ?></span>
+						<select name="onderdeel_herkomst[]">
+							<option value="homburg" <?php selected( ! $derden ); ?>><?php echo esc_html( HDP_I18N::t( 'garantie_regel_homburg' ) ); ?></option>
+							<option value="derden" <?php selected( $derden ); ?>><?php echo esc_html( HDP_I18N::t( 'garantie_regel_derden' ) ); ?></option>
+						</select>
+					</label>
+				</div>
+			<?php endfor; ?>
+		</div>
+		<button type="button" class="hdp-btn hdp-btn-secundair hdp-btn-klein" id="hdp-regel-erbij"><?php echo esc_html( HDP_I18N::t( 'garantie_regel_toevoegen' ) ); ?></button>
+		<script>
+		(function () {
+			var knop = document.getElementById( 'hdp-regel-erbij' );
+			var lijst = document.getElementById( 'hdp-claimregels' );
+			if ( ! knop || ! lijst ) { return; }
+
+			knop.addEventListener( 'click', function () {
+				var regels = lijst.querySelectorAll( '.hdp-claimregel:not(.hdp-claimregel-kop)' );
+				var laatste = regels[ regels.length - 1 ];
+				if ( ! laatste ) { return; }
+
+				var nieuw = laatste.cloneNode( true );
+				nieuw.querySelectorAll( 'input' ).forEach( function ( veld ) { veld.value = ''; } );
+				nieuw.querySelectorAll( 'select' ).forEach( function ( veld ) { veld.selectedIndex = 0; } );
+				lijst.appendChild( nieuw );
+				var eerste = nieuw.querySelector( 'input' );
+				if ( eerste ) { eerste.focus(); }
+			} );
+		})();
+		</script>
+		<?php
+	}
+
+	/**
 	 * Een formulier op zijn eigen scherm: machine aanmelden of claim
 	 * indienen. Bewust niet meer onder de lijst op het overzicht — daar las
 	 * het als een naschrift in plaats van als een taak, en met twee
@@ -448,11 +582,14 @@ class HDP_Garantie_Render {
 	 * versturen, en een formulier dat je wél kunt invullen maar dat niets
 	 * doet is erger dan geen formulier.
 	 *
-	 * @param string $soort 'machine' of 'claim'.
+	 * @param string $soort       'machine' (aanmelden) of 'claim' (indienen).
+	 * @param string $claimsoort  Bij een claim: 'machine' of 'onderdeel'.
 	 */
-	private static function render_formulier( $soort ) {
-		$is_claim = 'claim' === $soort;
-		$velden   = $is_claim ? HDP_Garantie::invulvelden() : HDP_Garantie::machinevelden();
+	private static function render_formulier( $soort, $claimsoort = HDP_Garantie::SOORT_MACHINE ) {
+		$is_claim     = 'claim' === $soort;
+		$is_onderdeel = $is_claim && HDP_Garantie::SOORT_ONDERDEEL === $claimsoort;
+		$velden       = $is_claim ? HDP_Garantie::invulvelden( $claimsoort ) : HDP_Garantie::machinevelden();
+		$titelsleutel = $is_onderdeel ? 'garantie_soort_onderdeel' : ( $is_claim ? 'garantie_soort_machine' : 'garantie_ingang_machine' );
 
 		ob_start();
 		?>
@@ -460,25 +597,33 @@ class HDP_Garantie_Render {
 			<section class="hdp-welkom alignfull hdp-welkom-zonder-hero">
 				<div class="hdp-welkom-inner">
 					<a class="hdp-terug-boven" href="<?php echo esc_url( home_url( '/garantie/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'garantie_terug_naar_garantie' ) ); ?></a>
-					<h1><?php echo esc_html( HDP_I18N::t( 'garantie_ingang_' . $soort . '_titel' ) ); ?></h1>
-					<p><?php echo esc_html( HDP_I18N::t( 'garantie_ingang_' . $soort . '_tekst' ) ); ?></p>
+					<h1><?php echo esc_html( HDP_I18N::t( $titelsleutel . '_titel' ) ); ?></h1>
+					<p><?php echo esc_html( HDP_I18N::t( $titelsleutel . '_tekst' ) ); ?></p>
 				</div>
 			</section>
 			<section class="hdp-garantie">
 				<?php self::render_meldingen(); ?>
 				<form class="hdp-garantie-formulier" method="post" enctype="multipart/form-data"
-					action="<?php echo esc_url( add_query_arg( 'nieuw', $soort, home_url( '/garantie/' ) ) ); ?>">
+					action="<?php echo esc_url( add_query_arg( $is_claim ? array( 'nieuw' => 'claim', 'soort' => $claimsoort ) : array( 'nieuw' => $soort ), home_url( '/garantie/' ) ) ); ?>">
 					<?php wp_nonce_field( HDP_Garantie_Formulier::NONCE ); ?>
 					<input type="hidden" name="<?php echo esc_attr( HDP_Garantie_Formulier::ACTIE_VELD ); ?>" value="<?php echo esc_attr( $soort ); ?>">
 					<?php if ( $is_claim ) : ?>
+						<input type="hidden" name="soort" value="<?php echo esc_attr( $claimsoort ); ?>">
+					<?php endif; ?>
+					<?php if ( $is_claim && ! $is_onderdeel ) : ?>
 						<?php self::render_machinekeuze(); ?>
 					<?php endif; ?>
 
 					<div class="hdp-garantie-velden">
 						<?php foreach ( $velden as $naam => $veld ) : ?>
 							<?php
-							$label     = HDP_I18N::t( 'garantie_veld_' . $naam );
-							$breed     = in_array( $veld['type'], array( 'textarea', 'file' ), true );
+							// Bij een onderdelenclaim is "defect" niet altijd het
+							// goede woord — een doos die verkeerd geleverd is,
+							// is nergens stuk. Daar heet dit veld Toelichting.
+							$label     = ( $is_onderdeel && 'klacht' === $naam )
+								? HDP_I18N::t( 'garantie_veld_klacht_onderdeel' )
+								: HDP_I18N::t( 'garantie_veld_' . $naam );
+							$breed     = in_array( $veld['type'], array( 'textarea', 'file', 'regels' ), true );
 							$veld_id   = 'hdp-' . $soort . '-' . $naam;
 							$verplicht = $veld['verplicht'];
 							?>
@@ -489,7 +634,8 @@ class HDP_Garantie_Render {
 							// opnieuw" en "laat maar".
 							$eerder = HDP_Garantie_Formulier::eerder( 'fotos' === $naam ? '' : $naam );
 							?>
-							<p class="hdp-veld<?php echo $breed ? ' hdp-veld-breed' : ''; ?>">
+							<?php // Een div en geen p: de onderdelenregels zijn blokelementen, en die sluiten een <p> stilzwijgend af — de regels en de knop belandden dan als losse vakjes in het raster. ?>
+							<div class="hdp-veld<?php echo $breed ? ' hdp-veld-breed' : ''; ?>">
 								<label for="<?php echo esc_attr( $veld_id ); ?>">
 									<?php echo esc_html( $label ); ?>
 									<?php if ( $verplicht ) : ?>
@@ -502,6 +648,20 @@ class HDP_Garantie_Render {
 									<input type="file" id="<?php echo esc_attr( $veld_id ); ?>" name="<?php echo esc_attr( 'machine' === $soort ? 'bijlagen' : 'fotos' ); ?>[]" multiple
 										accept="<?php echo esc_attr( self::toegestane_bestanden() ); ?>">
 									<span class="hdp-veld-hint"><?php echo esc_html( HDP_I18N::t( 'claim' === $soort ? 'garantie_fotos_hint' : 'garantie_bijlagen_hint' ) ); ?></span>
+								<?php elseif ( 'regels' === $veld['type'] ) : ?>
+									<?php self::render_claimregels( HDP_Garantie_Formulier::eerder( 'regels', array() ) ); ?>
+								<?php elseif ( 'probleem' === $veld['type'] ) : ?>
+									<select id="<?php echo esc_attr( $veld_id ); ?>" name="<?php echo esc_attr( $naam ); ?>" required>
+										<option value=""><?php echo esc_html( HDP_I18N::t( 'garantie_kies' ) ); ?></option>
+										<?php foreach ( HDP_Garantie::ONDERDEEL_PROBLEMEN as $probleem ) : ?>
+											<option value="<?php echo esc_attr( $probleem ); ?>" <?php selected( $eerder, $probleem ); ?>><?php echo esc_html( HDP_I18N::t( 'garantie_probleem_' . $probleem ) ); ?></option>
+										<?php endforeach; ?>
+									</select>
+								<?php elseif ( 'checkbox' === $veld['type'] ) : ?>
+									<input type="checkbox" id="<?php echo esc_attr( $veld_id ); ?>" name="<?php echo esc_attr( $naam ); ?>" value="1" <?php checked( (bool) $eerder ); ?>>
+								<?php elseif ( 'uren' === $veld['type'] ) : ?>
+									<input type="number" min="0" step="0.25" id="<?php echo esc_attr( $veld_id ); ?>" name="<?php echo esc_attr( $naam ); ?>"
+										value="<?php echo esc_attr( $eerder ); ?>">
 								<?php elseif ( 'merk' === $veld['type'] ) : ?>
 									<select id="<?php echo esc_attr( $veld_id ); ?>" name="<?php echo esc_attr( $naam ); ?>" required>
 										<option value=""><?php echo esc_html( HDP_I18N::t( 'garantie_kies' ) ); ?></option>
@@ -516,7 +676,7 @@ class HDP_Garantie_Render {
 								<?php if ( ! empty( $veld['hint'] ) ) : ?>
 									<span class="hdp-veld-hint"><?php echo esc_html( HDP_I18N::t( 'garantie_veld_' . $naam . '_hint' ) ); ?></span>
 								<?php endif; ?>
-							</p>
+							</div>
 						<?php endforeach; ?>
 					</div>
 

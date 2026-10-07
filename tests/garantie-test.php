@@ -54,7 +54,7 @@ class Garantie_Test extends WP_UnitTestCase {
 	public function tearDown(): void {
 		remove_filter( 'pre_http_request', array( $this, 'nagebootste_supabase' ), 10 );
 		wp_set_current_user( 0 );
-		unset( $_GET['ticket'], $_GET['nieuw'], $_COOKIE[ HDP_I18N::COOKIE ] );
+		unset( $_GET['ticket'], $_GET['nieuw'], $_GET['soort'], $_COOKIE[ HDP_I18N::COOKIE ] );
 		parent::tearDown();
 	}
 
@@ -690,23 +690,109 @@ class Garantie_Test extends WP_UnitTestCase {
 	 * Formulieren
 	 * ================================================================== */
 
-	public function test_beide_formulieren_hebben_een_eigen_scherm() {
+	public function test_alle_formulieren_hebben_een_eigen_scherm() {
 		$this->als_goedgekeurde_dealer();
 
-		foreach ( array( 'machine', 'claim' ) as $soort ) {
-			$_GET['nieuw'] = $soort;
-			$html          = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
-			unset( $_GET['nieuw'] );
+		$schermen = array(
+			array( 'machine', '' ),
+			array( 'claim', 'machine' ),
+			array( 'claim', 'onderdeel' ),
+		);
 
-			$this->assertStringContainsString( 'hdp-garantie-velden', $html, "Formulier $soort ontbreekt." );
+		foreach ( $schermen as $scherm ) {
+			list( $nieuw, $soort ) = $scherm;
+
+			$_GET['nieuw'] = $nieuw;
+			if ( $soort ) {
+				$_GET['soort'] = $soort;
+			}
+			$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+			unset( $_GET['nieuw'], $_GET['soort'] );
+
+			$this->assertStringContainsString( 'hdp-garantie-velden', $html, "Formulier $nieuw $soort ontbreekt." );
 			$this->assertStringNotContainsString( 'hdp-garantie-lijst', $html );
 			$this->assertStringNotContainsString( 'hdp-machines', $html );
+		}
+	}
+
+	/**
+	 * Een machineclaim en een onderdelenclaim vragen om heel andere dingen,
+	 * dus staat de vraag "waar gaat het over" ervoor. Zonder die keuze hoort
+	 * er nog geen formulier te staan.
+	 */
+	public function test_claim_begint_met_de_vraag_waar_het_over_gaat() {
+		$this->als_goedgekeurde_dealer();
+		$_GET['nieuw'] = 'claim';
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		$this->assertStringNotContainsString( 'hdp-garantie-velden', $html, 'Er hoort hier nog geen formulier te staan.' );
+		$this->assertStringContainsString( 'soort=machine', $html );
+		$this->assertStringContainsString( 'soort=onderdeel', $html );
+	}
+
+	/** Een onbekende soort valt terug op het machineformulier, niet op een fout. */
+	public function test_onbekende_claimsoort_toont_de_keuze() {
+		$this->als_goedgekeurde_dealer();
+		$_GET['nieuw'] = 'claim';
+		$_GET['soort'] = 'iets-anders';
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		$this->assertStringNotContainsString( 'hdp-garantie-velden', $html );
+	}
+
+	/**
+	 * Onderdelen komen uit een doos, niet van een serienummer: het
+	 * machinekeuzemenu hoort hier niet te staan, een factuurnummer en de
+	 * vraag wat er mis is juist wel.
+	 */
+	public function test_onderdelenclaim_vraagt_geen_machine_maar_wel_een_factuur() {
+		$this->als_goedgekeurde_dealer();
+		$_GET['nieuw'] = 'claim';
+		$_GET['soort'] = 'onderdeel';
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		$this->assertStringNotContainsString( 'hdp-claim-machinekeuze', $html );
+		$this->assertStringContainsString( 'hdp-claim-factuurnummer', $html );
+		$this->assertStringContainsString( 'hdp-claim-onderdeel_probleem', $html );
+		$this->assertStringContainsString( 'onderdeel_nummer[]', $html );
+	}
+
+	public function test_claimformulier_vraagt_de_nieuwe_velden() {
+		$this->als_goedgekeurde_dealer();
+		$_GET['nieuw'] = 'claim';
+		$_GET['soort'] = 'machine';
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		foreach ( array( 'te_claimen_tijd', 'klantreferentie', 'opmerkingen', 'onderdeel_retour' ) as $veld ) {
+			$this->assertStringContainsString( 'hdp-claim-' . $veld, $html, "Veld $veld ontbreekt." );
+		}
+		$this->assertStringContainsString( 'onderdeel_nummer[]', $html );
+	}
+
+	public function test_velden_verschillen_per_claimsoort() {
+		$machine   = array_keys( HDP_Garantie::velden( 'machine' ) );
+		$onderdeel = array_keys( HDP_Garantie::velden( 'onderdeel' ) );
+
+		$this->assertContains( 'serienummer', $machine );
+		$this->assertNotContains( 'serienummer', $onderdeel );
+		$this->assertContains( 'onderdeel_probleem', $onderdeel );
+		$this->assertNotContains( 'onderdeel_probleem', $machine );
+
+		// Wat allebei vragen, blijft allebei vragen.
+		foreach ( array( 'klacht', 'regels', 'te_claimen_tijd', 'opmerkingen', 'fotos' ) as $gedeeld ) {
+			$this->assertContains( $gedeeld, $machine );
+			$this->assertContains( $gedeeld, $onderdeel );
 		}
 	}
 
 	public function test_claimformulier_vraagt_niet_wat_de_machine_al_weet() {
 		$this->als_goedgekeurde_dealer();
 		$_GET['nieuw'] = 'claim';
+		$_GET['soort'] = 'machine';
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
@@ -718,6 +804,7 @@ class Garantie_Test extends WP_UnitTestCase {
 	public function test_machinekeuze_toont_de_eigen_machines() {
 		$this->als_goedgekeurde_dealer();
 		$_GET['nieuw'] = 'claim';
+		$_GET['soort'] = 'machine';
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
@@ -863,15 +950,26 @@ class Garantie_Test extends WP_UnitTestCase {
 	public function test_formulieren_zijn_echte_formulieren_met_een_nonce() {
 		$this->als_goedgekeurde_dealer();
 
-		foreach ( array( 'machine', 'claim' ) as $soort ) {
-			$_GET['nieuw'] = $soort;
-			$html          = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
-			unset( $_GET['nieuw'] );
+		$schermen = array(
+			array( 'machine', '' ),
+			array( 'claim', 'machine' ),
+			array( 'claim', 'onderdeel' ),
+		);
 
-			$this->assertStringContainsString( '<form', $html, "Formulier $soort is geen form." );
-			$this->assertStringContainsString( '_wpnonce', $html, "Formulier $soort heeft geen nonce." );
-			$this->assertStringContainsString( 'type="submit"', $html, "Formulier $soort heeft geen verzendknop." );
-			$this->assertStringNotContainsString( 'disabled', $html, "Formulier $soort staat nog uit." );
+		foreach ( $schermen as $scherm ) {
+			list( $nieuw, $soort ) = $scherm;
+
+			$_GET['nieuw'] = $nieuw;
+			if ( $soort ) {
+				$_GET['soort'] = $soort;
+			}
+			$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+			unset( $_GET['nieuw'], $_GET['soort'] );
+
+			$this->assertStringContainsString( '<form', $html, "Formulier $nieuw $soort is geen form." );
+			$this->assertStringContainsString( '_wpnonce', $html, "Formulier $nieuw $soort heeft geen nonce." );
+			$this->assertStringContainsString( 'type="submit"', $html, "Formulier $nieuw $soort heeft geen verzendknop." );
+			$this->assertStringNotContainsString( 'disabled', $html, "Formulier $nieuw $soort staat nog uit." );
 		}
 	}
 

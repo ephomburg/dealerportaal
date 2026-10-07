@@ -365,6 +365,94 @@ class HDP_I18N {
 				'nl' => 'Eén onderdeel per regel, met onderdeelnummer, aantal en bedrag. Vermeld erbij of het van een Homburg-factuur komt; zo niet, stuur die factuur mee als bijlage.',
 				'fr' => "Une pièce par ligne, avec le numéro, la quantité et le montant. Indiquez s'il s'agit d'une facture Homburg ; sinon, joignez cette facture.",
 			),
+			// Garantie — keuze vooraf en onderdelenclaim
+			'garantie_kies_soort_titel' => array( 'nl' => 'Waar gaat uw claim over?', 'fr' => 'Sur quoi porte votre demande\u00a0?' ),
+			'garantie_kies_soort_tekst' => array(
+				'nl' => 'De twee soorten vragen om verschillende gegevens, dus kiest u eerst waar het om gaat.',
+				'fr' => 'Les deux types demandent des informations diff\u00e9rentes\u00a0; choisissez donc d\u2019abord de quoi il s\u2019agit.',
+			),
+			'garantie_soort_machine_titel' => array( 'nl' => 'Een machine', 'fr' => 'Une machine' ),
+			'garantie_soort_machine_tekst' => array(
+				'nl' => 'Een defect aan een machine die u bij ons heeft aangemeld.',
+				'fr' => 'Un d\u00e9faut sur une machine que vous avez enregistr\u00e9e chez nous.',
+			),
+			'garantie_soort_machine_knop'  => array( 'nl' => 'Claim op een machine', 'fr' => 'Demande pour une machine' ),
+			'garantie_soort_onderdeel_titel' => array( 'nl' => 'Bestelde onderdelen', 'fr' => 'Pi\u00e8ces command\u00e9es' ),
+			'garantie_soort_onderdeel_tekst' => array(
+				'nl' => 'Onderdelen die defect of beschadigd aankwamen, verkeerd geleverd zijn, verkeerd besteld of niet aangekomen.',
+				'fr' => 'Des pi\u00e8ces arriv\u00e9es d\u00e9fectueuses ou endommag\u00e9es, mal livr\u00e9es, mal command\u00e9es ou non re\u00e7ues.',
+			),
+			'garantie_soort_onderdeel_knop'  => array( 'nl' => 'Claim op onderdelen', 'fr' => 'Demande pour des pi\u00e8ces' ),
+
+			'garantie_veld_onderdeel_probleem' => array( 'nl' => 'Wat is er met de onderdelen?', 'fr' => 'Que se passe-t-il avec les pi\u00e8ces\u00a0?' ),
+			'garantie_probleem_defect'                => array( 'nl' => 'Defect', 'fr' => 'D\u00e9fectueux' ),
+			'garantie_probleem_beschadigd_aangekomen' => array( 'nl' => 'Beschadigd aangekomen', 'fr' => 'Arriv\u00e9 endommag\u00e9' ),
+			'garantie_probleem_onjuist_geleverd'      => array( 'nl' => 'Onjuist geleverd', 'fr' => 'Mal livr\u00e9' ),
+			'garantie_probleem_onjuist_besteld'       => array( 'nl' => 'Onjuist besteld', 'fr' => 'Mal command\u00e9' ),
+			'garantie_probleem_niet_ontvangen'        => array( 'nl' => 'Niet ontvangen', 'fr' => 'Non re\u00e7u' ),
+
+			'garantie_veld_klacht_onderdeel' => array( 'nl' => 'Toelichting', 'fr' => 'Pr\u00e9cisions' ),
+			'garantie_veld_factuurnummer'      => array( 'nl' => 'Homburg-factuurnummer', 'fr' => 'Num\u00e9ro de facture Homburg' ),
+			'garantie_veld_factuurnummer_hint' => array(
+				'nl' => 'Het factuur- of ordernummer waarop deze onderdelen zijn geleverd.',
+				'fr' => 'Le num\u00e9ro de facture ou de commande sur lequel ces pi\u00e8ces ont \u00e9t\u00e9 livr\u00e9es.',
+			),
+
+			'garantie_veld_regels'           => array( 'nl' => 'Te claimen onderdelen', 'fr' => 'Pi\u00e8ces \u00e0 d\u00e9clarer' ),
+			'garantie_regels_hint'           => array(
+				'nl' => 'Vul alleen de regels in die u claimt. Komt een onderdeel van een andere leverancier, stuur die factuur dan mee als bijlage.',
+				'fr' => 'Ne remplissez que les lignes que vous d\u00e9clarez. Si une pi\u00e8ce provient d\u2019un autre fournisseur, joignez cette facture.',
+			),
+			'garantie_regel_nummer'          => array( 'nl' => 'Onderdeelnummer', 'fr' => 'Num\u00e9ro de pi\u00e8ce' ),
+			'garantie_regel_aantal'          => array( 'nl' => 'Aantal', 'fr' => 'Quantit\u00e9' ),
+			'garantie_regel_bedrag'          => array( 'nl' => 'Bedrag', 'fr' => 'Montant' ),
+			'garantie_regel_herkomst'        => array( 'nl' => 'Factuur', 'fr' => 'Facture' ),
+			'garantie_regel_homburg'         => array( 'nl' => 'Homburg', 'fr' => 'Homburg' ),
+			'garantie_regel_derden'          => array( 'nl' => 'Andere leverancier', 'fr' => 'Autre fournisseur' ),
+			'garantie_regel_toevoegen'       => array( 'nl' => 'Regel toevoegen', 'fr' => 'Ajouter une ligne' ),
+			/* translators: %d is het regelnummer. */
+			'garantie_regel_nummer_van'      => array( 'nl' => 'Onderdeelnummer regel %d', 'fr' => 'Num\u00e9ro de pi\u00e8ce ligne %d' ),
+			/* translators: %d is het regelnummer. */
+			'garantie_regel_aantal_van'      => array( 'nl' => 'Aantal regel %d', 'fr' => 'Quantit\u00e9 ligne %d' ),
+			/* translators: %d is het regelnummer. */
+			'garantie_regel_bedrag_van'      => array( 'nl' => 'Bedrag regel %d', 'fr' => 'Montant ligne %d' ),
+			/* translators: %d is het regelnummer. */
+			'garantie_regel_herkomst_van'    => array( 'nl' => 'Factuur regel %d', 'fr' => 'Facture ligne %d' ),
+
+			'garantie_veld_te_claimen_tijd'      => array( 'nl' => 'Te claimen tijd (uren)', 'fr' => 'Temps \u00e0 d\u00e9clarer (heures)' ),
+			'garantie_veld_te_claimen_tijd_hint' => array(
+				'nl' => 'Alleen de tijd voor het opsporen en repareren van het defect. Reistijd telt niet mee.',
+				'fr' => 'Uniquement le temps consacr\u00e9 au diagnostic et \u00e0 la r\u00e9paration. Le temps de d\u00e9placement ne compte pas.',
+			),
+			'garantie_veld_klantreferentie'      => array( 'nl' => 'Referentie van de klant', 'fr' => 'R\u00e9f\u00e9rence du client' ),
+			'garantie_veld_klantreferentie_hint' => array(
+				'nl' => 'Bijvoorbeeld uw eigen werkordernummer, zodat u deze claim later terugvindt.',
+				'fr' => 'Par exemple votre propre num\u00e9ro de bon de travail, pour retrouver cette demande plus tard.',
+			),
+			'garantie_veld_opmerkingen'          => array( 'nl' => 'Opmerkingen', 'fr' => 'Remarques' ),
+			'garantie_veld_opmerkingen_hint'     => array(
+				'nl' => 'Alles wat wij verder moeten weten. Bijvoorbeeld: hierover gemaild met Gerard op 11-5.',
+				'fr' => 'Tout ce que nous devons savoir en plus. Par exemple\u00a0: courriel \u00e0 Gerard le 11-5.',
+			),
+			'garantie_veld_onderdeel_retour'      => array( 'nl' => 'Ik stuur onderdelen retour naar Stiens', 'fr' => 'Je renvoie des pi\u00e8ces \u00e0 Stiens' ),
+			'garantie_veld_onderdeel_retour_hint' => array(
+				'nl' => 'Vermeld het ticketnummer op de zending. De claim kan pas behandeld worden zodra het onderdeel binnen is.',
+				'fr' => 'Mentionnez le num\u00e9ro de ticket sur l\u2019envoi. La demande ne peut \u00eatre trait\u00e9e qu\u2019une fois la pi\u00e8ce re\u00e7ue.',
+			),
+
+			'garantie_fout_geen_regels'    => array(
+				'nl' => 'Vul minstens \u00e9\u00e9n te claimen onderdeel in.',
+				'fr' => 'Indiquez au moins une pi\u00e8ce \u00e0 d\u00e9clarer.',
+			),
+			'garantie_fout_factuur_nodig'  => array(
+				'nl' => 'Er staat een onderdeel van een andere leverancier bij. Stuur die factuur mee als bijlage.',
+				'fr' => 'Une pi\u00e8ce provient d\u2019un autre fournisseur. Joignez cette facture.',
+			),
+			'garantie_fout_probleem'       => array(
+				'nl' => 'Kies wat er met de onderdelen aan de hand is.',
+				'fr' => 'Choisissez ce qui ne va pas avec les pi\u00e8ces.',
+			),
+
 			'garantie_veld_fotos'        => array( 'nl' => "Foto's", 'fr' => 'Photos' ),
 			// Eigen hint voor de claim: op het machineformulier slaat "foto
 			// van het defect" nergens op, daar is nog niets stuk.

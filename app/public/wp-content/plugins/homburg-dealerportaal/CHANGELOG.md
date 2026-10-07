@@ -8,6 +8,21 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.63.0
+
+**Garantie: twee soorten claims, en de velden die de serviceafdeling vroeg.**
+- Een claim begint nu met één vraag: gaat het over een machine of over bestelde onderdelen? Daarna volgt een formulier dat alleen vraagt wat bij die soort hoort. Dat scheelt een scherm vol velden die aan- en uitspringen.
+- **Onderdelenclaim**: geen machine nodig (een doos die verkeerd aankomt hoort niet bij een serienummer), wel verplicht een Homburg-factuurnummer en de keuze wat er mis is — defect, beschadigd aangekomen, onjuist geleverd, onjuist besteld of niet ontvangen.
+- **Te claimen onderdelen** zijn echte regels geworden: onderdeelnummer, aantal, bedrag en of het van een Homburg-factuur komt. Drie regels staan klaar, meer kan met één knop. Staat er een regel van een andere leverancier bij, dan wordt de claim geweigerd tot die factuur als bijlage meekomt.
+- Nieuw op beide formulieren: **te claimen tijd** (met de uitleg dat reistijd niet meetelt), **referentie van de klant**, **opmerkingen** en een vinkje **"ik stuur onderdelen retour naar Stiens"** — zodat de werkplaats weet dat er iets onderweg is.
+- Bedragen worden in hele centen opgeslagen. Als kommagetal is 6,11 niet precies op te slaan (het wordt 6.1100000000000003) en dan loopt het optellen van tien claimregels zichtbaar mis.
+- De herkomst per regel is een keuzemenu en geen vinkje: een vinkje dat uit staat stuurt niets mee, waardoor de rijtjes uit het formulier niet meer gelijk lopen en het bedrag van regel 2 bij onderdeel 3 belandt. Een test bewaakt precies dat.
+- Vraagt om de kolommen die op 7 oktober 2026 aan de claimtabel van de Homburg App zijn toegevoegd.
+
+**Twee kleine dingen uit de doorlichting.**
+- Het instellingenvenster in de header gebruikte een `h1`. Omdat dat venster op elke pagina staat, heette elke pagina voor een schermlezer en voor Google "Accountinstellingen" — ook de winkel en garantie. Nu een `h2`; het venster houdt zijn naam via `aria-labelledby`.
+- De sitemap gaf `/author/erik/` prijs, en daarmee een inlognaam. Gebruikers staan er niet meer in.
+
 ## 1.62.0
 
 **De webshop was voor iedereen te bekijken — inclusief de dealerprijzen.**
