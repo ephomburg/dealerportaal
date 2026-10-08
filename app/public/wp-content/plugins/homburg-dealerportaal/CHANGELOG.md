@@ -8,6 +8,11 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.63.1
+- **De zelfcontrole sloeg vals alarm.** Direct na het live zetten meldde hij dat er twee bestanden op het inlogscherm niet meer op te halen waren. Allebei onterecht: de sfeerfoto komt van homburg-belgium.com en staat helemaal niet in onze uploadsmap, en het tweede "bestand" was een sterretje uit een stylesheet.
+- Oorzaak: de controle rekende elk pad om naar ons eigen domein. En binnen een afgeschermde map geeft alles wat er niet is een 403 in plaats van een 404 — waardoor de regel "alleen een 403 telt" die bestanden toch aanwees.
+- Nu kijkt de controle alleen naar bestanden van de eigen site, en alleen naar wat op een bestandsnaam lijkt. Drie tests leggen beide gevallen vast. Een melding die onterecht afgaat, leer je namelijk negeren.
+
 ## 1.63.0
 
 **Garantie: twee soorten claims, en de velden die de serviceafdeling vroeg.**

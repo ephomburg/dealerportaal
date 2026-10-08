@@ -287,15 +287,53 @@ class HDP_Bestandsbeveiliging {
 			return array();
 		}
 
-		$patroon = '#' . preg_quote( $pad, '#' ) . '/[^"\'\s),>]+#';
-		if ( ! preg_match_all( $patroon, wp_remote_retrieve_body( $antwoord ), $treffers ) ) {
-			return array();
+		$html       = wp_remote_retrieve_body( $antwoord );
+		$eigen_host = wp_parse_url( home_url(), PHP_URL_HOST );
+		$urls       = array();
+
+		// 1. Volledige URL's: alleen die van onze eigen site tellen mee. De
+		// sfeerfoto op het inlogscherm komt bijvoorbeeld van
+		// homburg-belgium.com; die staat niet in ónze uploadsmap en zou
+		// omgerekend naar ons eigen domein een valse melding geven.
+		if ( preg_match_all( '#https?://[^"\'\s),>]+#', $html, $treffers ) ) {
+			foreach ( $treffers[0] as $url ) {
+				$delen = wp_parse_url( $url );
+				if ( empty( $delen['host'] ) || $delen['host'] !== $eigen_host ) {
+					continue;
+				}
+				if ( empty( $delen['path'] ) || 0 !== strpos( $delen['path'], $pad . '/' ) ) {
+					continue;
+				}
+				$urls[] = $url;
+			}
 		}
 
-		// Alles weer tot een volledige URL maken. Een pad van een ánder domein
-		// komt zo op onze eigen site uit, wat hoogstens een 404 oplevert en dus
-		// geen melding.
-		return array_map( 'home_url', $treffers[0] );
+		// 2. Paden zonder domeinnaam; die zijn per definitie van onszelf. De
+		// header schrijft zijn logo zo, en dat staat op elke pagina.
+		if ( preg_match_all( '#(?<=["\'\s(])' . preg_quote( $pad, '#' ) . '/[^"\'\s),>]+#', $html, $treffers ) ) {
+			foreach ( $treffers[0] as $relatief ) {
+				$urls[] = home_url( $relatief );
+			}
+		}
+
+		return array_values( array_filter( array_unique( $urls ), array( __CLASS__, 'lijkt_op_een_bestand' ) ) );
+	}
+
+	/**
+	 * Of deze URL een bestand aanwijst en niet iets anders.
+	 *
+	 * Een stylesheet kan "/wp-content/uploads/*" bevatten en die sterretjes
+	 * zijn geen bestand. Binnen een afgeschermde map geeft álles wat er niet
+	 * is een 403 in plaats van een 404, dus zonder deze zeef meldt de
+	 * controle dat er iets stuk is wat nooit heeft bestaan.
+	 *
+	 * @param string $url Volledige URL.
+	 * @return bool
+	 */
+	private static function lijkt_op_een_bestand( $url ) {
+		$pad = (string) wp_parse_url( $url, PHP_URL_PATH );
+
+		return (bool) preg_match( '#\.[a-z0-9]{2,5}$#i', $pad );
 	}
 
 	/**

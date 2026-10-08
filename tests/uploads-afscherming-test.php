@@ -131,6 +131,7 @@ class Uploads_Afscherming_Test extends WP_UnitTestCase {
 		);
 
 		$this->assertContains( 'Logo-HOMBURG_WIT-768x102.png', $namen, 'Een logo zonder domeinnaam hoort ook gevonden te worden.' );
+
 		$this->assertContains( 'Godin-druppel-klein-100x100.png', $namen );
 	}
 
@@ -195,6 +196,55 @@ class Uploads_Afscherming_Test extends WP_UnitTestCase {
 		$methode->setAccessible( true );
 
 		$this->assertSame( array( 'geheim.png' ), $methode->invoke( null ) );
+	}
+
+	/**
+	 * De sfeerfoto op het inlogscherm komt van homburg-belgium.com. Die
+	 * staat niet in ónze uploadsmap, dus hij hoort hier niet gecontroleerd
+	 * te worden. Ging dat mis, dan vroeg de controle hem op ons eigen
+	 * domein op — en binnen een afgeschermde map geeft álles wat er niet is
+	 * een 403, dus meldde hij dat er iets stuk was wat nooit heeft bestaan.
+	 */
+	public function test_bestanden_van_een_ander_domein_tellen_niet_mee() {
+		$this->mock_pagina(
+			'<div style="background-image:url(\'https://www.homburg-belgium.com/wp-content/uploads/2023/09/sfeer.jpg\')"></div>'
+			. '<img src="/wp-content/uploads/2026/07/Logo-HOMBURG_WIT.png">'
+		);
+
+		$namen = $this->namen_op( home_url( '/' ) );
+
+		$this->assertSame( array( 'Logo-HOMBURG_WIT.png' ), $namen );
+	}
+
+	/**
+	 * Een stylesheet kan "/wp-content/uploads/*" bevatten. Dat is geen
+	 * bestand en levert anders ook een valse melding op.
+	 */
+	public function test_wat_geen_bestand_is_telt_niet_mee() {
+		$this->mock_pagina(
+			'<style>[src*="/wp-content/uploads/*"] { display: block }</style>'
+			. '<img src="/wp-content/uploads/2026/09/dc.png">'
+		);
+
+		$this->assertSame( array( 'dc.png' ), $this->namen_op( home_url( '/' ) ) );
+	}
+
+	/** Een volledige URL van onze eigen site telt wél mee. */
+	public function test_eigen_volledige_urls_tellen_mee() {
+		$uploads = wp_upload_dir();
+		$this->mock_pagina( '<link rel="icon" href="' . $uploads['baseurl'] . '/2026/09/Godin-druppel-klein-100x100.png">' );
+
+		$this->assertSame( array( 'Godin-druppel-klein-100x100.png' ), $this->namen_op( home_url( '/' ) ) );
+	}
+
+	/** De bestandsnamen die de controle op een pagina vindt. */
+	private function namen_op( $pagina ) {
+		return array_map(
+			function ( $url ) {
+				return basename( wp_parse_url( $url, PHP_URL_PATH ) );
+			},
+			$this->urls_op( $pagina )
+		);
 	}
 
 	/** Laat elke pagina-aanvraag dit stukje HTML teruggeven. */
