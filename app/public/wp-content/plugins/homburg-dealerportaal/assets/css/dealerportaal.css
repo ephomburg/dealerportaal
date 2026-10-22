@@ -7,6 +7,56 @@
 :root {
 	--hdp-radius:  10px;
 	--hdp-schaduw: 0 4px 18px rgba(43, 45, 49, 0.10);
+
+	/* ── Statuskleuren ───────────────────────────────────────────────
+	   Vijf betekenissen, niet vijftien losse kleuren. Bestellingen en
+	   garantieclaims hadden allebei hun eigen set, op verschillende
+	   momenten gekozen: "afgerond" was groen #1a7d3a en "goedgekeurd"
+	   groen #1d6b2d. Hetzelfde idee, net een andere kleur — niemand ziet
+	   het verschil, en het kost onderhoud zonder iets op te leveren.
+
+	   De kleur draagt de bétekenis; de tekst in het label zegt welke
+	   status het precies is. Daarom krijgt "bij fabrikant" dezelfde
+	   kleur als "in behandeling": in beide gevallen loopt het en hoeft
+	   de dealer niets te doen. Dat staat er in woorden bij.
+
+	   Komt er een status bij, dan kiest die een betekenis en heeft hij
+	   meteen kleur — in plaats van als kale tekst op het scherm te
+	   belanden, wat eerder twee keer is gebeurd.
+
+	   Alle vijf halen ruim 4,5:1 contrast op hun eigen vlak. */
+
+	/* Ingediend, ontvangen — er gebeurt nog niets. */
+	--hdp-neutraal-vlak:  #eceef1;
+	--hdp-neutraal-tekst: #3f434a;
+	--hdp-neutraal-rand:  #d9dde3;
+
+	/* Het loopt, bij ons of bij de fabrikant. De dealer hoeft niets. */
+	--hdp-loopt-vlak:  #e4eefb;
+	--hdp-loopt-tekst: #1d4e85;
+	--hdp-loopt-rand:  #c3d7f2;
+
+	/* De dealer is aan zet. Bewust de enige kleur die om aandacht vraagt;
+	   als "in behandeling" ook oranje is, valt dit niet meer op. */
+	--hdp-aanzet-vlak:         #fdeccf;
+	--hdp-aanzet-tekst:        #7a4100;
+	--hdp-aanzet-rand:         #f3dcc0;
+	/* Lichter vlak voor hele blokken i.p.v. een klein label. */
+	--hdp-aanzet-zacht:        #fff8ef;
+	--hdp-aanzet-zacht-hover:  #fff2e0;
+	/* Fellere variant voor een randlijn of icoon, waar een donkerbruine
+	   tekstkleur te dof uitvalt. */
+	--hdp-aanzet-accent:       #b25e00;
+
+	/* Klaar: afgerond, goedgekeurd, verwerkt. */
+	--hdp-klaar-vlak:  #e2f3e6;
+	--hdp-klaar-tekst: #1d6b2d;
+	--hdp-klaar-rand:  #b9ebc9;
+
+	/* Gestopt: afgewezen, geannuleerd, mislukt. */
+	--hdp-gestopt-vlak:  #fdecec;
+	--hdp-gestopt-tekst: #9a0a0a;
+	--hdp-gestopt-rand:  #f5c2c2;
 }
 
 /* .hdp-info-sectie/.hdp-kaarten-sectie staan sinds de omzetting naar
@@ -203,9 +253,9 @@
 	justify-content: space-between;
 	gap: 0.8rem;
 	flex-wrap: wrap;
-	background: #fff8e6;
-	color: #8a6100;
-	border: 1px solid #f2dfa0;
+	background: var(--hdp-loopt-vlak);
+	color: var(--hdp-loopt-tekst);
+	border: 1px solid var(--hdp-loopt-rand);
 	border-radius: 6px;
 	padding: 0.7rem 0.9rem;
 	font-size: 0.85rem;
@@ -214,9 +264,9 @@
 .hdp-instellingen-in-afwachting form { margin: 0; }
 
 .hdp-instellingen-melding-ok {
-	background: #ecfdf1;
-	color: #1a7d3a;
-	border: 1px solid #b9ebc9;
+	background: var(--hdp-klaar-vlak);
+	color: var(--hdp-klaar-tekst);
+	border: 1px solid var(--hdp-klaar-rand);
 	border-radius: 6px;
 	padding: 0.7rem 0.9rem;
 	font-size: 0.85rem;
@@ -282,9 +332,9 @@
 
 .hdp-login-fout {
 	display: none;
-	background: #fdecec;
-	color: var(--wp--preset--color--homburg-rood-donker);
-	border: 1px solid #f5c2c2;
+	background: var(--hdp-gestopt-vlak);
+	color: var(--hdp-gestopt-tekst);
+	border: 1px solid var(--hdp-gestopt-rand);
 	border-radius: 6px;
 	padding: 0.7rem 0.9rem;
 	font-size: 0.85rem;
@@ -938,12 +988,14 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	background: var(--wp--preset--color--grijs-licht);
 	color: var(--wp--preset--color--donkergrijs);
 }
-.hdp-bestel-status-completed { background: #ecfdf1; color: #1a7d3a; }
+.hdp-bestel-status-completed { background: var(--hdp-klaar-vlak); color: var(--hdp-klaar-tekst); }
+/* "Wordt verwerkt" was oranje. Oranje is nu voorbehouden aan "u bent aan
+   zet", en bij een lopende bestelling hoeft de dealer juist niets. */
 .hdp-bestel-status-processing,
-.hdp-bestel-status-on-hold { background: #fff8e6; color: #8a6100; }
+.hdp-bestel-status-on-hold { background: var(--hdp-loopt-vlak); color: var(--hdp-loopt-tekst); }
 .hdp-bestel-status-cancelled,
 .hdp-bestel-status-failed,
-.hdp-bestel-status-refunded { background: #fdecec; color: var(--wp--preset--color--homburg-rood-donker); }
+.hdp-bestel-status-refunded { background: var(--hdp-gestopt-vlak); color: var(--hdp-gestopt-tekst); }
 
 .hdp-bestel-paginering {
 	display: flex;
@@ -978,8 +1030,8 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	font-size: 0.88rem;
 	font-weight: 600;
 }
-.hdp-admin-melding-ok { background: #ecfdf1; color: #1a7d3a; border: 1px solid #b9ebc9; }
-.hdp-admin-melding-fout { background: #fdecec; color: var(--wp--preset--color--homburg-rood-donker); border: 1px solid #f5c2c2; }
+.hdp-admin-melding-ok { background: var(--hdp-klaar-vlak); color: var(--hdp-klaar-tekst); border: 1px solid var(--hdp-klaar-rand); }
+.hdp-admin-melding-fout { background: var(--hdp-gestopt-vlak); color: var(--hdp-gestopt-tekst); border: 1px solid var(--hdp-gestopt-rand); }
 
 .hdp-admin-formulier {
 	background: var(--wp--preset--color--wit);
@@ -1169,7 +1221,7 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	   8,7:1 contrast in plaats van 6,4:1, en op deze maat telt dat. Beide
 	   kleuren hier als vaste waarde, zodat het label leesbaar blijft ook
 	   als de themavariabelen ergens niet doorkomen. */
-	background: #9a0a0a;
+	background: #9a0a0a; /* = homburg-rood-donker */
 	color: #fff;
 	font-size: .74rem;
 	font-weight: 700;
@@ -1325,8 +1377,8 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 /* De enige status waarbij de dealer zelf aan zet is — die mag opvallen,
    anders blijft een claim liggen omdat niemand merkt dat er iets gevraagd is. */
 .hdp-garantie-item-actie {
-	border-left-color: #b25e00;
-	background: #fff8ef;
+	border-left-color: var(--hdp-aanzet-accent);
+	background: var(--hdp-aanzet-zacht);
 }
 
 .hdp-garantie-item-hoofd {
@@ -1358,7 +1410,7 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	margin: .6rem 0 0;
 	font-size: .9rem;
 	font-weight: 600;
-	color: #8a4800;
+	color: var(--hdp-aanzet-tekst);
 }
 
 /* ── Statuslabels ─────────────────────────────────────────────── */
@@ -1371,15 +1423,15 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	letter-spacing: .02em;
 	white-space: nowrap;
 }
-.hdp-garantie-status-ingediend      { background: #eceef1; color: #3f434a; }
-.hdp-garantie-status-in-behandeling { background: #e4eefb; color: #1d4e85; }
-.hdp-garantie-status-info-nodig     { background: #fdeccf; color: #7a4100; }
-.hdp-garantie-status-goedgekeurd    { background: #e2f3e6; color: #1d6b2d; }
-.hdp-garantie-status-afgewezen      { background: #fdecec; color: var(--wp--preset--color--homburg-rood-donker); }
+.hdp-garantie-status-ingediend      { background: var(--hdp-neutraal-vlak); color: var(--hdp-neutraal-tekst); }
+.hdp-garantie-status-in-behandeling { background: var(--hdp-loopt-vlak); color: var(--hdp-loopt-tekst); }
+.hdp-garantie-status-info-nodig     { background: var(--hdp-aanzet-vlak); color: var(--hdp-aanzet-tekst); }
+.hdp-garantie-status-goedgekeurd    { background: var(--hdp-klaar-vlak); color: var(--hdp-klaar-tekst); }
+.hdp-garantie-status-afgewezen      { background: var(--hdp-gestopt-vlak); color: var(--hdp-gestopt-tekst); }
 /* De twee vertakkingen via de fabrikant: eigen kleur, zodat ze niet als
    kale tekst op het scherm staan. */
-.hdp-garantie-status-bij-fabrikant  { background: #e8e4fb; color: #46338f; }
-.hdp-garantie-status-afgewezen-fabrikant { background: #fdecec; color: var(--wp--preset--color--homburg-rood-donker); }
+.hdp-garantie-status-bij-fabrikant  { background: var(--hdp-loopt-vlak); color: var(--hdp-loopt-tekst); }
+.hdp-garantie-status-afgewezen-fabrikant { background: var(--hdp-gestopt-vlak); color: var(--hdp-gestopt-tekst); }
 
 /* Alleen voor schermlezers: labels bij velden die visueel genoeg hebben
    aan de kolomkop erboven. */
@@ -1723,15 +1775,15 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	line-height: 1.55;
 }
 .hdp-ticket-ligtbij-u {
-	background: #fff8ef;
-	border-left: 4px solid #b25e00;
-	color: #8a4800;
+	background: var(--hdp-aanzet-zacht);
+	border-left: 4px solid var(--hdp-aanzet-accent);
+	color: var(--hdp-aanzet-tekst);
 	font-weight: 600;
 }
 .hdp-ticket-ligtbij-klaar {
-	background: #e2f3e6;
-	border-left-color: #1d6b2d;
-	color: #1d6b2d;
+	background: var(--hdp-klaar-vlak);
+	border-left-color: var(--hdp-klaar-tekst);
+	color: var(--hdp-klaar-tekst);
 	font-weight: 600;
 }
 
@@ -1748,7 +1800,7 @@ a.hdp-garantie-item:focus-visible {
 	box-shadow: 0 4px 16px rgba(43, 45, 49, .14);
 }
 a.hdp-garantie-item-actie:hover,
-a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
+a.hdp-garantie-item-actie:focus-visible { background: var(--hdp-aanzet-zacht-hover); }
 
 @media (max-width: 48rem) {
 	.hdp-ticket-gegevens { grid-template-columns: 1fr; }
@@ -1799,25 +1851,25 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 	gap: 1rem;
 	padding: 1rem 1.2rem;
 	margin-bottom: 1.9rem;
-	background: #fff8ef;
-	border: 1px solid #f3dcc0;
-	border-left: 4px solid #b25e00;
+	background: var(--hdp-aanzet-zacht);
+	border: 1px solid var(--hdp-aanzet-rand);
+	border-left: 4px solid var(--hdp-aanzet-accent);
 	border-radius: var(--hdp-radius);
 }
 .hdp-aandacht-icoon {
 	width: 38px;
 	height: 38px;
 	border-radius: 8px;
-	background: #fdeccf;
+	background: var(--hdp-aanzet-vlak);
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
 }
-.hdp-aandacht-icoon svg { width: 20px; height: 20px; stroke: #b25e00; fill: none; }
+.hdp-aandacht-icoon svg { width: 20px; height: 20px; stroke: var(--hdp-aanzet-accent); fill: none; }
 .hdp-aandacht-tekst { flex: 1; min-width: 0; }
-.hdp-aandacht-tekst strong { display: block; color: #8a4800; font-size: .98rem; }
-.hdp-aandacht-tekst span { display: block; font-size: .87rem; color: #8a4800; }
+.hdp-aandacht-tekst strong { display: block; color: var(--hdp-aanzet-tekst); font-size: .98rem; }
+.hdp-aandacht-tekst span { display: block; font-size: .87rem; color: var(--hdp-aanzet-tekst); }
 .hdp-garantie-aandacht .hdp-btn { flex-shrink: 0; }
 
 .hdp-garantie-aantal {
@@ -1872,7 +1924,7 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 	color: var(--wp--preset--color--grijs-tekst);
 	margin-bottom: .3rem;
 }
-.hdp-machine-garantie-label strong { color: #8a4800; }
+.hdp-machine-garantie-label strong { color: var(--hdp-aanzet-tekst); }
 .hdp-machine-balk {
 	display: block;
 	height: 6px;
@@ -1880,8 +1932,8 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 	background: var(--wp--preset--color--rand);
 	overflow: hidden;
 }
-.hdp-machine-balk i { display: block; height: 100%; background: #1d6b2d; }
-.hdp-machine-balk-bijna i { background: #b25e00; }
+.hdp-machine-balk i { display: block; height: 100%; background: var(--hdp-klaar-tekst); }
+.hdp-machine-balk-bijna i { background: var(--hdp-aanzet-accent); }
 .hdp-machine-balk-verlopen i { background: #c9cbd0; }
 
 /* ── Formulierscherm ─────────────────────────────────────────── */
@@ -1942,8 +1994,8 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 .hdp-garantie-storing {
 	margin: 0 0 1.9rem;
 	padding: 1rem 1.2rem;
-	background: #fdecec;
-	border: 1px solid #f5c2c2;
+	background: var(--hdp-gestopt-vlak);
+	border: 1px solid var(--hdp-gestopt-rand);
 	border-left: 4px solid var(--wp--preset--color--homburg-rood);
 	border-radius: var(--hdp-radius);
 	color: var(--wp--preset--color--homburg-rood-donker);
@@ -1963,8 +2015,9 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 }
 .hdp-machine-beoordeling strong { display: block; }
 .hdp-machine-beoordeling span { display: block; margin-top: .15rem; }
-.hdp-machine-beoordeling-in_behandeling { background: #fdeccf; color: #7a4100; }
-.hdp-machine-beoordeling-afgewezen { background: #fdecec; color: var(--wp--preset--color--homburg-rood-donker); }
+/* Wacht op ónze beoordeling, niet op de dealer — dus "loopt", niet oranje. */
+.hdp-machine-beoordeling-in_behandeling { background: var(--hdp-loopt-vlak); color: var(--hdp-loopt-tekst); }
+.hdp-machine-beoordeling-afgewezen { background: var(--hdp-gestopt-vlak); color: var(--hdp-gestopt-tekst); }
 
 @media (max-width: 48rem) {
 	.hdp-machine-beoordeling { max-width: 100%; width: 100%; }
@@ -2011,9 +2064,9 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 .hdp-garantie-gelukt {
 	margin: 0 0 1.9rem;
 	padding: 1rem 1.2rem;
-	background: #e2f3e6;
-	border: 1px solid #bfe2c8;
-	border-left: 4px solid #1d6b2d;
+	background: var(--hdp-klaar-vlak);
+	border: 1px solid var(--hdp-klaar-rand);
+	border-left: 4px solid var(--hdp-klaar-tekst);
 	border-radius: var(--hdp-radius);
 	color: #19572a;
 	font-size: .93rem;
@@ -2106,7 +2159,7 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 	background: var(--wp--preset--color--rand);
 }
 .hdp-route-stap:last-child::before { display: none; }
-.hdp-route-gedaan::before { background: #1d6b2d; }
+.hdp-route-gedaan::before { background: var(--hdp-klaar-tekst); }
 
 .hdp-route-bol {
 	position: relative;
@@ -2118,7 +2171,7 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 	border: 3px solid var(--wp--preset--color--rand);
 	background: var(--wp--preset--color--wit);
 }
-.hdp-route-gedaan .hdp-route-bol { background: #1d6b2d; border-color: #1d6b2d; }
+.hdp-route-gedaan .hdp-route-bol { background: var(--hdp-klaar-tekst); border-color: var(--hdp-klaar-tekst); }
 /* Vinkje, getekend met twee lijntjes. */
 .hdp-route-gedaan .hdp-route-bol::after {
 	content: "";
@@ -2186,17 +2239,17 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 
 /* ── "U bent aan zet" ────────────────────────────────────────── */
 .hdp-ticket-actie {
-	background: #fff8ef;
-	border: 1px solid #f3dcc0;
-	border-left: 4px solid #b25e00;
+	background: var(--hdp-aanzet-zacht);
+	border: 1px solid var(--hdp-aanzet-rand);
+	border-left: 4px solid var(--hdp-aanzet-accent);
 	border-radius: var(--hdp-radius);
 	padding: 1rem 1.2rem;
 }
-.hdp-ticket-actie strong { display: block; color: #8a4800; font-size: .96rem; margin-bottom: .25rem; }
+.hdp-ticket-actie strong { display: block; color: var(--hdp-aanzet-tekst); font-size: .96rem; margin-bottom: .25rem; }
 .hdp-ticket-actie p {
 	margin: 0 0 .85rem;
 	font-size: .86rem;
-	color: #8a4800;
+	color: var(--hdp-aanzet-tekst);
 	line-height: 1.5;
 }
 .hdp-ticket-actie .hdp-btn { padding: .55rem 1rem; font-size: .85rem; }

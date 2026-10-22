@@ -55,13 +55,17 @@ class HDP_Garantie_Render {
 		ob_start();
 		?>
 		<div class="hdp-portaal alignfull">
-			<section class="hdp-welkom alignfull hdp-welkom-zonder-hero">
-				<div class="hdp-welkom-inner">
-					<a class="hdp-terug-boven" href="<?php echo esc_url( home_url( '/dealerportaal/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'terug_naar_portaal' ) ); ?></a>
-					<h1><?php echo esc_html( $titel ); ?></h1>
-					<p><?php echo esc_html( $omschrijving ); ?></p>
-				</div>
-			</section>
+			<?php
+			HDP_Paginakop::render(
+				array_merge(
+					array(
+						'titel' => $titel,
+						'intro' => $omschrijving,
+					),
+					HDP_Paginakop::terug_naar_portaal()
+				)
+			);
+			?>
 			<section class="hdp-garantie">
 				<?php
 				// Eén keer ophalen en doorgeven: anders doet elke sectie zijn
@@ -82,7 +86,6 @@ class HDP_Garantie_Render {
 					<?php self::render_machinelijst( $machines ); ?>
 					<?php self::render_zoekscript(); ?>
 				<?php endif; ?>
-				<p class="hdp-terug"><a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/dealerportaal/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'terug_naar_portaal' ) ); ?></a></p>
 			</section>
 		</div>
 		<?php
@@ -453,13 +456,16 @@ class HDP_Garantie_Render {
 		ob_start();
 		?>
 		<div class="hdp-portaal alignfull">
-			<section class="hdp-welkom alignfull hdp-welkom-zonder-hero">
-				<div class="hdp-welkom-inner">
-					<a class="hdp-terug-boven" href="<?php echo esc_url( home_url( '/garantie/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'garantie_terug_naar_garantie' ) ); ?></a>
-					<h1><?php echo esc_html( HDP_I18N::t( 'garantie_kies_soort_titel' ) ); ?></h1>
-					<p><?php echo esc_html( HDP_I18N::t( 'garantie_kies_soort_tekst' ) ); ?></p>
-				</div>
-			</section>
+			<?php
+			HDP_Paginakop::render(
+				array(
+					'titel'       => HDP_I18N::t( 'garantie_kies_soort_titel' ),
+					'intro'       => HDP_I18N::t( 'garantie_kies_soort_tekst' ),
+					'terug_url'   => home_url( '/garantie/' ),
+					'terug_tekst' => HDP_I18N::t( 'garantie_terug_naar_garantie' ),
+				)
+			);
+			?>
 			<section class="hdp-garantie">
 				<?php self::render_meldingen(); ?>
 				<div class="hdp-garantie-ingangen">
@@ -594,13 +600,16 @@ class HDP_Garantie_Render {
 		ob_start();
 		?>
 		<div class="hdp-portaal alignfull">
-			<section class="hdp-welkom alignfull hdp-welkom-zonder-hero">
-				<div class="hdp-welkom-inner">
-					<a class="hdp-terug-boven" href="<?php echo esc_url( home_url( '/garantie/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'garantie_terug_naar_garantie' ) ); ?></a>
-					<h1><?php echo esc_html( HDP_I18N::t( $titelsleutel . '_titel' ) ); ?></h1>
-					<p><?php echo esc_html( HDP_I18N::t( $titelsleutel . '_tekst' ) ); ?></p>
-				</div>
-			</section>
+			<?php
+			HDP_Paginakop::render(
+				array(
+					'titel'       => HDP_I18N::t( $titelsleutel . '_titel' ),
+					'intro'       => HDP_I18N::t( $titelsleutel . '_tekst' ),
+					'terug_url'   => home_url( '/garantie/' ),
+					'terug_tekst' => HDP_I18N::t( 'garantie_terug_naar_garantie' ),
+				)
+			);
+			?>
 			<section class="hdp-garantie">
 				<?php self::render_meldingen(); ?>
 				<form class="hdp-garantie-formulier" method="post" enctype="multipart/form-data"
@@ -759,7 +768,6 @@ class HDP_Garantie_Render {
 			<div class="hdp-portaal alignfull">
 				<section class="hdp-garantie">
 					<?php self::render_storing(); ?>
-					<p class="hdp-terug"><a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/garantie/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'garantie_terug_naar_overzicht' ) ); ?></a></p>
 				</section>
 			</div>
 			<?php
@@ -794,7 +802,6 @@ class HDP_Garantie_Render {
 					</aside>
 				</div>
 
-				<p class="hdp-terug"><a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/garantie/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'garantie_terug_naar_overzicht' ) ); ?></a></p>
 			</section>
 		</div>
 		<?php
@@ -809,7 +816,6 @@ class HDP_Garantie_Render {
 				<?php
 				echo HDP_Icons::render_lege_status( 'downloads', HDP_I18N::t( 'garantie_ticket_onbekend' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- render_lege_status() escapet zelf.
 				?>
-				<p class="hdp-terug"><a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/garantie/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'garantie_terug_naar_overzicht' ) ); ?></a></p>
 			</section>
 		</div>
 		<?php

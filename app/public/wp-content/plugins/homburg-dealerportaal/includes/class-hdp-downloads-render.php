@@ -24,16 +24,19 @@ class HDP_Downloads_Render {
 		ob_start();
 		?>
 		<div class="hdp-portaal alignfull">
-			<section class="hdp-welkom alignfull hdp-welkom-zonder-hero">
-				<div class="hdp-welkom-inner">
-					<a class="hdp-terug-boven" href="<?php echo esc_url( home_url( '/dealerportaal/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'terug_naar_portaal' ) ); ?></a>
-					<h1><?php echo esc_html( $titel ); ?></h1>
-					<p><?php echo esc_html( $omschrijving ); ?></p>
-				</div>
-			</section>
+			<?php
+			HDP_Paginakop::render(
+				array_merge(
+					array(
+						'titel' => $titel,
+						'intro' => $omschrijving,
+					),
+					HDP_Paginakop::terug_naar_portaal()
+				)
+			);
+			?>
 			<section class="hdp-downloads">
 				<?php echo self::render_downloads_lijst( 'download' ); // phpcs:ignore WordPress.Security.EscapeOutput -- reeds ge-escaped in render_downloads_lijst(). ?>
-				<p class="hdp-terug"><a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/dealerportaal/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'terug_naar_portaal' ) ); ?></a></p>
 			</section>
 		</div>
 		<?php
@@ -61,16 +64,19 @@ class HDP_Downloads_Render {
 		ob_start();
 		?>
 		<div class="hdp-portaal alignfull">
-			<section class="hdp-welkom alignfull hdp-welkom-zonder-hero">
-				<div class="hdp-welkom-inner">
-					<a class="hdp-terug-boven" href="<?php echo esc_url( home_url( '/dealerportaal/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'terug_naar_portaal' ) ); ?></a>
-					<h1><?php echo esc_html( $titel ); ?></h1>
-					<p><?php echo esc_html( $omschrijving ); ?></p>
-				</div>
-			</section>
+			<?php
+			HDP_Paginakop::render(
+				array_merge(
+					array(
+						'titel' => $titel,
+						'intro' => $omschrijving,
+					),
+					HDP_Paginakop::terug_naar_portaal()
+				)
+			);
+			?>
 			<section class="hdp-downloads">
 				<?php echo self::render_downloads_lijst( 'content' ); // phpcs:ignore WordPress.Security.EscapeOutput -- reeds ge-escaped in render_downloads_lijst(). ?>
-				<p class="hdp-terug"><a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/dealerportaal/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'terug_naar_portaal' ) ); ?></a></p>
 			</section>
 		</div>
 		<?php

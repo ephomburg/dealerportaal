@@ -31,6 +31,7 @@ require_once HDP_PLUGIN_DIR . 'includes/class-hdp-downloads-cpt.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-herbestellen.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-bestelgeschiedenis-render.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-icons.php';
+require_once HDP_PLUGIN_DIR . 'includes/class-hdp-paginakop.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-foutscherm.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-login.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-account.php';
