@@ -8,6 +8,29 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.64.0 / thema 1.28.0
+
+**Eén statuspalet in plaats van twee.**
+- Bestellingen en garantieclaims hadden allebei hun eigen set statuskleuren, op verschillende momenten gekozen: "afgerond" was groen `#1a7d3a` en "goedgekeurd" groen `#1d6b2d`. Hetzelfde idee, net een andere kleur — niemand ziet het verschil, en het kost onderhoud zonder iets op te leveren.
+- Nu vijf betekenissen: neutraal, loopt, aan zet, klaar, gestopt. Elke status wijst naar een betekenis; nul losse statuskleuren over in de hele stylesheet.
+- **Twee zichtbare gevolgen.** "Wordt verwerkt" en "machine in beoordeling" zijn van oranje naar blauw gegaan: oranje is nu voorbehouden aan "u bent aan zet", en bij een lopende bestelling hoeft de dealer juist niets. En "bij fabrikant" deelt de kleur van "in behandeling" — in beide gevallen loopt het; wélke het is staat in het label.
+- Een test bewaakt dat elke status een regel hééft en dat die uit het palet komt. Dat is hier twee keer misgegaan: een nieuwe status belandde als kale tekst op het scherm.
+
+**Eén paginakop, en overal dezelfde terugweg.**
+- Acht keer stond dezelfde kop gekopieerd in de code; de Winkel had een klein kruimelpad en Mijn account alleen een titel met een streep. Nu één component.
+- Garantie en Downloads hadden twéé terugknoppen (boven én onder), de Winkel en Bestellingen geen enkele. Zeven dubbele knoppen verwijderd; de Winkel en Mijn account hebben nu ook een terugweg.
+- Mijn account zei altijd "Mijn account", ook op Bestellingen of Adressen. Nu staat het onderdeel in de titel, met "Mijn account" erboven — en die titel komt uit dezelfde lijst als het menu ernaast, dus hij klopt altijd met het tabblad dat oplicht.
+
+**Garantie is een werkblad geworden: filters links, claims in het midden, de claim rechts.**
+- Dit was een stapel secties onder elkaar: twee kaarten, een zoekveld, de claims, de machines. Om één claim te lezen moest je weg van het overzicht, en na de terugweg stond je weer bovenaan.
+- Links filtert u op Alles, Wacht op u, In behandeling, Afgehandeld of Mijn machines, met achter elke regel hoeveel het er zijn. Staat er iets op u te wachten, dan kleurt die telling. Zonder die cijfers moet u elke groep openklikken om te zien of er iets in zit.
+- Rechts opent de gekozen claim meteen: status, route, bij wie het ligt, het gesprek en het antwoordvak — zonder de lijst kwijt te raken. Het volledige ticketscherm (met route, machinekaart en bijlagen, die breedte nodig hebben) blijft bestaan en is één klik verder.
+- Dezelfde indeling als Contactpersonen in de Homburg App, zodat de dealer en de binnendienst naar hetzelfde kijken.
+
+**Lege schermen vertellen nu wat u kunt doen.**
+- "U heeft op dit moment geen lopende claims." was een grijze regel tekst. Garantie is juist waar een nieuwe dealer begint, met nul machines en nul claims; dat scherm had de schraalste lege toestand van de hele site.
+- Nu een kaart met icoon, uitleg en een knop: nog geen claims → meld eerst een machine aan; lege groep → toon alle claims; geen claim gekozen → kies er links een.
+
 ## 1.63.1
 - **De zelfcontrole sloeg vals alarm.** Direct na het live zetten meldde hij dat er twee bestanden op het inlogscherm niet meer op te halen waren. Allebei onterecht: de sfeerfoto komt van homburg-belgium.com en staat helemaal niet in onze uploadsmap, en het tweede "bestand" was een sterretje uit een stylesheet.
 - Oorzaak: de controle rekende elk pad om naar ons eigen domein. En binnen een afgeschermde map geeft alles wat er niet is een 403 in plaats van een 404 — waardoor de regel "alleen een 403 telt" die bestanden toch aanwees.

@@ -2390,3 +2390,100 @@ a.hdp-garantie-item-actie:focus-visible { background: var(--hdp-aanzet-zacht-hov
 	.hdp-ticket-kop-boven { flex-direction: column; gap: .75rem; }
 	.hdp-route-stap { flex: 1 1 100%; }
 }
+
+/* ── Garantie als werkblad ────────────────────────────────────────
+   Filters links, claims in het midden, de gekozen claim rechts — dezelfde
+   indeling als Contactpersonen in de Homburg App, zodat de dealer en de
+   binnendienst naar hetzelfde kijken.
+
+   Dit was een stapel secties onder elkaar: twee kaarten, een zoekveld, de
+   claims, de machines. Om één claim te lezen moest je weg van het
+   overzicht, en na de terugweg stond je weer bovenaan. */
+.hdp-garantie-werkblad {
+	display: grid;
+	grid-template-columns: 230px minmax(0, 340px) minmax(0, 1fr);
+	gap: 1.5rem;
+	align-items: start;
+}
+
+/* ── De filterkolom ─────────────────────────────────────────────── */
+.hdp-garantie-rail {
+	display: flex;
+	flex-direction: column;
+	gap: 1.6rem;
+	position: sticky;
+	top: 1.5rem;
+}
+.hdp-rail-knoppen { display: flex; flex-direction: column; gap: 0.5rem; }
+.hdp-rail-knoppen .hdp-btn { text-align: center; }
+.hdp-rail-groep { display: flex; flex-direction: column; gap: 0.2rem; }
+.hdp-rail-kop {
+	margin: 0 0 0.5rem;
+	padding-bottom: 0.3rem;
+	align-self: flex-start;
+	border-bottom: 2px solid var(--wp--preset--color--homburg-rood);
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-rail-regel {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.6rem;
+	min-height: 44px;
+	padding: 0.6rem 0.8rem;
+	border-radius: 8px;
+	text-decoration: none;
+	color: var(--wp--preset--color--donkergrijs);
+	font-size: 0.88rem;
+	font-weight: 600;
+	transition: background 0.12s;
+}
+.hdp-rail-regel:hover { background: var(--wp--preset--color--grijs-licht); }
+.hdp-rail-aantal {
+	flex: none;
+	padding: 0.05rem 0.5rem;
+	border-radius: 999px;
+	background: var(--wp--preset--color--grijs-licht);
+	color: var(--wp--preset--color--grijs-tekst);
+	font-size: 0.75rem;
+	font-weight: 700;
+}
+.hdp-rail-actief,
+.hdp-rail-actief:hover {
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+	font-weight: 700;
+}
+.hdp-rail-actief .hdp-rail-aantal { background: rgba(255, 255, 255, 0.22); color: var(--wp--preset--color--wit); }
+/* Staat er iets op de dealer te wachten, dan mag dat te zien zijn zonder
+   dat je die regel eerst aanklikt. */
+.hdp-rail-wacht:not(.hdp-rail-actief) .hdp-rail-aantal {
+	background: var(--hdp-aanzet-vlak);
+	color: var(--hdp-aanzet-tekst);
+}
+
+/* ── De lijstkolom ──────────────────────────────────────────────── */
+.hdp-garantie-kolom-lijst { display: flex; flex-direction: column; gap: 0.9rem; min-width: 0; }
+.hdp-garantie-kolom-lijst .hdp-garantie-kop { margin: 0; }
+.hdp-garantie-kolom-lijst .hdp-garantie-lijst { gap: 0.5rem; }
+
+/* ── De detailkolom ─────────────────────────────────────────────── */
+.hdp-garantie-kolom-detail { min-width: 0; position: sticky; top: 1.5rem; }
+.hdp-detail-kaart { display: flex; flex-direction: column; gap: 1.1rem; }
+.hdp-detail-volledig { margin: 0; font-size: 0.88rem; font-weight: 700; }
+
+@media (max-width: 68rem) {
+	/* Drie kolommen passen niet meer; de filters worden een rij erboven en
+	   de gekozen claim komt onder de lijst. */
+	.hdp-garantie-werkblad { grid-template-columns: minmax(0, 1fr); }
+	.hdp-garantie-rail { position: static; flex-direction: row; flex-wrap: wrap; gap: 1rem; align-items: flex-start; }
+	.hdp-rail-knoppen { flex-direction: row; flex-wrap: wrap; }
+	.hdp-rail-groep { flex-direction: row; flex-wrap: wrap; align-items: center; }
+	.hdp-rail-kop { width: 100%; margin-bottom: 0.3rem; }
+	.hdp-rail-regel { border: 1px solid var(--wp--preset--color--rand); }
+	.hdp-garantie-kolom-detail { position: static; }
+}

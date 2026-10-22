@@ -286,6 +286,33 @@ class HDP_I18N {
 			/* translators: %d is het totale aantal claims. */
 			'garantie_toon_alle_claims'    => array( 'nl' => 'Alle claims tonen (%d)', 'fr' => 'Afficher toutes les demandes (%d)' ),
 
+			'garantie_rail_claims'    => array( 'nl' => 'Claims', 'fr' => 'Demandes' ),
+			'garantie_rail_alles'     => array( 'nl' => 'Alles', 'fr' => 'Tout' ),
+			'garantie_rail_wacht'     => array( 'nl' => 'Wacht op u', 'fr' => 'En attente de vous' ),
+			'garantie_rail_loopt'     => array( 'nl' => 'In behandeling', 'fr' => 'En cours' ),
+			'garantie_rail_klaar'     => array( 'nl' => 'Afgehandeld', 'fr' => 'Traité' ),
+			'garantie_rail_aangemeld' => array( 'nl' => 'Aangemeld', 'fr' => 'Enregistrées' ),
+			'garantie_rail_toon_alles' => array( 'nl' => 'Toon alle claims', 'fr' => 'Afficher toutes les demandes' ),
+			'garantie_geen_claims_totaal' => array(
+				'nl' => 'U heeft nog geen claims ingediend.',
+				'fr' => "Vous n'avez encore introduit aucune demande.",
+			),
+			'garantie_geen_claims_filter' => array(
+				'nl' => 'Geen claims in deze groep.',
+				'fr' => 'Aucune demande dans ce groupe.',
+			),
+			'garantie_kies_een_claim' => array(
+				'nl' => 'Kies links een claim om hem hier te lezen.',
+				'fr' => 'Sélectionnez une demande à gauche pour la lire ici.',
+			),
+			'garantie_nog_niets_tekst' => array(
+				'nl' => 'U heeft nog geen claims. Meld eerst een machine aan; daarna kunt u er claims op indienen.',
+				'fr' => "Vous n'avez pas encore de demandes. Enregistrez d'abord une machine, puis vous pourrez introduire des demandes.",
+			),
+			'garantie_open_volledig'  => array(
+				'nl' => 'Open het volledige ticket',
+				'fr' => 'Ouvrir le ticket complet',
+			),
 			'garantie_mijn_machines'  => array( 'nl' => 'Mijn machines', 'fr' => 'Mes machines' ),
 			'garantie_geen_machines'  => array(
 				'nl' => 'U heeft nog geen machines aangemeld. Meld een machine aan om er claims op in te kunnen dienen.',
