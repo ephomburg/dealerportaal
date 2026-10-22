@@ -8,6 +8,11 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.65.1
+- **Berichten kunnen nu in het Nederlands én het Frans.** Onder de gewone editor staat een blok "Franse vertaling" met een eigen titel en tekst. De dealer krijgt de taal die hij in het portaal heeft gekozen.
+- Het Franse veld is niet verplicht. Blijft het leeg, dan ziet een Franstalige dealer de Nederlandse tekst — een bericht dat alleen in het Nederlands bestaat is beter dan geen bericht.
+- In de berichtenlijst in wp-admin staat een kolom "Talen" (NL + FR of alleen NL), zodat in één oogopslag te zien is wat nog een vertaling mist.
+
 ## 1.65.0
 
 **Homburg kan nu een bericht op de startpagina zetten, gericht op merken.**

@@ -142,6 +142,73 @@ class Berichten_Test extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'Storing in de webshop', $html );
 	}
 
+	/* --- Nederlands en Frans ------------------------------------------- */
+
+	private function maak_tweetalig_bericht() {
+		$id = $this->maak_bericht( 'Magazijn gesloten' );
+		wp_update_post(
+			array(
+				'ID'           => $id,
+				'post_content' => 'Op 1 november is het magazijn gesloten.',
+			)
+		);
+		update_post_meta( $id, HDP_Berichten::META_TITEL_FR, 'Entrepôt fermé' );
+		update_post_meta( $id, HDP_Berichten::META_TEKST_FR, 'L’entrepôt est fermé le 1er novembre.' );
+
+		return $id;
+	}
+
+	private function render_als( $taal ) {
+		wp_set_current_user( $this->dealer_id );
+		$_COOKIE[ HDP_I18N::COOKIE ] = $taal;
+
+		ob_start();
+		HDP_Berichten::render();
+		$html = ob_get_clean();
+
+		unset( $_COOKIE[ HDP_I18N::COOKIE ] );
+
+		return $html;
+	}
+
+	public function test_franstalige_dealer_krijgt_de_franse_tekst() {
+		$this->maak_tweetalig_bericht();
+
+		$html = $this->render_als( 'fr' );
+
+		$this->assertStringContainsString( 'Entrep', $html );
+		$this->assertStringContainsString( 'novembre', $html );
+		$this->assertStringNotContainsString( 'Magazijn gesloten', $html );
+	}
+
+	public function test_nederlandse_dealer_krijgt_de_nederlandse_tekst() {
+		$this->maak_tweetalig_bericht();
+
+		$html = $this->render_als( 'nl' );
+
+		$this->assertStringContainsString( 'Magazijn gesloten', $html );
+		$this->assertStringNotContainsString( 'novembre', $html );
+	}
+
+	/**
+	 * Het Franse veld is niet verplicht. Blijft het leeg, dan hoort een
+	 * Franstalige dealer de Nederlandse tekst te zien — niet een lege kaart.
+	 */
+	public function test_zonder_vertaling_ziet_een_franse_dealer_het_nederlands() {
+		$id = $this->maak_bericht( 'Alleen in het Nederlands' );
+		wp_update_post(
+			array(
+				'ID'           => $id,
+				'post_content' => 'Deze tekst is niet vertaald.',
+			)
+		);
+
+		$html = $this->render_als( 'fr' );
+
+		$this->assertStringContainsString( 'Alleen in het Nederlands', $html );
+		$this->assertStringContainsString( 'niet vertaald', $html );
+	}
+
 	public function test_zonder_berichten_staat_er_niets() {
 		wp_set_current_user( $this->dealer_id );
 

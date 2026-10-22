@@ -36,6 +36,16 @@ class HDP_Berichten {
 	const META_SOORT = '_hdp_bericht_soort';
 
 	/**
+	 * Meta: de Franse titel en tekst.
+	 *
+	 * Het Nederlands staat in de gewone titel en editor; het Frans ernaast
+	 * in een eigen blok. Leeg laten mag: dan krijgt een Waalse dealer de
+	 * Nederlandse tekst te zien in plaats van niets.
+	 */
+	const META_TITEL_FR = '_hdp_bericht_titel_fr';
+	const META_TEKST_FR = '_hdp_bericht_tekst_fr';
+
+	/**
 	 * Hoeveel berichten er hoogstens tegelijk op de startpagina staan.
 	 *
 	 * Drie is de grens waarboven het van een mededeling een nieuwsbrief
@@ -82,6 +92,31 @@ class HDP_Berichten {
 
 	public static function add_meta_box() {
 		add_meta_box( 'hdp_bericht_bereik', 'Voor wie en hoelang', array( __CLASS__, 'render_meta_box' ), self::POST_TYPE, 'side' );
+		add_meta_box( 'hdp_bericht_frans', 'Franse vertaling', array( __CLASS__, 'render_frans_meta_box' ), self::POST_TYPE, 'normal' );
+	}
+
+	/**
+	 * Het Franse blok, onder de gewone editor.
+	 *
+	 * Bewust niet verplicht: een bericht dat alleen Nederlands bestaat is
+	 * beter dan geen bericht. Blijft dit leeg, dan ziet een Franstalige
+	 * dealer de Nederlandse tekst.
+	 */
+	public static function render_frans_meta_box( $post ) {
+		$titel = get_post_meta( $post->ID, self::META_TITEL_FR, true );
+		$tekst = get_post_meta( $post->ID, self::META_TEKST_FR, true );
+		?>
+		<p>
+			<label for="hdp_bericht_titel_fr"><strong>Titel (Frans)</strong></label><br>
+			<input type="text" name="hdp_bericht_titel_fr" id="hdp_bericht_titel_fr" class="widefat"
+				value="<?php echo esc_attr( $titel ); ?>">
+		</p>
+		<p>
+			<label for="hdp_bericht_tekst_fr"><strong>Tekst (Frans)</strong></label><br>
+			<textarea name="hdp_bericht_tekst_fr" id="hdp_bericht_tekst_fr" class="widefat" rows="6"><?php echo esc_textarea( $tekst ); ?></textarea>
+			<span class="description">Laat u dit leeg, dan krijgt een Franstalige dealer de Nederlandse tekst te zien.</span>
+		</p>
+		<?php
 	}
 
 	public static function render_meta_box( $post ) {
@@ -145,6 +180,14 @@ class HDP_Berichten {
 
 		$tot = isset( $_POST['hdp_bericht_tot'] ) ? sanitize_text_field( wp_unslash( $_POST['hdp_bericht_tot'] ) ) : '';
 		update_post_meta( $post_id, self::META_TOT, preg_match( '/^\d{4}-\d{2}-\d{2}$/', $tot ) ? $tot : '' );
+
+		$titel_fr = isset( $_POST['hdp_bericht_titel_fr'] ) ? sanitize_text_field( wp_unslash( $_POST['hdp_bericht_titel_fr'] ) ) : '';
+		update_post_meta( $post_id, self::META_TITEL_FR, $titel_fr );
+
+		// Dezelfde ruimte als de gewone editor: wat daar mag (een link, vet)
+		// mag hier ook, maar niets gevaarlijks.
+		$tekst_fr = isset( $_POST['hdp_bericht_tekst_fr'] ) ? wp_kses_post( wp_unslash( $_POST['hdp_bericht_tekst_fr'] ) ) : '';
+		update_post_meta( $post_id, self::META_TEKST_FR, $tekst_fr );
 	}
 
 	public static function kolommen( $kolommen ) {
@@ -153,6 +196,7 @@ class HDP_Berichten {
 			$nieuw[ $sleutel ] = $label;
 			if ( 'title' === $sleutel ) {
 				$nieuw['hdp_merken'] = 'Voor';
+				$nieuw['hdp_talen']  = 'Talen';
 				$nieuw['hdp_tot']    = 'Tot en met';
 			}
 		}
@@ -163,6 +207,11 @@ class HDP_Berichten {
 		if ( 'hdp_merken' === $kolom ) {
 			$merken = get_post_meta( $post_id, self::META_MERKEN, true );
 			echo esc_html( $merken ? $merken : 'Alle dealers' );
+		}
+		if ( 'hdp_talen' === $kolom ) {
+			// In één oogopslag zien welk bericht nog een vertaling mist.
+			$heeft_fr = '' !== trim( (string) get_post_meta( $post_id, self::META_TEKST_FR, true ) );
+			echo esc_html( $heeft_fr ? 'NL + FR' : 'alleen NL' );
 		}
 		if ( 'hdp_tot' === $kolom ) {
 			$tot = get_post_meta( $post_id, self::META_TOT, true );
@@ -275,9 +324,15 @@ class HDP_Berichten {
 					<div class="hdp-bericht-icoon" aria-hidden="true">
 						<?php HDP_Icons::render_icoon( $belangrijk ? 'technisch' : 'mail' ); ?>
 					</div>
+					<?php
+					// kies() valt vanzelf terug op het Nederlands als het
+					// Franse veld leeg is gebleven.
+					$titel = HDP_I18N::kies( get_the_title( $post ), get_post_meta( $post->ID, self::META_TITEL_FR, true ) );
+					$tekst = HDP_I18N::kies( $post->post_content, get_post_meta( $post->ID, self::META_TEKST_FR, true ) );
+					?>
 					<div class="hdp-bericht-tekst">
-						<h2><?php echo esc_html( get_the_title( $post ) ); ?></h2>
-						<?php echo wp_kses_post( wpautop( $post->post_content ) ); ?>
+						<h2><?php echo esc_html( $titel ); ?></h2>
+						<?php echo wp_kses_post( wpautop( $tekst ) ); ?>
 						<p class="hdp-bericht-datum">
 							<?php echo esc_html( date_i18n( 'j F Y', get_post_time( 'U', true, $post ) ) ); ?>
 						</p>
