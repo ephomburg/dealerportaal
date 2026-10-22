@@ -78,6 +78,120 @@ class HDP_I18N {
 		return $nl;
 	}
 
+	/**
+	 * Maand- en dagnamen in het Frans.
+	 *
+	 * Met de hand en niet via WordPress' eigen taalomschakeling: er staan
+	 * op deze site geen Franse taalbestanden, dus switch_to_locale() valt
+	 * terug op het Engels — "22 October 2026" in plaats van "22 octobre
+	 * 2026". Dat is erger dan het Nederlands laten staan. Het portaal
+	 * draagt zijn eigen teksten (zie teksten() hieronder); dit hoort
+	 * daarbij.
+	 */
+	const MAANDEN_FR = array(
+		'janvier',
+		'février',
+		'mars',
+		'avril',
+		'mai',
+		'juin',
+		'juillet',
+		'août',
+		'septembre',
+		'octobre',
+		'novembre',
+		'décembre',
+	);
+
+	const MAANDEN_FR_KORT = array(
+		'janv.',
+		'févr.',
+		'mars',
+		'avr.',
+		'mai',
+		'juin',
+		'juil.',
+		'août',
+		'sept.',
+		'oct.',
+		'nov.',
+		'déc.',
+	);
+
+	/** Vanaf zondag, zoals het formaatteken "w" telt. */
+	const DAGEN_FR = array(
+		'dimanche',
+		'lundi',
+		'mardi',
+		'mercredi',
+		'jeudi',
+		'vendredi',
+		'samedi',
+	);
+
+	const DAGEN_FR_KORT = array( 'dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.' );
+
+	/**
+	 * Een datum in de taal die de dealer zelf heeft gekozen.
+	 *
+	 * WordPress' eigen date_i18n() volgt de taal van de site, niet die van
+	 * de bezoeker. Daardoor stond er bij een Waalse dealer "22 oktober
+	 * 2026" tussen verder Franse tekst — op elf plekken in het portaal.
+	 *
+	 * Gebruik dit overal waar een datum aan een dealer getoond wordt.
+	 *
+	 * @param string $formaat     Formaat zoals bij date(), bijv. 'j F Y'.
+	 * @param int    $tijdstempel Unix-tijd.
+	 * @return string
+	 */
+	public static function datum( $formaat, $tijdstempel ) {
+		if ( ! self::is_frans() ) {
+			return date_i18n( $formaat, $tijdstempel );
+		}
+
+		$maand = (int) date_i18n( 'n', $tijdstempel );
+		$dag   = (int) date_i18n( 'w', $tijdstempel );
+
+		$woorden = array(
+			'F' => self::MAANDEN_FR[ $maand - 1 ],
+			'M' => self::MAANDEN_FR_KORT[ $maand - 1 ],
+			'l' => self::DAGEN_FR[ $dag ],
+			'D' => self::DAGEN_FR_KORT[ $dag ],
+		);
+
+		// Teken voor teken, zodat een al ontsnapt teken (\j) met rust
+		// gelaten wordt en alleen een echt formaatteken vervangen wordt.
+		$uit    = '';
+		$lengte = strlen( $formaat );
+
+		for ( $i = 0; $i < $lengte; $i++ ) {
+			$teken = $formaat[ $i ];
+
+			if ( '\\' === $teken ) {
+				$uit .= $teken;
+				if ( isset( $formaat[ $i + 1 ] ) ) {
+					++$i;
+					$uit .= $formaat[ $i ];
+				}
+				continue;
+			}
+
+			$uit .= isset( $woorden[ $teken ] ) ? self::letterlijk( $woorden[ $teken ] ) : $teken;
+		}
+
+		return date_i18n( $uit, $tijdstempel );
+	}
+
+	/**
+	 * Zet tekst om naar iets wat date() letterlijk overneemt.
+	 *
+	 * Zonder dit leest date() de letters in "octobre" als formaattekens en
+	 * komt er onzin uit.
+	 */
+	private static function letterlijk( $tekst ) {
+		return preg_replace( '/([A-Za-z])/', '\\\\$1', $tekst );
+	}
+
 	/** Vaste, niet-bewerkbare teksten (labels, knoppen, meldingen). */
 	public static function t( $sleutel ) {
 		$teksten = self::teksten();
@@ -287,6 +401,11 @@ class HDP_I18N {
 			'garantie_toon_alle_claims'    => array( 'nl' => 'Alle claims tonen (%d)', 'fr' => 'Afficher toutes les demandes (%d)' ),
 
 			'berichten_titel'         => array( 'nl' => 'Berichten van Homburg', 'fr' => 'Messages de Homburg' ),
+			/* translators: %s is de titel van het bericht. */
+			'bericht_wegklikken'      => array(
+				'nl' => 'Bericht "%s" wegklikken',
+				'fr' => 'Masquer le message "%s"',
+			),
 			'garantie_rail_claims'    => array( 'nl' => 'Claims', 'fr' => 'Demandes' ),
 			'garantie_rail_alles'     => array( 'nl' => 'Alles', 'fr' => 'Tout' ),
 			'garantie_rail_wacht'     => array( 'nl' => 'Wacht op u', 'fr' => 'En attente de vous' ),

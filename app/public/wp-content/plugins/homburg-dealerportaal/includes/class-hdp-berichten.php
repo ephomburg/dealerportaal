@@ -45,6 +45,13 @@ class HDP_Berichten {
 	const META_TITEL_FR = '_hdp_bericht_titel_fr';
 	const META_TEKST_FR = '_hdp_bericht_tekst_fr';
 
+	/** Gebruikersmeta: welke berichten deze dealer heeft weggeklikt. */
+	const META_WEG = 'hdp_berichten_weg';
+
+	/** Veld- en nonce-naam van de wegklikknop. */
+	const WEG_VELD  = 'hdp_bericht_weg';
+	const WEG_NONCE = 'hdp_bericht_wegklikken';
+
 	/**
 	 * Hoeveel berichten er hoogstens tegelijk op de startpagina staan.
 	 *
@@ -61,6 +68,7 @@ class HDP_Berichten {
 		add_action( 'save_post_' . self::POST_TYPE, array( __CLASS__, 'opslaan' ) );
 		add_filter( 'manage_' . self::POST_TYPE . '_posts_columns', array( __CLASS__, 'kolommen' ) );
 		add_action( 'manage_' . self::POST_TYPE . '_posts_custom_column', array( __CLASS__, 'kolom_inhoud' ), 10, 2 );
+		add_action( 'template_redirect', array( __CLASS__, 'verwerk_wegklikken' ) );
 	}
 
 	public static function register_post_type() {
@@ -219,7 +227,7 @@ class HDP_Berichten {
 				echo '—';
 				return;
 			}
-			echo esc_html( date_i18n( 'j M Y', strtotime( $tot ) ) );
+			echo esc_html( HDP_I18N::datum( 'j M Y', strtotime( $tot ) ) );
 			if ( self::verlopen( $tot ) ) {
 				echo ' <em>(verlopen)</em>';
 			}
@@ -263,6 +271,70 @@ class HDP_Berichten {
 	}
 
 	/**
+	 * Welke berichten deze dealer heeft weggeklikt.
+	 *
+	 * @param int $user_id Leeg = de huidige bezoeker.
+	 * @return int[]
+	 */
+	public static function weggeklikt( $user_id = 0 ) {
+		$user_id    = $user_id ? (int) $user_id : get_current_user_id();
+		$opgeslagen = get_user_meta( $user_id, self::META_WEG, true );
+
+		return array_map( 'intval', (array) ( is_array( $opgeslagen ) ? $opgeslagen : array() ) );
+	}
+
+	/**
+	 * Verwerkt een klik op het kruisje.
+	 *
+	 * Een formulier en geen link: wegklikken verandert iets, en dat hoort
+	 * niet te gebeuren doordat een browser of een mailprogramma even een
+	 * adres ophaalt. Daarna terug naar dezelfde pagina, zodat de dealer
+	 * staat waar hij stond.
+	 */
+	public static function verwerk_wegklikken() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- de nonce wordt hieronder gecontroleerd zodra we weten dát dit onze knop is.
+		if ( ! isset( $_POST[ self::WEG_VELD ] ) ) {
+			return;
+		}
+
+		if ( ! is_user_logged_in() ) {
+			return;
+		}
+
+		check_admin_referer( self::WEG_NONCE );
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- check_admin_referer() is hierboven gedraaid.
+		$id = (int) $_POST[ self::WEG_VELD ];
+		if ( $id <= 0 || self::POST_TYPE !== get_post_type( $id ) ) {
+			return;
+		}
+
+		$user_id = get_current_user_id();
+		$weg     = self::weggeklikt( $user_id );
+
+		if ( ! in_array( $id, $weg, true ) ) {
+			$weg[] = $id;
+		}
+
+		// Meteen opschonen: berichten die inmiddels verwijderd zijn hoeven
+		// hier niet eeuwig als nummer te blijven staan.
+		$weg = array_values(
+			array_filter(
+				$weg,
+				static function ( $bericht_id ) {
+					return self::POST_TYPE === get_post_type( $bericht_id );
+				}
+			)
+		);
+
+		update_user_meta( $user_id, self::META_WEG, $weg );
+
+		$terug = wp_get_referer();
+		wp_safe_redirect( $terug ? $terug : home_url( '/' ) );
+		exit;
+	}
+
+	/**
 	 * De berichten die nu voor deze dealer gelden, nieuwste eerst.
 	 *
 	 * @param int $user_id Leeg = de huidige bezoeker.
@@ -283,8 +355,13 @@ class HDP_Berichten {
 			)
 		);
 
+		$weg       = self::weggeklikt( $user_id );
 		$zichtbaar = array();
+
 		foreach ( $posts as $post ) {
+			if ( in_array( (int) $post->ID, $weg, true ) ) {
+				continue;
+			}
 			if ( self::verlopen( get_post_meta( $post->ID, self::META_TOT, true ) ) ) {
 				continue;
 			}
@@ -334,9 +411,18 @@ class HDP_Berichten {
 						<h2><?php echo esc_html( $titel ); ?></h2>
 						<?php echo wp_kses_post( wpautop( $tekst ) ); ?>
 						<p class="hdp-bericht-datum">
-							<?php echo esc_html( date_i18n( 'j F Y', get_post_time( 'U', true, $post ) ) ); ?>
+							<?php echo esc_html( HDP_I18N::datum( 'j F Y', get_post_time( 'U', true, $post ) ) ); ?>
 						</p>
 					</div>
+					<form class="hdp-bericht-weg" method="post">
+						<?php wp_nonce_field( self::WEG_NONCE ); ?>
+						<?php // Het nummer in een verborgen veld en niet op de knop zelf: dan maakt het niet uit of die knop tijdens het versturen wordt uitgeschakeld. ?>
+						<input type="hidden" name="<?php echo esc_attr( self::WEG_VELD ); ?>" value="<?php echo esc_attr( (string) $post->ID ); ?>">
+						<button type="submit"
+							aria-label="<?php echo esc_attr( sprintf( HDP_I18N::t( 'bericht_wegklikken' ), $titel ) ); ?>">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+						</button>
+					</form>
 				</article>
 			<?php endforeach; ?>
 		</section>

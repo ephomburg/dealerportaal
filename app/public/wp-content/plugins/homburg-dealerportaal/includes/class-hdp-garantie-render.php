@@ -533,7 +533,7 @@ class HDP_Garantie_Render {
 							<strong><?php echo esc_html( HDP_Garantie::machinenaam( $claim['machine'], $claim['serienummer'] ) ); ?></strong>
 							<span>
 								<?php echo esc_html( HDP_I18N::t( 'garantie_ingediend_op' ) ); ?>
-								<?php echo esc_html( date_i18n( 'j F Y', strtotime( $claim['ingediend'] ) ) ); ?>
+								<?php echo esc_html( HDP_I18N::datum( 'j F Y', strtotime( $claim['ingediend'] ) ) ); ?>
 							</span>
 						</div>
 						<?php if ( $actie_nodig ) : ?>
@@ -629,9 +629,9 @@ class HDP_Garantie_Render {
 						<div class="hdp-machine-garantie">
 							<span class="hdp-machine-garantie-label">
 								<?php if ( $stand['verlopen'] ) : ?>
-									<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_verlopen_op' ), date_i18n( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
+									<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_verlopen_op' ), HDP_I18N::datum( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
 								<?php else : ?>
-									<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_tot_en_met' ), date_i18n( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
+									<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_tot_en_met' ), HDP_I18N::datum( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
 									<?php if ( $stand['bijna'] ) : ?>
 										<strong>&mdash; <?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_nog_maanden' ), $stand['maanden'] ) ); ?></strong>
 									<?php endif; ?>
@@ -1048,7 +1048,7 @@ class HDP_Garantie_Render {
 					<p class="hdp-ticket-meta">
 						<?php echo esc_html( $claim['merk'] ); ?> &middot;
 						<?php echo esc_html( HDP_I18N::t( 'garantie_ingediend_op' ) ); ?>
-						<?php echo esc_html( date_i18n( 'j F Y', strtotime( $claim['ingediend_op'] ) ) ); ?>
+						<?php echo esc_html( HDP_I18N::datum( 'j F Y', strtotime( $claim['ingediend_op'] ) ) ); ?>
 						<?php if ( $dagen > 0 ) : ?>
 							&middot;
 							<?php
@@ -1107,7 +1107,7 @@ class HDP_Garantie_Render {
 						<?php if ( $stap['wie'] ) : ?>
 							<?php echo esc_html( $stap['wie'] ); ?>
 							<?php if ( $stap['wanneer'] ) : ?>
-								&middot; <?php echo esc_html( date_i18n( 'j M H:i', strtotime( $stap['wanneer'] ) ) ); ?>
+								&middot; <?php echo esc_html( HDP_I18N::datum( 'j M H:i', strtotime( $stap['wanneer'] ) ) ); ?>
 							<?php endif; ?>
 						<?php else : ?>
 							&nbsp;
@@ -1199,9 +1199,9 @@ class HDP_Garantie_Render {
 				<?php if ( $stand['tot'] ) : ?>
 					<span class="hdp-machine-garantie-label">
 						<?php if ( $stand['verlopen'] ) : ?>
-							<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_verlopen_op' ), date_i18n( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
+							<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_verlopen_op' ), HDP_I18N::datum( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
 						<?php else : ?>
-							<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_tot_en_met' ), date_i18n( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
+							<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_tot_en_met' ), HDP_I18N::datum( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
 							<?php if ( $stand['bijna'] ) : ?>
 								<strong>&mdash; <?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_nog_maanden' ), $stand['maanden'] ) ); ?></strong>
 							<?php endif; ?>
@@ -1214,7 +1214,7 @@ class HDP_Garantie_Render {
 					<?php if ( $claim['aankoopdatum'] ) : ?>
 						<div>
 							<dt><?php echo esc_html( HDP_I18N::t( 'garantie_veld_aankoopdatum' ) ); ?></dt>
-							<dd><?php echo esc_html( date_i18n( 'j M Y', strtotime( $claim['aankoopdatum'] ) ) ); ?></dd>
+							<dd><?php echo esc_html( HDP_I18N::datum( 'j M Y', strtotime( $claim['aankoopdatum'] ) ) ); ?></dd>
 						</div>
 					<?php endif; ?>
 					<?php if ( $claim['hectares'] ) : ?>
@@ -1327,7 +1327,7 @@ class HDP_Garantie_Render {
 							<span class="<?php echo esc_attr( HDP_Garantie::status_klasse( $bericht['status'] ) ); ?>"><?php echo esc_html( HDP_Garantie::status_label( $bericht['status'] ) ); ?></span>
 						<?php endif; ?>
 						<?php if ( $bericht['wanneer'] ) : ?>
-							<time><?php echo esc_html( date_i18n( 'j M H:i', strtotime( $bericht['wanneer'] ) ) ); ?></time>
+							<time><?php echo esc_html( HDP_I18N::datum( 'j M H:i', strtotime( $bericht['wanneer'] ) ) ); ?></time>
 						<?php endif; ?>
 					</div>
 					<p class="hdp-bericht-tekst"><?php echo esc_html( $bericht['tekst'] ); ?></p>

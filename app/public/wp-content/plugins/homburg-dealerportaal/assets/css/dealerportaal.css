@@ -2543,6 +2543,30 @@ a.hdp-garantie-item-actie:focus-visible { background: var(--hdp-aanzet-zacht-hov
 	color: var(--wp--preset--color--donkergrijs);
 }
 .hdp-bericht-tekst p:last-child { margin-bottom: 0; }
+/* Het kruisje. Een echte knop in een formulier: wegklikken verandert iets,
+   en dat hoort niet te gebeuren doordat een browser even een adres ophaalt. */
+.hdp-bericht-weg { margin: 0; flex: none; }
+.hdp-bericht-weg button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: 0;
+	border-radius: 7px;
+	background: none;
+	color: var(--wp--preset--color--grijs-tekst);
+	cursor: pointer;
+	transition: background 0.12s, color 0.12s;
+}
+.hdp-bericht-weg button:hover,
+.hdp-bericht-weg button:focus-visible {
+	background: var(--wp--preset--color--wit);
+	color: var(--wp--preset--color--donkergrijs);
+}
+.hdp-bericht-weg svg { width: 16px; height: 16px; }
+
 .hdp-bericht-datum {
 	font-size: 0.78rem !important;
 	color: var(--wp--preset--color--grijs-tekst) !important;

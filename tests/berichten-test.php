@@ -142,6 +142,64 @@ class Berichten_Test extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'Storing in de webshop', $html );
 	}
 
+	/* --- Wegklikken ---------------------------------------------------- */
+
+	/**
+	 * Zonder dit blijft een mededeling van vorige maand eeuwig boven de
+	 * tegels staan, ook als de dealer hem allang gelezen heeft.
+	 */
+	public function test_weggeklikt_bericht_verdwijnt_voor_die_dealer() {
+		$id = $this->maak_bericht( 'Magazijn gesloten' );
+		update_user_meta( $this->dealer_id, HDP_Berichten::META_WEG, array( $id ) );
+
+		$this->assertSame( array(), $this->titels( $this->dealer_id ) );
+	}
+
+	/** Maar alleen voor hém: een collega hoort het nog gewoon te zien. */
+	public function test_wegklikken_geldt_per_dealer() {
+		$id      = $this->maak_bericht( 'Magazijn gesloten' );
+		$collega = self::factory()->user->create( array( 'role' => 'dealer' ) );
+		update_user_meta( $collega, 'hdp_goedgekeurd', '1' );
+		update_user_meta( $this->dealer_id, HDP_Berichten::META_WEG, array( $id ) );
+
+		$this->assertSame( array(), $this->titels( $this->dealer_id ) );
+		$this->assertSame( array( 'Magazijn gesloten' ), $this->titels( $collega ) );
+	}
+
+	/** Een nieuw bericht komt gewoon weer boven, ook na eerder wegklikken. */
+	public function test_een_nieuw_bericht_komt_wel_door() {
+		$oud = $this->maak_bericht( 'Oud bericht' );
+		update_user_meta( $this->dealer_id, HDP_Berichten::META_WEG, array( $oud ) );
+		$this->maak_bericht( 'Nieuw bericht' );
+
+		$this->assertSame( array( 'Nieuw bericht' ), $this->titels( $this->dealer_id ) );
+	}
+
+	public function test_elk_bericht_heeft_een_wegklikknop() {
+		wp_set_current_user( $this->dealer_id );
+		$this->maak_bericht( 'Magazijn gesloten' );
+
+		ob_start();
+		HDP_Berichten::render();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'hdp-bericht-weg', $html );
+		// Een formulier met nonce, geen kale link: wegklikken verandert iets.
+		$this->assertStringContainsString( '_wpnonce', $html );
+		$this->assertStringContainsString( '<form', $html );
+
+		// Het nummer hoort in een verborgen veld te staan en niet op de
+		// knop. Het gedeelde scriptje zet een verzendknop tijdens het
+		// versturen op "bezig"; een knop die op dat moment uitgeschakeld
+		// wordt telt niet meer als verzender, en dan komt zijn waarde
+		// nooit aan. Dat kostte een zoektocht.
+		$this->assertMatchesRegularExpression(
+			'#<input type="hidden" name="' . preg_quote( HDP_Berichten::WEG_VELD, '#' ) . '"#',
+			$html,
+			'Het bericht-id hoort in een verborgen veld te staan.'
+		);
+	}
+
 	/* --- Nederlands en Frans ------------------------------------------- */
 
 	private function maak_tweetalig_bericht() {

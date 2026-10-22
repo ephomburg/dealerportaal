@@ -28,7 +28,15 @@
 			return;
 		}
 
-		knop.disabled = true;
-		knop.classList.add( 'hdp-btn-bezig' );
+		// Pas ná dit event uitschakelen. Een verzendknop die tijdens het
+		// submit-event op disabled gezet wordt, telt niet meer mee als
+		// verzender en valt daarmee uit de verzonden gegevens weg — een
+		// knop met een eigen name/value stuurt die dan niet mee. Alle
+		// formulieren hier droegen hun gegevens in verborgen velden, dus
+		// dat viel lang niet op.
+		window.setTimeout( function () {
+			knop.disabled = true;
+			knop.classList.add( 'hdp-btn-bezig' );
+		}, 0 );
 	} );
 } )();

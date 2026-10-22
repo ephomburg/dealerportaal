@@ -8,6 +8,22 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.66.0
+
+**Datums volgen nu de taal van de dealer.**
+- Een Waalse dealer kreeg "22 oktober 2026" te lezen tussen verder Franse tekst, op elf plekken in het portaal — ingediend op, garantie tot, tijdstippen in het ticketgesprek.
+- Bewust niet via WordPress' eigen taalomschakeling: er staan op deze site geen Franse taalbestanden, dus die zou terugvallen op het Engels ("22 October 2026"). Dat is erger dan het Nederlands laten staan. Het portaal draagt al zijn eigen teksten; de maand- en dagnamen horen daarbij.
+- Acht tests, waaronder alle twaalf maanden apart — een verschoven tabel valt dan meteen op.
+
+**Dealers kunnen een bericht wegklikken.**
+- Zonder dat blijft een mededeling van vorige maand boven de tegels staan, ook als de dealer hem allang gelezen heeft.
+- Per dealer onthouden: wie het wegklikt is het kwijt, zijn collega ziet het nog gewoon. Een nieuw bericht komt er altijd weer boven.
+- Een formulier met nonce en geen kale link: wegklikken verandert iets, en dat hoort niet te gebeuren doordat een browser of mailprogramma even een adres ophaalt.
+
+**Opgelost: een verzendknop verloor zijn eigen waarde.**
+- Het gedeelde scriptje zette de verzendknop op "bezig" tijdens het versturen. Een knop die op dat moment wordt uitgeschakeld telt niet meer als verzender, waardoor zijn `name`/`value` nooit aankwam. Alle bestaande formulieren dragen hun gegevens in verborgen velden, dus dit heeft nooit iets gebroken — maar het zou de volgende die zo'n knop gebruikt stilzwijgend opbreken.
+- De knop wordt nu pas ná het versturen uitgeschakeld. Het bericht-id staat daarnaast in een verborgen veld, zodat het wegklikken niet van die subtiliteit afhangt.
+
 ## 1.65.1
 - **Berichten kunnen nu in het Nederlands én het Frans.** Onder de gewone editor staat een blok "Franse vertaling" met een eigen titel en tekst. De dealer krijgt de taal die hij in het portaal heeft gekozen.
 - Het Franse veld is niet verplicht. Blijft het leeg, dan ziet een Franstalige dealer de Nederlandse tekst — een bericht dat alleen in het Nederlands bestaat is beter dan geen bericht.
