@@ -406,6 +406,13 @@ class HDP_I18N {
 				'nl' => 'Bericht "%s" wegklikken',
 				'fr' => 'Masquer le message "%s"',
 			),
+			'garantie_retour_onderweg'  => array( 'nl' => 'Onderdeel onderweg', 'fr' => 'Pièce en route' ),
+			/* translators: %s is het ticketnummer. */
+			'garantie_retour_vermeld'   => array(
+				'nl' => 'Vermeld %s op de zending',
+				'fr' => 'Mentionnez %s sur l\'envoi',
+			),
+			'garantie_retour_ontvangen' => array( 'nl' => 'Onderdeel ontvangen', 'fr' => 'Pièce reçue' ),
 			'garantie_rail_claims'    => array( 'nl' => 'Claims', 'fr' => 'Demandes' ),
 			'garantie_rail_alles'     => array( 'nl' => 'Alles', 'fr' => 'Tout' ),
 			'garantie_rail_wacht'     => array( 'nl' => 'Wacht op u', 'fr' => 'En attente de vous' ),

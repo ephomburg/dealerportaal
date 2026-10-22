@@ -8,6 +8,17 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.67.0
+
+**Een stap "onderdeel onderweg" in de route van een ticket.**
+- Stuurt een dealer een onderdeel retour naar Stiens, dan ligt de claim stil tot dat pakket binnen is. Hij zag alleen "ingediend" staan en kon denken dat er niets gebeurde, terwijl de bal bij de post lag.
+- De stap staat tussen **Ingediend** en **Behandeling**, en verschijnt alleen als er ook echt iets onderweg is — bij elke claim een grijze "onderdeel onderweg" zou ruis zijn.
+- Twee toestanden: **Onderdeel onderweg** (oranje, met het ticketnummer erbij dat op de zending moet) en **Onderdeel ontvangen** (groen, met de datum van binnenkomst).
+- Geen nieuwe status maar een feit uit de administratie: het vinkje "ik stuur onderdelen retour" bij het indienen, en `onderdeel_ontvangen_op` dat de app zet zodra het pakket op de balie ligt. Daar was in 1.63.0 al ruimte voor gemaakt.
+
+**Opgelost: een datum verdween als er geen naam bij stond.**
+- De route toonde het tijdstip van een stap alleen samen met de naam van wie hem zette. Bij "onderdeel ontvangen" is er geen naam — er kwam een pakket binnen — en dan viel juist de datum weg die het punt is.
+
 ## 1.66.0
 
 **Datums volgen nu de taal van de dealer.**

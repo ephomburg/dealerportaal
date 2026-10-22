@@ -1092,25 +1092,48 @@ class HDP_Garantie_Render {
 				if ( $stap['huidig'] && HDP_Garantie::is_afwijzing( $stap['status'] ) ) {
 					$klassen[] = 'hdp-route-afwijzing';
 				}
-				if ( ! $stap['status'] ) {
+				if ( ! $stap['status'] && 'retour' !== $stap['fase'] ) {
 					$klassen[] = 'hdp-route-komt-nog';
 				}
+				if ( ! empty( $stap['wacht'] ) ) {
+					// Waar we op wachten mag opvallen; dat is hier het hele punt.
+					$klassen[] = 'hdp-route-wacht';
+				}
 
-				$label = $stap['status']
-					? HDP_Garantie::status_label( $stap['status'] )
-					: HDP_I18N::t( 'garantie_fase_' . $stap['fase'] );
+				if ( $stap['status'] ) {
+					$label = HDP_Garantie::status_label( $stap['status'] );
+				} elseif ( 'retour' === $stap['fase'] ) {
+					$label = HDP_I18N::t( empty( $stap['wacht'] ) ? 'garantie_retour_ontvangen' : 'garantie_retour_onderweg' );
+				} else {
+					$label = HDP_I18N::t( 'garantie_fase_' . $stap['fase'] );
+				}
 				?>
 				<li class="<?php echo esc_attr( implode( ' ', $klassen ) ); ?>">
 					<span class="hdp-route-bol" aria-hidden="true"></span>
 					<strong><?php echo esc_html( $label ); ?></strong>
 					<span class="hdp-route-wie">
-						<?php if ( $stap['wie'] ) : ?>
-							<?php echo esc_html( $stap['wie'] ); ?>
-							<?php if ( $stap['wanneer'] ) : ?>
-								&middot; <?php echo esc_html( HDP_I18N::datum( 'j M H:i', strtotime( $stap['wanneer'] ) ) ); ?>
-							<?php endif; ?>
-						<?php else : ?>
+						<?php
+						// Een datum hoorde alleen te verschijnen als er ook
+						// een naam bij stond. Bij "onderdeel ontvangen" is er
+						// geen naam — er kwam een pakket binnen — en dan viel
+						// de datum weg, terwijl die juist het punt is.
+						$heeft_iets = $stap['wie'] || $stap['wanneer'] || ! empty( $stap['hint'] );
+						?>
+						<?php if ( ! $heeft_iets ) : ?>
 							&nbsp;
+						<?php else : ?>
+							<?php if ( ! empty( $stap['hint'] ) ) : ?>
+								<?php echo esc_html( $stap['hint'] ); ?>
+							<?php else : ?>
+								<?php echo esc_html( $stap['wie'] ); ?>
+								<?php
+								if ( $stap['wie'] && $stap['wanneer'] ) :
+									?>
+									&middot;<?php endif; ?>
+								<?php if ( $stap['wanneer'] ) : ?>
+									<?php echo esc_html( HDP_I18N::datum( 'j M H:i', strtotime( $stap['wanneer'] ) ) ); ?>
+								<?php endif; ?>
+							<?php endif; ?>
 						<?php endif; ?>
 					</span>
 				</li>

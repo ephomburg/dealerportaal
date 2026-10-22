@@ -2172,6 +2172,15 @@ a.hdp-garantie-item-actie:focus-visible { background: var(--hdp-aanzet-zacht-hov
 	background: var(--wp--preset--color--wit);
 }
 .hdp-route-gedaan .hdp-route-bol { background: var(--hdp-klaar-tekst); border-color: var(--hdp-klaar-tekst); }
+
+/* Waar de claim op wacht: het onderdeel dat nog onderweg is naar Stiens.
+   Oranje, want dat is in het hele portaal de kleur van "hier ligt nog
+   iets open". */
+.hdp-route-wacht .hdp-route-bol {
+	background: var(--hdp-aanzet-vlak);
+	border-color: var(--hdp-aanzet-accent);
+}
+.hdp-route-wacht strong { color: var(--hdp-aanzet-tekst); }
 /* Vinkje, getekend met twee lijntjes. */
 .hdp-route-gedaan .hdp-route-bol::after {
 	content: "";

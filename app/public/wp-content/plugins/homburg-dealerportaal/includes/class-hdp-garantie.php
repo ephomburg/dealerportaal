@@ -499,6 +499,10 @@ class HDP_Garantie {
 			'garantie_tot'    => isset( $machine['garantie_tot'] ) ? (string) $machine['garantie_tot'] : '',
 			'machine_status'  => isset( $machine['status'] ) ? (string) $machine['status'] : '',
 			'machine_reden'   => isset( $machine['reden'] ) ? (string) $machine['reden'] : '',
+			// Stuurt de dealer een onderdeel retour, en is het al binnen? Die
+			// twee bepalen samen de retourstap in de route.
+			'onderdeel_retour'       => ! empty( $rij['onderdeel_retour'] ),
+			'onderdeel_ontvangen_op' => isset( $rij['onderdeel_ontvangen_op'] ) ? (string) $rij['onderdeel_ontvangen_op'] : '',
 			'bijlagen'        => array(),
 			'verloop'         => array(),
 		);
@@ -692,6 +696,61 @@ class HDP_Garantie {
 				);
 			}
 		}
+
+		return self::met_retourstap( $stappen, $claim );
+	}
+
+	/**
+	 * Schuift de retourstap tussen "ingediend" en "behandeling".
+	 *
+	 * Heeft de dealer bij het indienen aangevinkt dat hij een onderdeel
+	 * opstuurt, dan ligt de claim stil tot dat pakket binnen is. Zonder deze
+	 * stap ziet hij alleen "ingediend" staan en lijkt het alsof er niets
+	 * gebeurt, terwijl de bal bij de post ligt.
+	 *
+	 * Geen status maar een feit uit de administratie: de app zet
+	 * onderdeel_ontvangen_op zodra het pakket op de balie ligt.
+	 *
+	 * @param array $stappen De route zoals hierboven opgebouwd.
+	 * @param array $claim   De claim.
+	 * @return array
+	 */
+	private static function met_retourstap( $stappen, $claim ) {
+		if ( empty( $claim['onderdeel_retour'] ) ) {
+			return $stappen;
+		}
+
+		$ontvangen = isset( $claim['onderdeel_ontvangen_op'] ) ? (string) $claim['onderdeel_ontvangen_op'] : '';
+
+		$retour = array(
+			'status'    => '',
+			'fase'      => 'retour',
+			'wie'       => '',
+			'wanneer'   => $ontvangen,
+			'opmerking' => '',
+			'gedaan'    => '' !== $ontvangen,
+			'huidig'    => false,
+			// Zolang het pakket onderweg is staat hier waar het om draait:
+			// zonder ticketnummer op de doos kan niemand het terugvinden.
+			'hint'      => '' === $ontvangen && isset( $claim['nummer'] )
+				? sprintf( HDP_I18N::t( 'garantie_retour_vermeld' ), $claim['nummer'] )
+				: '',
+			// Eigen vlag i.p.v. "huidig": de route kent al precies één
+			// huidige stap (de laatste statuswijziging), en daar hoort deze
+			// niet mee te concurreren.
+			'wacht'     => '' === $ontvangen,
+		);
+
+		// Direct achter de laatste stap van de fase "ingediend"; staat die er
+		// niet (bij een oude claim zonder logregel), dan vooraan.
+		$plek = 0;
+		foreach ( $stappen as $i => $stap ) {
+			if ( 'ingediend' === $stap['fase'] ) {
+				$plek = $i + 1;
+			}
+		}
+
+		array_splice( $stappen, $plek, 0, array( $retour ) );
 
 		return $stappen;
 	}
