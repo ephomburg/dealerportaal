@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Homburg Dealerportaal
  * Description: Dealerportaal met echte inlogbeveiliging, dealerrechten (merken/korting) en beveiligde downloads voor Homburg-dealers.
- * Version:     1.64.0
+ * Version:     1.65.0
  * Author:      Homburg Machinehandel BV
  * Text Domain: homburg-dealerportaal
  */
@@ -28,6 +28,7 @@ require_once HDP_PLUGIN_DIR . 'includes/class-hdp-merken.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-user-fields.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-settings.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-downloads-cpt.php';
+require_once HDP_PLUGIN_DIR . 'includes/class-hdp-berichten.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-herbestellen.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-bestelgeschiedenis-render.php';
 require_once HDP_PLUGIN_DIR . 'includes/class-hdp-icons.php';
@@ -63,6 +64,7 @@ add_action(
 		HDP_User_Fields::init();
 		HDP_Settings::init();
 		HDP_Downloads_CPT::init();
+		HDP_Berichten::init();
 		HDP_Login::init();
 		HDP_Account::init();
 		HDP_Site_Blocks::init();

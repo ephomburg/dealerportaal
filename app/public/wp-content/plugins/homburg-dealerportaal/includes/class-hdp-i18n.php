@@ -286,6 +286,7 @@ class HDP_I18N {
 			/* translators: %d is het totale aantal claims. */
 			'garantie_toon_alle_claims'    => array( 'nl' => 'Alle claims tonen (%d)', 'fr' => 'Afficher toutes les demandes (%d)' ),
 
+			'berichten_titel'         => array( 'nl' => 'Berichten van Homburg', 'fr' => 'Messages de Homburg' ),
 			'garantie_rail_claims'    => array( 'nl' => 'Claims', 'fr' => 'Demandes' ),
 			'garantie_rail_alles'     => array( 'nl' => 'Alles', 'fr' => 'Tout' ),
 			'garantie_rail_wacht'     => array( 'nl' => 'Wacht op u', 'fr' => 'En attente de vous' ),

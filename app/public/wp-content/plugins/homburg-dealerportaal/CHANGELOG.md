@@ -8,6 +8,16 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.65.0
+
+**Homburg kan nu een bericht op de startpagina zetten, gericht op merken.**
+- De informatiestroom liep één kant op: bestanden en claims verschenen vanzelf, maar er was geen manier om iets te zéggen. Een prijswijziging of een leveringsprobleem bij één fabrikant ging per mail, en kwam daarmee bij iedereen terecht of bij niemand.
+- Te plaatsen in wp-admin onder **Berichten**. Per bericht: voor welke merken (niets aanvinken = alle dealers), het soort (Melding of Belangrijk) en een optionele datum tot wanneer het blijft staan.
+- Dezelfde merkregels als bij downloads, zodat "merk" overal hetzelfde betekent: geen merk = voor iedereen, en een dealer bij wie nog geen merken zijn ingesteld ziet alles — die mag niet per ongeluk niets meer te zien krijgen.
+- Een gewone melding is blauw, "Belangrijk" oranje: in het hele portaal de kleur van "hier moet u iets mee". Gebruik dat spaarzaam, anders valt het niet meer op.
+- Hoogstens drie berichten tegelijk. Daarboven wordt het een nieuwsbrief en vallen de tegels eronder weg; staat er een vierde klaar, dan verdwijnt het oudste vanzelf. Dat dwingt af dat oude berichten een einddatum krijgen in plaats van eeuwig te blijven staan.
+- Elf tests leggen de afscherming vast — dat is het stuk dat stil misgaat: er komt geen foutmelding van, je ziet alleen te veel of te weinig.
+
 ## 1.64.0 / thema 1.28.0
 
 **Eén statuspalet in plaats van twee.**

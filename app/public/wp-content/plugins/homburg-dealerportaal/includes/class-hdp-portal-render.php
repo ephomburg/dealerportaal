@@ -61,6 +61,8 @@ class HDP_Portal_Render {
 			</div>
 		</div>
 		<div class="hdp-portaal alignfull">
+			<?php // Berichten van Homburg staan bovenaan: een mededeling die je pas tegenkomt nadat je ergens heen geklikt hebt, is te laat. ?>
+			<?php HDP_Berichten::render(); ?>
 			<?php self::render_nieuw_melding(); ?>
 			<?php HDP_Herbestellen::render(); ?>
 		</div>
