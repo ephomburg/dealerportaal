@@ -2703,7 +2703,9 @@ a.hdp-garantie-item-actie:focus-visible { background: var(--hdp-aanzet-zacht-hov
 	display: flex;
 	flex-direction: column;
 	gap: 0.45rem;
-	padding: 1.4rem 0.9rem 1.8rem;
+	/* Wat lucht bovenin: tegen de balk aan begon het menu zo hoog dat het
+	   eraan vastgeplakt leek. */
+	padding: 2.4rem 0.9rem 1.8rem;
 	box-sizing: border-box;
 	font-family: 'Montserrat', Arial, sans-serif;
 }
@@ -2745,6 +2747,12 @@ body.admin-bar .hdp-zijbalk {
 	display: flex;
 	flex-direction: column;
 	gap: 0.15rem;
+}
+/* Home hoort bij geen van de kopjes: een streep eronder zet hem apart
+   zonder er een vierde groep van te maken. */
+.hdp-zijbalk-lijst-home {
+	padding-bottom: 0.9rem;
+	border-bottom: 1px solid #3e4147;
 }
 
 .hdp-zijbalk-link {
@@ -3004,6 +3012,7 @@ body.hdp-app-layout .hdp-app-inhoud {
 		flex: 0 0 auto;
 		gap: 0.4rem;
 	}
+	.hdp-zijbalk-lijst-home { padding-bottom: 0; border-bottom: 0; }
 	.hdp-zijbalk-link { white-space: nowrap; padding: 0.55rem 0.8rem; }
 
 	.hdp-welkomkop h1 { font-size: 1.45rem; }

@@ -58,6 +58,14 @@ class HDP_Paginakop {
 			return;
 		}
 
+		// Staat het zijmenu er, dan is Home daar de weg terug en hoeft die
+		// link hier niet nog een keer. Alleen die ene link vervalt: een
+		// "terug naar garantie" op een ticket wijst naar een pagina die niet
+		// in het menu staat en blijft dus gewoon staan.
+		if ( home_url( '/dealerportaal/' ) === $args['terug_url'] && HDP_Zijbalk::gebruikt_zijmenu() ) {
+			$args['terug_url'] = '';
+		}
+
 		$buiten = $args['compact'] ? 'div' : 'section';
 		$klasse = $args['compact'] ? 'hdp-paginakop-compact' : 'hdp-welkom alignfull hdp-welkom-zonder-hero';
 		?>

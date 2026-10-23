@@ -191,6 +191,78 @@ class Zijbalk_Test extends WP_UnitTestCase {
 		$this->assertSame( '', trim( ob_get_clean() ) );
 	}
 
+	/* --- Home ---------------------------------------------------------- */
+
+	/**
+	 * Home staat bovenaan het menu en is daarmee overal de weg terug. Zonder
+	 * dat kwam een dealer alleen via het logo of een losse link terug op het
+	 * welkomscherm.
+	 */
+	public function test_home_staat_bovenaan_het_menu() {
+		$this->maak_startpagina(
+			array( array( 'titel' => 'Webshop', 'icoon' => 'webshop', 'url' => '/shop/' ) )
+		);
+
+		ob_start();
+		HDP_Zijbalk::render();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( HDP_I18N::t( 'zijbalk_home' ), $html );
+		$this->assertStringContainsString( esc_url( home_url( '/dealerportaal/' ) ), $html );
+
+		// Bovenaan, dus vóór het eerste kopje.
+		$this->assertLessThan(
+			strpos( $html, HDP_I18N::t( 'zijbalk_groep_bestellen' ) ),
+			strpos( $html, HDP_I18N::t( 'zijbalk_home' ) ),
+			'Home hoort boven de kopjes te staan.'
+		);
+	}
+
+	/**
+	 * Staat Home in het menu, dan hoeft "terug naar het portaal" niet ook nog
+	 * eens boven elke pagina.
+	 */
+	public function test_de_terugknop_vervalt_zodra_het_menu_er_staat() {
+		$this->maak_startpagina(
+			array( array( 'titel' => 'Webshop', 'icoon' => 'webshop', 'url' => '/shop/' ) )
+		);
+		$this->go_to( get_permalink( $this->pagina_id ) );
+		wp_set_current_user( $this->dealer_id );
+
+		ob_start();
+		HDP_Paginakop::render(
+			array_merge( array( 'titel' => 'Downloads' ), HDP_Paginakop::terug_naar_portaal() )
+		);
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'Downloads', $html );
+		$this->assertStringNotContainsString( HDP_I18N::t( 'terug_naar_portaal' ), $html );
+	}
+
+	/**
+	 * Maar een terugknop naar iets anders dan het portaal blijft staan: die
+	 * wijst naar een pagina die niet in het menu voorkomt.
+	 */
+	public function test_een_andere_terugknop_blijft_staan() {
+		$this->maak_startpagina(
+			array( array( 'titel' => 'Webshop', 'icoon' => 'webshop', 'url' => '/shop/' ) )
+		);
+		$this->go_to( get_permalink( $this->pagina_id ) );
+		wp_set_current_user( $this->dealer_id );
+
+		ob_start();
+		HDP_Paginakop::render(
+			array(
+				'titel'       => 'Ticket T100001',
+				'terug_url'   => home_url( '/garantie/' ),
+				'terug_tekst' => 'Terug naar garantie',
+			)
+		);
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'Terug naar garantie', $html );
+	}
+
 	/* --- Op welke pagina's --------------------------------------------- */
 
 	/**

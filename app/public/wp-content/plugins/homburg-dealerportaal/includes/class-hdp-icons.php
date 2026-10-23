@@ -20,6 +20,7 @@ class HDP_Icons {
 			// plaatje-icoon van content, en die twee stonden met hetzelfde
 			// icoontje naast elkaar op de startpagina.
 			'huisstijl'    => '<path d="M12 3a9 9 0 1 0 0 18c1 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.8" cy="11.5" r="1.1"/><circle cx="11.2" cy="7.6" r="1.1"/><circle cx="16.3" cy="9.4" r="1.1"/>',
+			'home'         => '<path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.3V20a1 1 0 0 0 1 1H9.5v-5.5h5V21h3a1 1 0 0 0 1-1V9.3"/>',
 			'login'        => '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
 			'wachten'      => '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
 			'bestellen'    => '<path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L4 3a1 1 0 0 0-1 1l.24 5.59a2 2 0 0 0 .59 1.41l9.58 9.58a2 2 0 0 0 2.83 0l4.35-4.34a2 2 0 0 0 0-2.83Z"/><circle cx="7.5" cy="7.5" r="1.5"/>',

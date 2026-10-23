@@ -408,6 +408,7 @@ class HDP_I18N {
 			'groet_ochtend'           => array( 'nl' => 'Goedemorgen', 'fr' => 'Bonjour' ),
 			'groet_middag'            => array( 'nl' => 'Goedemiddag', 'fr' => 'Bonjour' ),
 			'groet_avond'             => array( 'nl' => 'Goedenavond', 'fr' => 'Bonsoir' ),
+			'zijbalk_home'            => array( 'nl' => 'Home', 'fr' => 'Accueil' ),
 			'zijbalk_bestellingen'    => array( 'nl' => 'Bestellingen', 'fr' => 'Commandes' ),
 			'zijbalk_label'           => array( 'nl' => 'Onderdelen van het dealerportaal', 'fr' => 'Sections du portail revendeur' ),
 			'zijbalk_groep_bestellen' => array( 'nl' => 'Bestellen', 'fr' => 'Commander' ),

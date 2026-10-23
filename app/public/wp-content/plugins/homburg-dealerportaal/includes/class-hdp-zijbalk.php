@@ -272,8 +272,20 @@ class HDP_Zijbalk {
 		}
 
 		$per_groep = self::verdeel_over_groepen( $onderdelen );
+		$home      = home_url( '/dealerportaal/' );
 		?>
 		<nav class="hdp-zijbalk" aria-label="<?php echo esc_attr( HDP_I18N::t( 'zijbalk_label' ) ); ?>">
+
+			<?php // Zonder kopje en bovenaan: dit is de weg terug, geen onderdeel. ?>
+			<ul class="hdp-zijbalk-lijst hdp-zijbalk-lijst-home">
+				<li>
+					<a href="<?php echo esc_url( $home ); ?>" class="hdp-zijbalk-link<?php echo is_front_page() ? ' hdp-zijbalk-huidig' : ''; ?>"<?php echo is_front_page() ? ' aria-current="page"' : ''; ?>>
+						<?php echo HDP_Icons::svg_icoon( 'home' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
+						<span class="hdp-zijbalk-tekst"><?php echo esc_html( HDP_I18N::t( 'zijbalk_home' ) ); ?></span>
+					</a>
+				</li>
+			</ul>
+
 			<?php foreach ( $per_groep as $groep => $in_groep ) : ?>
 			<p class="hdp-zijbalk-kop"><?php echo esc_html( HDP_I18N::t( 'zijbalk_groep_' . $groep ) ); ?></p>
 

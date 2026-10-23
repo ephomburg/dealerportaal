@@ -8,6 +8,14 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.71.1
+
+**Home bovenaan het zijmenu, en de "terug naar het portaal"-knoppen vervallen.**
+- Home staat los boven de kopjes, met een streep eronder: het is de weg terug, geen onderdeel. Daarmee staat die weg terug op elke pagina op dezelfde plek.
+- De knop "← Terug naar het portaal" boven de pagina's is daardoor overbodig en verdwijnt zodra het zijmenu er staat. Een terugknop naar iets anders — zoals "terug naar garantie" op een ticket — blijft wél staan; die wijst naar een pagina die niet in het menu voorkomt.
+- Het menu begint wat lager; tegen de balk aan leek het eraan vastgeplakt.
+- Tests: 319 (was 316).
+
 ## 1.71.0
 
 **Het zijmenu staat nu op alle portaalpagina's, niet alleen op het welkomscherm** (thema 1.31.0).
