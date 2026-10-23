@@ -33,7 +33,8 @@ $link_icoon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 				<label for="hdp-links-menu-toggle" class="hdp-links-menu-knop" aria-label="<?php esc_attr_e( 'Links naar Homburg Holland en Belgium', 'homburg-dealerportaal' ); ?>">
 					<span class="hdp-links-menu-hoofd">
 						<?php echo $link_icoon; // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
-						<?php esc_html_e( 'Links', 'homburg-dealerportaal' ); ?>
+						<?php // Eigen span: op een telefoon blijft alleen het icoontje over, maar wel zo dat een schermlezer het woord nog voorleest. ?>
+						<span class="hdp-knop-tekst"><?php esc_html_e( 'Links', 'homburg-dealerportaal' ); ?></span>
 					</span>
 					<span class="hdp-links-menu-chevron-vak">
 						<svg class="hdp-links-menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
@@ -83,7 +84,7 @@ $link_icoon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 							<?php // Rechtstreeks naar de bestellingen: /mijn-account/ stuurt daar toch naartoe (zie homburg_wc_myaccount_naar_bestellingen), dit scheelt een omleiding per klik. ?>
 							<a class="hdp-account-split-link" href="<?php echo esc_url( wc_get_account_endpoint_url( 'orders' ) ); ?>">
 								<?php echo HDP_Icons::svg_icoon( 'gebruiker' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
-								<?php esc_html_e( 'Mijn account', 'homburg-dealerportaal' ); ?>
+								<span class="hdp-knop-tekst"><?php esc_html_e( 'Mijn account', 'homburg-dealerportaal' ); ?></span>
 							</a>
 						<?php endif; ?>
 						<label for="hdp-account-menu-toggle" class="hdp-account-split-toggle" aria-label="<?php esc_attr_e( 'Accountmenu', 'homburg-dealerportaal' ); ?>">

@@ -8,6 +8,12 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.69.2
+
+**Op een telefoon worden "Links" en "Mijn account" alleen hun icoontje** (thema 1.29.1).
+- Daarmee passen het hartje, beide knoppen en de taalkeuze op één regel en is de header daar 100px in plaats van 139px. Nu hij blijft staan, scheelt dat een hele regel scherm op elke pagina.
+- Het opschrift is weggeklemd en niet verwijderd: een schermlezer leest nog steeds "Mijn account" voor. Op laptop en desktop verandert er niets.
+
 ## 1.69.1
 
 **De header met het logo blijft bij het scrollen bovenaan staan** (thema 1.29.0).
