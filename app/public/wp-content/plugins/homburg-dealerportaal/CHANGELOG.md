@@ -8,6 +8,26 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.70.0
+
+**Nieuw welkomscherm: een vast menu aan de zijkant, in plaats van een scherm vol tegels.** (thema 1.30.0)
+- De startpagina heeft een eigen sjabloon gekregen (`templates/front-page.html`). De balk bovenaan blijft precies zoals hij was; daaronder staat links een vast menu met de onderdelen van het portaal, en rechts het werkblad.
+- Het menu haalt zijn onderdelen uit de portaalkaarten die al op de startpagina stonden. Titel, Franse titel en link blijven dus gewoon in de pagina-editor staan; een kaart die daar bijkomt, verschijnt vanzelf in het menu. De kaarten worden op het welkomscherm zelf niet meer als tegels getoond — die navigatie zit nu in het menu.
+- De onderdelen staan onder drie kopjes: Bestellen, Service en Materiaal. Een kaart met een onbekend icoon komt onder Materiaal, zodat er nooit eentje uit het menu valt.
+- Bij Garantie staat een rood cijfer zodra er een claim op de dealer wacht.
+- De paginabrede foto is weg. Daarvoor in de plaats: een groet die met het tijdstip meegaat, de datum van vandaag en een zoekveld naar de artikelen. Daaronder staan meteen de berichten van Homburg.
+- De balk bovenaan, het menu en de voettekst vormen samen één donker vlak; het werkblad ligt daar als een licht paneel in, met afgeronde hoeken aan de kant van het menu en een rode rand eromheen. De lichte waas die over de voettekst lag is weg — daardoor was die zichtbaar lichter dan de rest.
+- Onder elk kopje in het menu staat een kort rood streepje.
+- Achter de herbestelde artikelen staat een kaart "Artikelnummers plakken" — die vult het gat dat overbleef en wijst naar de snelste manier van bestellen.
+- Huisstijl & media had hetzelfde icoon als Content; die heeft nu een eigen palet-icoon.
+- De startpagina is van 3298 naar ongeveer 2000 pixels hoog gegaan.
+- Op een telefoon wordt het menu één strook boven de inhoud die opzij schuift.
+
+**Opgelost: Franse teksten toonden `é` in plaats van é.**
+- Op 76 plekken in de vertalingen stond zo'n reeks letterlijk in de code. In een PHP-tekst tussen enkele aanhalingstekens betekent die niets, dus kwam hij onvertaald op het scherm ("pièces" in plaats van "pièces"). Ze waren via bewerkscripts ingeslopen en vielen niet op omdat ze alleen het Frans raakten.
+- Een test bewaakt dit nu, en controleert meteen dat elke tekst zowel Nederlands als Frans heeft.
+- Tests: 312 (was 298), browsertests 11.
+
 ## 1.69.2
 
 **Op een telefoon worden "Links" en "Mijn account" alleen hun icoontje** (thema 1.29.1).

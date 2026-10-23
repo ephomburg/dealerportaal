@@ -17,9 +17,12 @@ test.describe('Header — Links/Mijn account-menu en taalswitch', () => {
 	});
 
 	test('taalswitch naar FR vertaalt de welkomsttekst', async ({ page }) => {
-		await expect(page.getByRole('heading', { name: /Welkom,/ })).toBeVisible();
+		// De begroeting gaat met het tijdstip mee (Goedemorgen/Goedemiddag/
+		// Goedenavond), dus toetsen op de drie samen in plaats van op één
+		// vaste tekst — anders valt deze test 's avonds om.
+		await expect(page.getByRole('heading', { name: /Goede(morgen|middag)|Goedenavond/ })).toBeVisible();
 		await page.locator('.hdp-taalswitch a', { hasText: 'FR' }).click();
-		await expect(page.getByRole('heading', { name: /Bienvenue,/ })).toBeVisible();
+		await expect(page.getByRole('heading', { name: /Bonjour|Bonsoir/ })).toBeVisible();
 	});
 
 	/**

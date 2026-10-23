@@ -547,6 +547,32 @@ body.hdp-login-actief {
 	.hdp-herbestellen-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 }
 
+/* De "plak een lijst"-kaart achteraan de herbestelstrook. Gestippelde rand
+   en geen afbeelding: het is geen artikel maar een manier van bestellen, en
+   dat hoort niet te lijken op de kaartjes ernaast. */
+.hdp-snelbestel-kaart {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 0.35rem;
+	padding: 1.1rem 1.2rem;
+	background: var(--wp--preset--color--wit);
+	border: 1px dashed #c3c7ce;
+	border-radius: var(--hdp-radius);
+	text-decoration: none;
+}
+.hdp-snelbestel-kaart:hover { border-color: var(--wp--preset--color--homburg-rood); }
+.hdp-snelbestel-kaart strong {
+	font-size: 0.92rem;
+	font-weight: 700;
+	color: var(--wp--preset--color--homburg-rood);
+}
+.hdp-snelbestel-kaart span {
+	font-size: 0.85rem;
+	line-height: 1.5;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+
 .hdp-kaart-icoon {
 	width: 52px;
 	height: 52px;
@@ -2621,4 +2647,314 @@ a.hdp-garantie-item-actie:focus-visible { background: var(--hdp-aanzet-zacht-hov
 @media (max-width: 600px) {
 	.hdp-berichten { max-width: 100%; padding: 1.25rem 1rem 0; }
 	.hdp-bericht { padding: 0.9rem; gap: 0.75rem; }
+}
+
+/* ==========================================================================
+   WELKOMSCHERM — zijmenu + werkblad
+   Het welkomscherm houdt de balk bovenaan en krijgt daaronder een vast menu
+   aan de zijkant met de onderdelen van het portaal (zie
+   templates/front-page.html in het thema en HDP_Zijbalk). Dat menu blijft
+   staan terwijl je scrolt; de inhoud ligt ernaast in plaats van eronder.
+   ========================================================================== */
+
+:root {
+	--hdp-zijbalk-breedte: 252px;
+	--hdp-werkblad-ronding: 20px;
+}
+
+.hdp-app {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: stretch;
+	gap: 0;
+	/* Tegen de voettekst aan: anders blijft er een streep achtergrond
+	   tussen het donkere menu en de donkere voettekst staan. */
+	margin-bottom: 0;
+}
+
+.hdp-app-zijbalk {
+	/* Een vaste breedte en niet meebuigend: de rode strepen onder de balk
+	   en boven de voettekst slaan precies dit stuk over, en die moeten weten
+	   waar het menu ophoudt. */
+	flex: 0 0 var(--hdp-zijbalk-breedte);
+	background: var(--wp--preset--color--donkergrijs);
+}
+
+.hdp-app-inhoud {
+	/* 999 zodat de inhoud alle resterende ruimte pakt en het menu op zijn
+	   eigen breedte blijft — tot het scherm te smal wordt en beide op een
+	   eigen regel belanden. */
+	flex: 999 1 560px;
+	min-width: 0;
+	padding: 2rem 2.2rem 3rem;
+	box-sizing: border-box;
+}
+
+/* --- Het menu zelf -------------------------------------------------- */
+
+.hdp-zijbalk {
+	/* Blijft staan, maar net onder de balk bovenaan die zelf ook blijft
+	   staan. Die hoogte meet dealerportaal.js op; zonder script valt het
+	   terug op 0 en plakt het menu tegen de bovenkant. */
+	position: sticky;
+	top: var(--hdp-header-hoogte, 0px);
+	max-height: calc(100vh - var(--hdp-header-hoogte, 0px));
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+	padding: 1.4rem 0.9rem 1.8rem;
+	box-sizing: border-box;
+	font-family: 'Montserrat', Arial, sans-serif;
+}
+
+body.admin-bar .hdp-zijbalk {
+	top: calc(var(--hdp-header-hoogte, 0px) + 32px);
+	max-height: calc(100vh - var(--hdp-header-hoogte, 0px) - 32px);
+}
+
+.hdp-zijbalk-kop {
+	margin: 0;
+	padding: 0 0.6rem;
+	font-size: 0.6rem;
+	font-weight: 700;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: #a9adb5;
+}
+/* Een kort rood streepje onder elk kopje: dat maakt van drie grijze
+   regeltjes drie herkenbare kopjes. */
+.hdp-zijbalk-kop::after {
+	content: "";
+	display: block;
+	width: 26px;
+	height: 2px;
+	margin-top: 0.4rem;
+	background: var(--wp--preset--color--homburg-rood);
+}
+/* Lucht boven elk volgend kopje, maar niet boven het eerste. */
+.hdp-zijbalk-lijst + .hdp-zijbalk-kop { margin-top: 1.1rem; }
+
+.hdp-zijbalk-lijst {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+}
+
+.hdp-zijbalk-link {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	min-height: 44px;
+	box-sizing: border-box;
+	padding: 0.6rem;
+	border-radius: 8px;
+	color: #e4e6ea;
+	font-size: 0.88rem;
+	font-weight: 600;
+	text-decoration: none;
+	transition: background 0.15s, color 0.15s;
+}
+.hdp-zijbalk-link:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
+.hdp-zijbalk-link svg {
+	flex: 0 0 auto;
+	width: 19px;
+	height: 19px;
+	stroke: currentColor;
+	fill: none;
+}
+.hdp-zijbalk-tekst { flex: 1 1 auto; min-width: 0; }
+
+.hdp-zijbalk-huidig {
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+}
+.hdp-zijbalk-huidig:hover { background: var(--wp--preset--color--homburg-rood-donker); color: var(--wp--preset--color--wit); }
+
+/* Een pijltje bij een link die het portaal verlaat — anders is het pas te
+   merken als er onverwacht een tabblad bijkomt. */
+.hdp-zijbalk-extern { flex: 0 0 auto; display: flex; opacity: 0.55; }
+.hdp-zijbalk-extern svg { width: 13px; height: 13px; }
+
+.hdp-zijbalk-badge {
+	flex: 0 0 auto;
+	min-width: 22px;
+	padding: 0.1rem 0.4rem;
+	border-radius: 20px;
+	background: var(--wp--preset--color--homburg-rood);
+	color: #ffffff;
+	font-size: 0.68rem;
+	font-weight: 800;
+	text-align: center;
+	line-height: 1.5;
+}
+.hdp-zijbalk-huidig .hdp-zijbalk-badge { background: #ffffff; color: var(--wp--preset--color--homburg-rood); }
+
+
+/* --- Eén donker vlak met het werkblad erin --------------------------- */
+/* De balk bovenaan, het menu links en de voettekst zijn samen één donker
+   vlak; het werkblad ligt daar als een licht paneel in, met afgeronde
+   hoeken aan de kant van het menu en een rode rand eromheen.
+
+   Daarvoor moeten drie dingen weg op het welkomscherm: de rode rand onder
+   de balk en boven de voettekst (die sneed het donker in drieën), de
+   ruimte die WordPress tussen blokken zet, en de lichte waas over de
+   voettekst — daardoor was die zichtbaar lichter dan de balk en het menu,
+   terwijl het hetzelfde vlak hoort te zijn. */
+
+body.home .hdp-site-header {
+	border-bottom: 0;
+	background: var(--wp--preset--color--donkergrijs);
+}
+
+body.home .hdp-site-footer {
+	border-top: 0;
+	margin-top: 0;
+	background: var(--wp--preset--color--donkergrijs);
+}
+
+body.home .hdp-app,
+body.home .hdp-app + footer.wp-block-template-part,
+body.home header.wp-block-template-part + .hdp-app {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+body.home .hdp-app {
+	background: var(--wp--preset--color--donkergrijs);
+}
+
+body.home .hdp-app-inhoud {
+	background: var(--wp--preset--color--grijs-licht);
+	border: 4px solid var(--wp--preset--color--homburg-rood);
+	/* Rechts loopt het werkblad gewoon tegen de rand van het scherm aan;
+	   daar hoort geen lijn en geen ronding. */
+	border-right: 0;
+	border-radius: var(--hdp-werkblad-ronding) 0 0 var(--hdp-werkblad-ronding);
+}
+
+/* --- De kop van het werkblad ---------------------------------------- */
+
+.hdp-welkomkop {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.2rem;
+	align-items: flex-end;
+	justify-content: space-between;
+	margin-bottom: 1.8rem;
+}
+.hdp-welkomkop h1 {
+	margin: 0 0 0.3rem;
+	font-size: 1.75rem;
+	font-weight: 800;
+	letter-spacing: -0.01em;
+	color: var(--wp--preset--color--donkergrijs);
+}
+.hdp-welkomkop-datum {
+	margin: 0;
+	font-size: 0.88rem;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-welkomkop-zoek { display: flex; flex: 0 1 320px; min-width: 240px; }
+.hdp-welkomkop-zoek input[type="search"] {
+	flex: 1 1 auto;
+	min-width: 0;
+	min-height: 44px;
+	box-sizing: border-box;
+	padding: 0.6rem 0.9rem;
+	border: 1px solid #c3c7ce;
+	border-right: 0;
+	border-radius: 8px 0 0 8px;
+	font-family: inherit;
+	font-size: 0.88rem;
+	background: var(--wp--preset--color--wit);
+}
+.hdp-welkomkop-zoek button {
+	flex: 0 0 auto;
+	min-height: 44px;
+	padding: 0.6rem 1.1rem;
+	border: 0;
+	border-radius: 0 8px 8px 0;
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+	font-family: inherit;
+	font-size: 0.88rem;
+	font-weight: 700;
+	cursor: pointer;
+}
+.hdp-welkomkop-zoek button:hover { background: var(--wp--preset--color--homburg-rood-donker); }
+
+/* --- In de kolom hoeft niets meer de volle breedte te pakken --------- */
+
+/* De secties op de startpagina centreren zichzelf normaal binnen de
+   paginabreedte, elk op een eigen maat (berichten op 90%, herbestellen op
+   70%). Naast een menu levert dat drie verschillende linkermarges onder
+   elkaar op. Hier bepaalt de kolom de breedte en beginnen ze allemaal
+   op dezelfde lijn. */
+.hdp-app-inhoud > *,
+.hdp-app-inhoud .entry-content > *,
+.hdp-app-inhoud .hdp-welkomscherm > *,
+.hdp-app-inhoud .alignfull,
+.hdp-app-inhoud .alignwide {
+	width: auto;
+	max-width: none;
+	margin-left: 0;
+	margin-right: 0;
+}
+.hdp-app-inhoud .hdp-info-sectie,
+.hdp-app-inhoud .hdp-herbestellen-sectie,
+.hdp-app-inhoud .hdp-berichten {
+	padding-left: 0;
+	padding-right: 0;
+}
+
+/* --- Smal scherm: het menu wordt een strook boven de inhoud ---------- */
+
+@media (max-width: 56rem) {
+	body.home .hdp-app-inhoud {
+		/* Het menu staat hier niet naast maar boven de inhoud; een paneel
+		   met ronde hoeken aan de linkerkant zou dan nergens op slaan. */
+		border-left: 0;
+		border-bottom: 0;
+		border-radius: 0;
+	}
+
+	.hdp-app-zijbalk { flex: 1 1 100%; max-width: none; }
+	.hdp-app-inhoud { flex: 1 1 100%; padding: 1.4rem 1.1rem 2.5rem; }
+
+	/* Alles op één regel die opzij schuift. Onder elkaar zou een
+	   telefoongebruiker eerst langs zeven menu-items moeten scrollen voor
+	   hij iets van de pagina ziet; en met de drie groepen elk op een eigen
+	   regel werd die strook drie keer zo hoog.
+
+	   Het schuiven zit op de balk zelf en niet op de lijsten, anders schuift
+	   elke groep los van de andere. */
+	.hdp-zijbalk {
+		position: static;
+		max-height: none;
+		flex-direction: row;
+		align-items: center;
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		overflow-y: visible;
+		gap: 0.4rem;
+		padding: 0.7rem 1.1rem;
+	}
+
+	/* De kopjes staan hier in de weg: naast elkaar is de indeling toch niet
+	   af te lezen, en ze kosten de hele hoogte van de strook. */
+	.hdp-zijbalk-kop { display: none; }
+
+	.hdp-zijbalk-lijst {
+		flex-direction: row;
+		flex: 0 0 auto;
+		gap: 0.4rem;
+	}
+	.hdp-zijbalk-link { white-space: nowrap; padding: 0.55rem 0.8rem; }
+
+	.hdp-welkomkop h1 { font-size: 1.45rem; }
+	.hdp-welkomkop-zoek { flex: 1 1 100%; }
 }

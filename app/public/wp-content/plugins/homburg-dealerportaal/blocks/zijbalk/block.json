@@ -1,0 +1,17 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "homburg/zijbalk",
+	"title": "Homburg zijmenu",
+	"category": "widgets",
+	"icon": "menu-alt",
+	"description": "Het vaste zijmenu van het welkomscherm. De onderdelen komen uit de portaalkaarten die op de startpagina staan — wijzig ze daar, niet hier.",
+	"textdomain": "homburg-dealerportaal",
+	"attributes": {},
+	"supports": {
+		"html": false,
+		"multiple": false,
+		"reusable": false
+	},
+	"render": "file:./render.php"
+}

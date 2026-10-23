@@ -20,6 +20,6 @@ test.describe('Inloggen dealerportaal', () => {
 		await page.getByLabel('Wachtwoord').fill(process.env.HDP_TEST_DEALER_PASS || '');
 		await page.getByRole('button', { name: 'Inloggen' }).click();
 
-		await expect(page.getByRole('heading', { name: /Welkom,/ })).toBeVisible();
+		await expect(page.getByRole('heading', { name: /Goede(morgen|middag)|Goedenavond/ })).toBeVisible();
 	});
 });
