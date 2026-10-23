@@ -2827,6 +2827,23 @@ body.home .hdp-app {
 	background: var(--wp--preset--color--donkergrijs);
 }
 
+/* Is de pagina korter dan het venster, dan bleef er onder de voettekst een
+   lichte strook over: dat is de achtergrond van de site, die door het
+   donkere vlak heen breekt. Dus de pagina minstens zo hoog als het scherm
+   maken, met het werkblad als het deel dat meegroeit — en de achtergrond
+   zelf donker, voor wat er bij doorscrollen onder vandaan komt. */
+body.home {
+	background: var(--wp--preset--color--donkergrijs);
+}
+body.home .wp-site-blocks {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+body.home .hdp-app {
+	flex: 1 0 auto;
+}
+
 body.home .hdp-app-inhoud {
 	background: var(--wp--preset--color--grijs-licht);
 	border: 4px solid var(--wp--preset--color--homburg-rood);

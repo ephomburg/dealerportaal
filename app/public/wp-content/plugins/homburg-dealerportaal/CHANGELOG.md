@@ -8,6 +8,12 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.70.1
+
+**Opgelost: onder de voettekst van het welkomscherm bleef een lichte strook staan.**
+- Op een hoog scherm is de pagina korter dan het venster. De voettekst eindigde dan halverwege en daaronder kwam de achtergrond van de site tevoorschijn — een witte strook die dwars door het donkere vlak heen brak.
+- De pagina is nu minstens zo hoog als het scherm, met het werkblad als het deel dat meegroeit, zodat de voettekst altijd onderaan staat. De achtergrond van de pagina is bovendien donkergrijs, voor wat er bij doorscrollen onder vandaan komt.
+
 ## 1.70.0
 
 **Nieuw welkomscherm: een vast menu aan de zijkant, in plaats van een scherm vol tegels.** (thema 1.30.0)
