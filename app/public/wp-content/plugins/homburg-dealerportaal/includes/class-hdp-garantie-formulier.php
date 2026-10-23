@@ -171,9 +171,16 @@ class HDP_Garantie_Formulier {
 
 		$mislukt = HDP_Garantie::bewaar_bijlagen( $bestanden, 'claim', $claim['id'] );
 
+		// Verwachten we een onderdeel, dan is dat het eerste wat de dealer
+		// moet weten: tot het pakket hier is, gebeurt er niets. Geen "stuurt
+		// u onderdelen retour?" maar een opdracht.
+		$sleutel = HDP_Garantie::onderdeel_verwacht( $waarden )
+			? 'garantie_ok_claim_onderdeel'
+			: 'garantie_ok_claim';
+
 		self::terug_met_melding(
 			'garantie',
-			sprintf( HDP_I18N::t( 'garantie_ok_claim' ), $claim['nummer'] ),
+			sprintf( HDP_I18N::t( $sleutel ), $claim['nummer'] ),
 			$mislukt,
 			add_query_arg( 'ticket', $claim['nummer'], home_url( '/garantie/' ) )
 		);

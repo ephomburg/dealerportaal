@@ -699,6 +699,38 @@ class HDP_Garantie_Render {
 	}
 
 	/**
+	 * De mededeling die bij een onderdelenclaim nergens te missen mag zijn:
+	 * wij beginnen pas als het onderdeel hier is.
+	 *
+	 * Dit stond eerst als hintregel onder een vinkje "ik stuur onderdelen
+	 * retour". Daarmee was het iets dat de dealer kon overslaan, terwijl het
+	 * bepaalt of zijn claim überhaupt in behandeling komt. Dus: boven het
+	 * formulier, in een eigen kader, voordat hij begint met invullen.
+	 *
+	 * Bij "niet ontvangen" is er niets om terug te sturen. Welk antwoord dat
+	 * is staat in data-zonder-onderdeel; het gedeelde script verbergt het
+	 * blok dan. Zo staat die uitzondering niet nog eens los in de JavaScript.
+	 *
+	 * @param string $nummer Het ticketnummer, als dat al bestaat.
+	 */
+	private static function render_retour_attentie( $nummer = '' ) {
+		$uitleg = '' === $nummer
+			? HDP_I18N::t( 'garantie_retour_uitleg' )
+			: sprintf( HDP_I18N::t( 'garantie_retour_uitleg_nummer' ), $nummer );
+		?>
+		<div class="hdp-garantie-attentie" id="hdp-retour-attentie"
+			data-zonder-onderdeel="<?php echo esc_attr( HDP_Garantie::PROBLEEM_ZONDER_ONDERDEEL ); ?>">
+			<?php // Eigen badge en niet hdp-kaart-icoon: dat is een vlak van 52px voor een kaarttegel, veel te zwaar boven een mededeling van drie regels. ?>
+			<?php HDP_Icons::render_icoon( 'bestellen', 'hdp-garantie-attentie-icoon' ); ?>
+			<div>
+				<strong><?php echo esc_html( HDP_I18N::t( 'garantie_retour_kop' ) ); ?></strong>
+				<p><?php echo esc_html( $uitleg ); ?></p>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
 	 * De regels van "te claimen onderdelen".
 	 *
 	 * Vier kolommen per regel, en een paar lege regels klaar. De herkomst is
@@ -827,6 +859,9 @@ class HDP_Garantie_Render {
 					<?php endif; ?>
 					<?php if ( $is_claim && ! $is_onderdeel ) : ?>
 						<?php self::render_machinekeuze(); ?>
+					<?php endif; ?>
+					<?php if ( $is_onderdeel ) : ?>
+						<?php self::render_retour_attentie(); ?>
 					<?php endif; ?>
 
 					<div class="hdp-garantie-velden">
@@ -1068,6 +1103,13 @@ class HDP_Garantie_Render {
 				</span>
 			</div>
 			<?php self::render_route( $claim ); ?>
+			<?php
+			// Wachten we op een pakket, dan hoort dat hier te staan en niet
+			// alleen in de bevestiging die de dealer één keer ziet.
+			if ( HDP_Garantie::onderdeel_verwacht( $claim ) && empty( $claim['onderdeel_ontvangen_op'] ) ) {
+				self::render_retour_attentie( $claim['nummer'] );
+			}
+			?>
 		</header>
 		<?php
 	}

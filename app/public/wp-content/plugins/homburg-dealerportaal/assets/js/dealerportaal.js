@@ -40,3 +40,33 @@
 		}, 0 );
 	} );
 } )();
+
+/**
+ * De mededeling bij een onderdelenclaim ("stuur het onderdeel naar
+ * Stiens") hoort te verdwijnen zodra de dealer "niet ontvangen" kiest: dan
+ * is er niets om terug te sturen.
+ *
+ * Staat hier en niet als inline-script bij het blok zelf: het blok staat
+ * boven het formulier, dus op dat moment bestaat de keuzelijst nog niet en
+ * vond het script er niets.
+ */
+( function () {
+	var blok = document.getElementById( 'hdp-retour-attentie' );
+	if ( ! blok ) {
+		return;
+	}
+
+	var keuze = document.getElementById( 'hdp-claim-onderdeel_probleem' );
+	if ( ! keuze ) {
+		// Op het ticketscherm staat hetzelfde blok zonder keuzelijst; daar
+		// is er niets te verbergen.
+		return;
+	}
+
+	function bijwerken() {
+		blok.hidden = keuze.value === blok.dataset.zonderOnderdeel;
+	}
+
+	keuze.addEventListener( 'change', bijwerken );
+	bijwerken();
+} )();

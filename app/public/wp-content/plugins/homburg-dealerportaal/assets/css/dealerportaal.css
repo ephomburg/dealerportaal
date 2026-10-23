@@ -2074,6 +2074,40 @@ a.hdp-garantie-item-actie:focus-visible { background: var(--hdp-aanzet-zacht-hov
 }
 .hdp-garantie-gelukt span { display: block; margin-top: .35rem; font-weight: 400; }
 
+/* De mededeling bij een onderdelenclaim: wij beginnen pas als het onderdeel
+   hier is. In het "u bent aan zet"-palet, want dat is precies wat het zegt.
+   Niet in rood: er is niets fout, er wordt iets van de dealer verwacht. */
+.hdp-garantie-attentie {
+	display: flex;
+	gap: .85rem;
+	align-items: flex-start;
+	margin: 0 0 1.9rem;
+	padding: 1rem 1.2rem;
+	background: var(--hdp-aanzet-zacht);
+	border: 1px solid var(--hdp-aanzet-rand);
+	border-left: 4px solid var(--hdp-aanzet-accent);
+	border-radius: var(--hdp-radius);
+	color: var(--hdp-aanzet-tekst);
+	font-size: .93rem;
+	line-height: 1.6;
+}
+.hdp-garantie-attentie-icoon {
+	flex: 0 0 auto;
+	display: flex;
+	margin-top: .15rem;
+}
+.hdp-garantie-attentie-icoon svg {
+	width: 1.5rem;
+	height: 1.5rem;
+	stroke: var(--hdp-aanzet-accent);
+}
+.hdp-garantie-attentie strong { display: block; font-size: 1rem; }
+.hdp-garantie-attentie p { margin: .3rem 0 0; }
+.hdp-garantie-attentie[hidden] { display: none; }
+
+/* Op het ticketscherm staat het blok binnen de kop, onder de route. */
+.hdp-ticket-kop .hdp-garantie-attentie { margin: 1.2rem 0 0; }
+
 @media (max-width: 48rem) {
 	.hdp-garantie-verzenden { flex-direction: column; align-items: stretch; }
 	.hdp-garantie-verzenden .hdp-btn,

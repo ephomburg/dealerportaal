@@ -266,6 +266,11 @@ class HDP_I18N {
 				'nl' => 'Uw claim is ingediend onder nummer %1$s. Stuurt u onderdelen retour naar Stiens? Vermeld dan %1$s op de zending — de claim kan pas behandeld worden zodra het onderdeel binnen is. Hieronder ziet u de stand van zaken.',
 				'fr' => 'Votre demande a été introduite sous le numéro %1$s. Vous renvoyez des pièces à Stiens ? Mentionnez alors %1$s sur l’envoi — la demande ne peut être traitée qu’une fois la pièce reçue. Vous voyez l’état ci-dessous.',
 			),
+			/* translators: %s is het ticketnummer. */
+			'garantie_ok_claim_onderdeel' => array(
+				'nl' => 'Uw claim is ingediend onder nummer %1$s. Stuur het onderdeel naar Stiens en vermeld %1$s op de zending — wij nemen de claim in behandeling zodra het onderdeel bij ons binnen is.',
+				'fr' => 'Votre demande a été introduite sous le numéro %1$s. Renvoyez la pièce à Stiens en mentionnant %1$s sur l’envoi — nous traitons la demande dès que la pièce nous est parvenue.',
+			),
 			'garantie_dag_in_status'     => array( 'nl' => '1 dag op deze status', 'fr' => '1 jour à ce statut' ),
 			/* translators: %d is een aantal dagen. */
 			'garantie_dagen_in_status'   => array( 'nl' => '%d dagen op deze status', 'fr' => '%d jours à ce statut' ),
@@ -413,6 +418,23 @@ class HDP_I18N {
 				'fr' => 'Mentionnez %s sur l\'envoi',
 			),
 			'garantie_retour_ontvangen' => array( 'nl' => 'Onderdeel ontvangen', 'fr' => 'Pièce reçue' ),
+			'garantie_behandeling_na_ontvangst' => array(
+				'nl' => 'Start zodra het onderdeel binnen is',
+				'fr' => 'Débute dès réception de la pièce',
+			),
+			'garantie_retour_kop'       => array(
+				'nl' => 'Stuur het onderdeel naar Stiens',
+				'fr' => 'Renvoyez la pièce à Stiens',
+			),
+			'garantie_retour_uitleg'    => array(
+				'nl' => 'Wij beoordelen het onderdeel zelf; op een foto is meestal niet te zien wat er mis is. Daarom nemen wij een onderdelenclaim pas in behandeling zodra het onderdeel bij ons in Stiens binnen is. Vermeld het ticketnummer op de zending — dat nummer krijgt u direct nadat u deze claim heeft ingediend.',
+				'fr' => 'Nous évaluons la pièce elle-même ; une photo ne montre généralement pas ce qui ne va pas. C’est pourquoi nous ne traitons une demande de garantie sur pièces qu’à partir du moment où la pièce nous est parvenue à Stiens. Mentionnez le numéro de ticket sur l’envoi — vous recevez ce numéro dès que vous avez introduit cette demande.',
+			),
+			/* translators: %s is het ticketnummer. */
+			'garantie_retour_uitleg_nummer' => array(
+				'nl' => 'Wij nemen deze claim in behandeling zodra het onderdeel bij ons in Stiens binnen is. Vermeld %s op de zending, dan weten wij meteen waar het pakket bij hoort.',
+				'fr' => 'Nous traitons cette demande dès que la pièce nous est parvenue à Stiens. Mentionnez %s sur l’envoi, afin que nous sachions immédiatement à quoi se rapporte le colis.',
+			),
 			'garantie_rail_claims'    => array( 'nl' => 'Claims', 'fr' => 'Demandes' ),
 			'garantie_rail_alles'     => array( 'nl' => 'Alles', 'fr' => 'Tout' ),
 			'garantie_rail_wacht'     => array( 'nl' => 'Wacht op u', 'fr' => 'En attente de vous' ),

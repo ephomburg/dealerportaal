@@ -8,6 +8,17 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.69.0
+
+**Een onderdelenclaim gaat pas in behandeling als het onderdeel in Stiens is — en dat staat nu op elk scherm waar de dealer het nodig heeft.**
+- Dit was een vinkje "ik stuur onderdelen retour" met een regeltje eronder. Daarmee was het iets dat een dealer kon overslaan, terwijl het bepaalt of zijn claim überhaupt in behandeling komt.
+- Bij een onderdelenclaim is het vinkje weg: terugsturen is daar de regel, geen keuze. Boven het formulier staat nu een kader dat uitlegt waarom (wij beoordelen het onderdeel zelf) en dat het ticketnummer op de zending moet.
+- Eén uitzondering: kiest de dealer "niet ontvangen", dan is er niets om terug te sturen en verdwijnt het kader. Zonder die uitzondering zou zo'n claim voorgoed blijven hangen.
+- Na indienen krijgt de dealer een eigen bevestiging: geen vraag ("stuurt u onderdelen retour?") maar een opdracht, met het ticketnummer erin.
+- Op het ticket zelf blijft het staan zolang wij op het pakket wachten, inclusief ticketnummer. In de route vertelt de stap "Behandeling" nu ook waarom er nog niets gebeurt: "Start zodra het onderdeel binnen is".
+- Bij een machineclaim blijft het een vinkje; die reparatie is vaak ter plekke gedaan en dan komt er niets retour.
+- Tests: 298 (was 282).
+
 ## 1.68.1
 
 **Content en huisstijl worden nu ook via FileBird gevuld, en de mappen verschijnen ook op een site waar ze al eens zijn aangemaakt.**
