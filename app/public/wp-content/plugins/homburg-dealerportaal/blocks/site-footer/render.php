@@ -43,7 +43,7 @@ $socials = array(
 		<div class="hdp-footer-inner">
 			<div>
 				<h3><?php echo esc_html( $nl_titel ); ?></h3>
-				<p class="hdp-footer-adres">It Noarderfjild 21<br>9051 BM Stiens<br>Nederland</p>
+				<p class="hdp-footer-adres">It Noarderfjild 21 &middot; 9051 BM Stiens &middot; Nederland</p>
 				<div class="hdp-footer-contact">
 					<a href="tel:+31582571555"><?php echo $tel_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?>+31 (0)58 257 15 55</a>
 					<a href="mailto:info@homburg-holland.com"><?php echo $mail_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?>info@homburg-holland.com</a>
@@ -51,7 +51,7 @@ $socials = array(
 			</div>
 			<div>
 				<h3><?php echo esc_html( $be_titel ); ?></h3>
-				<p class="hdp-footer-adres">Liersesteenweg 211L<br>2220 Heist-op-den-Berg<br>België</p>
+				<p class="hdp-footer-adres">Liersesteenweg 211L &middot; 2220 Heist-op-den-Berg &middot; België</p>
 				<div class="hdp-footer-contact">
 					<a href="tel:+3215559835"><?php echo $tel_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?>+32 (0)15 55 98 35</a>
 					<a href="mailto:info@homburg-belgium.com"><?php echo $mail_icoon; // phpcs:ignore WordPress.Security.EscapeOutput ?>info@homburg-belgium.com</a>

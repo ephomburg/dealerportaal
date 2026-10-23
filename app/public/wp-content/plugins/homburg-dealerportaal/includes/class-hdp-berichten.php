@@ -1,0 +1,431 @@
+<?php
+/**
+ * Berichten van Homburg aan dealers, op de startpagina van het portaal.
+ *
+ * De informatiestroom liep tot nu toe één kant op: bestanden en claims
+ * verschenen vanzelf, maar er was geen manier om iets te zéggen. Een
+ * prijswijziging, een leveringsprobleem bij één fabrikant, een gewijzigde
+ * openingstijd — dat ging per mail en kwam daarmee bij iedereen terecht of
+ * bij niemand.
+ *
+ * Een bericht kan op merken gericht worden, net als een download: alleen
+ * Väderstad-dealers zien het Väderstad-nieuws. Zonder merk is het voor
+ * iedereen.
+ *
+ * @package Homburg_Dealerportaal
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Beheert en toont de berichten op de startpagina.
+ */
+class HDP_Berichten {
+
+	const POST_TYPE = 'hdp_bericht';
+
+	/** Meta: op welke merken dit bericht gericht is (kommagescheiden). */
+	const META_MERKEN = '_hdp_bericht_merken';
+
+	/** Meta: tot en met welke datum het bericht getoond wordt (leeg = blijft staan). */
+	const META_TOT = '_hdp_bericht_tot';
+
+	/** Meta: 'melding' of 'belangrijk'. */
+	const META_SOORT = '_hdp_bericht_soort';
+
+	/**
+	 * Meta: de Franse titel en tekst.
+	 *
+	 * Het Nederlands staat in de gewone titel en editor; het Frans ernaast
+	 * in een eigen blok. Leeg laten mag: dan krijgt een Waalse dealer de
+	 * Nederlandse tekst te zien in plaats van niets.
+	 */
+	const META_TITEL_FR = '_hdp_bericht_titel_fr';
+	const META_TEKST_FR = '_hdp_bericht_tekst_fr';
+
+	/** Gebruikersmeta: welke berichten deze dealer heeft weggeklikt. */
+	const META_WEG = 'hdp_berichten_weg';
+
+	/** Veld- en nonce-naam van de wegklikknop. */
+	const WEG_VELD  = 'hdp_bericht_weg';
+	const WEG_NONCE = 'hdp_bericht_wegklikken';
+
+	/**
+	 * Hoeveel berichten er hoogstens tegelijk op de startpagina staan.
+	 *
+	 * Drie is de grens waarboven het van een mededeling een nieuwsbrief
+	 * wordt en de tegels eronder wegvallen. Staat er een vierde klaar, dan
+	 * verdwijnt het oudste vanzelf — dat dwingt af dat oude berichten een
+	 * einddatum krijgen in plaats van eeuwig te blijven staan.
+	 */
+	const MAXIMAAL = 3;
+
+	public static function init() {
+		add_action( 'init', array( __CLASS__, 'register_post_type' ) );
+		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_box' ) );
+		add_action( 'save_post_' . self::POST_TYPE, array( __CLASS__, 'opslaan' ) );
+		add_filter( 'manage_' . self::POST_TYPE . '_posts_columns', array( __CLASS__, 'kolommen' ) );
+		add_action( 'manage_' . self::POST_TYPE . '_posts_custom_column', array( __CLASS__, 'kolom_inhoud' ), 10, 2 );
+		add_action( 'template_redirect', array( __CLASS__, 'verwerk_wegklikken' ) );
+	}
+
+	public static function register_post_type() {
+		register_post_type(
+			self::POST_TYPE,
+			array(
+				'label'           => 'Berichten',
+				'labels'          => array(
+					'name'          => 'Berichten',
+					'singular_name' => 'Bericht',
+					'add_new_item'  => 'Nieuw bericht plaatsen',
+					'edit_item'     => 'Bericht bewerken',
+					'search_items'  => 'Berichten zoeken',
+					'not_found'     => 'Nog geen berichten geplaatst.',
+				),
+				'public'          => false,
+				'show_ui'         => true,
+				'show_in_menu'    => true,
+				'menu_icon'       => 'dashicons-megaphone',
+				'menu_position'   => 26,
+				'supports'        => array( 'title', 'editor' ),
+				'capability_type' => 'post',
+				'map_meta_cap'    => true,
+			)
+		);
+	}
+
+	/* === Beheer in wp-admin ============================================ */
+
+	public static function add_meta_box() {
+		add_meta_box( 'hdp_bericht_bereik', 'Voor wie en hoelang', array( __CLASS__, 'render_meta_box' ), self::POST_TYPE, 'side' );
+		add_meta_box( 'hdp_bericht_frans', 'Franse vertaling', array( __CLASS__, 'render_frans_meta_box' ), self::POST_TYPE, 'normal' );
+	}
+
+	/**
+	 * Het Franse blok, onder de gewone editor.
+	 *
+	 * Bewust niet verplicht: een bericht dat alleen Nederlands bestaat is
+	 * beter dan geen bericht. Blijft dit leeg, dan ziet een Franstalige
+	 * dealer de Nederlandse tekst.
+	 */
+	public static function render_frans_meta_box( $post ) {
+		$titel = get_post_meta( $post->ID, self::META_TITEL_FR, true );
+		$tekst = get_post_meta( $post->ID, self::META_TEKST_FR, true );
+		?>
+		<p>
+			<label for="hdp_bericht_titel_fr"><strong>Titel (Frans)</strong></label><br>
+			<input type="text" name="hdp_bericht_titel_fr" id="hdp_bericht_titel_fr" class="widefat"
+				value="<?php echo esc_attr( $titel ); ?>">
+		</p>
+		<p>
+			<label for="hdp_bericht_tekst_fr"><strong>Tekst (Frans)</strong></label><br>
+			<textarea name="hdp_bericht_tekst_fr" id="hdp_bericht_tekst_fr" class="widefat" rows="6"><?php echo esc_textarea( $tekst ); ?></textarea>
+			<span class="description">Laat u dit leeg, dan krijgt een Franstalige dealer de Nederlandse tekst te zien.</span>
+		</p>
+		<?php
+	}
+
+	public static function render_meta_box( $post ) {
+		wp_nonce_field( 'hdp_bericht_opslaan', 'hdp_bericht_nonce' );
+
+		$gekozen = HDP_Merken::naar_array( get_post_meta( $post->ID, self::META_MERKEN, true ) );
+		$tot     = get_post_meta( $post->ID, self::META_TOT, true );
+		$soort   = get_post_meta( $post->ID, self::META_SOORT, true );
+		?>
+		<p>
+			<strong>Merken</strong><br>
+			<span class="description">Niets aanvinken = alle dealers zien dit bericht.</span>
+		</p>
+		<?php foreach ( HDP_Merken::lijst() as $merk ) : ?>
+			<label style="display:block">
+				<input type="checkbox" name="hdp_bericht_merken[]" value="<?php echo esc_attr( $merk ); ?>"
+					<?php checked( in_array( $merk, $gekozen, true ) ); ?>>
+				<?php echo esc_html( $merk ); ?>
+			</label>
+		<?php endforeach; ?>
+
+		<p style="margin-top:1em">
+			<label for="hdp_bericht_soort"><strong>Soort</strong></label><br>
+			<select name="hdp_bericht_soort" id="hdp_bericht_soort" class="widefat">
+				<option value="melding" <?php selected( 'belangrijk' !== $soort ); ?>>Melding</option>
+				<option value="belangrijk" <?php selected( 'belangrijk', $soort ); ?>>Belangrijk</option>
+			</select>
+			<span class="description">"Belangrijk" valt op; gebruik dat spaarzaam, anders valt het niet meer op.</span>
+		</p>
+
+		<p style="margin-top:1em">
+			<label for="hdp_bericht_tot"><strong>Tonen tot en met</strong></label><br>
+			<input type="date" name="hdp_bericht_tot" id="hdp_bericht_tot" class="widefat"
+				value="<?php echo esc_attr( $tot ); ?>">
+			<span class="description">Leeg laten = blijft staan tot u het bericht weghaalt.</span>
+		</p>
+		<?php
+	}
+
+	public static function opslaan( $post_id ) {
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return;
+		}
+		if ( ! isset( $_POST['hdp_bericht_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['hdp_bericht_nonce'] ) ), 'hdp_bericht_opslaan' ) ) {
+			return;
+		}
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return;
+		}
+
+		// Via HDP_Merken::uit_selectie(): dat filtert alles weg wat niet in
+		// de vaste merkenlijst staat, zodat een met de hand samengesteld
+		// verzoek hier geen willekeurige waarde kan achterlaten.
+		$merken = isset( $_POST['hdp_bericht_merken'] )
+			? HDP_Merken::uit_selectie( array_map( 'sanitize_text_field', wp_unslash( (array) $_POST['hdp_bericht_merken'] ) ) )
+			: '';
+		update_post_meta( $post_id, self::META_MERKEN, $merken );
+
+		$soort = isset( $_POST['hdp_bericht_soort'] ) ? sanitize_key( wp_unslash( $_POST['hdp_bericht_soort'] ) ) : 'melding';
+		update_post_meta( $post_id, self::META_SOORT, 'belangrijk' === $soort ? 'belangrijk' : 'melding' );
+
+		$tot = isset( $_POST['hdp_bericht_tot'] ) ? sanitize_text_field( wp_unslash( $_POST['hdp_bericht_tot'] ) ) : '';
+		update_post_meta( $post_id, self::META_TOT, preg_match( '/^\d{4}-\d{2}-\d{2}$/', $tot ) ? $tot : '' );
+
+		$titel_fr = isset( $_POST['hdp_bericht_titel_fr'] ) ? sanitize_text_field( wp_unslash( $_POST['hdp_bericht_titel_fr'] ) ) : '';
+		update_post_meta( $post_id, self::META_TITEL_FR, $titel_fr );
+
+		// Dezelfde ruimte als de gewone editor: wat daar mag (een link, vet)
+		// mag hier ook, maar niets gevaarlijks.
+		$tekst_fr = isset( $_POST['hdp_bericht_tekst_fr'] ) ? wp_kses_post( wp_unslash( $_POST['hdp_bericht_tekst_fr'] ) ) : '';
+		update_post_meta( $post_id, self::META_TEKST_FR, $tekst_fr );
+	}
+
+	public static function kolommen( $kolommen ) {
+		$nieuw = array();
+		foreach ( $kolommen as $sleutel => $label ) {
+			$nieuw[ $sleutel ] = $label;
+			if ( 'title' === $sleutel ) {
+				$nieuw['hdp_merken'] = 'Voor';
+				$nieuw['hdp_talen']  = 'Talen';
+				$nieuw['hdp_tot']    = 'Tot en met';
+			}
+		}
+		return $nieuw;
+	}
+
+	public static function kolom_inhoud( $kolom, $post_id ) {
+		if ( 'hdp_merken' === $kolom ) {
+			$merken = get_post_meta( $post_id, self::META_MERKEN, true );
+			echo esc_html( $merken ? $merken : 'Alle dealers' );
+		}
+		if ( 'hdp_talen' === $kolom ) {
+			// In één oogopslag zien welk bericht nog een vertaling mist.
+			$heeft_fr = '' !== trim( (string) get_post_meta( $post_id, self::META_TEKST_FR, true ) );
+			echo esc_html( $heeft_fr ? 'NL + FR' : 'alleen NL' );
+		}
+		if ( 'hdp_tot' === $kolom ) {
+			$tot = get_post_meta( $post_id, self::META_TOT, true );
+			if ( ! $tot ) {
+				echo '—';
+				return;
+			}
+			echo esc_html( HDP_I18N::datum( 'j M Y', strtotime( $tot ) ) );
+			if ( self::verlopen( $tot ) ) {
+				echo ' <em>(verlopen)</em>';
+			}
+		}
+	}
+
+	/* === Wat een dealer te zien krijgt ================================= */
+
+	/** Is deze einddatum voorbij? Een lege datum verloopt nooit. */
+	private static function verlopen( $tot ) {
+		if ( ! $tot ) {
+			return false;
+		}
+
+		// Tot en met: op de dag zelf staat het er nog.
+		return current_time( 'Y-m-d' ) > $tot;
+	}
+
+	/**
+	 * Mag deze dealer dit bericht zien?
+	 *
+	 * Dezelfde regels als bij downloads, zodat "merk" overal hetzelfde
+	 * betekent: zonder merk is het voor iedereen, en een dealer bij wie nog
+	 * geen merken zijn ingesteld ziet alles — die mag niet per ongeluk
+	 * niets meer te zien krijgen.
+	 */
+	public static function mag_zien( $post_id, $user_id = 0 ) {
+		$merken = HDP_Merken::naar_array( get_post_meta( $post_id, self::META_MERKEN, true ) );
+		if ( ! $merken ) {
+			return true;
+		}
+
+		$user_id    = $user_id ? (int) $user_id : get_current_user_id();
+		$toegestaan = HDP_Merken::naar_array( get_user_meta( $user_id, 'hdp_merken', true ) );
+
+		if ( ! $toegestaan ) {
+			return true;
+		}
+
+		return (bool) array_intersect( $merken, $toegestaan );
+	}
+
+	/**
+	 * Welke berichten deze dealer heeft weggeklikt.
+	 *
+	 * @param int $user_id Leeg = de huidige bezoeker.
+	 * @return int[]
+	 */
+	public static function weggeklikt( $user_id = 0 ) {
+		$user_id    = $user_id ? (int) $user_id : get_current_user_id();
+		$opgeslagen = get_user_meta( $user_id, self::META_WEG, true );
+
+		return array_map( 'intval', (array) ( is_array( $opgeslagen ) ? $opgeslagen : array() ) );
+	}
+
+	/**
+	 * Verwerkt een klik op het kruisje.
+	 *
+	 * Een formulier en geen link: wegklikken verandert iets, en dat hoort
+	 * niet te gebeuren doordat een browser of een mailprogramma even een
+	 * adres ophaalt. Daarna terug naar dezelfde pagina, zodat de dealer
+	 * staat waar hij stond.
+	 */
+	public static function verwerk_wegklikken() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- de nonce wordt hieronder gecontroleerd zodra we weten dát dit onze knop is.
+		if ( ! isset( $_POST[ self::WEG_VELD ] ) ) {
+			return;
+		}
+
+		if ( ! is_user_logged_in() ) {
+			return;
+		}
+
+		check_admin_referer( self::WEG_NONCE );
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- check_admin_referer() is hierboven gedraaid.
+		$id = (int) $_POST[ self::WEG_VELD ];
+		if ( $id <= 0 || self::POST_TYPE !== get_post_type( $id ) ) {
+			return;
+		}
+
+		$user_id = get_current_user_id();
+		$weg     = self::weggeklikt( $user_id );
+
+		if ( ! in_array( $id, $weg, true ) ) {
+			$weg[] = $id;
+		}
+
+		// Meteen opschonen: berichten die inmiddels verwijderd zijn hoeven
+		// hier niet eeuwig als nummer te blijven staan.
+		$weg = array_values(
+			array_filter(
+				$weg,
+				static function ( $bericht_id ) {
+					return self::POST_TYPE === get_post_type( $bericht_id );
+				}
+			)
+		);
+
+		update_user_meta( $user_id, self::META_WEG, $weg );
+
+		$terug = wp_get_referer();
+		wp_safe_redirect( $terug ? $terug : home_url( '/' ) );
+		exit;
+	}
+
+	/**
+	 * De berichten die nu voor deze dealer gelden, nieuwste eerst.
+	 *
+	 * @param int $user_id Leeg = de huidige bezoeker.
+	 * @return WP_Post[]
+	 */
+	public static function voor_dealer( $user_id = 0 ) {
+		$posts = get_posts(
+			array(
+				'post_type'        => self::POST_TYPE,
+				'post_status'      => 'publish',
+				// Ruimer ophalen dan we tonen: na het wegfilteren van
+				// verlopen en niet-passende berichten moeten er nog genoeg
+				// overblijven om MAXIMAAL te kunnen vullen.
+				'numberposts'      => 30,
+				'orderby'          => 'date',
+				'order'            => 'DESC',
+				'suppress_filters' => false,
+			)
+		);
+
+		$weg       = self::weggeklikt( $user_id );
+		$zichtbaar = array();
+
+		foreach ( $posts as $post ) {
+			if ( in_array( (int) $post->ID, $weg, true ) ) {
+				continue;
+			}
+			if ( self::verlopen( get_post_meta( $post->ID, self::META_TOT, true ) ) ) {
+				continue;
+			}
+			if ( ! self::mag_zien( $post->ID, $user_id ) ) {
+				continue;
+			}
+
+			$zichtbaar[] = $post;
+
+			if ( count( $zichtbaar ) >= self::MAXIMAAL ) {
+				break;
+			}
+		}
+
+		return $zichtbaar;
+	}
+
+	/* === Weergave op de startpagina ==================================== */
+
+	/**
+	 * De berichten boven de tegels.
+	 *
+	 * Daar en nergens anders: dit is het eerste wat een dealer ziet, en een
+	 * mededeling die je pas tegenkomt nadat je ergens naartoe geklikt hebt,
+	 * is te laat.
+	 */
+	public static function render() {
+		$berichten = self::voor_dealer();
+		if ( ! $berichten ) {
+			return;
+		}
+		?>
+		<section class="hdp-berichten" aria-label="<?php echo esc_attr( HDP_I18N::t( 'berichten_titel' ) ); ?>">
+			<?php foreach ( $berichten as $post ) : ?>
+				<?php $belangrijk = 'belangrijk' === get_post_meta( $post->ID, self::META_SOORT, true ); ?>
+				<article class="hdp-bericht<?php echo $belangrijk ? ' hdp-bericht-belangrijk' : ''; ?>">
+					<div class="hdp-bericht-icoon" aria-hidden="true">
+						<?php HDP_Icons::render_icoon( $belangrijk ? 'technisch' : 'mail' ); ?>
+					</div>
+					<?php
+					// kies() valt vanzelf terug op het Nederlands als het
+					// Franse veld leeg is gebleven.
+					$titel = HDP_I18N::kies( get_the_title( $post ), get_post_meta( $post->ID, self::META_TITEL_FR, true ) );
+					$tekst = HDP_I18N::kies( $post->post_content, get_post_meta( $post->ID, self::META_TEKST_FR, true ) );
+					?>
+					<div class="hdp-bericht-tekst">
+						<h2><?php echo esc_html( $titel ); ?></h2>
+						<?php echo wp_kses_post( wpautop( $tekst ) ); ?>
+						<p class="hdp-bericht-datum">
+							<?php echo esc_html( HDP_I18N::datum( 'j F Y', get_post_time( 'U', true, $post ) ) ); ?>
+						</p>
+					</div>
+					<form class="hdp-bericht-weg" method="post">
+						<?php wp_nonce_field( self::WEG_NONCE ); ?>
+						<?php // Het nummer in een verborgen veld en niet op de knop zelf: dan maakt het niet uit of die knop tijdens het versturen wordt uitgeschakeld. ?>
+						<input type="hidden" name="<?php echo esc_attr( self::WEG_VELD ); ?>" value="<?php echo esc_attr( (string) $post->ID ); ?>">
+						<button type="submit"
+							aria-label="<?php echo esc_attr( sprintf( HDP_I18N::t( 'bericht_wegklikken' ), $titel ) ); ?>">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+						</button>
+					</form>
+				</article>
+			<?php endforeach; ?>
+		</section>
+		<?php
+	}
+}

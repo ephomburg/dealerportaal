@@ -54,7 +54,7 @@ class Garantie_Test extends WP_UnitTestCase {
 	public function tearDown(): void {
 		remove_filter( 'pre_http_request', array( $this, 'nagebootste_supabase' ), 10 );
 		wp_set_current_user( 0 );
-		unset( $_GET['ticket'], $_GET['nieuw'], $_GET['soort'], $_COOKIE[ HDP_I18N::COOKIE ] );
+		unset( $_GET['ticket'], $_GET['volledig'], $_GET['toon'], $_GET['nieuw'], $_GET['soort'], $_COOKIE[ HDP_I18N::COOKIE ] );
 		parent::tearDown();
 	}
 
@@ -381,9 +381,50 @@ class Garantie_Test extends WP_UnitTestCase {
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
-		$this->assertStringContainsString( 'hdp-garantie-ingangen', $html );
+		$this->assertStringContainsString( 'hdp-garantie-werkblad', $html );
+		$this->assertStringContainsString( 'hdp-garantie-rail', $html );
 		$this->assertStringContainsString( 'hdp-garantie-lijst', $html );
-		$this->assertStringContainsString( 'hdp-machines', $html );
+	}
+
+	/**
+	 * De filterkolom zegt met een getal hoeveel er in elke groep zit.
+	 * Zonder die tellingen moet je elke groep openklikken om te zien of er
+	 * iets in zit — precies wat deze indeling moest voorkomen.
+	 */
+	public function test_filterkolom_telt_de_claims_per_groep() {
+		$this->als_goedgekeurde_dealer();
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		foreach ( array( 'alles', 'wacht', 'loopt', 'klaar' ) as $groep ) {
+			$this->assertStringContainsString( "toon=$groep", $html, "Groep $groep ontbreekt in de filterkolom." );
+		}
+		$this->assertStringContainsString( 'toon=machines', $html );
+		$this->assertStringContainsString( 'hdp-rail-aantal', $html );
+	}
+
+	/** Een claim opent rechts in het overzicht, niet op een eigen scherm. */
+	public function test_claim_opent_in_de_detailkolom() {
+		$this->als_goedgekeurde_dealer();
+		$_GET['ticket'] = 'T100001';
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		// De lijst blijft ernaast staan.
+		$this->assertStringContainsString( 'hdp-garantie-werkblad', $html );
+		$this->assertStringContainsString( 'hdp-detail-kaart', $html );
+		$this->assertStringContainsString( 'hdp-gesprek', $html );
+		// En het volledige scherm is van daaruit bereikbaar.
+		$this->assertStringContainsString( 'volledig=1', $html );
+	}
+
+	/** Zonder gekozen claim staat er rechts een uitnodiging, geen leegte. */
+	public function test_zonder_gekozen_claim_staat_er_een_lege_toestand() {
+		$this->als_goedgekeurde_dealer();
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		$this->assertStringContainsString( 'hdp-leeg-kaart', $html );
 	}
 
 	public function test_overzicht_toont_alleen_lopende_claims() {
@@ -392,8 +433,20 @@ class Garantie_Test extends WP_UnitTestCase {
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
 		$this->assertStringContainsString( 'T100001', $html );
-		$this->assertStringNotContainsString( 'T100002', $html, 'Een afgehandelde claim hoort niet in het overzicht.' );
 		$this->assertStringNotContainsString( 'T100009', $html, 'Een claim van een andere dealer hoort hier nooit te staan.' );
+	}
+
+	/**
+	 * De filterkolom bepaalt wat er in de lijst staat. "Wacht op u" hoort
+	 * alleen de claims te tonen waar de dealer zelf iets moet doen.
+	 */
+	public function test_filter_toont_alleen_de_claims_van_die_groep() {
+		$this->als_goedgekeurde_dealer();
+		$_GET['toon'] = 'klaar';
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		$this->assertStringContainsString( 'T100002', $html, 'Een afgehandelde claim hoort onder "Afgehandeld" te staan.' );
 	}
 
 	public function test_wat_op_de_dealer_wacht_staat_boven_de_lijsten() {
@@ -401,11 +454,13 @@ class Garantie_Test extends WP_UnitTestCase {
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
-		$this->assertStringContainsString( 'hdp-garantie-aandacht', $html );
+		// Staat nu als eigen groep bovenin de filterkolom, met een telling
+		// die opvalt zolang er iets openstaat.
+		$this->assertStringContainsString( 'hdp-rail-wacht', $html );
 		$this->assertLessThan(
 			strpos( $html, 'hdp-garantie-lijst' ),
-			strpos( $html, 'hdp-garantie-aandacht' ),
-			'De aandachtsbalk hoort voor de claimlijst te staan.'
+			strpos( $html, 'hdp-rail-wacht' ),
+			'Wat op de dealer wacht hoort vóór de lijst te staan.'
 		);
 	}
 
@@ -424,6 +479,7 @@ class Garantie_Test extends WP_UnitTestCase {
 	 */
 	public function test_machine_die_nog_beoordeeld_wordt_is_herkenbaar() {
 		$this->als_goedgekeurde_dealer();
+		$_GET['toon'] = 'machines';
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
@@ -456,7 +512,8 @@ class Garantie_Test extends WP_UnitTestCase {
 	public function test_storing_op_het_ticketscherm_zegt_niet_dat_het_ticket_niet_bestaat() {
 		$this->als_goedgekeurde_dealer();
 		$this->storing  = true;
-		$_GET['ticket'] = 'T100001';
+		$_GET['ticket']   = 'T100001';
+		$_GET['volledig'] = '1';
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
@@ -470,7 +527,8 @@ class Garantie_Test extends WP_UnitTestCase {
 
 	public function test_ticketscherm_toont_route_gesprek_en_gegevens() {
 		$this->als_goedgekeurde_dealer();
-		$_GET['ticket'] = 'T100001';
+		$_GET['ticket']   = 'T100001';
+		$_GET['volledig'] = '1';
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
@@ -488,7 +546,8 @@ class Garantie_Test extends WP_UnitTestCase {
 	 */
 	public function test_ticketscherm_heeft_twee_kolommen() {
 		$this->als_goedgekeurde_dealer();
-		$_GET['ticket'] = 'T100001';
+		$_GET['ticket']   = 'T100001';
+		$_GET['volledig'] = '1';
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
@@ -503,7 +562,8 @@ class Garantie_Test extends WP_UnitTestCase {
 	 */
 	public function test_wie_aan_zet_is_staat_boven_het_gesprek() {
 		$this->als_goedgekeurde_dealer();
-		$_GET['ticket'] = 'T100001';
+		$_GET['ticket']   = 'T100001';
+		$_GET['volledig'] = '1';
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
@@ -514,7 +574,8 @@ class Garantie_Test extends WP_UnitTestCase {
 
 	public function test_machinekaart_toont_de_garantiestand_bij_het_ticket() {
 		$this->als_goedgekeurde_dealer();
-		$_GET['ticket'] = 'T100001';
+		$_GET['ticket']   = 'T100001';
+		$_GET['volledig'] = '1';
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
@@ -557,7 +618,8 @@ class Garantie_Test extends WP_UnitTestCase {
 	 */
 	public function test_antwoordvak_kan_een_bestand_meesturen() {
 		$this->als_goedgekeurde_dealer();
-		$_GET['ticket'] = 'T100001';
+		$_GET['ticket']   = 'T100001';
+		$_GET['volledig'] = '1';
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
@@ -592,7 +654,8 @@ class Garantie_Test extends WP_UnitTestCase {
 
 	public function test_onbekend_ticketnummer_geeft_geen_gegevens_prijs() {
 		$this->als_goedgekeurde_dealer();
-		$_GET['ticket'] = 'T999999';
+		$_GET['ticket']   = 'T999999';
+		$_GET['volledig'] = '1';
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
@@ -602,7 +665,8 @@ class Garantie_Test extends WP_UnitTestCase {
 
 	public function test_opmerkingen_van_homburg_komen_bij_de_dealer_terecht() {
 		$this->als_goedgekeurde_dealer();
-		$_GET['ticket'] = 'T100001';
+		$_GET['ticket']   = 'T100001';
+		$_GET['volledig'] = '1';
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
@@ -975,7 +1039,8 @@ class Garantie_Test extends WP_UnitTestCase {
 
 	public function test_antwoordvak_op_een_ticket_is_een_werkend_formulier() {
 		$this->als_goedgekeurde_dealer();
-		$_GET['ticket'] = 'T100001';
+		$_GET['ticket']   = 'T100001';
+		$_GET['volledig'] = '1';
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
@@ -1092,7 +1157,8 @@ class Garantie_Test extends WP_UnitTestCase {
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
-		$this->assertStringContainsString( 'Demandes en cours', $html );
-		$this->assertStringNotContainsString( 'Lopende claims', $html );
+		$this->assertStringContainsString( 'En attente de vous', $html, 'De filterkolom hoort Frans te zijn.' );
+		$this->assertStringContainsString( 'Retour au portail', $html );
+		$this->assertStringNotContainsString( 'Wacht op u', $html );
 	}
 }

@@ -7,6 +7,56 @@
 :root {
 	--hdp-radius:  10px;
 	--hdp-schaduw: 0 4px 18px rgba(43, 45, 49, 0.10);
+
+	/* ── Statuskleuren ───────────────────────────────────────────────
+	   Vijf betekenissen, niet vijftien losse kleuren. Bestellingen en
+	   garantieclaims hadden allebei hun eigen set, op verschillende
+	   momenten gekozen: "afgerond" was groen #1a7d3a en "goedgekeurd"
+	   groen #1d6b2d. Hetzelfde idee, net een andere kleur — niemand ziet
+	   het verschil, en het kost onderhoud zonder iets op te leveren.
+
+	   De kleur draagt de bétekenis; de tekst in het label zegt welke
+	   status het precies is. Daarom krijgt "bij fabrikant" dezelfde
+	   kleur als "in behandeling": in beide gevallen loopt het en hoeft
+	   de dealer niets te doen. Dat staat er in woorden bij.
+
+	   Komt er een status bij, dan kiest die een betekenis en heeft hij
+	   meteen kleur — in plaats van als kale tekst op het scherm te
+	   belanden, wat eerder twee keer is gebeurd.
+
+	   Alle vijf halen ruim 4,5:1 contrast op hun eigen vlak. */
+
+	/* Ingediend, ontvangen — er gebeurt nog niets. */
+	--hdp-neutraal-vlak:  #eceef1;
+	--hdp-neutraal-tekst: #3f434a;
+	--hdp-neutraal-rand:  #d9dde3;
+
+	/* Het loopt, bij ons of bij de fabrikant. De dealer hoeft niets. */
+	--hdp-loopt-vlak:  #e4eefb;
+	--hdp-loopt-tekst: #1d4e85;
+	--hdp-loopt-rand:  #c3d7f2;
+
+	/* De dealer is aan zet. Bewust de enige kleur die om aandacht vraagt;
+	   als "in behandeling" ook oranje is, valt dit niet meer op. */
+	--hdp-aanzet-vlak:         #fdeccf;
+	--hdp-aanzet-tekst:        #7a4100;
+	--hdp-aanzet-rand:         #f3dcc0;
+	/* Lichter vlak voor hele blokken i.p.v. een klein label. */
+	--hdp-aanzet-zacht:        #fff8ef;
+	--hdp-aanzet-zacht-hover:  #fff2e0;
+	/* Fellere variant voor een randlijn of icoon, waar een donkerbruine
+	   tekstkleur te dof uitvalt. */
+	--hdp-aanzet-accent:       #b25e00;
+
+	/* Klaar: afgerond, goedgekeurd, verwerkt. */
+	--hdp-klaar-vlak:  #e2f3e6;
+	--hdp-klaar-tekst: #1d6b2d;
+	--hdp-klaar-rand:  #b9ebc9;
+
+	/* Gestopt: afgewezen, geannuleerd, mislukt. */
+	--hdp-gestopt-vlak:  #fdecec;
+	--hdp-gestopt-tekst: #9a0a0a;
+	--hdp-gestopt-rand:  #f5c2c2;
 }
 
 /* .hdp-info-sectie/.hdp-kaarten-sectie staan sinds de omzetting naar
@@ -203,9 +253,9 @@
 	justify-content: space-between;
 	gap: 0.8rem;
 	flex-wrap: wrap;
-	background: #fff8e6;
-	color: #8a6100;
-	border: 1px solid #f2dfa0;
+	background: var(--hdp-loopt-vlak);
+	color: var(--hdp-loopt-tekst);
+	border: 1px solid var(--hdp-loopt-rand);
 	border-radius: 6px;
 	padding: 0.7rem 0.9rem;
 	font-size: 0.85rem;
@@ -214,9 +264,9 @@
 .hdp-instellingen-in-afwachting form { margin: 0; }
 
 .hdp-instellingen-melding-ok {
-	background: #ecfdf1;
-	color: #1a7d3a;
-	border: 1px solid #b9ebc9;
+	background: var(--hdp-klaar-vlak);
+	color: var(--hdp-klaar-tekst);
+	border: 1px solid var(--hdp-klaar-rand);
 	border-radius: 6px;
 	padding: 0.7rem 0.9rem;
 	font-size: 0.85rem;
@@ -282,9 +332,9 @@
 
 .hdp-login-fout {
 	display: none;
-	background: #fdecec;
-	color: var(--wp--preset--color--homburg-rood-donker);
-	border: 1px solid #f5c2c2;
+	background: var(--hdp-gestopt-vlak);
+	color: var(--hdp-gestopt-tekst);
+	border: 1px solid var(--hdp-gestopt-rand);
 	border-radius: 6px;
 	padding: 0.7rem 0.9rem;
 	font-size: 0.85rem;
@@ -495,6 +545,32 @@ body.hdp-login-actief {
 @media (max-width: 600px) {
 	.hdp-herbestellen-sectie { max-width: 100%; padding: 1.5rem 1rem 0; }
 	.hdp-herbestellen-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+
+/* De "plak een lijst"-kaart achteraan de herbestelstrook. Gestippelde rand
+   en geen afbeelding: het is geen artikel maar een manier van bestellen, en
+   dat hoort niet te lijken op de kaartjes ernaast. */
+.hdp-snelbestel-kaart {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 0.35rem;
+	padding: 1.1rem 1.2rem;
+	background: var(--wp--preset--color--wit);
+	border: 1px dashed #c3c7ce;
+	border-radius: var(--hdp-radius);
+	text-decoration: none;
+}
+.hdp-snelbestel-kaart:hover { border-color: var(--wp--preset--color--homburg-rood); }
+.hdp-snelbestel-kaart strong {
+	font-size: 0.92rem;
+	font-weight: 700;
+	color: var(--wp--preset--color--homburg-rood);
+}
+.hdp-snelbestel-kaart span {
+	font-size: 0.85rem;
+	line-height: 1.5;
+	color: var(--wp--preset--color--grijs-tekst);
 }
 
 .hdp-kaart-icoon {
@@ -938,12 +1014,14 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	background: var(--wp--preset--color--grijs-licht);
 	color: var(--wp--preset--color--donkergrijs);
 }
-.hdp-bestel-status-completed { background: #ecfdf1; color: #1a7d3a; }
+.hdp-bestel-status-completed { background: var(--hdp-klaar-vlak); color: var(--hdp-klaar-tekst); }
+/* "Wordt verwerkt" was oranje. Oranje is nu voorbehouden aan "u bent aan
+   zet", en bij een lopende bestelling hoeft de dealer juist niets. */
 .hdp-bestel-status-processing,
-.hdp-bestel-status-on-hold { background: #fff8e6; color: #8a6100; }
+.hdp-bestel-status-on-hold { background: var(--hdp-loopt-vlak); color: var(--hdp-loopt-tekst); }
 .hdp-bestel-status-cancelled,
 .hdp-bestel-status-failed,
-.hdp-bestel-status-refunded { background: #fdecec; color: var(--wp--preset--color--homburg-rood-donker); }
+.hdp-bestel-status-refunded { background: var(--hdp-gestopt-vlak); color: var(--hdp-gestopt-tekst); }
 
 .hdp-bestel-paginering {
 	display: flex;
@@ -978,8 +1056,8 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	font-size: 0.88rem;
 	font-weight: 600;
 }
-.hdp-admin-melding-ok { background: #ecfdf1; color: #1a7d3a; border: 1px solid #b9ebc9; }
-.hdp-admin-melding-fout { background: #fdecec; color: var(--wp--preset--color--homburg-rood-donker); border: 1px solid #f5c2c2; }
+.hdp-admin-melding-ok { background: var(--hdp-klaar-vlak); color: var(--hdp-klaar-tekst); border: 1px solid var(--hdp-klaar-rand); }
+.hdp-admin-melding-fout { background: var(--hdp-gestopt-vlak); color: var(--hdp-gestopt-tekst); border: 1px solid var(--hdp-gestopt-rand); }
 
 .hdp-admin-formulier {
 	background: var(--wp--preset--color--wit);
@@ -1169,7 +1247,7 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	   8,7:1 contrast in plaats van 6,4:1, en op deze maat telt dat. Beide
 	   kleuren hier als vaste waarde, zodat het label leesbaar blijft ook
 	   als de themavariabelen ergens niet doorkomen. */
-	background: #9a0a0a;
+	background: #9a0a0a; /* = homburg-rood-donker */
 	color: #fff;
 	font-size: .74rem;
 	font-weight: 700;
@@ -1325,8 +1403,8 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 /* De enige status waarbij de dealer zelf aan zet is — die mag opvallen,
    anders blijft een claim liggen omdat niemand merkt dat er iets gevraagd is. */
 .hdp-garantie-item-actie {
-	border-left-color: #b25e00;
-	background: #fff8ef;
+	border-left-color: var(--hdp-aanzet-accent);
+	background: var(--hdp-aanzet-zacht);
 }
 
 .hdp-garantie-item-hoofd {
@@ -1358,7 +1436,7 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	margin: .6rem 0 0;
 	font-size: .9rem;
 	font-weight: 600;
-	color: #8a4800;
+	color: var(--hdp-aanzet-tekst);
 }
 
 /* ── Statuslabels ─────────────────────────────────────────────── */
@@ -1371,15 +1449,15 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	letter-spacing: .02em;
 	white-space: nowrap;
 }
-.hdp-garantie-status-ingediend      { background: #eceef1; color: #3f434a; }
-.hdp-garantie-status-in-behandeling { background: #e4eefb; color: #1d4e85; }
-.hdp-garantie-status-info-nodig     { background: #fdeccf; color: #7a4100; }
-.hdp-garantie-status-goedgekeurd    { background: #e2f3e6; color: #1d6b2d; }
-.hdp-garantie-status-afgewezen      { background: #fdecec; color: var(--wp--preset--color--homburg-rood-donker); }
+.hdp-garantie-status-ingediend      { background: var(--hdp-neutraal-vlak); color: var(--hdp-neutraal-tekst); }
+.hdp-garantie-status-in-behandeling { background: var(--hdp-loopt-vlak); color: var(--hdp-loopt-tekst); }
+.hdp-garantie-status-info-nodig     { background: var(--hdp-aanzet-vlak); color: var(--hdp-aanzet-tekst); }
+.hdp-garantie-status-goedgekeurd    { background: var(--hdp-klaar-vlak); color: var(--hdp-klaar-tekst); }
+.hdp-garantie-status-afgewezen      { background: var(--hdp-gestopt-vlak); color: var(--hdp-gestopt-tekst); }
 /* De twee vertakkingen via de fabrikant: eigen kleur, zodat ze niet als
    kale tekst op het scherm staan. */
-.hdp-garantie-status-bij-fabrikant  { background: #e8e4fb; color: #46338f; }
-.hdp-garantie-status-afgewezen-fabrikant { background: #fdecec; color: var(--wp--preset--color--homburg-rood-donker); }
+.hdp-garantie-status-bij-fabrikant  { background: var(--hdp-loopt-vlak); color: var(--hdp-loopt-tekst); }
+.hdp-garantie-status-afgewezen-fabrikant { background: var(--hdp-gestopt-vlak); color: var(--hdp-gestopt-tekst); }
 
 /* Alleen voor schermlezers: labels bij velden die visueel genoeg hebben
    aan de kolomkop erboven. */
@@ -1723,15 +1801,15 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	line-height: 1.55;
 }
 .hdp-ticket-ligtbij-u {
-	background: #fff8ef;
-	border-left: 4px solid #b25e00;
-	color: #8a4800;
+	background: var(--hdp-aanzet-zacht);
+	border-left: 4px solid var(--hdp-aanzet-accent);
+	color: var(--hdp-aanzet-tekst);
 	font-weight: 600;
 }
 .hdp-ticket-ligtbij-klaar {
-	background: #e2f3e6;
-	border-left-color: #1d6b2d;
-	color: #1d6b2d;
+	background: var(--hdp-klaar-vlak);
+	border-left-color: var(--hdp-klaar-tekst);
+	color: var(--hdp-klaar-tekst);
 	font-weight: 600;
 }
 
@@ -1748,7 +1826,7 @@ a.hdp-garantie-item:focus-visible {
 	box-shadow: 0 4px 16px rgba(43, 45, 49, .14);
 }
 a.hdp-garantie-item-actie:hover,
-a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
+a.hdp-garantie-item-actie:focus-visible { background: var(--hdp-aanzet-zacht-hover); }
 
 @media (max-width: 48rem) {
 	.hdp-ticket-gegevens { grid-template-columns: 1fr; }
@@ -1799,25 +1877,25 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 	gap: 1rem;
 	padding: 1rem 1.2rem;
 	margin-bottom: 1.9rem;
-	background: #fff8ef;
-	border: 1px solid #f3dcc0;
-	border-left: 4px solid #b25e00;
+	background: var(--hdp-aanzet-zacht);
+	border: 1px solid var(--hdp-aanzet-rand);
+	border-left: 4px solid var(--hdp-aanzet-accent);
 	border-radius: var(--hdp-radius);
 }
 .hdp-aandacht-icoon {
 	width: 38px;
 	height: 38px;
 	border-radius: 8px;
-	background: #fdeccf;
+	background: var(--hdp-aanzet-vlak);
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
 }
-.hdp-aandacht-icoon svg { width: 20px; height: 20px; stroke: #b25e00; fill: none; }
+.hdp-aandacht-icoon svg { width: 20px; height: 20px; stroke: var(--hdp-aanzet-accent); fill: none; }
 .hdp-aandacht-tekst { flex: 1; min-width: 0; }
-.hdp-aandacht-tekst strong { display: block; color: #8a4800; font-size: .98rem; }
-.hdp-aandacht-tekst span { display: block; font-size: .87rem; color: #8a4800; }
+.hdp-aandacht-tekst strong { display: block; color: var(--hdp-aanzet-tekst); font-size: .98rem; }
+.hdp-aandacht-tekst span { display: block; font-size: .87rem; color: var(--hdp-aanzet-tekst); }
 .hdp-garantie-aandacht .hdp-btn { flex-shrink: 0; }
 
 .hdp-garantie-aantal {
@@ -1872,7 +1950,7 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 	color: var(--wp--preset--color--grijs-tekst);
 	margin-bottom: .3rem;
 }
-.hdp-machine-garantie-label strong { color: #8a4800; }
+.hdp-machine-garantie-label strong { color: var(--hdp-aanzet-tekst); }
 .hdp-machine-balk {
 	display: block;
 	height: 6px;
@@ -1880,8 +1958,8 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 	background: var(--wp--preset--color--rand);
 	overflow: hidden;
 }
-.hdp-machine-balk i { display: block; height: 100%; background: #1d6b2d; }
-.hdp-machine-balk-bijna i { background: #b25e00; }
+.hdp-machine-balk i { display: block; height: 100%; background: var(--hdp-klaar-tekst); }
+.hdp-machine-balk-bijna i { background: var(--hdp-aanzet-accent); }
 .hdp-machine-balk-verlopen i { background: #c9cbd0; }
 
 /* ── Formulierscherm ─────────────────────────────────────────── */
@@ -1942,8 +2020,8 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 .hdp-garantie-storing {
 	margin: 0 0 1.9rem;
 	padding: 1rem 1.2rem;
-	background: #fdecec;
-	border: 1px solid #f5c2c2;
+	background: var(--hdp-gestopt-vlak);
+	border: 1px solid var(--hdp-gestopt-rand);
 	border-left: 4px solid var(--wp--preset--color--homburg-rood);
 	border-radius: var(--hdp-radius);
 	color: var(--wp--preset--color--homburg-rood-donker);
@@ -1963,8 +2041,9 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 }
 .hdp-machine-beoordeling strong { display: block; }
 .hdp-machine-beoordeling span { display: block; margin-top: .15rem; }
-.hdp-machine-beoordeling-in_behandeling { background: #fdeccf; color: #7a4100; }
-.hdp-machine-beoordeling-afgewezen { background: #fdecec; color: var(--wp--preset--color--homburg-rood-donker); }
+/* Wacht op ónze beoordeling, niet op de dealer — dus "loopt", niet oranje. */
+.hdp-machine-beoordeling-in_behandeling { background: var(--hdp-loopt-vlak); color: var(--hdp-loopt-tekst); }
+.hdp-machine-beoordeling-afgewezen { background: var(--hdp-gestopt-vlak); color: var(--hdp-gestopt-tekst); }
 
 @media (max-width: 48rem) {
 	.hdp-machine-beoordeling { max-width: 100%; width: 100%; }
@@ -2011,15 +2090,49 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 .hdp-garantie-gelukt {
 	margin: 0 0 1.9rem;
 	padding: 1rem 1.2rem;
-	background: #e2f3e6;
-	border: 1px solid #bfe2c8;
-	border-left: 4px solid #1d6b2d;
+	background: var(--hdp-klaar-vlak);
+	border: 1px solid var(--hdp-klaar-rand);
+	border-left: 4px solid var(--hdp-klaar-tekst);
 	border-radius: var(--hdp-radius);
 	color: #19572a;
 	font-size: .93rem;
 	line-height: 1.6;
 }
 .hdp-garantie-gelukt span { display: block; margin-top: .35rem; font-weight: 400; }
+
+/* De mededeling bij een onderdelenclaim: wij beginnen pas als het onderdeel
+   hier is. In het "u bent aan zet"-palet, want dat is precies wat het zegt.
+   Niet in rood: er is niets fout, er wordt iets van de dealer verwacht. */
+.hdp-garantie-attentie {
+	display: flex;
+	gap: .85rem;
+	align-items: flex-start;
+	margin: 0 0 1.9rem;
+	padding: 1rem 1.2rem;
+	background: var(--hdp-aanzet-zacht);
+	border: 1px solid var(--hdp-aanzet-rand);
+	border-left: 4px solid var(--hdp-aanzet-accent);
+	border-radius: var(--hdp-radius);
+	color: var(--hdp-aanzet-tekst);
+	font-size: .93rem;
+	line-height: 1.6;
+}
+.hdp-garantie-attentie-icoon {
+	flex: 0 0 auto;
+	display: flex;
+	margin-top: .15rem;
+}
+.hdp-garantie-attentie-icoon svg {
+	width: 1.5rem;
+	height: 1.5rem;
+	stroke: var(--hdp-aanzet-accent);
+}
+.hdp-garantie-attentie strong { display: block; font-size: 1rem; }
+.hdp-garantie-attentie p { margin: .3rem 0 0; }
+.hdp-garantie-attentie[hidden] { display: none; }
+
+/* Op het ticketscherm staat het blok binnen de kop, onder de route. */
+.hdp-ticket-kop .hdp-garantie-attentie { margin: 1.2rem 0 0; }
 
 @media (max-width: 48rem) {
 	.hdp-garantie-verzenden { flex-direction: column; align-items: stretch; }
@@ -2046,7 +2159,10 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 	gap: 1.1rem;
 	/* Blijft in beeld terwijl je het gesprek leest. */
 	position: sticky;
-	top: 1.5rem;
+	/* Onder de header blijven, die nu zelf bovenaan blijft staan. De hoogte
+	   zet dealerportaal.js in --hdp-header-hoogte; zonder script valt het
+	   terug op 0 en staat deze kolom waar hij eerst stond. */
+	top: calc(var(--hdp-header-hoogte, 0px) + 1.5rem);
 }
 
 /* ── Kop ─────────────────────────────────────────────────────── */
@@ -2106,7 +2222,7 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 	background: var(--wp--preset--color--rand);
 }
 .hdp-route-stap:last-child::before { display: none; }
-.hdp-route-gedaan::before { background: #1d6b2d; }
+.hdp-route-gedaan::before { background: var(--hdp-klaar-tekst); }
 
 .hdp-route-bol {
 	position: relative;
@@ -2118,7 +2234,16 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 	border: 3px solid var(--wp--preset--color--rand);
 	background: var(--wp--preset--color--wit);
 }
-.hdp-route-gedaan .hdp-route-bol { background: #1d6b2d; border-color: #1d6b2d; }
+.hdp-route-gedaan .hdp-route-bol { background: var(--hdp-klaar-tekst); border-color: var(--hdp-klaar-tekst); }
+
+/* Waar de claim op wacht: het onderdeel dat nog onderweg is naar Stiens.
+   Oranje, want dat is in het hele portaal de kleur van "hier ligt nog
+   iets open". */
+.hdp-route-wacht .hdp-route-bol {
+	background: var(--hdp-aanzet-vlak);
+	border-color: var(--hdp-aanzet-accent);
+}
+.hdp-route-wacht strong { color: var(--hdp-aanzet-tekst); }
 /* Vinkje, getekend met twee lijntjes. */
 .hdp-route-gedaan .hdp-route-bol::after {
 	content: "";
@@ -2186,17 +2311,17 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 
 /* ── "U bent aan zet" ────────────────────────────────────────── */
 .hdp-ticket-actie {
-	background: #fff8ef;
-	border: 1px solid #f3dcc0;
-	border-left: 4px solid #b25e00;
+	background: var(--hdp-aanzet-zacht);
+	border: 1px solid var(--hdp-aanzet-rand);
+	border-left: 4px solid var(--hdp-aanzet-accent);
 	border-radius: var(--hdp-radius);
 	padding: 1rem 1.2rem;
 }
-.hdp-ticket-actie strong { display: block; color: #8a4800; font-size: .96rem; margin-bottom: .25rem; }
+.hdp-ticket-actie strong { display: block; color: var(--hdp-aanzet-tekst); font-size: .96rem; margin-bottom: .25rem; }
 .hdp-ticket-actie p {
 	margin: 0 0 .85rem;
 	font-size: .86rem;
-	color: #8a4800;
+	color: var(--hdp-aanzet-tekst);
 	line-height: 1.5;
 }
 .hdp-ticket-actie .hdp-btn { padding: .55rem 1rem; font-size: .85rem; }
@@ -2336,4 +2461,560 @@ a.hdp-garantie-item-actie:focus-visible { background: #fff2e0; }
 @media (max-width: 40rem) {
 	.hdp-ticket-kop-boven { flex-direction: column; gap: .75rem; }
 	.hdp-route-stap { flex: 1 1 100%; }
+}
+
+/* ── Garantie als werkblad ────────────────────────────────────────
+   Filters links, claims in het midden, de gekozen claim rechts — dezelfde
+   indeling als Contactpersonen in de Homburg App, zodat de dealer en de
+   binnendienst naar hetzelfde kijken.
+
+   Dit was een stapel secties onder elkaar: twee kaarten, een zoekveld, de
+   claims, de machines. Om één claim te lezen moest je weg van het
+   overzicht, en na de terugweg stond je weer bovenaan. */
+.hdp-garantie-werkblad {
+	display: grid;
+	grid-template-columns: 230px minmax(0, 340px) minmax(0, 1fr);
+	gap: 1.5rem;
+	align-items: start;
+}
+
+/* ── De filterkolom ─────────────────────────────────────────────── */
+.hdp-garantie-rail {
+	display: flex;
+	flex-direction: column;
+	gap: 1.6rem;
+	position: sticky;
+	top: calc(var(--hdp-header-hoogte, 0px) + 1.5rem);
+}
+.hdp-rail-knoppen { display: flex; flex-direction: column; gap: 0.5rem; }
+.hdp-rail-knoppen .hdp-btn { text-align: center; }
+.hdp-rail-groep { display: flex; flex-direction: column; gap: 0.2rem; }
+.hdp-rail-kop {
+	margin: 0 0 0.5rem;
+	padding-bottom: 0.3rem;
+	align-self: flex-start;
+	border-bottom: 2px solid var(--wp--preset--color--homburg-rood);
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-rail-regel {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.6rem;
+	min-height: 44px;
+	padding: 0.6rem 0.8rem;
+	border-radius: 8px;
+	text-decoration: none;
+	color: var(--wp--preset--color--donkergrijs);
+	font-size: 0.88rem;
+	font-weight: 600;
+	transition: background 0.12s;
+}
+.hdp-rail-regel:hover { background: var(--wp--preset--color--grijs-licht); }
+.hdp-rail-aantal {
+	flex: none;
+	padding: 0.05rem 0.5rem;
+	border-radius: 999px;
+	background: var(--wp--preset--color--grijs-licht);
+	color: var(--wp--preset--color--grijs-tekst);
+	font-size: 0.75rem;
+	font-weight: 700;
+}
+.hdp-rail-actief,
+.hdp-rail-actief:hover {
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+	font-weight: 700;
+}
+.hdp-rail-actief .hdp-rail-aantal { background: rgba(255, 255, 255, 0.22); color: var(--wp--preset--color--wit); }
+/* Staat er iets op de dealer te wachten, dan mag dat te zien zijn zonder
+   dat je die regel eerst aanklikt. */
+.hdp-rail-wacht:not(.hdp-rail-actief) .hdp-rail-aantal {
+	background: var(--hdp-aanzet-vlak);
+	color: var(--hdp-aanzet-tekst);
+}
+
+/* ── De lijstkolom ──────────────────────────────────────────────── */
+.hdp-garantie-kolom-lijst { display: flex; flex-direction: column; gap: 0.9rem; min-width: 0; }
+.hdp-garantie-kolom-lijst .hdp-garantie-kop { margin: 0; }
+.hdp-garantie-kolom-lijst .hdp-garantie-lijst { gap: 0.5rem; }
+
+/* ── De detailkolom ─────────────────────────────────────────────── */
+.hdp-garantie-kolom-detail { min-width: 0; position: sticky; top: calc(var(--hdp-header-hoogte, 0px) + 1.5rem); }
+.hdp-detail-kaart { display: flex; flex-direction: column; gap: 1.1rem; }
+.hdp-detail-volledig { margin: 0; font-size: 0.88rem; font-weight: 700; }
+
+@media (max-width: 68rem) {
+	/* Drie kolommen passen niet meer; de filters worden een rij erboven en
+	   de gekozen claim komt onder de lijst. */
+	.hdp-garantie-werkblad { grid-template-columns: minmax(0, 1fr); }
+	.hdp-garantie-rail { position: static; flex-direction: row; flex-wrap: wrap; gap: 1rem; align-items: flex-start; }
+	.hdp-rail-knoppen { flex-direction: row; flex-wrap: wrap; }
+	.hdp-rail-groep { flex-direction: row; flex-wrap: wrap; align-items: center; }
+	.hdp-rail-kop { width: 100%; margin-bottom: 0.3rem; }
+	.hdp-rail-regel { border: 1px solid var(--wp--preset--color--rand); }
+	.hdp-garantie-kolom-detail { position: static; }
+}
+
+/* ── Berichten van Homburg ────────────────────────────────────────
+   Bovenaan de startpagina, want een mededeling die je pas tegenkomt
+   nadat je ergens heen geklikt hebt is te laat. Een gewone melding is
+   blauw ("er loopt iets, lees even mee"), een belangrijke oranje — dat
+   is in het hele portaal de kleur van "u moet hier iets mee". */
+.hdp-berichten {
+	display: flex;
+	flex-direction: column;
+	gap: 0.7rem;
+	max-width: 90%;
+	margin: 0 auto;
+	padding: 1.9rem 0 0;
+}
+.hdp-bericht {
+	display: flex;
+	align-items: flex-start;
+	gap: 1rem;
+	padding: 1rem 1.2rem;
+	border-radius: var(--hdp-radius);
+	background: var(--hdp-loopt-vlak);
+	border: 1px solid var(--hdp-loopt-rand);
+	border-left: 4px solid var(--hdp-loopt-tekst);
+}
+.hdp-bericht-belangrijk {
+	background: var(--hdp-aanzet-zacht);
+	border-color: var(--hdp-aanzet-rand);
+	border-left-color: var(--hdp-aanzet-accent);
+}
+.hdp-bericht-icoon {
+	flex: none;
+	width: 38px;
+	height: 38px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 8px;
+	background: var(--wp--preset--color--wit);
+}
+.hdp-bericht-icoon svg { width: 20px; height: 20px; stroke: var(--hdp-loopt-tekst); fill: none; }
+.hdp-bericht-belangrijk .hdp-bericht-icoon svg { stroke: var(--hdp-aanzet-accent); }
+.hdp-bericht-tekst { flex: 1; min-width: 0; }
+.hdp-bericht-tekst h2 {
+	margin: 0 0 0.3rem;
+	font-size: 1rem;
+	font-weight: 700;
+	color: var(--hdp-loopt-tekst);
+}
+.hdp-bericht-belangrijk .hdp-bericht-tekst h2 { color: var(--hdp-aanzet-tekst); }
+.hdp-bericht-tekst p {
+	margin: 0 0 0.4rem;
+	font-size: 0.9rem;
+	line-height: 1.55;
+	color: var(--wp--preset--color--donkergrijs);
+}
+.hdp-bericht-tekst p:last-child { margin-bottom: 0; }
+/* Het kruisje. Een echte knop in een formulier: wegklikken verandert iets,
+   en dat hoort niet te gebeuren doordat een browser even een adres ophaalt. */
+.hdp-bericht-weg { margin: 0; flex: none; }
+.hdp-bericht-weg button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: 0;
+	border-radius: 7px;
+	background: none;
+	color: var(--wp--preset--color--grijs-tekst);
+	cursor: pointer;
+	transition: background 0.12s, color 0.12s;
+}
+.hdp-bericht-weg button:hover,
+.hdp-bericht-weg button:focus-visible {
+	background: var(--wp--preset--color--wit);
+	color: var(--wp--preset--color--donkergrijs);
+}
+.hdp-bericht-weg svg { width: 16px; height: 16px; }
+
+.hdp-bericht-datum {
+	font-size: 0.78rem !important;
+	color: var(--wp--preset--color--grijs-tekst) !important;
+}
+
+@media (max-width: 600px) {
+	.hdp-berichten { max-width: 100%; padding: 1.25rem 1rem 0; }
+	.hdp-bericht { padding: 0.9rem; gap: 0.75rem; }
+}
+
+/* ==========================================================================
+   WELKOMSCHERM — zijmenu + werkblad
+   Het welkomscherm houdt de balk bovenaan en krijgt daaronder een vast menu
+   aan de zijkant met de onderdelen van het portaal (zie
+   templates/front-page.html in het thema en HDP_Zijbalk). Dat menu blijft
+   staan terwijl je scrolt; de inhoud ligt ernaast in plaats van eronder.
+   ========================================================================== */
+
+:root {
+	--hdp-zijbalk-breedte: 252px;
+	--hdp-werkblad-ronding: 20px;
+}
+
+.hdp-app {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: stretch;
+	gap: 0;
+	/* Tegen de voettekst aan: anders blijft er een streep achtergrond
+	   tussen het donkere menu en de donkere voettekst staan. */
+	margin-bottom: 0;
+}
+
+.hdp-app-zijbalk {
+	/* Een vaste breedte en niet meebuigend: de rode strepen onder de balk
+	   en boven de voettekst slaan precies dit stuk over, en die moeten weten
+	   waar het menu ophoudt. */
+	flex: 0 0 var(--hdp-zijbalk-breedte);
+	background: var(--wp--preset--color--donkergrijs);
+}
+
+.hdp-app-inhoud {
+	/* 999 zodat de inhoud alle resterende ruimte pakt en het menu op zijn
+	   eigen breedte blijft — tot het scherm te smal wordt en beide op een
+	   eigen regel belanden. */
+	flex: 999 1 560px;
+	min-width: 0;
+	padding: 2rem 2.2rem 3rem;
+	box-sizing: border-box;
+}
+
+/* --- Het menu zelf -------------------------------------------------- */
+
+.hdp-zijbalk {
+	/* Blijft staan, maar net onder de balk bovenaan die zelf ook blijft
+	   staan. Die hoogte meet dealerportaal.js op; zonder script valt het
+	   terug op 0 en plakt het menu tegen de bovenkant. */
+	position: sticky;
+	top: var(--hdp-header-hoogte, 0px);
+	max-height: calc(100vh - var(--hdp-header-hoogte, 0px));
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+	/* Wat lucht bovenin: tegen de balk aan begon het menu zo hoog dat het
+	   eraan vastgeplakt leek. */
+	padding: 2.4rem 0.9rem 1.8rem;
+	box-sizing: border-box;
+	font-family: 'Montserrat', Arial, sans-serif;
+}
+
+body.admin-bar .hdp-zijbalk {
+	top: calc(var(--hdp-header-hoogte, 0px) + 32px);
+	max-height: calc(100vh - var(--hdp-header-hoogte, 0px) - 32px);
+}
+
+.hdp-zijbalk-kop {
+	margin: 0;
+	padding: 0 0.6rem;
+	/* Wit, niet grijs. Het verschil met de regels eronder zit in de vorm —
+	   klein, kapitalen, wijd uit elkaar, met een rood streepje — en niet in
+	   een flauwere kleur. Grijs op donkergrijs las als uitgezet. */
+	font-size: 0.63rem;
+	font-weight: 800;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--wit);
+}
+/* Een kort rood streepje onder elk kopje: dat maakt van drie grijze
+   regeltjes drie herkenbare kopjes. */
+.hdp-zijbalk-kop::after {
+	content: "";
+	display: block;
+	width: 26px;
+	height: 2px;
+	margin-top: 0.4rem;
+	background: var(--wp--preset--color--homburg-rood);
+}
+/* Lucht boven elk volgend kopje, maar niet boven het eerste. */
+.hdp-zijbalk-lijst + .hdp-zijbalk-kop { margin-top: 1.1rem; }
+
+.hdp-zijbalk-lijst {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+}
+/* Home hoort bij geen van de kopjes: een streep eronder zet hem apart
+   zonder er een vierde groep van te maken. */
+.hdp-zijbalk-lijst-home {
+	padding-bottom: 0.9rem;
+	border-bottom: 1px solid #3e4147;
+}
+
+.hdp-zijbalk-link {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	min-height: 44px;
+	box-sizing: border-box;
+	padding: 0.6rem;
+	border-radius: 8px;
+	color: #e4e6ea;
+	font-size: 0.88rem;
+	font-weight: 600;
+	text-decoration: none;
+	transition: background 0.15s, color 0.15s;
+}
+.hdp-zijbalk-link:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
+.hdp-zijbalk-link svg {
+	flex: 0 0 auto;
+	width: 19px;
+	height: 19px;
+	stroke: currentColor;
+	fill: none;
+}
+.hdp-zijbalk-tekst { flex: 1 1 auto; min-width: 0; }
+
+.hdp-zijbalk-huidig {
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+}
+.hdp-zijbalk-huidig:hover { background: var(--wp--preset--color--homburg-rood-donker); color: var(--wp--preset--color--wit); }
+
+/* Een pijltje bij een link die het portaal verlaat — anders is het pas te
+   merken als er onverwacht een tabblad bijkomt. */
+.hdp-zijbalk-extern { flex: 0 0 auto; display: flex; opacity: 0.55; }
+.hdp-zijbalk-extern svg { width: 13px; height: 13px; }
+
+.hdp-zijbalk-badge {
+	flex: 0 0 auto;
+	min-width: 22px;
+	padding: 0.1rem 0.4rem;
+	border-radius: 20px;
+	background: var(--wp--preset--color--homburg-rood);
+	color: #ffffff;
+	font-size: 0.68rem;
+	font-weight: 800;
+	text-align: center;
+	line-height: 1.5;
+}
+.hdp-zijbalk-huidig .hdp-zijbalk-badge { background: #ffffff; color: var(--wp--preset--color--homburg-rood); }
+
+
+/* --- Eén donker vlak met het werkblad erin --------------------------- */
+/* De balk bovenaan, het menu links en de voettekst zijn samen één donker
+   vlak; het werkblad ligt daar als een licht paneel in, met afgeronde
+   hoeken aan de kant van het menu en een rode rand eromheen.
+
+   Daarvoor moeten twee dingen weg op het welkomscherm: de rode rand onder
+   de balk en boven de voettekst (die sneed het donker in drieën), en de
+   ruimte die WordPress tussen blokken zet. De lichte waas die over de
+   voettekst lag is sitebreed verdwenen; zie het thema. */
+
+body.hdp-app-layout .hdp-site-header {
+	border-bottom: 0;
+	background: var(--wp--preset--color--donkergrijs);
+}
+
+body.hdp-app-layout .hdp-site-footer {
+	border-top: 0;
+	margin-top: 0;
+}
+
+body.hdp-app-layout .hdp-app,
+body.hdp-app-layout .hdp-app + footer.wp-block-template-part,
+body.hdp-app-layout header.wp-block-template-part + .hdp-app {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+body.hdp-app-layout .hdp-app {
+	background: var(--wp--preset--color--donkergrijs);
+}
+
+/* Is de pagina korter dan het venster, dan bleef er onder de voettekst een
+   lichte strook over: dat is de achtergrond van de site, die door het
+   donkere vlak heen breekt. Dus de pagina minstens zo hoog als het scherm
+   maken, met het werkblad als het deel dat meegroeit — en de achtergrond
+   zelf donker, voor wat er bij doorscrollen onder vandaan komt. */
+body.hdp-app-layout {
+	background: var(--wp--preset--color--donkergrijs);
+}
+body.hdp-app-layout .wp-site-blocks {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+body.hdp-app-layout .hdp-app {
+	flex: 1 0 auto;
+}
+
+/* Staat het menu er niet (een bezoeker zonder toegang), dan blijft alleen
+   de inhoud over: geen lege donkere kolom en geen paneel dat nergens
+   tegenaan ligt. */
+body:not(.hdp-app-layout) .hdp-app-zijbalk {
+	display: none;
+}
+
+/* De paginakop was een witte band over de volle paginabreedte, met de
+   inhoud op 15% inspringing. Binnen het werkblad klopt dat niet meer: dan
+   is het een witte kaart in een grijs vlak, met een eigen marge die niet
+   op de rest aansluit. De titel hoort hier direct op het werkblad te
+   staan, net als de begroeting op het welkomscherm. */
+.hdp-app-inhoud .hdp-welkom {
+	background: none;
+	border-bottom: 0;
+	padding: 0;
+	margin: 0 0 1.8rem;
+}
+.hdp-app-inhoud .hdp-welkom-inner {
+	padding: 0;
+}
+
+/* De accountpagina's (bestellingen, favorieten, snel bestellen) houden hun
+   eigen 70%-breedte aan en gingen daardoor binnen het werkblad nog eens
+   inspringen — met een brede lege strook rechts tot gevolg. Die regel is
+   specifieker dan de algemene hierboven, dus hier met evenveel gewicht
+   terug. */
+body.hdp-app-layout.woocommerce-account .hdp-app-inhoud .woocommerce {
+	max-width: none;
+	margin-left: 0;
+	margin-right: 0;
+}
+
+body.hdp-app-layout .hdp-app-inhoud {
+	background: var(--wp--preset--color--grijs-licht);
+	border: 4px solid var(--wp--preset--color--homburg-rood);
+	/* Rechts loopt het werkblad gewoon tegen de rand van het scherm aan;
+	   daar hoort geen lijn en geen ronding. */
+	border-right: 0;
+	border-radius: var(--hdp-werkblad-ronding) 0 0 var(--hdp-werkblad-ronding);
+}
+
+/* --- De kop van het werkblad ---------------------------------------- */
+
+.hdp-welkomkop {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.2rem;
+	align-items: flex-end;
+	justify-content: space-between;
+	margin-bottom: 1.8rem;
+}
+.hdp-welkomkop h1 {
+	margin: 0 0 0.3rem;
+	font-size: 1.75rem;
+	font-weight: 800;
+	letter-spacing: -0.01em;
+	color: var(--wp--preset--color--donkergrijs);
+}
+.hdp-welkomkop-datum {
+	margin: 0;
+	font-size: 0.88rem;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-welkomkop-zoek { display: flex; flex: 0 1 320px; min-width: 240px; }
+.hdp-welkomkop-zoek input[type="search"] {
+	flex: 1 1 auto;
+	min-width: 0;
+	min-height: 44px;
+	box-sizing: border-box;
+	padding: 0.6rem 0.9rem;
+	border: 1px solid #c3c7ce;
+	border-right: 0;
+	border-radius: 8px 0 0 8px;
+	font-family: inherit;
+	font-size: 0.88rem;
+	background: var(--wp--preset--color--wit);
+}
+.hdp-welkomkop-zoek button {
+	flex: 0 0 auto;
+	min-height: 44px;
+	padding: 0.6rem 1.1rem;
+	border: 0;
+	border-radius: 0 8px 8px 0;
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+	font-family: inherit;
+	font-size: 0.88rem;
+	font-weight: 700;
+	cursor: pointer;
+}
+.hdp-welkomkop-zoek button:hover { background: var(--wp--preset--color--homburg-rood-donker); }
+
+/* --- In de kolom hoeft niets meer de volle breedte te pakken --------- */
+
+/* De secties op de startpagina centreren zichzelf normaal binnen de
+   paginabreedte, elk op een eigen maat (berichten op 90%, herbestellen op
+   70%). Naast een menu levert dat drie verschillende linkermarges onder
+   elkaar op. Hier bepaalt de kolom de breedte en beginnen ze allemaal
+   op dezelfde lijn. */
+.hdp-app-inhoud > *,
+.hdp-app-inhoud .entry-content > *,
+.hdp-app-inhoud .hdp-welkomscherm > *,
+.hdp-app-inhoud .alignfull,
+.hdp-app-inhoud .alignwide {
+	width: auto;
+	max-width: none;
+	margin-left: 0;
+	margin-right: 0;
+}
+.hdp-app-inhoud .hdp-info-sectie,
+.hdp-app-inhoud .hdp-herbestellen-sectie,
+.hdp-app-inhoud .hdp-berichten {
+	padding-left: 0;
+	padding-right: 0;
+}
+
+/* --- Smal scherm: het menu wordt een strook boven de inhoud ---------- */
+
+@media (max-width: 56rem) {
+	body.hdp-app-layout .hdp-app-inhoud {
+		/* Het menu staat hier niet naast maar boven de inhoud; een paneel
+		   met ronde hoeken aan de linkerkant zou dan nergens op slaan. */
+		border-left: 0;
+		border-bottom: 0;
+		border-radius: 0;
+	}
+
+	.hdp-app-zijbalk { flex: 1 1 100%; max-width: none; }
+	.hdp-app-inhoud { flex: 1 1 100%; padding: 1.4rem 1.1rem 2.5rem; }
+
+	/* Alles op één regel die opzij schuift. Onder elkaar zou een
+	   telefoongebruiker eerst langs zeven menu-items moeten scrollen voor
+	   hij iets van de pagina ziet; en met de drie groepen elk op een eigen
+	   regel werd die strook drie keer zo hoog.
+
+	   Het schuiven zit op de balk zelf en niet op de lijsten, anders schuift
+	   elke groep los van de andere. */
+	.hdp-zijbalk {
+		position: static;
+		max-height: none;
+		flex-direction: row;
+		align-items: center;
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		overflow-y: visible;
+		gap: 0.4rem;
+		padding: 0.7rem 1.1rem;
+	}
+
+	/* De kopjes staan hier in de weg: naast elkaar is de indeling toch niet
+	   af te lezen, en ze kosten de hele hoogte van de strook. */
+	.hdp-zijbalk-kop { display: none; }
+
+	.hdp-zijbalk-lijst {
+		flex-direction: row;
+		flex: 0 0 auto;
+		gap: 0.4rem;
+	}
+	.hdp-zijbalk-lijst-home { padding-bottom: 0; border-bottom: 0; }
+	.hdp-zijbalk-link { white-space: nowrap; padding: 0.55rem 0.8rem; }
+
+	.hdp-welkomkop h1 { font-size: 1.45rem; }
+	.hdp-welkomkop-zoek { flex: 1 1 100%; }
 }

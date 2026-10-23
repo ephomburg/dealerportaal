@@ -140,7 +140,11 @@ class HDP_Garantie {
 				'te_claimen_tijd'    => array( 'type' => 'uren', 'verplicht' => false, 'hint' => true ),
 				'klantreferentie'    => array( 'type' => 'text', 'verplicht' => false, 'hint' => true ),
 				'opmerkingen'        => array( 'type' => 'textarea', 'verplicht' => false, 'hint' => true ),
-				'onderdeel_retour'   => array( 'type' => 'checkbox', 'verplicht' => false, 'hint' => true ),
+				// Geen vinkje "ik stuur een onderdeel retour": bij een
+				// onderdelenclaim is dat geen keuze maar de regel. We nemen de
+				// claim pas in behandeling als het onderdeel hier is, dus het
+				// hoort als mededeling op het formulier en niet als iets dat de
+				// dealer kan vergeten aan te vinken. Zie onderdeel_verwacht().
 				'fotos'              => array( 'type' => 'file', 'verplicht' => false ),
 			);
 		}
@@ -179,6 +183,35 @@ class HDP_Garantie {
 			}
 		);
 	}
+
+	/**
+	 * Verwachten we een onderdeel in Stiens voordat deze claim verder kan?
+	 *
+	 * Bij een onderdelenclaim is dat de regel: wij beoordelen wat er mis is
+	 * aan het onderdeel zelf, en dat kan niet op een foto. De claim ligt dus
+	 * stil tot het pakket binnen is. Daarop één uitzondering: is het
+	 * onderdeel nooit aangekomen, dan is er ook niets om terug te sturen —
+	 * dat eisen zou de claim voorgoed laten hangen.
+	 *
+	 * Bij een machineclaim blijft het een keuze van de dealer (het vinkje):
+	 * daar is de reparatie vaak ter plekke gedaan en komt er niets retour.
+	 *
+	 * @param array $claim Een claim, of de ingevulde formulierwaarden.
+	 * @return bool
+	 */
+	public static function onderdeel_verwacht( $claim ) {
+		$soort = isset( $claim['soort'] ) ? (string) $claim['soort'] : '';
+
+		if ( self::SOORT_ONDERDEEL === $soort ) {
+			$probleem = isset( $claim['onderdeel_probleem'] ) ? (string) $claim['onderdeel_probleem'] : '';
+			return self::PROBLEEM_ZONDER_ONDERDEEL !== $probleem;
+		}
+
+		return ! empty( $claim['onderdeel_retour'] );
+	}
+
+	/** Het enige probleem waarbij de dealer niets terug kan sturen. */
+	const PROBLEEM_ZONDER_ONDERDEEL = 'niet_ontvangen';
 
 	/**
 	 * Of dit een soort claim is die we kennen; alles anders wordt een
@@ -499,6 +532,12 @@ class HDP_Garantie {
 			'garantie_tot'    => isset( $machine['garantie_tot'] ) ? (string) $machine['garantie_tot'] : '',
 			'machine_status'  => isset( $machine['status'] ) ? (string) $machine['status'] : '',
 			'machine_reden'   => isset( $machine['reden'] ) ? (string) $machine['reden'] : '',
+			// Soort en probleem bepalen samen met onderdeel_retour of we een
+			// onderdeel verwachten; zie onderdeel_verwacht().
+			'soort'                  => self::claimsoort( isset( $rij['soort'] ) ? (string) $rij['soort'] : '' ),
+			'onderdeel_probleem'     => isset( $rij['onderdeel_probleem'] ) ? (string) $rij['onderdeel_probleem'] : '',
+			'onderdeel_retour'       => ! empty( $rij['onderdeel_retour'] ),
+			'onderdeel_ontvangen_op' => isset( $rij['onderdeel_ontvangen_op'] ) ? (string) $rij['onderdeel_ontvangen_op'] : '',
 			'bijlagen'        => array(),
 			'verloop'         => array(),
 		);
@@ -670,6 +709,10 @@ class HDP_Garantie {
 				'opmerking' => isset( $stap['opmerking'] ) ? $stap['opmerking'] : '',
 				'gedaan'    => $i < $laatste,
 				'huidig'    => $i === $laatste,
+				// Elke stap dezelfde vorm, ook als er niets bij te zeggen is:
+				// anders moet iedere lezer van deze lijst raden welke sleutels
+				// er bij déze stap wel in zitten.
+				'hint'      => '',
 			);
 		}
 
@@ -689,7 +732,75 @@ class HDP_Garantie {
 					'opmerking' => '',
 					'gedaan'    => false,
 					'huidig'    => false,
+					'hint'      => '',
 				);
+			}
+		}
+
+		return self::met_retourstap( $stappen, $claim );
+	}
+
+	/**
+	 * Schuift de retourstap tussen "ingediend" en "behandeling".
+	 *
+	 * Heeft de dealer bij het indienen aangevinkt dat hij een onderdeel
+	 * opstuurt, dan ligt de claim stil tot dat pakket binnen is. Zonder deze
+	 * stap ziet hij alleen "ingediend" staan en lijkt het alsof er niets
+	 * gebeurt, terwijl de bal bij de post ligt.
+	 *
+	 * Geen status maar een feit uit de administratie: de app zet
+	 * onderdeel_ontvangen_op zodra het pakket op de balie ligt.
+	 *
+	 * @param array $stappen De route zoals hierboven opgebouwd.
+	 * @param array $claim   De claim.
+	 * @return array
+	 */
+	private static function met_retourstap( $stappen, $claim ) {
+		if ( ! self::onderdeel_verwacht( $claim ) ) {
+			return $stappen;
+		}
+
+		$ontvangen = isset( $claim['onderdeel_ontvangen_op'] ) ? (string) $claim['onderdeel_ontvangen_op'] : '';
+
+		$retour = array(
+			'status'    => '',
+			'fase'      => 'retour',
+			'wie'       => '',
+			'wanneer'   => $ontvangen,
+			'opmerking' => '',
+			'gedaan'    => '' !== $ontvangen,
+			'huidig'    => false,
+			// Zolang het pakket onderweg is staat hier waar het om draait:
+			// zonder ticketnummer op de doos kan niemand het terugvinden.
+			'hint'      => '' === $ontvangen && isset( $claim['nummer'] )
+				? sprintf( HDP_I18N::t( 'garantie_retour_vermeld' ), $claim['nummer'] )
+				: '',
+			// Eigen vlag i.p.v. "huidig": de route kent al precies één
+			// huidige stap (de laatste statuswijziging), en daar hoort deze
+			// niet mee te concurreren.
+			'wacht'     => '' === $ontvangen,
+		);
+
+		// Direct achter de laatste stap van de fase "ingediend"; staat die er
+		// niet (bij een oude claim zonder logregel), dan vooraan.
+		$plek = 0;
+		foreach ( $stappen as $i => $stap ) {
+			if ( 'ingediend' === $stap['fase'] ) {
+				$plek = $i + 1;
+			}
+		}
+
+		array_splice( $stappen, $plek, 0, array( $retour ) );
+
+		// Zolang het pakket onderweg is, hoort ook bij "in behandeling" te
+		// staan waarom daar nog niets gebeurt. Anders ziet de dealer een
+		// lege grijze stap en lijkt het alsof wij stilzitten.
+		if ( '' === $ontvangen ) {
+			foreach ( $stappen as $i => $stap ) {
+				if ( 'behandeling' === $stap['fase'] && ! $stap['status'] ) {
+					$stappen[ $i ]['hint'] = HDP_I18N::t( 'garantie_behandeling_na_ontvangst' );
+					break;
+				}
 			}
 		}
 
@@ -795,6 +906,10 @@ class HDP_Garantie {
 				return new WP_Error( 'hdp_onbekend_probleem', HDP_I18N::t( 'garantie_fout_probleem' ) );
 			}
 			$rij['onderdeel_probleem'] = $probleem;
+			// Niet wat de dealer aanvinkte (dat vinkje staat er niet meer),
+			// maar wat de regel zegt: bij een onderdelenclaim komt het
+			// onderdeel naar Stiens, behalve als het nooit is aangekomen.
+			$rij['onderdeel_retour'] = self::onderdeel_verwacht( $rij );
 		} else {
 			// Een machineclaim hangt altijd aan een aangemelde machine van
 			// déze dealer. De machine opzoeken binnen zijn eigen lijst is

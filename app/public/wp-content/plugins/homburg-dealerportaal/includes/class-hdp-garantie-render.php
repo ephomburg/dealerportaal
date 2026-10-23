@@ -29,9 +29,15 @@ class HDP_Garantie_Render {
 			return ob_get_clean();
 		}
 
+		// Een ticket opent normaal rechts in het overzicht, zodat de lijst
+		// ernaast blijft staan. Het volledige scherm — met de route, de
+		// machinekaart en de bijlagen, die breedte nodig hebben — is een
+		// bewuste stap verder.
+		//
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- alleen een keuze uit de URL om te bepalen wát getoond wordt; de toegangscontrole zit in HDP_Garantie::claim_voor_dealer() en in de rolcontrole hierboven.
 		$gevraagd = isset( $_GET['ticket'] ) ? sanitize_text_field( wp_unslash( $_GET['ticket'] ) ) : '';
-		if ( '' !== $gevraagd ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- zie hierboven.
+		if ( '' !== $gevraagd && ! empty( $_GET['volledig'] ) ) {
 			return self::render_ticket( $gevraagd );
 		}
 
@@ -55,13 +61,17 @@ class HDP_Garantie_Render {
 		ob_start();
 		?>
 		<div class="hdp-portaal alignfull">
-			<section class="hdp-welkom alignfull hdp-welkom-zonder-hero">
-				<div class="hdp-welkom-inner">
-					<a class="hdp-terug-boven" href="<?php echo esc_url( home_url( '/dealerportaal/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'terug_naar_portaal' ) ); ?></a>
-					<h1><?php echo esc_html( $titel ); ?></h1>
-					<p><?php echo esc_html( $omschrijving ); ?></p>
-				</div>
-			</section>
+			<?php
+			HDP_Paginakop::render(
+				array_merge(
+					array(
+						'titel' => $titel,
+						'intro' => $omschrijving,
+					),
+					HDP_Paginakop::terug_naar_portaal()
+				)
+			);
+			?>
 			<section class="hdp-garantie">
 				<?php
 				// Eén keer ophalen en doorgeven: anders doet elke sectie zijn
@@ -75,18 +85,210 @@ class HDP_Garantie_Render {
 					<?php self::render_storing(); ?>
 					<?php self::render_ingangen(); ?>
 				<?php else : ?>
-					<?php self::render_ingangen(); ?>
-					<?php self::render_wacht_op_u(); ?>
-					<?php self::render_zoekveld(); ?>
-					<?php self::render_claimlijst( $claims ); ?>
-					<?php self::render_machinelijst( $machines ); ?>
+					<?php self::render_werkblad(); ?>
 					<?php self::render_zoekscript(); ?>
 				<?php endif; ?>
-				<p class="hdp-terug"><a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/dealerportaal/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'terug_naar_portaal' ) ); ?></a></p>
 			</section>
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Hoe de claims gegroepeerd worden in de zijkolom.
+	 *
+	 * Niet per losse status maar per betekenis — dezelfde indeling als de
+	 * statuskleuren gebruiken. Een dealer wil weten "moet ik iets doen",
+	 * niet of iets nu bij ons of bij de fabrikant ligt; dat staat in het
+	 * label van de claim zelf.
+	 */
+	private static function groepen() {
+		return array(
+			'wacht' => array( HDP_Garantie::STATUS_ACTIE_DEALER ),
+			'loopt' => array_values(
+				array_diff(
+					HDP_Garantie::STATUSSEN,
+					array_merge( array( HDP_Garantie::STATUS_ACTIE_DEALER ), HDP_Garantie::EIND_STATUSSEN )
+				)
+			),
+			'klaar' => HDP_Garantie::EIND_STATUSSEN,
+		);
+	}
+
+	/** Welke groep nu actief is, of 'machines' voor de machinelijst. */
+	private static function gekozen_groep() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- alleen lezen.
+		$toon = isset( $_GET['toon'] ) ? sanitize_key( wp_unslash( $_GET['toon'] ) ) : '';
+
+		return in_array( $toon, array_merge( array( 'alles', 'machines' ), array_keys( self::groepen() ) ), true )
+			? $toon
+			: 'alles';
+	}
+
+	/** Het ticket dat rechts openstaat, als er een gekozen is. */
+	private static function gekozen_ticket() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- alleen lezen.
+		return isset( $_GET['ticket'] ) ? sanitize_text_field( wp_unslash( $_GET['ticket'] ) ) : '';
+	}
+
+	/**
+	 * Het werkblad: filters links, claims in het midden, de gekozen claim
+	 * rechts.
+	 *
+	 * Dit was een stapel losse secties onder elkaar — eerst twee kaarten,
+	 * dan een zoekveld, dan de claims, dan de machines. Om één claim te
+	 * lezen moest je weg van het overzicht en daarna terug, en na die
+	 * terugweg stond je weer bovenaan. Dezelfde indeling als Contactpersonen
+	 * in de Homburg App, zodat dealer en binnendienst naar hetzelfde kijken.
+	 */
+	private static function render_werkblad() {
+		$alle     = HDP_Garantie::claims();
+		$machines = HDP_Garantie::machines();
+		$alle     = is_wp_error( $alle ) ? array() : $alle;
+		$machines = is_wp_error( $machines ) ? array() : $machines;
+		$groep    = self::gekozen_groep();
+		?>
+		<div class="hdp-garantie-werkblad">
+			<?php self::render_rail( $alle, $machines, $groep ); ?>
+
+			<div class="hdp-garantie-kolom-lijst">
+				<?php self::render_zoekveld(); ?>
+				<?php if ( 'machines' === $groep ) : ?>
+					<?php self::render_machinelijst( $machines ); ?>
+				<?php else : ?>
+					<?php self::render_claimlijst( self::filter_claims( $alle, $groep ) ); ?>
+				<?php endif; ?>
+			</div>
+
+			<div class="hdp-garantie-kolom-detail">
+				<?php self::render_detail( $alle ); ?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/** De claims die bij een groep horen. */
+	private static function filter_claims( $claims, $groep ) {
+		$groepen = self::groepen();
+		if ( ! isset( $groepen[ $groep ] ) ) {
+			return $claims;
+		}
+
+		return array_values(
+			array_filter(
+				$claims,
+				static function ( $claim ) use ( $groepen, $groep ) {
+					return in_array( $claim['status'], $groepen[ $groep ], true );
+				}
+			)
+		);
+	}
+
+	/**
+	 * De filterkolom links, met achter elke regel hoeveel het er zijn.
+	 *
+	 * Die tellingen zijn het punt: zonder die cijfers moet je elke groep
+	 * openklikken om te zien of er iets in zit.
+	 */
+	private static function render_rail( $claims, $machines, $actief ) {
+		$regels = array(
+			'alles' => count( $claims ),
+			'wacht' => count( self::filter_claims( $claims, 'wacht' ) ),
+			'loopt' => count( self::filter_claims( $claims, 'loopt' ) ),
+			'klaar' => count( self::filter_claims( $claims, 'klaar' ) ),
+		);
+		?>
+		<aside class="hdp-garantie-rail">
+			<div class="hdp-rail-knoppen">
+				<a class="hdp-btn" href="<?php echo esc_url( add_query_arg( 'nieuw', 'claim', home_url( '/garantie/' ) ) ); ?>">
+					<?php echo esc_html( HDP_I18N::t( 'garantie_ingang_claim_knop' ) ); ?>
+				</a>
+				<a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( add_query_arg( 'nieuw', 'machine', home_url( '/garantie/' ) ) ); ?>">
+					<?php echo esc_html( HDP_I18N::t( 'garantie_ingang_machine_knop' ) ); ?>
+				</a>
+			</div>
+
+			<div class="hdp-rail-groep">
+				<p class="hdp-rail-kop"><?php echo esc_html( HDP_I18N::t( 'garantie_rail_claims' ) ); ?></p>
+				<?php foreach ( $regels as $sleutel => $aantal ) : ?>
+					<a class="hdp-rail-regel<?php echo $actief === $sleutel ? ' hdp-rail-actief' : ''; ?><?php echo ( 'wacht' === $sleutel && $aantal ) ? ' hdp-rail-wacht' : ''; ?>"
+						href="<?php echo esc_url( add_query_arg( 'toon', $sleutel, home_url( '/garantie/' ) ) ); ?>"
+						<?php echo $actief === $sleutel ? 'aria-current="page"' : ''; ?>>
+						<span><?php echo esc_html( HDP_I18N::t( 'garantie_rail_' . $sleutel ) ); ?></span>
+						<span class="hdp-rail-aantal"><?php echo esc_html( (string) $aantal ); ?></span>
+					</a>
+				<?php endforeach; ?>
+			</div>
+
+			<div class="hdp-rail-groep">
+				<p class="hdp-rail-kop"><?php echo esc_html( HDP_I18N::t( 'garantie_mijn_machines' ) ); ?></p>
+				<a class="hdp-rail-regel<?php echo 'machines' === $actief ? ' hdp-rail-actief' : ''; ?>"
+					href="<?php echo esc_url( add_query_arg( 'toon', 'machines', home_url( '/garantie/' ) ) ); ?>"
+					<?php echo 'machines' === $actief ? 'aria-current="page"' : ''; ?>>
+					<span><?php echo esc_html( HDP_I18N::t( 'garantie_rail_aangemeld' ) ); ?></span>
+					<span class="hdp-rail-aantal"><?php echo esc_html( (string) count( $machines ) ); ?></span>
+				</a>
+			</div>
+		</aside>
+		<?php
+	}
+
+	/**
+	 * De rechterkolom: de gekozen claim, of de uitnodiging er een te kiezen.
+	 *
+	 * Bewust een kortere versie van het ticket dan het volledige scherm: de
+	 * route, de machinekaart en de bijlagen hebben breedte nodig en staan
+	 * daar. Hier staat waar het om draait — bij wie het ligt en wat er
+	 * gezegd is — met een link naar de rest.
+	 */
+	private static function render_detail( $claims ) {
+		$nummer = self::gekozen_ticket();
+
+		if ( '' === $nummer ) {
+			self::render_detail_leeg( $claims );
+			return;
+		}
+
+		$claim = HDP_Garantie::claim_voor_dealer( $nummer );
+
+		if ( is_wp_error( $claim ) || ! $claim ) {
+			$onbekend = HDP_I18N::t( 'garantie_ticket_onbekend' );
+			echo HDP_Icons::render_lege_status( 'downloads', $onbekend ); // phpcs:ignore WordPress.Security.EscapeOutput -- render_lege_status() escapet elk veld zelf.
+			return;
+		}
+		?>
+		<div class="hdp-detail-kaart">
+			<?php self::render_ticket_kop( $claim ); ?>
+			<?php self::render_aan_zet( $claim ); ?>
+			<?php self::render_gesprek( $claim ); ?>
+			<p class="hdp-detail-volledig">
+				<a href="<?php echo esc_url( add_query_arg( array( 'ticket' => $claim['nummer'], 'volledig' => '1' ), home_url( '/garantie/' ) ) ); ?>">
+					<?php echo esc_html( HDP_I18N::t( 'garantie_open_volledig' ) ); ?>
+				</a>
+			</p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Wat er rechts staat als er nog niets gekozen is.
+	 *
+	 * Voor een nieuwe dealer is dit het eerste wat hij van garantie ziet,
+	 * met nul machines en nul claims. Dat scherm hoort te vertellen wat hij
+	 * kan doen, niet alleen te melden dat er niets is.
+	 */
+	private static function render_detail_leeg( $claims ) {
+		if ( ! $claims ) {
+			$tekst = HDP_I18N::t( 'garantie_nog_niets_tekst' );
+			$knop  = HDP_I18N::t( 'garantie_ingang_machine_knop' );
+			$url   = add_query_arg( 'nieuw', 'machine', home_url( '/garantie/' ) );
+
+			echo HDP_Icons::render_lege_status( 'garantie', $tekst, $url, $knop ); // phpcs:ignore WordPress.Security.EscapeOutput -- render_lege_status() escapet elk veld zelf.
+			return;
+		}
+
+		$kies = HDP_I18N::t( 'garantie_kies_een_claim' );
+		echo HDP_Icons::render_lege_status( 'garantie', $kies ); // phpcs:ignore WordPress.Security.EscapeOutput -- render_lege_status() escapet elk veld zelf.
 	}
 
 	/**
@@ -285,23 +487,30 @@ class HDP_Garantie_Render {
 	 * "alle claims".
 	 */
 	private static function render_claimlijst( $claims ) {
-		$alles = HDP_Garantie::claims();
-		$alle  = is_wp_error( $alles ) ? count( $claims ) : count( $alles );
+		// De kop volgt het gekozen filter: onder "Afgehandeld" stond eerder
+		// nog steeds "Lopende claims" boven de lijst.
+		$groep = self::gekozen_groep();
 		?>
 		<div class="hdp-garantie-kop">
 			<h2>
-				<?php echo esc_html( HDP_I18N::t( 'garantie_lopende_claims' ) ); ?>
+				<?php echo esc_html( HDP_I18N::t( 'garantie_rail_' . $groep ) ); ?>
 				<span class="hdp-garantie-aantal"><?php echo esc_html( (string) count( $claims ) ); ?></span>
 			</h2>
-			<?php if ( $alle > count( $claims ) ) : ?>
-				<a class="hdp-garantie-toon-alles" href="<?php echo esc_url( add_query_arg( 'alles', '1', home_url( '/garantie/' ) ) ); ?>">
-					<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_toon_alle_claims' ), $alle ) ); ?>
-				</a>
-			<?php endif; ?>
 		</div>
 
 		<?php if ( ! $claims ) : ?>
-			<p class="hdp-gesprek-leeg"><?php echo esc_html( HDP_I18N::t( 'garantie_geen_lopende_claims' ) ); ?></p>
+			<?php
+			// Een lege lijst hoort te zeggen wát er leeg is, en wat je nu
+			// kunt doen — niet alleen dat er niets staat.
+			$leeg_alles = 'alles' === $groep;
+			$leeg_tekst = HDP_I18N::t( $leeg_alles ? 'garantie_geen_claims_totaal' : 'garantie_geen_claims_filter' );
+			$leeg_knop  = HDP_I18N::t( $leeg_alles ? 'garantie_ingang_claim_knop' : 'garantie_rail_toon_alles' );
+			$leeg_url   = $leeg_alles
+				? add_query_arg( 'nieuw', 'claim', home_url( '/garantie/' ) )
+				: add_query_arg( 'toon', 'alles', home_url( '/garantie/' ) );
+
+			echo HDP_Icons::render_lege_status( 'garantie', $leeg_tekst, $leeg_url, $leeg_knop ); // phpcs:ignore WordPress.Security.EscapeOutput -- render_lege_status() escapet elk veld zelf.
+			?>
 		<?php else : ?>
 			<div class="hdp-garantie-lijst">
 				<?php foreach ( $claims as $claim ) : ?>
@@ -324,7 +533,7 @@ class HDP_Garantie_Render {
 							<strong><?php echo esc_html( HDP_Garantie::machinenaam( $claim['machine'], $claim['serienummer'] ) ); ?></strong>
 							<span>
 								<?php echo esc_html( HDP_I18N::t( 'garantie_ingediend_op' ) ); ?>
-								<?php echo esc_html( date_i18n( 'j F Y', strtotime( $claim['ingediend'] ) ) ); ?>
+								<?php echo esc_html( HDP_I18N::datum( 'j F Y', strtotime( $claim['ingediend'] ) ) ); ?>
 							</span>
 						</div>
 						<?php if ( $actie_nodig ) : ?>
@@ -420,9 +629,9 @@ class HDP_Garantie_Render {
 						<div class="hdp-machine-garantie">
 							<span class="hdp-machine-garantie-label">
 								<?php if ( $stand['verlopen'] ) : ?>
-									<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_verlopen_op' ), date_i18n( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
+									<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_verlopen_op' ), HDP_I18N::datum( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
 								<?php else : ?>
-									<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_tot_en_met' ), date_i18n( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
+									<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_tot_en_met' ), HDP_I18N::datum( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
 									<?php if ( $stand['bijna'] ) : ?>
 										<strong>&mdash; <?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_nog_maanden' ), $stand['maanden'] ) ); ?></strong>
 									<?php endif; ?>
@@ -453,13 +662,16 @@ class HDP_Garantie_Render {
 		ob_start();
 		?>
 		<div class="hdp-portaal alignfull">
-			<section class="hdp-welkom alignfull hdp-welkom-zonder-hero">
-				<div class="hdp-welkom-inner">
-					<a class="hdp-terug-boven" href="<?php echo esc_url( home_url( '/garantie/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'garantie_terug_naar_garantie' ) ); ?></a>
-					<h1><?php echo esc_html( HDP_I18N::t( 'garantie_kies_soort_titel' ) ); ?></h1>
-					<p><?php echo esc_html( HDP_I18N::t( 'garantie_kies_soort_tekst' ) ); ?></p>
-				</div>
-			</section>
+			<?php
+			HDP_Paginakop::render(
+				array(
+					'titel'       => HDP_I18N::t( 'garantie_kies_soort_titel' ),
+					'intro'       => HDP_I18N::t( 'garantie_kies_soort_tekst' ),
+					'terug_url'   => home_url( '/garantie/' ),
+					'terug_tekst' => HDP_I18N::t( 'garantie_terug_naar_garantie' ),
+				)
+			);
+			?>
 			<section class="hdp-garantie">
 				<?php self::render_meldingen(); ?>
 				<div class="hdp-garantie-ingangen">
@@ -484,6 +696,38 @@ class HDP_Garantie_Render {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * De mededeling die bij een onderdelenclaim nergens te missen mag zijn:
+	 * wij beginnen pas als het onderdeel hier is.
+	 *
+	 * Dit stond eerst als hintregel onder een vinkje "ik stuur onderdelen
+	 * retour". Daarmee was het iets dat de dealer kon overslaan, terwijl het
+	 * bepaalt of zijn claim überhaupt in behandeling komt. Dus: boven het
+	 * formulier, in een eigen kader, voordat hij begint met invullen.
+	 *
+	 * Bij "niet ontvangen" is er niets om terug te sturen. Welk antwoord dat
+	 * is staat in data-zonder-onderdeel; het gedeelde script verbergt het
+	 * blok dan. Zo staat die uitzondering niet nog eens los in de JavaScript.
+	 *
+	 * @param string $nummer Het ticketnummer, als dat al bestaat.
+	 */
+	private static function render_retour_attentie( $nummer = '' ) {
+		$uitleg = '' === $nummer
+			? HDP_I18N::t( 'garantie_retour_uitleg' )
+			: sprintf( HDP_I18N::t( 'garantie_retour_uitleg_nummer' ), $nummer );
+		?>
+		<div class="hdp-garantie-attentie" id="hdp-retour-attentie"
+			data-zonder-onderdeel="<?php echo esc_attr( HDP_Garantie::PROBLEEM_ZONDER_ONDERDEEL ); ?>">
+			<?php // Eigen badge en niet hdp-kaart-icoon: dat is een vlak van 52px voor een kaarttegel, veel te zwaar boven een mededeling van drie regels. ?>
+			<?php HDP_Icons::render_icoon( 'bestellen', 'hdp-garantie-attentie-icoon' ); ?>
+			<div>
+				<strong><?php echo esc_html( HDP_I18N::t( 'garantie_retour_kop' ) ); ?></strong>
+				<p><?php echo esc_html( $uitleg ); ?></p>
+			</div>
+		</div>
+		<?php
 	}
 
 	/**
@@ -594,13 +838,16 @@ class HDP_Garantie_Render {
 		ob_start();
 		?>
 		<div class="hdp-portaal alignfull">
-			<section class="hdp-welkom alignfull hdp-welkom-zonder-hero">
-				<div class="hdp-welkom-inner">
-					<a class="hdp-terug-boven" href="<?php echo esc_url( home_url( '/garantie/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'garantie_terug_naar_garantie' ) ); ?></a>
-					<h1><?php echo esc_html( HDP_I18N::t( $titelsleutel . '_titel' ) ); ?></h1>
-					<p><?php echo esc_html( HDP_I18N::t( $titelsleutel . '_tekst' ) ); ?></p>
-				</div>
-			</section>
+			<?php
+			HDP_Paginakop::render(
+				array(
+					'titel'       => HDP_I18N::t( $titelsleutel . '_titel' ),
+					'intro'       => HDP_I18N::t( $titelsleutel . '_tekst' ),
+					'terug_url'   => home_url( '/garantie/' ),
+					'terug_tekst' => HDP_I18N::t( 'garantie_terug_naar_garantie' ),
+				)
+			);
+			?>
 			<section class="hdp-garantie">
 				<?php self::render_meldingen(); ?>
 				<form class="hdp-garantie-formulier" method="post" enctype="multipart/form-data"
@@ -612,6 +859,9 @@ class HDP_Garantie_Render {
 					<?php endif; ?>
 					<?php if ( $is_claim && ! $is_onderdeel ) : ?>
 						<?php self::render_machinekeuze(); ?>
+					<?php endif; ?>
+					<?php if ( $is_onderdeel ) : ?>
+						<?php self::render_retour_attentie(); ?>
 					<?php endif; ?>
 
 					<div class="hdp-garantie-velden">
@@ -759,7 +1009,6 @@ class HDP_Garantie_Render {
 			<div class="hdp-portaal alignfull">
 				<section class="hdp-garantie">
 					<?php self::render_storing(); ?>
-					<p class="hdp-terug"><a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/garantie/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'garantie_terug_naar_overzicht' ) ); ?></a></p>
 				</section>
 			</div>
 			<?php
@@ -794,7 +1043,6 @@ class HDP_Garantie_Render {
 					</aside>
 				</div>
 
-				<p class="hdp-terug"><a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/garantie/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'garantie_terug_naar_overzicht' ) ); ?></a></p>
 			</section>
 		</div>
 		<?php
@@ -809,7 +1057,6 @@ class HDP_Garantie_Render {
 				<?php
 				echo HDP_Icons::render_lege_status( 'downloads', HDP_I18N::t( 'garantie_ticket_onbekend' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- render_lege_status() escapet zelf.
 				?>
-				<p class="hdp-terug"><a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/garantie/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'garantie_terug_naar_overzicht' ) ); ?></a></p>
 			</section>
 		</div>
 		<?php
@@ -836,7 +1083,7 @@ class HDP_Garantie_Render {
 					<p class="hdp-ticket-meta">
 						<?php echo esc_html( $claim['merk'] ); ?> &middot;
 						<?php echo esc_html( HDP_I18N::t( 'garantie_ingediend_op' ) ); ?>
-						<?php echo esc_html( date_i18n( 'j F Y', strtotime( $claim['ingediend_op'] ) ) ); ?>
+						<?php echo esc_html( HDP_I18N::datum( 'j F Y', strtotime( $claim['ingediend_op'] ) ) ); ?>
 						<?php if ( $dagen > 0 ) : ?>
 							&middot;
 							<?php
@@ -856,6 +1103,13 @@ class HDP_Garantie_Render {
 				</span>
 			</div>
 			<?php self::render_route( $claim ); ?>
+			<?php
+			// Wachten we op een pakket, dan hoort dat hier te staan en niet
+			// alleen in de bevestiging die de dealer één keer ziet.
+			if ( HDP_Garantie::onderdeel_verwacht( $claim ) && empty( $claim['onderdeel_ontvangen_op'] ) ) {
+				self::render_retour_attentie( $claim['nummer'] );
+			}
+			?>
 		</header>
 		<?php
 	}
@@ -880,25 +1134,48 @@ class HDP_Garantie_Render {
 				if ( $stap['huidig'] && HDP_Garantie::is_afwijzing( $stap['status'] ) ) {
 					$klassen[] = 'hdp-route-afwijzing';
 				}
-				if ( ! $stap['status'] ) {
+				if ( ! $stap['status'] && 'retour' !== $stap['fase'] ) {
 					$klassen[] = 'hdp-route-komt-nog';
 				}
+				if ( ! empty( $stap['wacht'] ) ) {
+					// Waar we op wachten mag opvallen; dat is hier het hele punt.
+					$klassen[] = 'hdp-route-wacht';
+				}
 
-				$label = $stap['status']
-					? HDP_Garantie::status_label( $stap['status'] )
-					: HDP_I18N::t( 'garantie_fase_' . $stap['fase'] );
+				if ( $stap['status'] ) {
+					$label = HDP_Garantie::status_label( $stap['status'] );
+				} elseif ( 'retour' === $stap['fase'] ) {
+					$label = HDP_I18N::t( empty( $stap['wacht'] ) ? 'garantie_retour_ontvangen' : 'garantie_retour_onderweg' );
+				} else {
+					$label = HDP_I18N::t( 'garantie_fase_' . $stap['fase'] );
+				}
 				?>
 				<li class="<?php echo esc_attr( implode( ' ', $klassen ) ); ?>">
 					<span class="hdp-route-bol" aria-hidden="true"></span>
 					<strong><?php echo esc_html( $label ); ?></strong>
 					<span class="hdp-route-wie">
-						<?php if ( $stap['wie'] ) : ?>
-							<?php echo esc_html( $stap['wie'] ); ?>
-							<?php if ( $stap['wanneer'] ) : ?>
-								&middot; <?php echo esc_html( date_i18n( 'j M H:i', strtotime( $stap['wanneer'] ) ) ); ?>
-							<?php endif; ?>
-						<?php else : ?>
+						<?php
+						// Een datum hoorde alleen te verschijnen als er ook
+						// een naam bij stond. Bij "onderdeel ontvangen" is er
+						// geen naam — er kwam een pakket binnen — en dan viel
+						// de datum weg, terwijl die juist het punt is.
+						$heeft_iets = $stap['wie'] || $stap['wanneer'] || ! empty( $stap['hint'] );
+						?>
+						<?php if ( ! $heeft_iets ) : ?>
 							&nbsp;
+						<?php else : ?>
+							<?php if ( ! empty( $stap['hint'] ) ) : ?>
+								<?php echo esc_html( $stap['hint'] ); ?>
+							<?php else : ?>
+								<?php echo esc_html( $stap['wie'] ); ?>
+								<?php
+								if ( $stap['wie'] && $stap['wanneer'] ) :
+									?>
+									&middot;<?php endif; ?>
+								<?php if ( $stap['wanneer'] ) : ?>
+									<?php echo esc_html( HDP_I18N::datum( 'j M H:i', strtotime( $stap['wanneer'] ) ) ); ?>
+								<?php endif; ?>
+							<?php endif; ?>
 						<?php endif; ?>
 					</span>
 				</li>
@@ -987,9 +1264,9 @@ class HDP_Garantie_Render {
 				<?php if ( $stand['tot'] ) : ?>
 					<span class="hdp-machine-garantie-label">
 						<?php if ( $stand['verlopen'] ) : ?>
-							<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_verlopen_op' ), date_i18n( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
+							<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_verlopen_op' ), HDP_I18N::datum( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
 						<?php else : ?>
-							<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_tot_en_met' ), date_i18n( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
+							<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_tot_en_met' ), HDP_I18N::datum( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
 							<?php if ( $stand['bijna'] ) : ?>
 								<strong>&mdash; <?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_nog_maanden' ), $stand['maanden'] ) ); ?></strong>
 							<?php endif; ?>
@@ -1002,7 +1279,7 @@ class HDP_Garantie_Render {
 					<?php if ( $claim['aankoopdatum'] ) : ?>
 						<div>
 							<dt><?php echo esc_html( HDP_I18N::t( 'garantie_veld_aankoopdatum' ) ); ?></dt>
-							<dd><?php echo esc_html( date_i18n( 'j M Y', strtotime( $claim['aankoopdatum'] ) ) ); ?></dd>
+							<dd><?php echo esc_html( HDP_I18N::datum( 'j M Y', strtotime( $claim['aankoopdatum'] ) ) ); ?></dd>
 						</div>
 					<?php endif; ?>
 					<?php if ( $claim['hectares'] ) : ?>
@@ -1115,7 +1392,7 @@ class HDP_Garantie_Render {
 							<span class="<?php echo esc_attr( HDP_Garantie::status_klasse( $bericht['status'] ) ); ?>"><?php echo esc_html( HDP_Garantie::status_label( $bericht['status'] ) ); ?></span>
 						<?php endif; ?>
 						<?php if ( $bericht['wanneer'] ) : ?>
-							<time><?php echo esc_html( date_i18n( 'j M H:i', strtotime( $bericht['wanneer'] ) ) ); ?></time>
+							<time><?php echo esc_html( HDP_I18N::datum( 'j M H:i', strtotime( $bericht['wanneer'] ) ) ); ?></time>
 						<?php endif; ?>
 					</div>
 					<p class="hdp-bericht-tekst"><?php echo esc_html( $bericht['tekst'] ); ?></p>

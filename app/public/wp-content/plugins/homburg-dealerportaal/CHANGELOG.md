@@ -8,6 +8,182 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.71.2
+
+**Kortere paginatitels: "Downloads" en "Content" in plaats van "Downloads voor dealers" en "Content voor dealers".**
+- Dat het voor dealers is, is in een afgeschermd dealerportaal met een menu waar "Downloads" in staat niet meer het vermelden waard. In het Frans net zo: "Téléchargements" en "Contenu".
+- De titels komen uit de standaardwaarden van de blokken en niet uit de pagina's zelf, dus dit werkt meteen — er hoeft op geen enkele site iets aan de pagina's te veranderen. Wie een eigen titel invult in de editor, houdt die.
+
+## 1.71.1
+
+**Home bovenaan het zijmenu, en de "terug naar het portaal"-knoppen vervallen.**
+- Home staat los boven de kopjes, met een streep eronder: het is de weg terug, geen onderdeel. Daarmee staat die weg terug op elke pagina op dezelfde plek.
+- De knop "← Terug naar het portaal" boven de pagina's is daardoor overbodig en verdwijnt zodra het zijmenu er staat. Een terugknop naar iets anders — zoals "terug naar garantie" op een ticket — blijft wél staan; die wijst naar een pagina die niet in het menu voorkomt.
+- Het menu begint wat lager; tegen de balk aan leek het eraan vastgeplakt.
+- Tests: 319 (was 316).
+
+## 1.71.0
+
+**Het zijmenu staat nu op alle portaalpagina's, niet alleen op het welkomscherm** (thema 1.31.0).
+- Downloads, Content, Huisstijl & media, Garantie, Bestelgeschiedenis en de accountpagina's (bestellingen, snel bestellen, favorieten, instellingen) hebben dezelfde opzet als het welkomscherm: het donkere vlak met het werkblad als afgerond paneel erin, en links het menu. Het onderdeel waar u bent licht op.
+- Er is een sjabloon "Portaalpagina (met zijmenu)" bijgekomen. Pagina's die daarop staan krijgen het menu; publieke pagina's zoals de privacyverklaring blijven ongemoeid. Een nieuwe portaalpagina zet u er zelf op via Pagina-instellingen → Sjabloon.
+- De paginatitel staat nu direct op het werkblad, zoals de begroeting op het welkomscherm. Dat was een witte band over de volle breedte, wat binnen het werkblad als een losse kaart oogde.
+- De accountpagina's hielden hun eigen smalle breedte aan en sprongen daardoor binnen het werkblad nog eens in; die vullen nu de ruimte.
+- Een bezoeker zonder toegang ziet gewoon het inlogscherm: geen lege donkere kolom.
+- De webshop (winkel, product, winkelwagen, afrekenen) is bewust ongemoeid gelaten — die heeft een eigen filterkolom.
+- Tests: 316 (was 312).
+
+## 1.70.2
+
+**De voettekst is op de hele site een stuk compacter** (thema 1.30.1).
+- Van ongeveer 300 naar 182 pixels op een groot scherm, en van 602 naar 491 op een telefoon. De inhoud is dezelfde gebleven.
+- De hoogte zat in de adressen: die stonden over drie regels met telefoon en e-mail eronder — zes regels per kolom. Nu staat het adres op één regel en staan telefoon en e-mail naast elkaar. De alinea met het adres hield bovendien zijn standaardmarges aan, goed voor 25 onzichtbare pixels.
+- De footer gebruikt nu de brede maat (90%) in plaats van de 70% van de leespagina's; op 70% waren de kolommen zo smal dat alles alsnog over twee regels brak.
+- De lichte waas over de voettekst is weg: die maakte hem zichtbaar lichter dan de balk bovenaan, wat op het welkomscherm meteen opviel doordat ze aan elkaar grenzen.
+- De kopjes in het zijmenu zijn wit in plaats van grijs. Het verschil met de regels eronder zit in de vorm — klein, kapitalen, wijd uit elkaar, met een rood streepje — en niet in een flauwere kleur.
+
+## 1.70.1
+
+**Opgelost: onder de voettekst van het welkomscherm bleef een lichte strook staan.**
+- Op een hoog scherm is de pagina korter dan het venster. De voettekst eindigde dan halverwege en daaronder kwam de achtergrond van de site tevoorschijn — een witte strook die dwars door het donkere vlak heen brak.
+- De pagina is nu minstens zo hoog als het scherm, met het werkblad als het deel dat meegroeit, zodat de voettekst altijd onderaan staat. De achtergrond van de pagina is bovendien donkergrijs, voor wat er bij doorscrollen onder vandaan komt.
+
+## 1.70.0
+
+**Nieuw welkomscherm: een vast menu aan de zijkant, in plaats van een scherm vol tegels.** (thema 1.30.0)
+- De startpagina heeft een eigen sjabloon gekregen (`templates/front-page.html`). De balk bovenaan blijft precies zoals hij was; daaronder staat links een vast menu met de onderdelen van het portaal, en rechts het werkblad.
+- Het menu haalt zijn onderdelen uit de portaalkaarten die al op de startpagina stonden. Titel, Franse titel en link blijven dus gewoon in de pagina-editor staan; een kaart die daar bijkomt, verschijnt vanzelf in het menu. De kaarten worden op het welkomscherm zelf niet meer als tegels getoond — die navigatie zit nu in het menu.
+- De onderdelen staan onder drie kopjes: Bestellen, Service en Materiaal. Een kaart met een onbekend icoon komt onder Materiaal, zodat er nooit eentje uit het menu valt.
+- Bij Garantie staat een rood cijfer zodra er een claim op de dealer wacht.
+- De paginabrede foto is weg. Daarvoor in de plaats: een groet die met het tijdstip meegaat, de datum van vandaag en een zoekveld naar de artikelen. Daaronder staan meteen de berichten van Homburg.
+- De balk bovenaan, het menu en de voettekst vormen samen één donker vlak; het werkblad ligt daar als een licht paneel in, met afgeronde hoeken aan de kant van het menu en een rode rand eromheen. De lichte waas die over de voettekst lag is weg — daardoor was die zichtbaar lichter dan de rest.
+- Onder elk kopje in het menu staat een kort rood streepje.
+- Achter de herbestelde artikelen staat een kaart "Artikelnummers plakken" — die vult het gat dat overbleef en wijst naar de snelste manier van bestellen.
+- Huisstijl & media had hetzelfde icoon als Content; die heeft nu een eigen palet-icoon.
+- De startpagina is van 3298 naar ongeveer 2000 pixels hoog gegaan.
+- Op een telefoon wordt het menu één strook boven de inhoud die opzij schuift.
+
+**Opgelost: Franse teksten toonden `é` in plaats van é.**
+- Op 76 plekken in de vertalingen stond zo'n reeks letterlijk in de code. In een PHP-tekst tussen enkele aanhalingstekens betekent die niets, dus kwam hij onvertaald op het scherm ("pièces" in plaats van "pièces"). Ze waren via bewerkscripts ingeslopen en vielen niet op omdat ze alleen het Frans raakten.
+- Een test bewaakt dit nu, en controleert meteen dat elke tekst zowel Nederlands als Frans heeft.
+- Tests: 312 (was 298), browsertests 11.
+
+## 1.69.2
+
+**Op een telefoon worden "Links" en "Mijn account" alleen hun icoontje** (thema 1.29.1).
+- Daarmee passen het hartje, beide knoppen en de taalkeuze op één regel en is de header daar 100px in plaats van 139px. Nu hij blijft staan, scheelt dat een hele regel scherm op elke pagina.
+- Het opschrift is weggeklemd en niet verwijderd: een schermlezer leest nog steeds "Mijn account" voor. Op laptop en desktop verandert er niets.
+
+## 1.69.1
+
+**De header met het logo blijft bij het scrollen bovenaan staan** (thema 1.29.0).
+- Geldt op elke pagina: portaal, webshop, winkelwagen, afrekenen en Mijn account. De uitklapmenu's "Links" en "Mijn account" liften mee en blijven over de pagina-inhoud heen vallen.
+- Staat voor ingelogde beheerders netjes onder de balk van WordPress in plaats van erachter te verdwijnen.
+- De filterkolom bij garantie en de zijkolom bij een ticket waren zelf al sticky; die houden nu afstand tot de header in plaats van eronder te schuiven. Het gedeelde script meet de hoogte op (`--hdp-header-hoogte`), zodat daar geen vast getal in de CSS staat dat stilletijds niet meer klopt.
+- Op een telefoon was de header 176px hoog — een vijfde van het scherm, permanent bezet. Die is nu 139px: kleiner logo, minder lucht, en aan de zijkanten niet langer de 70%-inhoudsbreedte van de rest van de site (daardoor bleef er maar 288px over voor de knoppen).
+- Browsertests: 11 (was 9).
+
+## 1.69.0
+
+**Een onderdelenclaim gaat pas in behandeling als het onderdeel in Stiens is — en dat staat nu op elk scherm waar de dealer het nodig heeft.**
+- Dit was een vinkje "ik stuur onderdelen retour" met een regeltje eronder. Daarmee was het iets dat een dealer kon overslaan, terwijl het bepaalt of zijn claim überhaupt in behandeling komt.
+- Bij een onderdelenclaim is het vinkje weg: terugsturen is daar de regel, geen keuze. Boven het formulier staat nu een kader dat uitlegt waarom (wij beoordelen het onderdeel zelf) en dat het ticketnummer op de zending moet.
+- Eén uitzondering: kiest de dealer "niet ontvangen", dan is er niets om terug te sturen en verdwijnt het kader. Zonder die uitzondering zou zo'n claim voorgoed blijven hangen.
+- Na indienen krijgt de dealer een eigen bevestiging: geen vraag ("stuurt u onderdelen retour?") maar een opdracht, met het ticketnummer erin.
+- Op het ticket zelf blijft het staan zolang wij op het pakket wachten, inclusief ticketnummer. In de route vertelt de stap "Behandeling" nu ook waarom er nog niets gebeurt: "Start zodra het onderdeel binnen is".
+- Bij een machineclaim blijft het een vinkje; die reparatie is vaak ter plekke gedaan en dan komt er niets retour.
+- Tests: 298 (was 282).
+
+## 1.68.1
+
+**Content en huisstijl worden nu ook via FileBird gevuld, en de mappen verschijnen ook op een site waar ze al eens zijn aangemaakt.**
+- De contentbibliotheek had nog geen eigen FileBird-hoofdmap: die bestanden moesten met de hand als "content" worden aangemerkt. Nu geldt voor alle drie de bibliotheken dezelfde werkwijze — bestand in de juiste map zetten in de mediabibliotheek en het staat in het portaal.
+- Mappen onder "Content dealerportaal" houden de taalcode (`Merk (NL)`), want bij advertentiemateriaal maakt de taal uit. Onder "Huisstijl dealerportaal" blijft die weg: een logo heeft geen taal en hoort bij iedere dealer te staan.
+- Verplaatst iemand een bestand van de ene hoofdmap naar de andere, dan verhuist het nu ook in het portaal naar de bijbehorende pagina.
+- Opgelost: de mappen werden eenmalig aangemaakt met een vlag "gedaan" in de database. Op een site waar die vlag al stond — zoals live, van de downloadsmappen — zouden de nieuwe hoofdmappen er nooit bijkomen en deed de koppeling daar stilletjes niets. Die vlag is vervangen door een versienummer, dat omhoog kan zodra er een map bijkomt.
+- Tests: 282 (was 279).
+
+## 1.68.0
+
+**Huisstijl & media: logo's, kleuren en lettertypen om te downloaden.**
+- Dealers zetten het Homburg-logo op hun eigen site, briefpapier en advertenties. Tot nu toe moesten ze daarvoor mailen of een bestand uit een oude nieuwsbrief vissen.
+- Derde categorie naast Downloads en Content, met een eigen pagina (`/huisstijl/`) en een tegel op de startpagina. Zelfde zoeken, filteren en beveiligde uitlevering als de andere twee.
+- **Vullen gaat via FileBird**, net als bij downloads: een nieuwe hoofdmap **"Huisstijl dealerportaal"** met een submap per merk. Een bestand dat daarin belandt, verschijnt vanzelf op de huisstijlpagina. Verplaatst u het later naar Downloads, dan verhuist het mee.
+- De submappen onder huisstijl hebben géén taalcode, anders dan bij downloads. Een logo is niet in één taal; zonder taalcode blijft de regio leeg en ziet iedere dealer het bestand, of hij het portaal nu op Nederlands of Frans heeft staan.
+- Huisstijl staat in een eigen hoofdmap en niet als submap van Downloads: logo's zijn iets anders dan prijslijsten, en zo is in de mediabibliotheek meteen te zien waar iets terechtkomt.
+
+**Opgelost bij het bouwen hiervan: een nieuwe categorie zou de oude bestanden opslokken.**
+- De query kende alleen "content" en "al het andere". Dat "al het andere" vangt ook de bestanden van vóór dit onderscheid op — die hebben geen categorie-meta en zijn altijd downloads geweest. Huisstijl viel daar doorheen en de pagina bleef leeg.
+- Nu vangt alleen "download" die erfenis op; elke andere categorie kijkt strikt naar zijn eigen meta. Vier tests bewaken dat de drie categorieën elkaars bestanden niet oppikken.
+
+**Drie keer dezelfde pagina is één pagina geworden.**
+- Downloads, content en huisstijl stonden als drie identieke blokken code naast elkaar, op één woord na. Bij de derde was dat niet meer vol te houden.
+
+## 1.67.0
+
+**Een stap "onderdeel onderweg" in de route van een ticket.**
+- Stuurt een dealer een onderdeel retour naar Stiens, dan ligt de claim stil tot dat pakket binnen is. Hij zag alleen "ingediend" staan en kon denken dat er niets gebeurde, terwijl de bal bij de post lag.
+- De stap staat tussen **Ingediend** en **Behandeling**, en verschijnt alleen als er ook echt iets onderweg is — bij elke claim een grijze "onderdeel onderweg" zou ruis zijn.
+- Twee toestanden: **Onderdeel onderweg** (oranje, met het ticketnummer erbij dat op de zending moet) en **Onderdeel ontvangen** (groen, met de datum van binnenkomst).
+- Geen nieuwe status maar een feit uit de administratie: het vinkje "ik stuur onderdelen retour" bij het indienen, en `onderdeel_ontvangen_op` dat de app zet zodra het pakket op de balie ligt. Daar was in 1.63.0 al ruimte voor gemaakt.
+
+**Opgelost: een datum verdween als er geen naam bij stond.**
+- De route toonde het tijdstip van een stap alleen samen met de naam van wie hem zette. Bij "onderdeel ontvangen" is er geen naam — er kwam een pakket binnen — en dan viel juist de datum weg die het punt is.
+
+## 1.66.0
+
+**Datums volgen nu de taal van de dealer.**
+- Een Waalse dealer kreeg "22 oktober 2026" te lezen tussen verder Franse tekst, op elf plekken in het portaal — ingediend op, garantie tot, tijdstippen in het ticketgesprek.
+- Bewust niet via WordPress' eigen taalomschakeling: er staan op deze site geen Franse taalbestanden, dus die zou terugvallen op het Engels ("22 October 2026"). Dat is erger dan het Nederlands laten staan. Het portaal draagt al zijn eigen teksten; de maand- en dagnamen horen daarbij.
+- Acht tests, waaronder alle twaalf maanden apart — een verschoven tabel valt dan meteen op.
+
+**Dealers kunnen een bericht wegklikken.**
+- Zonder dat blijft een mededeling van vorige maand boven de tegels staan, ook als de dealer hem allang gelezen heeft.
+- Per dealer onthouden: wie het wegklikt is het kwijt, zijn collega ziet het nog gewoon. Een nieuw bericht komt er altijd weer boven.
+- Een formulier met nonce en geen kale link: wegklikken verandert iets, en dat hoort niet te gebeuren doordat een browser of mailprogramma even een adres ophaalt.
+
+**Opgelost: een verzendknop verloor zijn eigen waarde.**
+- Het gedeelde scriptje zette de verzendknop op "bezig" tijdens het versturen. Een knop die op dat moment wordt uitgeschakeld telt niet meer als verzender, waardoor zijn `name`/`value` nooit aankwam. Alle bestaande formulieren dragen hun gegevens in verborgen velden, dus dit heeft nooit iets gebroken — maar het zou de volgende die zo'n knop gebruikt stilzwijgend opbreken.
+- De knop wordt nu pas ná het versturen uitgeschakeld. Het bericht-id staat daarnaast in een verborgen veld, zodat het wegklikken niet van die subtiliteit afhangt.
+
+## 1.65.1
+- **Berichten kunnen nu in het Nederlands én het Frans.** Onder de gewone editor staat een blok "Franse vertaling" met een eigen titel en tekst. De dealer krijgt de taal die hij in het portaal heeft gekozen.
+- Het Franse veld is niet verplicht. Blijft het leeg, dan ziet een Franstalige dealer de Nederlandse tekst — een bericht dat alleen in het Nederlands bestaat is beter dan geen bericht.
+- In de berichtenlijst in wp-admin staat een kolom "Talen" (NL + FR of alleen NL), zodat in één oogopslag te zien is wat nog een vertaling mist.
+
+## 1.65.0
+
+**Homburg kan nu een bericht op de startpagina zetten, gericht op merken.**
+- De informatiestroom liep één kant op: bestanden en claims verschenen vanzelf, maar er was geen manier om iets te zéggen. Een prijswijziging of een leveringsprobleem bij één fabrikant ging per mail, en kwam daarmee bij iedereen terecht of bij niemand.
+- Te plaatsen in wp-admin onder **Berichten**. Per bericht: voor welke merken (niets aanvinken = alle dealers), het soort (Melding of Belangrijk) en een optionele datum tot wanneer het blijft staan.
+- Dezelfde merkregels als bij downloads, zodat "merk" overal hetzelfde betekent: geen merk = voor iedereen, en een dealer bij wie nog geen merken zijn ingesteld ziet alles — die mag niet per ongeluk niets meer te zien krijgen.
+- Een gewone melding is blauw, "Belangrijk" oranje: in het hele portaal de kleur van "hier moet u iets mee". Gebruik dat spaarzaam, anders valt het niet meer op.
+- Hoogstens drie berichten tegelijk. Daarboven wordt het een nieuwsbrief en vallen de tegels eronder weg; staat er een vierde klaar, dan verdwijnt het oudste vanzelf. Dat dwingt af dat oude berichten een einddatum krijgen in plaats van eeuwig te blijven staan.
+- Elf tests leggen de afscherming vast — dat is het stuk dat stil misgaat: er komt geen foutmelding van, je ziet alleen te veel of te weinig.
+
+## 1.64.0 / thema 1.28.0
+
+**Eén statuspalet in plaats van twee.**
+- Bestellingen en garantieclaims hadden allebei hun eigen set statuskleuren, op verschillende momenten gekozen: "afgerond" was groen `#1a7d3a` en "goedgekeurd" groen `#1d6b2d`. Hetzelfde idee, net een andere kleur — niemand ziet het verschil, en het kost onderhoud zonder iets op te leveren.
+- Nu vijf betekenissen: neutraal, loopt, aan zet, klaar, gestopt. Elke status wijst naar een betekenis; nul losse statuskleuren over in de hele stylesheet.
+- **Twee zichtbare gevolgen.** "Wordt verwerkt" en "machine in beoordeling" zijn van oranje naar blauw gegaan: oranje is nu voorbehouden aan "u bent aan zet", en bij een lopende bestelling hoeft de dealer juist niets. En "bij fabrikant" deelt de kleur van "in behandeling" — in beide gevallen loopt het; wélke het is staat in het label.
+- Een test bewaakt dat elke status een regel hééft en dat die uit het palet komt. Dat is hier twee keer misgegaan: een nieuwe status belandde als kale tekst op het scherm.
+
+**Eén paginakop, en overal dezelfde terugweg.**
+- Acht keer stond dezelfde kop gekopieerd in de code; de Winkel had een klein kruimelpad en Mijn account alleen een titel met een streep. Nu één component.
+- Garantie en Downloads hadden twéé terugknoppen (boven én onder), de Winkel en Bestellingen geen enkele. Zeven dubbele knoppen verwijderd; de Winkel en Mijn account hebben nu ook een terugweg.
+- Mijn account zei altijd "Mijn account", ook op Bestellingen of Adressen. Nu staat het onderdeel in de titel, met "Mijn account" erboven — en die titel komt uit dezelfde lijst als het menu ernaast, dus hij klopt altijd met het tabblad dat oplicht.
+
+**Garantie is een werkblad geworden: filters links, claims in het midden, de claim rechts.**
+- Dit was een stapel secties onder elkaar: twee kaarten, een zoekveld, de claims, de machines. Om één claim te lezen moest je weg van het overzicht, en na de terugweg stond je weer bovenaan.
+- Links filtert u op Alles, Wacht op u, In behandeling, Afgehandeld of Mijn machines, met achter elke regel hoeveel het er zijn. Staat er iets op u te wachten, dan kleurt die telling. Zonder die cijfers moet u elke groep openklikken om te zien of er iets in zit.
+- Rechts opent de gekozen claim meteen: status, route, bij wie het ligt, het gesprek en het antwoordvak — zonder de lijst kwijt te raken. Het volledige ticketscherm (met route, machinekaart en bijlagen, die breedte nodig hebben) blijft bestaan en is één klik verder.
+- Dezelfde indeling als Contactpersonen in de Homburg App, zodat de dealer en de binnendienst naar hetzelfde kijken.
+
+**Lege schermen vertellen nu wat u kunt doen.**
+- "U heeft op dit moment geen lopende claims." was een grijze regel tekst. Garantie is juist waar een nieuwe dealer begint, met nul machines en nul claims; dat scherm had de schraalste lege toestand van de hele site.
+- Nu een kaart met icoon, uitleg en een knop: nog geen claims → meld eerst een machine aan; lege groep → toon alle claims; geen claim gekozen → kies er links een.
+
 ## 1.63.1
 - **De zelfcontrole sloeg vals alarm.** Direct na het live zetten meldde hij dat er twee bestanden op het inlogscherm niet meer op te halen waren. Allebei onterecht: de sfeerfoto komt van homburg-belgium.com en staat helemaal niet in onze uploadsmap, en het tweede "bestand" was een sterretje uit een stylesheet.
 - Oorzaak: de controle rekende elk pad om naar ons eigen domein. En binnen een afgeschermde map geeft alles wat er niet is een 403 in plaats van een 404 — waardoor de regel "alleen een 403 telt" die bestanden toch aanwees.

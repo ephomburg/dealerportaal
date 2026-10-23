@@ -42,12 +42,14 @@ class HDP_Blocks {
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/dealerportaal' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/downloads' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/content' );
+		register_block_type( HDP_PLUGIN_DIR . 'blocks/huisstijl' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/info-kaart' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/contact-kaart' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/portaal-kaart' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/bestelgeschiedenis' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/merken-tegel' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/garantie' );
+		register_block_type( HDP_PLUGIN_DIR . 'blocks/zijbalk' );
 	}
 
 	public static function enqueue_assets() {
@@ -56,12 +58,14 @@ class HDP_Blocks {
 			has_block( 'homburg/dealerportaal', $post )
 			|| has_block( 'homburg/downloads-pagina', $post )
 			|| has_block( 'homburg/content-pagina', $post )
+			|| has_block( 'homburg/huisstijl-pagina', $post )
 			|| has_block( 'homburg/info-kaart', $post )
 			|| has_block( 'homburg/contact-kaart', $post )
 			|| has_block( 'homburg/portaal-kaart', $post )
 			|| has_block( 'homburg/bestelgeschiedenis-pagina', $post )
 			|| has_block( 'homburg/merken-tegel', $post )
 			|| has_block( 'homburg/garantie-pagina', $post )
+			|| has_block( 'homburg/zijbalk', $post )
 		);
 
 		// Ook laden (los van de blokken hierboven) wanneer een ingelogde
@@ -113,10 +117,18 @@ class HDP_Blocks {
 			return $block_content;
 		}
 
-		if ( is_user_logged_in() && HDP_Roles::mag_portaal_zien( get_current_user_id() ) ) {
-			return $block_content;
+		if ( ! is_user_logged_in() || ! HDP_Roles::mag_portaal_zien( get_current_user_id() ) ) {
+			return '';
 		}
 
-		return '';
+		// Op het welkomscherm zelf staan de portaalkaarten niet meer als
+		// tegels: hun inhoud zit daar in het zijmenu (HDP_Zijbalk leest
+		// precies deze blokken). Ze blijven wél in de pagina staan, want
+		// daar worden ze beheerd — ze worden alleen niet getoond.
+		if ( is_front_page() && false !== strpos( $classname, 'hdp-kaarten-sectie' ) ) {
+			return '';
+		}
+
+		return $block_content;
 	}
 }

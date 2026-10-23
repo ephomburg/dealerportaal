@@ -2,7 +2,7 @@
 Theme Name: Homburg Dealerportaal
 Description: Eigen blokthema voor het Homburg-dealerportaal, gebouwd op het originele HTML-ontwerp (rood/donkergrijs, Montserrat). Geen bloggerichte onderdelen; puur gericht op de dealerportaalsite.
 Author: Homburg Machinehandel BV
-Version: 1.27.0
+Version: 1.31.0
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -57,6 +57,31 @@ html { height: 100%; }
 	background: var(--wp--preset--color--donkergrijs);
 	color: var(--wp--preset--color--wit);
 	border-bottom: 4px solid var(--wp--preset--color--homburg-rood);
+}
+
+/* De header blijft bij het scrollen bovenaan staan.
+   Niet op .hdp-site-header zelf: het sjabloon zet daar nog een
+   <header class="wp-block-template-part"> omheen, en een sticky element
+   blijft alleen staan binnen zijn eigen ouder — dat omhulsel is precies zo
+   hoog als de header, dus die zou meteen meescrollen. Daarom op het
+   omhulsel, dat alleen de header is (de footer krijgt tagName "footer"). */
+header.wp-block-template-part {
+	position: sticky;
+	top: 0;
+	/* Boven de pagina-inhoud (die blijft onder z-index 30). De panelen van
+	   "Links" en "Mijn account" zitten in de header en liften mee. */
+	z-index: 100;
+}
+
+/* Ingelogde beheerders hebben de balk van WordPress al bovenaan vastzitten;
+   daar moet de header onder blijven in plaats van eronder te verdwijnen.
+   Onder 600px staat die balk niet vast en scrollt hij gewoon weg. */
+body.admin-bar header.wp-block-template-part { top: 32px; }
+@media screen and (max-width: 782px) {
+	body.admin-bar header.wp-block-template-part { top: 46px; }
+}
+@media screen and (max-width: 600px) {
+	body.admin-bar header.wp-block-template-part { top: 0; }
 }
 .hdp-header-inner {
 	/* Zelfde 70%-inhoudsbreedte als de rest van de site (hero, kaarten,
@@ -352,6 +377,47 @@ html { height: 100%; }
 	   knoppenrij, nooit meer bovenop een knop op de regel erboven/eronder. */
 	.hdp-hoofdmenu { position: relative; row-gap: 0.6rem; }
 	.hdp-links-menu, .hdp-account-menu { position: static; }
+
+	/* Nu de header blijft staan, telt elke pixel: op een telefoon was hij
+	   176px hoog (logo op een eigen regel, knoppen op twee regels) en dat
+	   is een vijfde van het scherm dat permanent bezet blijft. Kleiner
+	   logo en minder lucht eromheen brengt dat terug naar ongeveer de helft
+	   zonder dat er iets verdwijnt. */
+	.hdp-header-inner {
+		padding-top: 0.7rem;
+		padding-bottom: 0.7rem;
+		/* En aan de zijkanten niet langer de 70%-inhoudsbreedte van de
+		   rest van de site: op een telefoon van 412px bleef daardoor maar
+		   288px over voor de knoppen, en die wrapten naar drie regels. */
+		padding-left: 1.1rem;
+		padding-right: 1.1rem;
+	}
+	.hdp-logo { height: 24px; }
+	.hdp-hoofdmenu { gap: 0.5rem; row-gap: 0.4rem; }
+
+	/* "Links" en "Mijn account" worden hier alleen hun icoontje. Samen met
+	   het hartje en de taalkeuze passen ze dan op één regel, en scheelt dat
+	   de header een hele regel — wat telt nu hij blijft staan.
+
+	   Weggeklemd en niet display:none: de knop "Mijn account" ontleent zijn
+	   naam aan deze tekst (anders dan "Links", dat een aria-label heeft).
+	   Met display:none zou een schermlezer alleen nog "link" voorlezen. */
+	.hdp-knop-tekst {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+		border: 0;
+	}
+	/* Zonder opschrift zijn de knoppen vierkantjes rond hun icoontje; de
+	   zijkantruimte die voor tekst bedoeld was, maakt ze anders onnodig
+	   breed en het aanraakvlak scheef. */
+	.hdp-links-menu-hoofd,
+	.hdp-account-split-link { padding-left: 0.75rem; padding-right: 0.75rem; }
 }
 
 /* ==========================================================================
@@ -362,25 +428,32 @@ html { height: 100%; }
 	box-sizing: border-box;
 }
 .hdp-site-footer {
-	/* Subtiele diepte i.p.v. een vlak donkergrijs — zelfde soort behandeling
-	   als de donkere balk op de winkelpagina, voor een consistente uitstraling. */
-	background:
-		radial-gradient(120% 180% at 15% 0%, rgba(255, 255, 255, 0.05), transparent 60%),
-		var(--wp--preset--color--donkergrijs);
+	/* Precies hetzelfde donkergrijs als de balk bovenaan. Er lag een lichte
+	   waas overheen voor wat diepte, maar daardoor was de voettekst
+	   zichtbaar lichter dan de header — naast elkaar op het welkomscherm
+	   viel dat meteen op. */
+	background: var(--wp--preset--color--donkergrijs);
 	color: #c9ccd2;
 	border-top: 4px solid var(--wp--preset--color--homburg-rood);
 	margin-top: 3rem;
 }
-/* Zelfde inhoudsbreedte (70%) als de rest van de pagina (hero, kaarten),
-   zodat de footer daar precies op aansluit i.p.v. een losse, gecentreerde
-   flex-rij met willekeurige witruimtes. */
+/* De bredere maat (90%) en niet de 70% van de leespagina's: op 70% waren de
+   drie kolommen zo smal dat het adres en de contactgegevens alsnog over
+   twee regels braken — precies wat deze footer zo hoog maakte. */
 .hdp-footer-boven {
-	max-width: var(--wp--style--global--content-size, 70%);
+	max-width: var(--wp--style--global--wide-size, 90%);
 	margin: 0 auto;
-	padding: 3rem 0 2.5rem;
+	/* Ingekort: dit is een werkomgeving, geen etalage. De footer was met
+	   drie centimeter lucht boven en onder bijna een eigen scherm; met
+	   dezelfde inhoud is de helft genoeg. */
+	padding: 1.7rem 0 1.4rem;
 	display: grid;
-	grid-template-columns: auto repeat(3, 1fr);
-	gap: 2.5rem;
+	/* De twee adreskolommen delen de ruimte; het logo en de knoppen nemen
+	   alleen wat ze nodig hebben. Met vier gelijke kolommen hield de
+	   knoppenkolom ruimte bezet die de adressen juist nodig hadden om op
+	   één regel te passen. */
+	grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr) auto;
+	gap: 1.8rem;
 	align-items: start;
 }
 /* auto (i.p.v. een vaste/capped breedte) zodat de kolom altijd precies om
@@ -391,10 +464,10 @@ html { height: 100%; }
 	align-self: stretch;
 	display: flex;
 	align-items: center;
-	padding-right: 2.5rem;
+	padding-right: 1.8rem;
 	border-right: 1px solid rgba(255, 255, 255, 0.14);
 }
-.hdp-footer-logo img { height: 28px; width: auto; display: block; }
+.hdp-footer-logo img { height: 22px; width: auto; display: block; }
 
 .hdp-footer-inner {
 	display: contents;
@@ -406,18 +479,24 @@ html { height: 100%; }
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
-	margin-bottom: 0.9rem;
+	margin-bottom: 0.55rem;
 }
 .hdp-footer-adres {
-	font-size: 0.85rem;
-	line-height: 1.7;
+	/* Zonder dit houdt de alinea zijn standaardmarges — ruim 25 pixels die
+	   je niet ziet maar wel de hele footer hoger maken. */
+	margin: 0;
+	font-size: 0.82rem;
+	line-height: 1.55;
 	color: #c9ccd2;
 }
+/* Naast elkaar en niet onder elkaar: samen met het adres op één regel
+   gaat elke kolom van zes regels naar drie, en dat is waar de hoogte van
+   deze footer in zat. Wordt het te smal, dan wrapt het alsnog. */
 .hdp-footer-contact {
 	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-	margin-top: 0.9rem;
+	flex-wrap: wrap;
+	gap: 0.25rem 1.1rem;
+	margin-top: 0.45rem;
 }
 .hdp-footer-contact a {
 	display: inline-flex;
@@ -432,8 +511,8 @@ html { height: 100%; }
 
 .hdp-footer-social { display: flex; gap: 0.6rem; }
 .hdp-social-icoon {
-	width: 38px;
-	height: 38px;
+	width: 32px;
+	height: 32px;
 	border-radius: 50%;
 	background: rgba(255, 255, 255, 0.08);
 	display: flex;
@@ -448,15 +527,15 @@ html { height: 100%; }
 .hdp-footer-onder {
 	border-top: 1px solid rgba(255, 255, 255, 0.12);
 	text-align: center;
-	padding: 0.9rem 1.5rem;
-	font-size: 0.75rem;
+	padding: 0.65rem 1.5rem;
+	font-size: 0.73rem;
 	color: #8f939b;
 }
 .hdp-footer-onder a { color: #8f939b; text-decoration: underline; }
 .hdp-footer-onder a:hover { color: var(--wp--preset--color--wit); }
 
 @media (max-width: 900px) {
-	.hdp-footer-boven { max-width: 90%; grid-template-columns: repeat(2, 1fr); }
+	.hdp-footer-boven { max-width: 90%; grid-template-columns: repeat(2, 1fr); gap: 1.4rem; }
 	.hdp-footer-logo {
 		grid-column: 1 / -1;
 		border-right: none;
@@ -466,8 +545,25 @@ html { height: 100%; }
 	}
 }
 @media (max-width: 600px) {
-	.hdp-footer-boven { max-width: 100%; padding: 2.5rem 1.5rem 2rem; grid-template-columns: 1fr; text-align: center; }
-	.hdp-footer-logo { justify-content: center; }
+	/* Alles onder elkaar maakt deze footer op een telefoon al snel een
+	   half scherm hoog; daarom hier minder lucht dan op een groot scherm. */
+	.hdp-footer-boven {
+		max-width: 100%;
+		padding: 1.4rem 1.2rem 1.2rem;
+		grid-template-columns: 1fr;
+		gap: 1.1rem;
+		text-align: center;
+	}
+	.hdp-footer-logo {
+		justify-content: center;
+		padding: 0 0 1rem;
+		border-right: 0;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+	}
+	.hdp-footer-logo img { height: 18px; }
+	.hdp-footer-inner h3 { margin-bottom: 0.35rem; }
+	.hdp-footer-contact { justify-content: center; gap: 0.2rem 1rem; margin-top: 0.35rem; }
 	.hdp-footer-contact a { justify-content: center; }
 	.hdp-footer-social { justify-content: center; }
+	.hdp-footer-onder { padding: 0.6rem 1.2rem; }
 }

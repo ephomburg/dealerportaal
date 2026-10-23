@@ -78,6 +78,120 @@ class HDP_I18N {
 		return $nl;
 	}
 
+	/**
+	 * Maand- en dagnamen in het Frans.
+	 *
+	 * Met de hand en niet via WordPress' eigen taalomschakeling: er staan
+	 * op deze site geen Franse taalbestanden, dus switch_to_locale() valt
+	 * terug op het Engels — "22 October 2026" in plaats van "22 octobre
+	 * 2026". Dat is erger dan het Nederlands laten staan. Het portaal
+	 * draagt zijn eigen teksten (zie teksten() hieronder); dit hoort
+	 * daarbij.
+	 */
+	const MAANDEN_FR = array(
+		'janvier',
+		'février',
+		'mars',
+		'avril',
+		'mai',
+		'juin',
+		'juillet',
+		'août',
+		'septembre',
+		'octobre',
+		'novembre',
+		'décembre',
+	);
+
+	const MAANDEN_FR_KORT = array(
+		'janv.',
+		'févr.',
+		'mars',
+		'avr.',
+		'mai',
+		'juin',
+		'juil.',
+		'août',
+		'sept.',
+		'oct.',
+		'nov.',
+		'déc.',
+	);
+
+	/** Vanaf zondag, zoals het formaatteken "w" telt. */
+	const DAGEN_FR = array(
+		'dimanche',
+		'lundi',
+		'mardi',
+		'mercredi',
+		'jeudi',
+		'vendredi',
+		'samedi',
+	);
+
+	const DAGEN_FR_KORT = array( 'dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.' );
+
+	/**
+	 * Een datum in de taal die de dealer zelf heeft gekozen.
+	 *
+	 * WordPress' eigen date_i18n() volgt de taal van de site, niet die van
+	 * de bezoeker. Daardoor stond er bij een Waalse dealer "22 oktober
+	 * 2026" tussen verder Franse tekst — op elf plekken in het portaal.
+	 *
+	 * Gebruik dit overal waar een datum aan een dealer getoond wordt.
+	 *
+	 * @param string $formaat     Formaat zoals bij date(), bijv. 'j F Y'.
+	 * @param int    $tijdstempel Unix-tijd.
+	 * @return string
+	 */
+	public static function datum( $formaat, $tijdstempel ) {
+		if ( ! self::is_frans() ) {
+			return date_i18n( $formaat, $tijdstempel );
+		}
+
+		$maand = (int) date_i18n( 'n', $tijdstempel );
+		$dag   = (int) date_i18n( 'w', $tijdstempel );
+
+		$woorden = array(
+			'F' => self::MAANDEN_FR[ $maand - 1 ],
+			'M' => self::MAANDEN_FR_KORT[ $maand - 1 ],
+			'l' => self::DAGEN_FR[ $dag ],
+			'D' => self::DAGEN_FR_KORT[ $dag ],
+		);
+
+		// Teken voor teken, zodat een al ontsnapt teken (\j) met rust
+		// gelaten wordt en alleen een echt formaatteken vervangen wordt.
+		$uit    = '';
+		$lengte = strlen( $formaat );
+
+		for ( $i = 0; $i < $lengte; $i++ ) {
+			$teken = $formaat[ $i ];
+
+			if ( '\\' === $teken ) {
+				$uit .= $teken;
+				if ( isset( $formaat[ $i + 1 ] ) ) {
+					++$i;
+					$uit .= $formaat[ $i ];
+				}
+				continue;
+			}
+
+			$uit .= isset( $woorden[ $teken ] ) ? self::letterlijk( $woorden[ $teken ] ) : $teken;
+		}
+
+		return date_i18n( $uit, $tijdstempel );
+	}
+
+	/**
+	 * Zet tekst om naar iets wat date() letterlijk overneemt.
+	 *
+	 * Zonder dit leest date() de letters in "octobre" als formaattekens en
+	 * komt er onzin uit.
+	 */
+	private static function letterlijk( $tekst ) {
+		return preg_replace( '/([A-Za-z])/', '\\\\$1', $tekst );
+	}
+
 	/** Vaste, niet-bewerkbare teksten (labels, knoppen, meldingen). */
 	public static function t( $sleutel ) {
 		$teksten = self::teksten();
@@ -151,6 +265,11 @@ class HDP_I18N {
 			'garantie_ok_claim'          => array(
 				'nl' => 'Uw claim is ingediend onder nummer %1$s. Stuurt u onderdelen retour naar Stiens? Vermeld dan %1$s op de zending — de claim kan pas behandeld worden zodra het onderdeel binnen is. Hieronder ziet u de stand van zaken.',
 				'fr' => 'Votre demande a été introduite sous le numéro %1$s. Vous renvoyez des pièces à Stiens ? Mentionnez alors %1$s sur l’envoi — la demande ne peut être traitée qu’une fois la pièce reçue. Vous voyez l’état ci-dessous.',
+			),
+			/* translators: %s is het ticketnummer. */
+			'garantie_ok_claim_onderdeel' => array(
+				'nl' => 'Uw claim is ingediend onder nummer %1$s. Stuur het onderdeel naar Stiens en vermeld %1$s op de zending — wij nemen de claim in behandeling zodra het onderdeel bij ons binnen is.',
+				'fr' => 'Votre demande a été introduite sous le numéro %1$s. Renvoyez la pièce à Stiens en mentionnant %1$s sur l’envoi — nous traitons la demande dès que la pièce nous est parvenue.',
 			),
 			'garantie_dag_in_status'     => array( 'nl' => '1 dag op deze status', 'fr' => '1 jour à ce statut' ),
 			/* translators: %d is een aantal dagen. */
@@ -286,6 +405,76 @@ class HDP_I18N {
 			/* translators: %d is het totale aantal claims. */
 			'garantie_toon_alle_claims'    => array( 'nl' => 'Alle claims tonen (%d)', 'fr' => 'Afficher toutes les demandes (%d)' ),
 
+			'groet_ochtend'           => array( 'nl' => 'Goedemorgen', 'fr' => 'Bonjour' ),
+			'groet_middag'            => array( 'nl' => 'Goedemiddag', 'fr' => 'Bonjour' ),
+			'groet_avond'             => array( 'nl' => 'Goedenavond', 'fr' => 'Bonsoir' ),
+			'zijbalk_home'            => array( 'nl' => 'Home', 'fr' => 'Accueil' ),
+			'zijbalk_bestellingen'    => array( 'nl' => 'Bestellingen', 'fr' => 'Commandes' ),
+			'zijbalk_label'           => array( 'nl' => 'Onderdelen van het dealerportaal', 'fr' => 'Sections du portail revendeur' ),
+			'zijbalk_groep_bestellen' => array( 'nl' => 'Bestellen', 'fr' => 'Commander' ),
+			'zijbalk_groep_service'   => array( 'nl' => 'Service', 'fr' => 'Service' ),
+			'zijbalk_groep_materiaal' => array( 'nl' => 'Materiaal', 'fr' => 'Documents' ),
+			'home_zoek_label'         => array( 'nl' => 'Artikelnummer of zoekterm', 'fr' => 'Numéro d’article ou mot-clé' ),
+			'home_zoek_knop'          => array( 'nl' => 'Zoek', 'fr' => 'Rechercher' ),
+			'snelbestel_kop'          => array( 'nl' => 'Artikelnummers plakken', 'fr' => 'Coller des numéros d’article' ),
+			'snelbestel_tekst'        => array( 'nl' => 'Een hele lijst in één keer in de winkelwagen.', 'fr' => 'Toute une liste dans le panier en une fois.' ),
+			'berichten_titel'         => array( 'nl' => 'Berichten van Homburg', 'fr' => 'Messages de Homburg' ),
+			/* translators: %s is de titel van het bericht. */
+			'bericht_wegklikken'      => array(
+				'nl' => 'Bericht "%s" wegklikken',
+				'fr' => 'Masquer le message "%s"',
+			),
+			'garantie_retour_onderweg'  => array( 'nl' => 'Onderdeel onderweg', 'fr' => 'Pièce en route' ),
+			/* translators: %s is het ticketnummer. */
+			'garantie_retour_vermeld'   => array(
+				'nl' => 'Vermeld %s op de zending',
+				'fr' => 'Mentionnez %s sur l\'envoi',
+			),
+			'garantie_retour_ontvangen' => array( 'nl' => 'Onderdeel ontvangen', 'fr' => 'Pièce reçue' ),
+			'garantie_behandeling_na_ontvangst' => array(
+				'nl' => 'Start zodra het onderdeel binnen is',
+				'fr' => 'Débute dès réception de la pièce',
+			),
+			'garantie_retour_kop'       => array(
+				'nl' => 'Stuur het onderdeel naar Stiens',
+				'fr' => 'Renvoyez la pièce à Stiens',
+			),
+			'garantie_retour_uitleg'    => array(
+				'nl' => 'Wij beoordelen het onderdeel zelf; op een foto is meestal niet te zien wat er mis is. Daarom nemen wij een onderdelenclaim pas in behandeling zodra het onderdeel bij ons in Stiens binnen is. Vermeld het ticketnummer op de zending — dat nummer krijgt u direct nadat u deze claim heeft ingediend.',
+				'fr' => 'Nous évaluons la pièce elle-même ; une photo ne montre généralement pas ce qui ne va pas. C’est pourquoi nous ne traitons une demande de garantie sur pièces qu’à partir du moment où la pièce nous est parvenue à Stiens. Mentionnez le numéro de ticket sur l’envoi — vous recevez ce numéro dès que vous avez introduit cette demande.',
+			),
+			/* translators: %s is het ticketnummer. */
+			'garantie_retour_uitleg_nummer' => array(
+				'nl' => 'Wij nemen deze claim in behandeling zodra het onderdeel bij ons in Stiens binnen is. Vermeld %s op de zending, dan weten wij meteen waar het pakket bij hoort.',
+				'fr' => 'Nous traitons cette demande dès que la pièce nous est parvenue à Stiens. Mentionnez %s sur l’envoi, afin que nous sachions immédiatement à quoi se rapporte le colis.',
+			),
+			'garantie_rail_claims'    => array( 'nl' => 'Claims', 'fr' => 'Demandes' ),
+			'garantie_rail_alles'     => array( 'nl' => 'Alles', 'fr' => 'Tout' ),
+			'garantie_rail_wacht'     => array( 'nl' => 'Wacht op u', 'fr' => 'En attente de vous' ),
+			'garantie_rail_loopt'     => array( 'nl' => 'In behandeling', 'fr' => 'En cours' ),
+			'garantie_rail_klaar'     => array( 'nl' => 'Afgehandeld', 'fr' => 'Traité' ),
+			'garantie_rail_aangemeld' => array( 'nl' => 'Aangemeld', 'fr' => 'Enregistrées' ),
+			'garantie_rail_toon_alles' => array( 'nl' => 'Toon alle claims', 'fr' => 'Afficher toutes les demandes' ),
+			'garantie_geen_claims_totaal' => array(
+				'nl' => 'U heeft nog geen claims ingediend.',
+				'fr' => "Vous n'avez encore introduit aucune demande.",
+			),
+			'garantie_geen_claims_filter' => array(
+				'nl' => 'Geen claims in deze groep.',
+				'fr' => 'Aucune demande dans ce groupe.',
+			),
+			'garantie_kies_een_claim' => array(
+				'nl' => 'Kies links een claim om hem hier te lezen.',
+				'fr' => 'Sélectionnez une demande à gauche pour la lire ici.',
+			),
+			'garantie_nog_niets_tekst' => array(
+				'nl' => 'U heeft nog geen claims. Meld eerst een machine aan; daarna kunt u er claims op indienen.',
+				'fr' => "Vous n'avez pas encore de demandes. Enregistrez d'abord une machine, puis vous pourrez introduire des demandes.",
+			),
+			'garantie_open_volledig'  => array(
+				'nl' => 'Open het volledige ticket',
+				'fr' => 'Ouvrir le ticket complet',
+			),
 			'garantie_mijn_machines'  => array( 'nl' => 'Mijn machines', 'fr' => 'Mes machines' ),
 			'garantie_geen_machines'  => array(
 				'nl' => 'U heeft nog geen machines aangemeld. Meld een machine aan om er claims op in te kunnen dienen.',
@@ -366,91 +555,91 @@ class HDP_I18N {
 				'fr' => "Une pièce par ligne, avec le numéro, la quantité et le montant. Indiquez s'il s'agit d'une facture Homburg ; sinon, joignez cette facture.",
 			),
 			// Garantie — keuze vooraf en onderdelenclaim
-			'garantie_kies_soort_titel' => array( 'nl' => 'Waar gaat uw claim over?', 'fr' => 'Sur quoi porte votre demande\u00a0?' ),
+			'garantie_kies_soort_titel' => array( 'nl' => 'Waar gaat uw claim over?', 'fr' => 'Sur quoi porte votre demande ?' ),
 			'garantie_kies_soort_tekst' => array(
 				'nl' => 'De twee soorten vragen om verschillende gegevens, dus kiest u eerst waar het om gaat.',
-				'fr' => 'Les deux types demandent des informations diff\u00e9rentes\u00a0; choisissez donc d\u2019abord de quoi il s\u2019agit.',
+				'fr' => 'Les deux types demandent des informations différentes ; choisissez donc d’abord de quoi il s’agit.',
 			),
 			'garantie_soort_machine_titel' => array( 'nl' => 'Een machine', 'fr' => 'Une machine' ),
 			'garantie_soort_machine_tekst' => array(
 				'nl' => 'Een defect aan een machine die u bij ons heeft aangemeld.',
-				'fr' => 'Un d\u00e9faut sur une machine que vous avez enregistr\u00e9e chez nous.',
+				'fr' => 'Un défaut sur une machine que vous avez enregistrée chez nous.',
 			),
 			'garantie_soort_machine_knop'  => array( 'nl' => 'Claim op een machine', 'fr' => 'Demande pour une machine' ),
-			'garantie_soort_onderdeel_titel' => array( 'nl' => 'Bestelde onderdelen', 'fr' => 'Pi\u00e8ces command\u00e9es' ),
+			'garantie_soort_onderdeel_titel' => array( 'nl' => 'Bestelde onderdelen', 'fr' => 'Pièces commandées' ),
 			'garantie_soort_onderdeel_tekst' => array(
 				'nl' => 'Onderdelen die defect of beschadigd aankwamen, verkeerd geleverd zijn, verkeerd besteld of niet aangekomen.',
-				'fr' => 'Des pi\u00e8ces arriv\u00e9es d\u00e9fectueuses ou endommag\u00e9es, mal livr\u00e9es, mal command\u00e9es ou non re\u00e7ues.',
+				'fr' => 'Des pièces arrivées défectueuses ou endommagées, mal livrées, mal commandées ou non reçues.',
 			),
-			'garantie_soort_onderdeel_knop'  => array( 'nl' => 'Claim op onderdelen', 'fr' => 'Demande pour des pi\u00e8ces' ),
+			'garantie_soort_onderdeel_knop'  => array( 'nl' => 'Claim op onderdelen', 'fr' => 'Demande pour des pièces' ),
 
-			'garantie_veld_onderdeel_probleem' => array( 'nl' => 'Wat is er met de onderdelen?', 'fr' => 'Que se passe-t-il avec les pi\u00e8ces\u00a0?' ),
-			'garantie_probleem_defect'                => array( 'nl' => 'Defect', 'fr' => 'D\u00e9fectueux' ),
-			'garantie_probleem_beschadigd_aangekomen' => array( 'nl' => 'Beschadigd aangekomen', 'fr' => 'Arriv\u00e9 endommag\u00e9' ),
-			'garantie_probleem_onjuist_geleverd'      => array( 'nl' => 'Onjuist geleverd', 'fr' => 'Mal livr\u00e9' ),
-			'garantie_probleem_onjuist_besteld'       => array( 'nl' => 'Onjuist besteld', 'fr' => 'Mal command\u00e9' ),
-			'garantie_probleem_niet_ontvangen'        => array( 'nl' => 'Niet ontvangen', 'fr' => 'Non re\u00e7u' ),
+			'garantie_veld_onderdeel_probleem' => array( 'nl' => 'Wat is er met de onderdelen?', 'fr' => 'Que se passe-t-il avec les pièces ?' ),
+			'garantie_probleem_defect'                => array( 'nl' => 'Defect', 'fr' => 'Défectueux' ),
+			'garantie_probleem_beschadigd_aangekomen' => array( 'nl' => 'Beschadigd aangekomen', 'fr' => 'Arrivé endommagé' ),
+			'garantie_probleem_onjuist_geleverd'      => array( 'nl' => 'Onjuist geleverd', 'fr' => 'Mal livré' ),
+			'garantie_probleem_onjuist_besteld'       => array( 'nl' => 'Onjuist besteld', 'fr' => 'Mal commandé' ),
+			'garantie_probleem_niet_ontvangen'        => array( 'nl' => 'Niet ontvangen', 'fr' => 'Non reçu' ),
 
-			'garantie_veld_klacht_onderdeel' => array( 'nl' => 'Toelichting', 'fr' => 'Pr\u00e9cisions' ),
-			'garantie_veld_factuurnummer'      => array( 'nl' => 'Homburg-factuurnummer', 'fr' => 'Num\u00e9ro de facture Homburg' ),
+			'garantie_veld_klacht_onderdeel' => array( 'nl' => 'Toelichting', 'fr' => 'Précisions' ),
+			'garantie_veld_factuurnummer'      => array( 'nl' => 'Homburg-factuurnummer', 'fr' => 'Numéro de facture Homburg' ),
 			'garantie_veld_factuurnummer_hint' => array(
 				'nl' => 'Het factuur- of ordernummer waarop deze onderdelen zijn geleverd.',
-				'fr' => 'Le num\u00e9ro de facture ou de commande sur lequel ces pi\u00e8ces ont \u00e9t\u00e9 livr\u00e9es.',
+				'fr' => 'Le numéro de facture ou de commande sur lequel ces pièces ont été livrées.',
 			),
 
-			'garantie_veld_regels'           => array( 'nl' => 'Te claimen onderdelen', 'fr' => 'Pi\u00e8ces \u00e0 d\u00e9clarer' ),
+			'garantie_veld_regels'           => array( 'nl' => 'Te claimen onderdelen', 'fr' => 'Pièces à déclarer' ),
 			'garantie_regels_hint'           => array(
 				'nl' => 'Vul alleen de regels in die u claimt. Komt een onderdeel van een andere leverancier, stuur die factuur dan mee als bijlage.',
-				'fr' => 'Ne remplissez que les lignes que vous d\u00e9clarez. Si une pi\u00e8ce provient d\u2019un autre fournisseur, joignez cette facture.',
+				'fr' => 'Ne remplissez que les lignes que vous déclarez. Si une pièce provient d’un autre fournisseur, joignez cette facture.',
 			),
-			'garantie_regel_nummer'          => array( 'nl' => 'Onderdeelnummer', 'fr' => 'Num\u00e9ro de pi\u00e8ce' ),
-			'garantie_regel_aantal'          => array( 'nl' => 'Aantal', 'fr' => 'Quantit\u00e9' ),
+			'garantie_regel_nummer'          => array( 'nl' => 'Onderdeelnummer', 'fr' => 'Numéro de pièce' ),
+			'garantie_regel_aantal'          => array( 'nl' => 'Aantal', 'fr' => 'Quantité' ),
 			'garantie_regel_bedrag'          => array( 'nl' => 'Bedrag', 'fr' => 'Montant' ),
 			'garantie_regel_herkomst'        => array( 'nl' => 'Factuur', 'fr' => 'Facture' ),
 			'garantie_regel_homburg'         => array( 'nl' => 'Homburg', 'fr' => 'Homburg' ),
 			'garantie_regel_derden'          => array( 'nl' => 'Andere leverancier', 'fr' => 'Autre fournisseur' ),
 			'garantie_regel_toevoegen'       => array( 'nl' => 'Regel toevoegen', 'fr' => 'Ajouter une ligne' ),
 			/* translators: %d is het regelnummer. */
-			'garantie_regel_nummer_van'      => array( 'nl' => 'Onderdeelnummer regel %d', 'fr' => 'Num\u00e9ro de pi\u00e8ce ligne %d' ),
+			'garantie_regel_nummer_van'      => array( 'nl' => 'Onderdeelnummer regel %d', 'fr' => 'Numéro de pièce ligne %d' ),
 			/* translators: %d is het regelnummer. */
-			'garantie_regel_aantal_van'      => array( 'nl' => 'Aantal regel %d', 'fr' => 'Quantit\u00e9 ligne %d' ),
+			'garantie_regel_aantal_van'      => array( 'nl' => 'Aantal regel %d', 'fr' => 'Quantité ligne %d' ),
 			/* translators: %d is het regelnummer. */
 			'garantie_regel_bedrag_van'      => array( 'nl' => 'Bedrag regel %d', 'fr' => 'Montant ligne %d' ),
 			/* translators: %d is het regelnummer. */
 			'garantie_regel_herkomst_van'    => array( 'nl' => 'Factuur regel %d', 'fr' => 'Facture ligne %d' ),
 
-			'garantie_veld_te_claimen_tijd'      => array( 'nl' => 'Te claimen tijd (uren)', 'fr' => 'Temps \u00e0 d\u00e9clarer (heures)' ),
+			'garantie_veld_te_claimen_tijd'      => array( 'nl' => 'Te claimen tijd (uren)', 'fr' => 'Temps à déclarer (heures)' ),
 			'garantie_veld_te_claimen_tijd_hint' => array(
 				'nl' => 'Alleen de tijd voor het opsporen en repareren van het defect. Reistijd telt niet mee.',
-				'fr' => 'Uniquement le temps consacr\u00e9 au diagnostic et \u00e0 la r\u00e9paration. Le temps de d\u00e9placement ne compte pas.',
+				'fr' => 'Uniquement le temps consacré au diagnostic et à la réparation. Le temps de déplacement ne compte pas.',
 			),
-			'garantie_veld_klantreferentie'      => array( 'nl' => 'Referentie van de klant', 'fr' => 'R\u00e9f\u00e9rence du client' ),
+			'garantie_veld_klantreferentie'      => array( 'nl' => 'Referentie van de klant', 'fr' => 'Référence du client' ),
 			'garantie_veld_klantreferentie_hint' => array(
 				'nl' => 'Bijvoorbeeld uw eigen werkordernummer, zodat u deze claim later terugvindt.',
-				'fr' => 'Par exemple votre propre num\u00e9ro de bon de travail, pour retrouver cette demande plus tard.',
+				'fr' => 'Par exemple votre propre numéro de bon de travail, pour retrouver cette demande plus tard.',
 			),
 			'garantie_veld_opmerkingen'          => array( 'nl' => 'Opmerkingen', 'fr' => 'Remarques' ),
 			'garantie_veld_opmerkingen_hint'     => array(
 				'nl' => 'Alles wat wij verder moeten weten. Bijvoorbeeld: hierover gemaild met Gerard op 11-5.',
-				'fr' => 'Tout ce que nous devons savoir en plus. Par exemple\u00a0: courriel \u00e0 Gerard le 11-5.',
+				'fr' => 'Tout ce que nous devons savoir en plus. Par exemple : courriel à Gerard le 11-5.',
 			),
-			'garantie_veld_onderdeel_retour'      => array( 'nl' => 'Ik stuur onderdelen retour naar Stiens', 'fr' => 'Je renvoie des pi\u00e8ces \u00e0 Stiens' ),
+			'garantie_veld_onderdeel_retour'      => array( 'nl' => 'Ik stuur onderdelen retour naar Stiens', 'fr' => 'Je renvoie des pièces à Stiens' ),
 			'garantie_veld_onderdeel_retour_hint' => array(
 				'nl' => 'Vermeld het ticketnummer op de zending. De claim kan pas behandeld worden zodra het onderdeel binnen is.',
-				'fr' => 'Mentionnez le num\u00e9ro de ticket sur l\u2019envoi. La demande ne peut \u00eatre trait\u00e9e qu\u2019une fois la pi\u00e8ce re\u00e7ue.',
+				'fr' => 'Mentionnez le numéro de ticket sur l’envoi. La demande ne peut être traitée qu’une fois la pièce reçue.',
 			),
 
 			'garantie_fout_geen_regels'    => array(
-				'nl' => 'Vul minstens \u00e9\u00e9n te claimen onderdeel in.',
-				'fr' => 'Indiquez au moins une pi\u00e8ce \u00e0 d\u00e9clarer.',
+				'nl' => 'Vul minstens één te claimen onderdeel in.',
+				'fr' => 'Indiquez au moins une pièce à déclarer.',
 			),
 			'garantie_fout_factuur_nodig'  => array(
 				'nl' => 'Er staat een onderdeel van een andere leverancier bij. Stuur die factuur mee als bijlage.',
-				'fr' => 'Une pi\u00e8ce provient d\u2019un autre fournisseur. Joignez cette facture.',
+				'fr' => 'Une pièce provient d’un autre fournisseur. Joignez cette facture.',
 			),
 			'garantie_fout_probleem'       => array(
 				'nl' => 'Kies wat er met de onderdelen aan de hand is.',
-				'fr' => 'Choisissez ce qui ne va pas avec les pi\u00e8ces.',
+				'fr' => 'Choisissez ce qui ne va pas avec les pièces.',
 			),
 
 			'garantie_veld_fotos'        => array( 'nl' => "Foto's", 'fr' => 'Photos' ),

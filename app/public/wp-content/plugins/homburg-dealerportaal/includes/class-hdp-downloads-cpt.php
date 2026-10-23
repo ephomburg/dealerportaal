@@ -102,7 +102,8 @@ class HDP_Downloads_CPT {
 		<p>
 			<strong>Categorie</strong><br>
 			<label><input type="radio" name="hdp_categorie" value="download" <?php checked( 'download', $categorie ); ?>> Download (prijslijst, handleiding, e.d.)</label><br>
-			<label><input type="radio" name="hdp_categorie" value="content" <?php checked( 'content', $categorie ); ?>> Content (voor social media/advertenties)</label>
+			<label><input type="radio" name="hdp_categorie" value="content" <?php checked( 'content', $categorie ); ?>> Content (voor social media/advertenties)</label><br>
+			<label><input type="radio" name="hdp_categorie" value="huisstijl" <?php checked( 'huisstijl', $categorie ); ?>> Huisstijl (logo's, kleuren, lettertypen)</label>
 		</p>
 		<p>
 			<label for="hdp_merk"><strong>Merk</strong></label><br>
@@ -188,10 +189,14 @@ class HDP_Downloads_CPT {
 		return ( time() - (int) $toegevoegd ) < ( self::NIEUW_DAGEN * DAY_IN_SECONDS );
 	}
 
+	/** De categorieën die een bestand kan hebben. */
+	const CATEGORIEEN = array( 'download', 'content', 'huisstijl' );
+
 	/** Bestaande downloads van vóór dit onderscheid hebben geen meta; die tellen als 'download'. */
 	public static function get_categorie( $post_id ) {
 		$waarde = get_post_meta( $post_id, '_hdp_categorie', true );
-		return 'content' === $waarde ? 'content' : 'download';
+
+		return in_array( $waarde, self::CATEGORIEEN, true ) ? $waarde : 'download';
 	}
 
 	public static function render_meta_box( $post ) {
@@ -235,7 +240,8 @@ class HDP_Downloads_CPT {
 		}
 
 		if ( isset( $_POST['hdp_rechten_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hdp_rechten_nonce'] ) ), 'hdp_rechten_save' ) ) {
-			$categorie = isset( $_POST['hdp_categorie'] ) && 'content' === $_POST['hdp_categorie'] ? 'content' : 'download';
+			$gekozen   = isset( $_POST['hdp_categorie'] ) ? sanitize_key( wp_unslash( $_POST['hdp_categorie'] ) ) : '';
+			$categorie = in_array( $gekozen, self::CATEGORIEEN, true ) ? $gekozen : 'download';
 			update_post_meta( $post_id, '_hdp_categorie', $categorie );
 
 			update_post_meta( $post_id, '_hdp_merk', isset( $_POST['hdp_merk'] ) ? sanitize_text_field( wp_unslash( $_POST['hdp_merk'] ) ) : '' );
@@ -343,7 +349,12 @@ class HDP_Downloads_CPT {
 
 	public static function column_content( $column, $post_id ) {
 		if ( 'hdp_categorie' === $column ) {
-			echo 'content' === self::get_categorie( $post_id ) ? 'Content' : 'Download';
+			$namen = array(
+				'download'  => 'Download',
+				'content'   => 'Content',
+				'huisstijl' => 'Huisstijl',
+			);
+			echo esc_html( $namen[ self::get_categorie( $post_id ) ] );
 			return;
 		}
 

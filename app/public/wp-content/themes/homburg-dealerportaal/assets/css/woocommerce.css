@@ -1031,6 +1031,17 @@ ul.products:not(.hdp-lijst-weergave) .hdp-card__brand--cat { display: none; }
 	.hdp-lijst-weergave .hdp-card__aantal { grid-area: aantal; margin-top: 0.3rem; }
 	.hdp-lijst-weergave .hdp-card__btn.button { grid-area: knop; margin-top: 0.3rem; }
 }
+/* De compacte paginakop binnen Mijn account: dezelfde onderdelen als op de
+   andere portaalpagina's, maar zonder de brede band — WooCommerce bouwt
+   deze pagina zelf op en de kop staat binnen die wrapper. */
+.hdp-paginakop-compact {
+	flex-basis: 100%;
+	margin: 0 0 1.6rem;
+	padding-bottom: 1.1rem;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+}
+.hdp-paginakop-compact .hdp-welkom-inner { padding: 0; max-width: none; }
+
 /* Merklabel op de losse productpagina (hook homburg_wc_merk_op_productpagina). */
 .hdp-wc-merk {
 	display: inline-block;

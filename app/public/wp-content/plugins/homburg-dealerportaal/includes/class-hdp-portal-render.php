@@ -19,7 +19,7 @@ class HDP_Portal_Render {
 		ob_start();
 
 		if ( is_user_logged_in() ) {
-			self::render_portal_content( $a );
+			self::render_portal_content();
 		} else {
 			HDP_Login::render_login( HDP_Login::login_foutmelding(), $a );
 		}
@@ -27,7 +27,7 @@ class HDP_Portal_Render {
 		return ob_get_clean();
 	}
 
-	private static function render_portal_content( $a ) {
+	private static function render_portal_content() {
 		$user = wp_get_current_user();
 
 		if ( ! HDP_Roles::mag_portaal_zien( $user->ID ) ) {
@@ -52,19 +52,69 @@ class HDP_Portal_Render {
 			return;
 		}
 
-		$portaal_intro = HDP_I18N::kies( $a['portaalIntro'], $a['portaalIntroFr'] );
 		?>
-		<div class="hdp-hero-nieuw alignfull" style="background-image:url('<?php echo esc_url( $a['heroAfbeelding'] ); ?>')">
-			<div class="hdp-hero-plaat">
-				<h1><?php echo esc_html( HDP_I18N::t( 'welkom_prefix' ) ); ?> <?php echo esc_html( $user->display_name ); ?></h1>
-				<p><?php echo esc_html( $portaal_intro ); ?></p>
-			</div>
-		</div>
-		<div class="hdp-portaal alignfull">
+		<div class="hdp-welkomscherm">
+			<?php self::render_welkomkop( $user ); ?>
+			<?php // Berichten van Homburg staan bovenaan: een mededeling die je pas tegenkomt nadat je ergens heen geklikt hebt, is te laat. ?>
+			<?php HDP_Berichten::render(); ?>
 			<?php self::render_nieuw_melding(); ?>
 			<?php HDP_Herbestellen::render(); ?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * De kop van het welkomscherm: groet, datum en een zoekveld.
+	 *
+	 * Verving de paginabrede foto. Die foto nam driehonderd pixels van het
+	 * eerste scherm in beslag en vertelde niets; een dealer die inlogt wil
+	 * weten waar hij is, welke dag het is en waar hij iets kan zoeken.
+	 *
+	 * @param WP_User $user De ingelogde dealer.
+	 */
+	private static function render_welkomkop( $user ) {
+		// Via de lokale tijd als tekst en niet via current_time('timestamp'):
+		// dat laatste is afgeraden, en dit levert hetzelfde soort tijdstempel
+		// op als overal elders in deze code (strtotime op een datumtekst),
+		// waar HDP_I18N::datum() op rekent.
+		$nu = strtotime( current_time( 'mysql' ) );
+		?>
+		<div class="hdp-welkomkop">
+			<div class="hdp-welkomkop-tekst">
+				<h1><?php echo esc_html( self::groet( $nu ) ); ?>, <?php echo esc_html( $user->display_name ); ?></h1>
+				<p class="hdp-welkomkop-datum"><?php echo esc_html( HDP_I18N::datum( 'l j F Y', $nu ) ); ?></p>
+			</div>
+			<?php if ( function_exists( 'wc_get_page_permalink' ) ) : ?>
+				<form class="hdp-welkomkop-zoek" role="search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+					<label for="hdp-home-zoek" class="hdp-vh"><?php echo esc_html( HDP_I18N::t( 'home_zoek_label' ) ); ?></label>
+					<input id="hdp-home-zoek" type="search" name="s" placeholder="<?php echo esc_attr( HDP_I18N::t( 'home_zoek_label' ) ); ?>">
+					<?php // Zonder dit zoekt WordPress door berichten en pagina's heen; hier gaat het altijd om artikelen. ?>
+					<input type="hidden" name="post_type" value="product">
+					<button type="submit"><?php echo esc_html( HDP_I18N::t( 'home_zoek_knop' ) ); ?></button>
+				</form>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Goedemorgen / goedemiddag / goedenavond.
+	 *
+	 * Met eigen woorden en niet via de taalbestanden van WordPress: die
+	 * bestaan in dit project niet in het Frans, dus alle vertaling loopt
+	 * via HDP_I18N.
+	 *
+	 * @param int $tijdstip Tijdstempel in de tijdzone van de site.
+	 * @return string
+	 */
+	private static function groet( $tijdstip ) {
+		$uur = (int) wp_date( 'G', $tijdstip );
+
+		if ( $uur < 12 ) {
+			return HDP_I18N::t( 'groet_ochtend' );
+		}
+
+		return $uur < 18 ? HDP_I18N::t( 'groet_middag' ) : HDP_I18N::t( 'groet_avond' );
 	}
 
 	/**

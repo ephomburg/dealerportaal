@@ -14,11 +14,11 @@
 		},
 		"titel": {
 			"type": "string",
-			"default": "Content voor dealers"
+			"default": "Content"
 		},
 		"titelFr": {
 			"type": "string",
-			"default": "Contenu pour revendeurs"
+			"default": "Contenu"
 		},
 		"omschrijving": {
 			"type": "string",

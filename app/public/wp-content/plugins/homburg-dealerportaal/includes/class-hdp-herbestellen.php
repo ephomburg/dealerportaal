@@ -43,8 +43,30 @@ class HDP_Herbestellen {
 						<a class="hdp-btn hdp-btn-klein hdp-btn-vol" href="<?php echo esc_url( add_query_arg( 'add-to-cart', $product->get_id(), wc_get_cart_url() ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'herbestellen_knop' ) ); ?></a>
 					</article>
 				<?php endforeach; ?>
+				<?php self::render_snelbestelkaart(); ?>
 			</div>
 		</section>
+		<?php
+	}
+
+	/**
+	 * Een kaart achter de herbestelde artikelen: een hele lijst
+	 * artikelnummers in één keer plakken.
+	 *
+	 * Vult meteen het gat dat overbleef — wie twee artikelen herbesteld
+	 * heeft, zag een strook met twee kaartjes en daarnaast lucht — en wijst
+	 * naar de snelste manier van bestellen, die anders alleen te vinden is
+	 * voor wie het accountmenu afstruint.
+	 */
+	private static function render_snelbestelkaart() {
+		if ( ! function_exists( 'wc_get_account_endpoint_url' ) ) {
+			return;
+		}
+		?>
+		<a class="hdp-snelbestel-kaart" href="<?php echo esc_url( wc_get_account_endpoint_url( 'snelbestellen' ) ); ?>">
+			<strong><?php echo esc_html( HDP_I18N::t( 'snelbestel_kop' ) ); ?></strong>
+			<span><?php echo esc_html( HDP_I18N::t( 'snelbestel_tekst' ) ); ?></span>
+		</a>
 		<?php
 	}
 

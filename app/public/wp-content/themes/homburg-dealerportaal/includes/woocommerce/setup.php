@@ -185,14 +185,104 @@ add_filter( 'woocommerce_customer_email_verification_should_show_prompt', '__ret
  * hier niet voorkomt.
  */
 
-add_action( 'woocommerce_before_account_navigation', 'homburg_wc_myaccount_titel' );
+add_action( 'woocommerce_before_account_navigation', 'homburg_wc_myaccount_kop' );
 /**
- * "Mijn account" begon zonder eigen titel meteen met de navigatie —
- * hier alsnog een paginakop + scheidingslijn vóór navigatie/inhoud.
- * Dit hook-punt zit al binnen de <div class="woocommerce">-wrapper van de
- * shortcode, dus deze titel telt in de CSS mee als (eerste) kind van die
- * flex-rij — zie .hdp-myaccount-kop in assets/css/woocommerce.css.
+ * Dezelfde paginakop als de rest van het portaal boven Mijn account.
+ *
+ * Stond hier eerder als een losse titel binnen de WooCommerce-wrapper, en
+ * zei altijd "Mijn account" — ook als je op Bestellingen of Adressen keek.
+ * Nu staat het onderdeel waar je bent in de titel, met "Mijn account" als
+ * bovenschrift, en een terugweg naar het portaal die er helemaal niet was.
+ *
+ * Dit hook-punt zit binnen de WooCommerce-wrapper, dus de kop krijgt de
+ * compacte vorm: dezelfde onderdelen in dezelfde volgorde, zonder de brede
+ * band die op de andere pagina's over de volle breedte loopt.
  */
-function homburg_wc_myaccount_titel() {
-	echo '<div class="hdp-myaccount-kop"><h1>' . esc_html( get_the_title() ) . '</h1></div>';
+function homburg_wc_myaccount_kop() {
+	if ( ! class_exists( 'HDP_Paginakop' ) ) {
+		return;
+	}
+
+	HDP_Paginakop::render(
+		array_merge(
+			array(
+				'bovenschrift' => get_the_title(),
+				'titel'        => homburg_wc_account_onderdeel(),
+				'compact'      => true,
+			),
+			HDP_Paginakop::terug_naar_portaal()
+		)
+	);
+}
+
+/**
+ * De naam van het onderdeel waar de dealer nu is: Bestellingen, Adressen,
+ * Accountdetails. WooCommerce weet dat zelf voor zijn eigen endpoints,
+ * inclusief "Bestelling #307" bij een losse bestelling.
+ *
+ * @return string
+ */
+function homburg_wc_account_onderdeel() {
+	$endpoint = ( function_exists( 'WC' ) && WC()->query ) ? WC()->query->get_current_endpoint() : '';
+
+	// Dezelfde labels als het menu ernaast gebruikt, zodat de titel altijd
+	// overeenkomt met het tabblad dat oplicht. (Niet via
+	// wc_get_endpoint_title(): die functie bestaat in deze WooCommerce-versie
+	// niet en liet de hele accountpagina halverwege afbreken.)
+	$items = function_exists( 'wc_get_account_menu_items' ) ? wc_get_account_menu_items() : array();
+
+	// Een losse bestelling hoort bij het tabblad Bestellingen.
+	if ( 'view-order' === $endpoint ) {
+		$endpoint = 'orders';
+	}
+
+	if ( $endpoint && isset( $items[ $endpoint ] ) ) {
+		return $items[ $endpoint ];
+	}
+
+	// Laatste redmiddel: zonder titel laat de paginakop zichzelf weg, en dan
+	// staat de pagina er zonder enige kop — erger dan een algemene titel.
+	$titel = get_the_title();
+
+	return $titel ? $titel : __( 'Mijn account', 'homburg-dealerportaal-theme' );
+}
+
+add_action( 'woocommerce_before_main_content', 'homburg_wc_winkel_kop', 5 );
+/**
+ * Dezelfde paginakop boven de winkel.
+ *
+ * Daar stond een klein grijs kruimelpad ("Home / Winkel") met een kale
+ * titel eronder, en geen enkele manier om terug te komen — op elke andere
+ * portaalpagina staat die link linksboven.
+ */
+function homburg_wc_winkel_kop() {
+	if ( ! is_shop() && ! is_product_taxonomy() ) {
+		return;
+	}
+
+	if ( ! class_exists( 'HDP_Paginakop' ) ) {
+		return;
+	}
+
+	HDP_Paginakop::render(
+		array_merge(
+			array(
+				'titel' => woocommerce_page_title( false ),
+			),
+			HDP_Paginakop::terug_naar_portaal()
+		)
+	);
+}
+
+add_action( 'wp', 'homburg_wc_winkel_oude_kop_weg' );
+/**
+ * De oude titel en het kruimelpad weghalen; die zijn nu vervangen.
+ */
+function homburg_wc_winkel_oude_kop_weg() {
+	if ( ! function_exists( 'is_shop' ) || ( ! is_shop() && ! is_product_taxonomy() ) ) {
+		return;
+	}
+
+	remove_action( 'woocommerce_before_main_content', 'woocommerce_breadcrumb', 20 );
+	add_filter( 'woocommerce_show_page_title', '__return_false' );
 }
