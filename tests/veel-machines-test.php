@@ -96,6 +96,56 @@ class Veel_Machines_Test extends WP_UnitTestCase {
 		$this->assertMatchesRegularExpression( '/<option[^>]*>[^<]*SN-00042/', $html );
 	}
 
+	/* --- De lijst inkorten ---------------------------------------------- */
+
+	private function lijst( $machines ) {
+		$methode = new ReflectionMethod( 'HDP_Garantie_Render', 'render_machinelijst' );
+		$methode->setAccessible( true );
+
+		ob_start();
+		$methode->invoke( null, $machines );
+
+		return ob_get_clean();
+	}
+
+	/** Een korte lijst blijft gewoon helemaal staan. */
+	public function test_een_korte_lijst_wordt_niet_ingekort() {
+		$html = $this->lijst( $this->machines( 5 ) );
+
+		$this->assertStringNotContainsString( 'hdp-machines-ingeklapt', $html );
+		$this->assertStringNotContainsString( 'hdp-machine-verborgen', $html );
+	}
+
+	/**
+	 * Bij een lange lijst staan ze er allemaal — de zoekbalk filtert in de
+	 * browser en moet ze kunnen vinden — maar wat boven de grens uitkomt
+	 * staat ingeklapt tot iemand erom vraagt.
+	 */
+	public function test_een_lange_lijst_wordt_ingeklapt() {
+		$html = $this->lijst( $this->machines( 30 ) );
+
+		$this->assertStringContainsString( 'hdp-machines-ingeklapt', $html );
+		$this->assertSame(
+			30,
+			substr_count( $html, '<article class="hdp-machine' ),
+			'Alle machines horen in de pagina te staan, ook de ingeklapte.'
+		);
+		$this->assertSame(
+			30 - HDP_Garantie_Render::MACHINES_ZICHTBAAR,
+			substr_count( $html, 'hdp-machine-verborgen' ),
+			'Alles boven de grens hoort ingeklapt te zijn.'
+		);
+	}
+
+	public function test_de_knop_noemt_hoeveel_er_nog_volgen() {
+		$html = $this->lijst( $this->machines( 30 ) );
+
+		$this->assertStringContainsString(
+			sprintf( HDP_I18N::t( 'garantie_machines_meer' ), 30 - HDP_Garantie_Render::MACHINES_ZICHTBAAR ),
+			$html
+		);
+	}
+
 	/* --- Het aantal ronden naar de administratie ------------------------- */
 
 	/**

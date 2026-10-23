@@ -8,6 +8,22 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.76.0
+
+**Een dealer ziet zijn eigen ingediende onderdelen terug op zijn ticket** (thema 1.32.1).
+- Het portaal schreef de claimregels wel weg maar las ze nooit terug. Een dealer vulde onderdeelnummers, aantallen, bedragen en sinds kort uren in, en zag daar op zijn eigen ticket niets van — hij kon dus ook niet nagaan of hij het goed had ingevuld.
+- Ze staan er nu als tabel, met het totaalbedrag en, als ze zijn opgegeven, het totaal aantal uren. Bedragen staan in centen opgeslagen en worden als euro's getoond; het aantal telt mee in het totaal.
+- Een oudere claim zonder uren krijgt die kolom gewoon niet, in plaats van een rij streepjes.
+- Ook factuurnummer, klantreferentie en opmerkingen kwamen niet terug; die staan er nu bij.
+
+**De machinelijst wordt ingekort bij veel machines.**
+- Boven de twaalf staat de rest ingeklapt, met een knop "Toon de overige N machines". Ze staan wél allemaal in de pagina, want de zoekbalk filtert in de browser en moet ze kunnen vinden — gaat iemand zoeken, dan klapt de lijst vanzelf open.
+
+**De accountpagina's zijn opgeschoond.**
+- Er zat ruim honderd pixels lege ruimte boven de titel: de ruimte die WooCommerce voor een eigen paginakop aanhoudt, kwam bovenop die van het werkblad.
+- De regels in het accountmenu stonden veertig pixels uit elkaar door een standaardmarge van WooCommerce onder elk lijstitem.
+- Tests: 358 (was 345).
+
 ## 1.75.0
 
 **De startpagina opnieuw ingericht.**

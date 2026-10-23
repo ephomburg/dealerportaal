@@ -555,6 +555,27 @@ class HDP_Garantie {
 		);
 	}
 
+	/**
+	 * Eén te claimen onderdeel uit de administratie, met vaste sleutels.
+	 *
+	 * Die regels komen uit een JSON-kolom, dus er is geen garantie dat alle
+	 * velden erin staan — oudere claims hebben bijvoorbeeld geen uren.
+	 *
+	 * @param mixed $regel Een regel zoals hij is opgeslagen.
+	 * @return array
+	 */
+	public static function regel_uit_rij( $regel ) {
+		$regel = (array) $regel;
+
+		return array(
+			'nummer'          => isset( $regel['nummer'] ) ? (string) $regel['nummer'] : '',
+			'aantal'          => isset( $regel['aantal'] ) ? (int) $regel['aantal'] : 1,
+			'bedrag_cent'     => isset( $regel['bedrag_cent'] ) && null !== $regel['bedrag_cent'] ? (int) $regel['bedrag_cent'] : null,
+			'homburg_factuur' => ! isset( $regel['homburg_factuur'] ) || (bool) $regel['homburg_factuur'],
+			'uren'            => isset( $regel['uren'] ) && null !== $regel['uren'] ? (float) $regel['uren'] : null,
+		);
+	}
+
 	private static function claim_uit_rij( $rij ) {
 		$machine = isset( $rij['machines'] ) && is_array( $rij['machines'] ) ? $rij['machines'] : array();
 
@@ -580,6 +601,16 @@ class HDP_Garantie {
 			// Soort en probleem bepalen samen met onderdeel_retour of we een
 			// onderdeel verwachten; zie onderdeel_verwacht().
 			'soort'                  => self::claimsoort( isset( $rij['soort'] ) ? (string) $rij['soort'] : '' ),
+			// Wat de dealer zelf heeft ingevuld, kwam niet terug op zijn
+			// eigen ticket: hij vult onderdeelnummers, bedragen en uren in
+			// en zag daar daarna niets meer van.
+			'regels'                 => isset( $rij['te_claimen_onderdelen'] ) && is_array( $rij['te_claimen_onderdelen'] )
+				? array_map( 'HDP_Garantie::regel_uit_rij', $rij['te_claimen_onderdelen'] )
+				: array(),
+			'te_claimen_tijd'        => isset( $rij['te_claimen_tijd'] ) ? $rij['te_claimen_tijd'] : null,
+			'factuurnummer'          => isset( $rij['factuurnummer'] ) ? (string) $rij['factuurnummer'] : '',
+			'klantreferentie'        => isset( $rij['klantreferentie'] ) ? (string) $rij['klantreferentie'] : '',
+			'opmerkingen'            => isset( $rij['opmerkingen'] ) ? (string) $rij['opmerkingen'] : '',
 			'onderdeel_probleem'     => isset( $rij['onderdeel_probleem'] ) ? (string) $rij['onderdeel_probleem'] : '',
 			'onderdeel_retour'       => ! empty( $rij['onderdeel_retour'] ),
 			'onderdeel_ontvangen_op' => isset( $rij['onderdeel_ontvangen_op'] ) ? (string) $rij['onderdeel_ontvangen_op'] : '',

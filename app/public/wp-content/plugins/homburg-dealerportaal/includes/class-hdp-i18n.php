@@ -643,6 +643,12 @@ class HDP_I18N {
 				'nl' => 'Zoek op machine, serienummer of klant…',
 				'fr' => 'Rechercher par machine, numéro de série ou client…',
 			),
+			/* translators: %d is een aantal machines. */
+			'garantie_machines_meer'       => array( 'nl' => 'Toon de overige %d machines', 'fr' => 'Afficher les %d autres machines' ),
+			/* translators: %s is een bedrag. */
+			'garantie_regels_totaal'       => array( 'nl' => 'Totaal te claimen: %s', 'fr' => 'Total à déclarer : %s' ),
+			/* translators: %s is een aantal uren. */
+			'garantie_regels_totaal_uren'  => array( 'nl' => '· %s uur', 'fr' => '· %s heures' ),
 			'garantie_regel_uren'          => array( 'nl' => 'Uren', 'fr' => 'Heures' ),
 			/* translators: %d is het regelnummer. */
 			'garantie_regel_uren_van'      => array( 'nl' => 'Uren regel %d', 'fr' => 'Heures ligne %d' ),

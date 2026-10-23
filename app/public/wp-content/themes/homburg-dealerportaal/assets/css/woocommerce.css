@@ -1050,10 +1050,15 @@ ul.products:not(.hdp-lijst-weergave) .hdp-card__brand--cat { display: none; }
    deze pagina zelf op en de kop staat binnen die wrapper. */
 .hdp-paginakop-compact {
 	flex-basis: 100%;
-	margin: 0 0 1.6rem;
-	padding-bottom: 1.1rem;
+	margin: 0 0 1.2rem;
+	padding-bottom: 0.9rem;
 	border-bottom: 1px solid var(--wp--preset--color--rand);
 }
+/* Binnen het werkblad zat er een flinke lege strook boven de titel: de
+   kop van WooCommerce nam de ruimte van een eigen paginakop in terwijl die
+   er nu bovenaan al staat. */
+body.hdp-app-layout .hdp-paginakop-compact { margin-top: 0; }
+body.hdp-app-layout.woocommerce-account .hdp-app-inhoud > .entry-content > *:first-child { margin-top: 0; }
 .hdp-paginakop-compact .hdp-welkom-inner { padding: 0; max-width: none; }
 
 /* Merklabel op de losse productpagina (hook homburg_wc_merk_op_productpagina). */
@@ -1476,10 +1481,13 @@ body.woocommerce-account .woocommerce {
 	box-shadow: var(--hdp-wc-schaduw);
 	padding: 1rem;
 }
-.woocommerce-MyAccount-navigation ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+.woocommerce-MyAccount-navigation ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.2rem; }
+/* WooCommerce zet standaard ruimte onder elk lijstitem; in dit menu gaf dat
+   regels die veertig pixels uit elkaar stonden. */
+.woocommerce-MyAccount-navigation li { margin: 0; }
 .woocommerce-MyAccount-navigation a {
 	display: block;
-	padding: 0.6rem 0.9rem;
+	padding: 0.55rem 0.9rem;
 	border-radius: 6px;
 	color: var(--wp--preset--color--donkergrijs);
 	text-decoration: none;

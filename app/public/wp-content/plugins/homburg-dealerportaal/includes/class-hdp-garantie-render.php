@@ -422,6 +422,54 @@ class HDP_Garantie_Render {
 		<?php
 	}
 
+	/** Hoeveel machines er staan voordat de rest wordt ingeklapt. */
+	const MACHINES_ZICHTBAAR = 12;
+
+	/**
+	 * De knop die de rest van de machines uitklapt.
+	 *
+	 * @param int $totaal Hoeveel machines er in totaal zijn.
+	 */
+	private static function render_machines_meer( $totaal ) {
+		$rest = $totaal - self::MACHINES_ZICHTBAAR;
+		if ( $rest < 1 ) {
+			return;
+		}
+		?>
+		<button type="button" class="hdp-btn hdp-btn-secundair hdp-machines-meer" id="hdp-machines-meer"
+			aria-controls="hdp-machines" aria-expanded="false">
+			<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_machines_meer' ), $rest ) ); ?>
+		</button>
+		<script>
+		(function () {
+			var knop  = document.getElementById('hdp-machines-meer');
+			var lijst = document.getElementById('hdp-machines');
+			if (!knop || !lijst) { return; }
+
+			knop.addEventListener('click', function () {
+				lijst.classList.remove('hdp-machines-ingeklapt');
+				knop.setAttribute('aria-expanded', 'true');
+				knop.hidden = true;
+			});
+
+			// Zoeken hoort door de hele lijst te gaan: een machine die
+			// ingeklapt stond en wel een treffer is, moet gewoon
+			// tevoorschijn komen.
+			var zoekveld = document.getElementById('hdp-garantie-zoeken');
+			if (zoekveld) {
+				zoekveld.addEventListener('input', function () {
+					if ('' === zoekveld.value.trim()) {
+						return;
+					}
+					lijst.classList.remove('hdp-machines-ingeklapt');
+					knop.hidden = true;
+				});
+			}
+		})();
+		</script>
+		<?php
+	}
+
 	/**
 	 * Zoeken gebeurt in de browser: de lijsten zijn klein en staan al op de
 	 * pagina, dus een nieuwe serverronde per toetsaanslag zou alleen maar
@@ -560,6 +608,11 @@ class HDP_Garantie_Render {
 	 * dat dekking afloopt, en dat is nu juist het moment om nog te claimen.
 	 */
 	private static function render_machinelijst( $machines ) {
+		// Een dealer met honderd machines krijgt anders honderd kaarten
+		// achter elkaar. Ze staan er allemaal — de zoekbalk filtert in de
+		// browser en moet ze dus kunnen vinden — maar wat boven deze grens
+		// uitkomt staat ingeklapt tot iemand erom vraagt.
+		$inklappen = count( $machines ) > self::MACHINES_ZICHTBAAR;
 		?>
 		<div class="hdp-garantie-kop">
 			<h2>
@@ -571,8 +624,9 @@ class HDP_Garantie_Render {
 		<?php if ( ! $machines ) : ?>
 			<p class="hdp-gesprek-leeg"><?php echo esc_html( HDP_I18N::t( 'garantie_geen_machines' ) ); ?></p>
 		<?php else : ?>
-			<div class="hdp-machines">
-				<?php foreach ( $machines as $machine ) : ?>
+			<div class="hdp-machines<?php echo $inklappen ? ' hdp-machines-ingeklapt' : ''; ?>" id="hdp-machines">
+				<?php foreach ( $machines as $nummer => $machine ) : ?>
+					<?php $verborgen = $inklappen && $nummer >= self::MACHINES_ZICHTBAAR; ?>
 					<?php
 					$stand  = HDP_Garantie::garantiestand( $machine );
 					$lopend = count(
@@ -593,7 +647,7 @@ class HDP_Garantie_Render {
 						$balk .= ' hdp-machine-balk-bijna';
 					}
 					?>
-					<article class="hdp-machine"
+					<article class="hdp-machine<?php echo $verborgen ? ' hdp-machine-verborgen' : ''; ?>"
 						data-zoek="<?php echo esc_attr( self::zoektekst( array( $machine['machine'], $machine['serienummer'], $machine['merk'], $machine['klant'] ) ) ); ?>">
 						<?php HDP_Icons::render_icoon( 'machine', 'hdp-machine-icoon' ); ?>
 						<div class="hdp-machine-info">
@@ -644,6 +698,9 @@ class HDP_Garantie_Render {
 					</article>
 				<?php endforeach; ?>
 			</div>
+			<?php if ( $inklappen ) : ?>
+				<?php self::render_machines_meer( count( $machines ) ); ?>
+			<?php endif; ?>
 		<?php endif; ?>
 		<?php
 	}
@@ -1395,9 +1452,79 @@ class HDP_Garantie_Render {
 						<dt><?php echo esc_html( HDP_I18N::t( 'garantie_veld_onderdelen' ) ); ?></dt>
 						<dd><?php echo esc_html( $claim['onderdelen'] ); ?></dd>
 					<?php endif; ?>
+					<?php foreach ( array( 'factuurnummer', 'klantreferentie', 'opmerkingen' ) as $veld ) : ?>
+						<?php if ( ! empty( $claim[ $veld ] ) ) : ?>
+							<dt><?php echo esc_html( HDP_I18N::t( 'garantie_veld_' . $veld ) ); ?></dt>
+							<dd><?php echo esc_html( $claim[ $veld ] ); ?></dd>
+						<?php endif; ?>
+					<?php endforeach; ?>
 				</dl>
+
+				<?php self::render_ingediende_regels( $claim ); ?>
 			</div>
 		</section>
+		<?php
+	}
+
+	/**
+	 * De onderdelen die de dealer bij het indienen heeft opgegeven.
+	 *
+	 * Stonden er niet: het portaal schreef ze wel weg maar las ze nooit
+	 * terug. Een dealer vulde onderdeelnummers, bedragen en uren in en zag
+	 * daar op zijn eigen ticket niets van — en kon dus ook niet nagaan of
+	 * hij het goed had ingevuld.
+	 *
+	 * @param array $claim De claim.
+	 */
+	private static function render_ingediende_regels( $claim ) {
+		$regels = isset( $claim['regels'] ) ? $claim['regels'] : array();
+		if ( ! $regels ) {
+			return;
+		}
+
+		$met_uren = false;
+		$totaal   = 0;
+		foreach ( $regels as $regel ) {
+			if ( null !== $regel['uren'] ) {
+				$met_uren = true;
+			}
+			$totaal += (int) $regel['bedrag_cent'] * max( 1, (int) $regel['aantal'] );
+		}
+
+		$uren = HDP_Garantie::tel_uren_op( $regels );
+		?>
+		<div class="hdp-ticket-regels<?php echo $met_uren ? ' hdp-ticket-regels-uren' : ''; ?>">
+			<h4><?php echo esc_html( HDP_I18N::t( 'garantie_veld_regels' ) ); ?></h4>
+
+			<div class="hdp-ticket-regel hdp-ticket-regel-kop" aria-hidden="true">
+				<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_nummer' ) ); ?></span>
+				<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_aantal' ) ); ?></span>
+				<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_bedrag' ) ); ?></span>
+				<?php if ( $met_uren ) : ?>
+					<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_uren' ) ); ?></span>
+				<?php endif; ?>
+				<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_herkomst' ) ); ?></span>
+			</div>
+
+			<?php foreach ( $regels as $regel ) : ?>
+				<div class="hdp-ticket-regel">
+					<span class="hdp-ticket-regel-nummer"><?php echo esc_html( $regel['nummer'] ); ?></span>
+					<span><?php echo esc_html( (string) $regel['aantal'] ); ?></span>
+					<span><?php echo esc_html( null === $regel['bedrag_cent'] ? '—' : '€ ' . number_format( $regel['bedrag_cent'] / 100, 2, ',', '.' ) ); ?></span>
+					<?php if ( $met_uren ) : ?>
+						<span><?php echo esc_html( null === $regel['uren'] ? '—' : rtrim( rtrim( number_format( $regel['uren'], 2, ',', '' ), '0' ), ',' ) ); ?></span>
+					<?php endif; ?>
+					<span><?php echo esc_html( HDP_I18N::t( $regel['homburg_factuur'] ? 'garantie_regel_homburg' : 'garantie_regel_derden' ) ); ?></span>
+				</div>
+			<?php endforeach; ?>
+
+			<p class="hdp-ticket-regels-totaal">
+				<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_regels_totaal' ), '€ ' . number_format( $totaal / 100, 2, ',', '.' ) ) ); ?>
+				<?php if ( '' !== $uren ) : ?>
+					<?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_regels_totaal_uren' ), rtrim( rtrim( number_format( (float) $uren, 2, ',', '' ), '0' ), ',' ) ) ); ?>
+				<?php endif; ?>
+			</p>
+		</div>
 		<?php
 	}
 

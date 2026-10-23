@@ -547,6 +547,75 @@ body.hdp-login-actief {
 	.hdp-herbestellen-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 }
 
+/* --- De ingediende onderdelen op het ticket -------------------------- */
+/* Wat de dealer zelf invulde, kwam niet terug op zijn eigen ticket. Hier
+   staat het als rustige tabel: smalle vaste kolommen voor de getallen en de
+   omschrijving krijgt de rest. */
+
+.hdp-ticket-regels { margin-top: 1.2rem; }
+.hdp-ticket-regels h4 {
+	margin: 0 0 0.6rem;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-ticket-regel {
+	display: grid;
+	grid-template-columns: minmax(0, 1.6fr) 3.2rem minmax(0, 1fr) minmax(0, 1fr);
+	gap: 0.6rem;
+	align-items: baseline;
+	padding: 0.45rem 0;
+	border-top: 1px solid var(--wp--preset--color--rand);
+	font-size: 0.85rem;
+}
+.hdp-ticket-regels-uren .hdp-ticket-regel {
+	grid-template-columns: minmax(0, 1.6fr) 3.2rem minmax(0, 1fr) 3.2rem minmax(0, 1fr);
+}
+.hdp-ticket-regel-kop {
+	border-top: 0;
+	padding-top: 0;
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-ticket-regel-nummer {
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-weight: 700;
+	overflow-wrap: anywhere;
+}
+.hdp-ticket-regels-totaal {
+	margin: 0.6rem 0 0;
+	padding-top: 0.6rem;
+	border-top: 2px solid var(--wp--preset--color--rand);
+	font-size: 0.85rem;
+	font-weight: 700;
+}
+
+@media (max-width: 40rem) {
+	/* Vier of vijf kolommen passen niet naast elkaar op een telefoon. */
+	.hdp-ticket-regel-kop { display: none; }
+	.hdp-ticket-regel,
+	.hdp-ticket-regels-uren .hdp-ticket-regel {
+		grid-template-columns: 1fr auto;
+		row-gap: 0.1rem;
+	}
+	.hdp-ticket-regel-nummer { grid-column: 1 / -1; }
+}
+
+/* --- De machinelijst inkorten --------------------------------------- */
+/* Bij veel machines staan ze er allemaal (de zoekbalk filtert in de
+   browser en moet ze kunnen vinden), maar wat boven de grens uitkomt staat
+   ingeklapt tot iemand op de knop drukt. */
+/* Welke kaarten boven de grens vallen bepaalt PHP (MACHINES_ZICHTBAAR);
+   nth-child kan geen CSS-variabele lezen, en het getal op twee plekken
+   zetten is vragen om ze uit elkaar te laten lopen. */
+.hdp-machines-ingeklapt .hdp-machine-verborgen { display: none; }
+.hdp-machines-meer { margin-top: 1rem; }
+
 /* --- Nieuw voor u ---------------------------------------------------
    Toont de nieuwste documenten zelf. Er stond een balk die alleen meldde
    dát er iets klaarstond; dan moet een dealer nog klikken om te zien wat
@@ -3015,6 +3084,11 @@ body.hdp-app-layout.woocommerce-account .hdp-app-inhoud .woocommerce {
 	max-width: none;
 	margin-left: 0;
 	margin-right: 0;
+	/* Die lucht boven was bedoeld voor een pagina zonder werkblad eromheen.
+	   Binnen het werkblad komt hij bovenop de marge die daar al zit, en
+	   begon de titel pas honderd pixels onder de rand. */
+	padding-top: 0;
+	padding-bottom: 0;
 }
 
 body.hdp-app-layout .hdp-app-inhoud {
