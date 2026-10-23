@@ -1,0 +1,38 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "homburg/huisstijl-pagina",
+	"title": "Huisstijl & media",
+	"category": "widgets",
+	"icon": "art",
+	"description": "Toont de beveiligde bibliotheek met huisstijlbestanden — logo's, kleuren en lettertypen — voor ingelogde, goedgekeurde dealers. Niet-ingelogde bezoekers zien het inlogscherm.",
+	"textdomain": "homburg-dealerportaal",
+	"attributes": {
+		"heroAfbeelding": {
+			"type": "string",
+			"default": "https://www.homburg-belgium.com/wp-content/uploads/2023/09/Homburg-Holland-precisielandbouw-man-in-veld.jpg"
+		},
+		"titel": {
+			"type": "string",
+			"default": "Huisstijl & media"
+		},
+		"titelFr": {
+			"type": "string",
+			"default": "Identité visuelle & médias"
+		},
+		"omschrijving": {
+			"type": "string",
+			"default": "Logo's, kleuren en lettertypen van Homburg en van de merken die wij voeren — klaar voor gebruik op uw eigen site, briefpapier en advertenties."
+		},
+		"omschrijvingFr": {
+			"type": "string",
+			"default": "Logos, couleurs et polices de Homburg et des marques que nous représentons — prêts à l'emploi pour votre site, votre papier à en-tête et vos publicités."
+		}
+	},
+	"supports": {
+		"html": false,
+		"multiple": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

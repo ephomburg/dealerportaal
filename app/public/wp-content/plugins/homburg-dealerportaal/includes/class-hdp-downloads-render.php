@@ -4,52 +4,46 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Rendert de downloads- en content-pagina's: welkomstkop + de beveiligde,
- * doorzoekbare/filterbare/sorteerbare lijst (zie render_downloads_lijst()).
+ * Rendert de downloads-, content- en huisstijlpagina's: paginakop + de
+ * beveiligde, doorzoekbare/filterbare/sorteerbare lijst (zie
+ * render_downloads_lijst()).
+ *
+ * Alle drie dezelfde pagina met een andere categorie ervoor. Ze stonden
+ * eerst als drie keer hetzelfde blok code naast elkaar; bij de derde was
+ * dat niet meer vol te houden.
  */
 class HDP_Downloads_Render {
 
 	public static function render_downloads_pagina( $a ) {
-		$mag_zien = is_user_logged_in() && HDP_Roles::mag_portaal_zien( get_current_user_id() );
-
-		if ( ! $mag_zien ) {
-			ob_start();
-			HDP_Login::render_login( HDP_Login::login_foutmelding(), $a );
-			return ob_get_clean();
-		}
-
-		$titel        = HDP_I18N::kies( $a['titel'], $a['titelFr'] );
-		$omschrijving = HDP_I18N::kies( $a['omschrijving'], $a['omschrijvingFr'] );
-
-		ob_start();
-		?>
-		<div class="hdp-portaal alignfull">
-			<?php
-			HDP_Paginakop::render(
-				array_merge(
-					array(
-						'titel' => $titel,
-						'intro' => $omschrijving,
-					),
-					HDP_Paginakop::terug_naar_portaal()
-				)
-			);
-			?>
-			<section class="hdp-downloads">
-				<?php echo self::render_downloads_lijst( 'download' ); // phpcs:ignore WordPress.Security.EscapeOutput -- reeds ge-escaped in render_downloads_lijst(). ?>
-			</section>
-		</div>
-		<?php
-		return ob_get_clean();
+		return self::render_categorie_pagina( $a, 'download' );
 	}
 
 	/**
-	 * Bibliotheek met content voor social media/advertenties — zelfde
-	 * opzet als de downloadspagina (zoeken, merk-/regiofilter, beveiligd
-	 * endpoint), maar dan gefilterd op categorie "content" i.p.v.
-	 * "download". Zie render_downloads_lijst().
+	 * Bibliotheek met content voor social media/advertenties — zelfde opzet
+	 * als de downloadspagina, gefilterd op categorie "content".
 	 */
 	public static function render_content_pagina( $a ) {
+		return self::render_categorie_pagina( $a, 'content' );
+	}
+
+	/**
+	 * De huisstijl: logo's, kleuren en lettertypen van Homburg en van de
+	 * merken die we voeren. Dealers zetten het Homburg-logo op hun eigen
+	 * site, briefpapier en advertenties; tot nu toe moesten ze daarvoor
+	 * mailen of een bestand uit een oude nieuwsbrief vissen.
+	 */
+	public static function render_huisstijl_pagina( $a ) {
+		return self::render_categorie_pagina( $a, 'huisstijl' );
+	}
+
+	/**
+	 * De pagina zelf. Buiten de categorie is er niets verschillends aan.
+	 *
+	 * @param array  $a         Blokattributen.
+	 * @param string $categorie 'download', 'content' of 'huisstijl'.
+	 * @return string
+	 */
+	private static function render_categorie_pagina( $a, $categorie ) {
 		$mag_zien = is_user_logged_in() && HDP_Roles::mag_portaal_zien( get_current_user_id() );
 
 		if ( ! $mag_zien ) {
@@ -76,7 +70,7 @@ class HDP_Downloads_Render {
 			);
 			?>
 			<section class="hdp-downloads">
-				<?php echo self::render_downloads_lijst( 'content' ); // phpcs:ignore WordPress.Security.EscapeOutput -- reeds ge-escaped in render_downloads_lijst(). ?>
+				<?php echo self::render_downloads_lijst( $categorie ); // phpcs:ignore WordPress.Security.EscapeOutput -- reeds ge-escaped in render_downloads_lijst(). ?>
 			</section>
 		</div>
 		<?php
@@ -102,13 +96,16 @@ class HDP_Downloads_Render {
 	 * @return array{downloads: WP_Post[], leeg: string} leeg is '', 'geen', 'taal' of 'merk'.
 	 */
 	public static function zichtbare_downloads( $categorie = 'download' ) {
-		$meta_query = 'content' === $categorie
-			? array( array( 'key' => '_hdp_categorie', 'value' => 'content' ) )
-			: array(
+		// Alleen "download" vangt ook de bestanden van vóór dit onderscheid
+		// op: die hebben geen categorie-meta en waren altijd downloads. Een
+		// nieuwe categorie mag die erfenis niet opslokken.
+		$meta_query = 'download' === $categorie
+			? array(
 				'relation' => 'OR',
 				array( 'key' => '_hdp_categorie', 'value' => 'download' ),
 				array( 'key' => '_hdp_categorie', 'compare' => 'NOT EXISTS' ),
-			);
+			)
+			: array( array( 'key' => '_hdp_categorie', 'value' => $categorie ) );
 
 		$downloads = get_posts(
 			array(

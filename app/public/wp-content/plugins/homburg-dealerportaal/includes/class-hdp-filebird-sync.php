@@ -32,7 +32,22 @@ class HDP_FileBird_Sync {
 	/** Meta-sleutel die aangeeft dat déze download door deze koppeling is aangemaakt (i.p.v. met de hand). */
 	const BRON_META = '_hdp_filebird_bron';
 
-	/** Alleen submappen van déze hoofdmap (op het hoogste niveau in FileBird) tellen mee. */
+	/**
+	 * De hoofdmappen die meetellen, en welke categorie hun inhoud krijgt.
+	 *
+	 * Alleen submappen van déze mappen (op het hoogste niveau in FileBird)
+	 * worden opgepikt; al het andere in de mediabibliotheek blijft met rust.
+	 *
+	 * Huisstijl staat bewust in een eigen hoofdmap en niet als submap van
+	 * Downloads: logo's zijn iets anders dan prijslijsten, en zo is in de
+	 * mediabibliotheek in één oogopslag te zien waar iets terechtkomt.
+	 */
+	const ROOTS = array(
+		'Downloads dealerportaal' => 'download',
+		'Huisstijl dealerportaal' => 'huisstijl',
+	);
+
+	/** Behouden voor bestaande verwijzingen; de downloadsmap blijft de hoofdmoot. */
 	const ROOT_FOLDER_NAAM = 'Downloads dealerportaal';
 
 	public static function init() {
@@ -55,12 +70,24 @@ class HDP_FileBird_Sync {
 	}
 
 	public static function maak_mappen_indien_nodig() {
-		$root    = \FileBird\Model\Folder::newOrGet( self::ROOT_FOLDER_NAAM, 0 );
-		$root_id = is_array( $root ) ? (int) $root['id'] : (int) $root->id;
+		foreach ( self::ROOTS as $naam => $categorie ) {
+			$root    = \FileBird\Model\Folder::newOrGet( $naam, 0 );
+			$root_id = is_array( $root ) ? (int) $root['id'] : (int) $root->id;
 
-		foreach ( HDP_Downloads_CPT::merk_opties() as $merk ) {
-			foreach ( array( 'NL', 'FR', 'EN' ) as $taalcode ) {
-				\FileBird\Model\Folder::newOrGet( $merk . ' (' . $taalcode . ')', $root_id );
+			foreach ( HDP_Downloads_CPT::merk_opties() as $merk ) {
+				if ( 'huisstijl' === $categorie ) {
+					// Logo's zijn niet in één taal. Daarom hier gewoon
+					// "Väderstad" en niet "Väderstad (NL)": zonder taalcode
+					// blijft de regio leeg, en dan ziet iedere dealer het
+					// bestand — ongeacht of hij het portaal op Nederlands of
+					// Frans heeft staan.
+					\FileBird\Model\Folder::newOrGet( $merk, $root_id );
+					continue;
+				}
+
+				foreach ( array( 'NL', 'FR', 'EN' ) as $taalcode ) {
+					\FileBird\Model\Folder::newOrGet( $merk . ' (' . $taalcode . ')', $root_id );
+				}
 			}
 		}
 
@@ -97,7 +124,7 @@ class HDP_FileBird_Sync {
 			return;
 		}
 
-		list( $merk, $regio ) = $match;
+		list( $merk, $regio, $categorie ) = $match;
 
 		if ( $bestaande_id ) {
 			// Al een download voor dit bestand (met de hand of eerder door
@@ -105,6 +132,9 @@ class HDP_FileBird_Sync {
 			// de nieuwe map, titel/omschrijving met rust laten.
 			update_post_meta( $bestaande_id, '_hdp_merk', $merk );
 			update_post_meta( $bestaande_id, '_hdp_regios', $regio );
+			// Verplaatst iemand een bestand van Downloads naar Huisstijl,
+			// dan hoort het ook op die pagina terecht te komen.
+			update_post_meta( $bestaande_id, '_hdp_categorie', $categorie );
 			if ( 'trash' === get_post_status( $bestaande_id ) ) {
 				// wp_untrash_post() probeert de status van vóór het trashen
 				// terug te zetten via post-meta die niet altijd betrouwbaar
@@ -140,7 +170,7 @@ class HDP_FileBird_Sync {
 		}
 
 		update_post_meta( $download_id, '_hdp_attachment_id', $attachment_id );
-		update_post_meta( $download_id, '_hdp_categorie', 'download' );
+		update_post_meta( $download_id, '_hdp_categorie', $categorie );
 		update_post_meta( $download_id, '_hdp_merk', $merk );
 		update_post_meta( $download_id, '_hdp_regios', $regio );
 		update_post_meta( $download_id, self::BRON_META, 1 );
@@ -172,20 +202,16 @@ class HDP_FileBird_Sync {
 	 */
 	private static function match_merk_en_regio( $folder_id ) {
 		$folder = \FileBird\Model\Folder::findById( $folder_id, 'name,parent' );
-		if ( ! $folder || ! self::is_directe_submap_van_root( (int) $folder->parent ) ) {
+		if ( ! $folder ) {
+			return null;
+		}
+
+		$categorie = self::categorie_van_root( (int) $folder->parent );
+		if ( ! $categorie ) {
 			return null;
 		}
 
 		$naam = trim( (string) $folder->name );
-
-		if ( ! preg_match( '/^(.+?)\s*\((NL|FR|EN)\)$/i', $naam, $matches ) ) {
-			return null;
-		}
-
-		$merk = self::vind_merk( trim( $matches[1] ) );
-		if ( ! $merk ) {
-			return null;
-		}
 
 		$regio_per_taalcode = array(
 			'NL' => 'nl',
@@ -193,20 +219,50 @@ class HDP_FileBird_Sync {
 			'EN' => 'en',
 		);
 
-		return array( $merk, $regio_per_taalcode[ strtoupper( $matches[2] ) ] );
+		if ( preg_match( '/^(.+?)\s*\((NL|FR|EN)\)$/i', $naam, $matches ) ) {
+			$merk  = self::vind_merk( trim( $matches[1] ) );
+			$regio = $regio_per_taalcode[ strtoupper( $matches[2] ) ];
+		} else {
+			// Zonder taalcode: alleen toegestaan onder huisstijl. Een lege
+			// regio betekent "voor iedereen", en dat klopt voor een logo —
+			// maar niet voor een prijslijst, waar de taal juist uitmaakt.
+			if ( 'huisstijl' !== $categorie ) {
+				return null;
+			}
+			$merk  = self::vind_merk( $naam );
+			$regio = '';
+		}
+
+		if ( ! $merk ) {
+			return null;
+		}
+
+		return array( $merk, $regio, $categorie );
 	}
 
 	/**
-	 * Is $parent_id de hoofdmap zelf (ROOT_FOLDER_NAAM, op het hoogste
-	 * niveau van FileBird)? Zo wordt een gelijknamige map die de gebruiker
-	 * ergens anders in FileBird aanmaakt (los van deze hoofdmap) genegeerd.
+	 * Welke categorie hoort bij de hoofdmap waarvan dit de bovenliggende map
+	 * is — of null als het er geen van is.
+	 *
+	 * De map moet op het hoogste niveau staan; zo wordt een gelijknamige map
+	 * die iemand ergens anders in FileBird aanmaakt genegeerd.
+	 *
+	 * @param int $parent_id Bovenliggende map van de map waar het bestand in zit.
+	 * @return string|null 'download', 'huisstijl' of null.
 	 */
-	private static function is_directe_submap_van_root( $parent_id ) {
+	private static function categorie_van_root( $parent_id ) {
 		if ( $parent_id <= 0 ) {
-			return false;
+			return null;
 		}
+
 		$root = \FileBird\Model\Folder::findById( $parent_id, 'name,parent' );
-		return $root && 0 === (int) $root->parent && self::ROOT_FOLDER_NAAM === trim( (string) $root->name );
+		if ( ! $root || 0 !== (int) $root->parent ) {
+			return null;
+		}
+
+		$naam = trim( (string) $root->name );
+
+		return isset( self::ROOTS[ $naam ] ) ? self::ROOTS[ $naam ] : null;
 	}
 
 	/**

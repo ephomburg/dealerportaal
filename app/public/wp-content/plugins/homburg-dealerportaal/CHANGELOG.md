@@ -8,6 +8,22 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.68.0
+
+**Huisstijl & media: logo's, kleuren en lettertypen om te downloaden.**
+- Dealers zetten het Homburg-logo op hun eigen site, briefpapier en advertenties. Tot nu toe moesten ze daarvoor mailen of een bestand uit een oude nieuwsbrief vissen.
+- Derde categorie naast Downloads en Content, met een eigen pagina (`/huisstijl/`) en een tegel op de startpagina. Zelfde zoeken, filteren en beveiligde uitlevering als de andere twee.
+- **Vullen gaat via FileBird**, net als bij downloads: een nieuwe hoofdmap **"Huisstijl dealerportaal"** met een submap per merk. Een bestand dat daarin belandt, verschijnt vanzelf op de huisstijlpagina. Verplaatst u het later naar Downloads, dan verhuist het mee.
+- De submappen onder huisstijl hebben géén taalcode, anders dan bij downloads. Een logo is niet in één taal; zonder taalcode blijft de regio leeg en ziet iedere dealer het bestand, of hij het portaal nu op Nederlands of Frans heeft staan.
+- Huisstijl staat in een eigen hoofdmap en niet als submap van Downloads: logo's zijn iets anders dan prijslijsten, en zo is in de mediabibliotheek meteen te zien waar iets terechtkomt.
+
+**Opgelost bij het bouwen hiervan: een nieuwe categorie zou de oude bestanden opslokken.**
+- De query kende alleen "content" en "al het andere". Dat "al het andere" vangt ook de bestanden van vóór dit onderscheid op — die hebben geen categorie-meta en zijn altijd downloads geweest. Huisstijl viel daar doorheen en de pagina bleef leeg.
+- Nu vangt alleen "download" die erfenis op; elke andere categorie kijkt strikt naar zijn eigen meta. Vier tests bewaken dat de drie categorieën elkaars bestanden niet oppikken.
+
+**Drie keer dezelfde pagina is één pagina geworden.**
+- Downloads, content en huisstijl stonden als drie identieke blokken code naast elkaar, op één woord na. Bij de derde was dat niet meer vol te houden.
+
 ## 1.67.0
 
 **Een stap "onderdeel onderweg" in de route van een ticket.**
