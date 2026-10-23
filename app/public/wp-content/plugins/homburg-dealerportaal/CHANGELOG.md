@@ -8,6 +8,15 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.70.2
+
+**De voettekst is op de hele site een stuk compacter** (thema 1.30.1).
+- Van ongeveer 300 naar 182 pixels op een groot scherm, en van 602 naar 491 op een telefoon. De inhoud is dezelfde gebleven.
+- De hoogte zat in de adressen: die stonden over drie regels met telefoon en e-mail eronder — zes regels per kolom. Nu staat het adres op één regel en staan telefoon en e-mail naast elkaar. De alinea met het adres hield bovendien zijn standaardmarges aan, goed voor 25 onzichtbare pixels.
+- De footer gebruikt nu de brede maat (90%) in plaats van de 70% van de leespagina's; op 70% waren de kolommen zo smal dat alles alsnog over twee regels brak.
+- De lichte waas over de voettekst is weg: die maakte hem zichtbaar lichter dan de balk bovenaan, wat op het welkomscherm meteen opviel doordat ze aan elkaar grenzen.
+- De kopjes in het zijmenu zijn wit in plaats van grijs. Het verschil met de regels eronder zit in de vorm — klein, kapitalen, wijd uit elkaar, met een rood streepje — en niet in een flauwere kleur.
+
 ## 1.70.1
 
 **Opgelost: onder de voettekst van het welkomscherm bleef een lichte strook staan.**

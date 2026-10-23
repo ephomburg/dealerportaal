@@ -2716,11 +2716,14 @@ body.admin-bar .hdp-zijbalk {
 .hdp-zijbalk-kop {
 	margin: 0;
 	padding: 0 0.6rem;
-	font-size: 0.6rem;
-	font-weight: 700;
-	letter-spacing: 0.18em;
+	/* Wit, niet grijs. Het verschil met de regels eronder zit in de vorm —
+	   klein, kapitalen, wijd uit elkaar, met een rood streepje — en niet in
+	   een flauwere kleur. Grijs op donkergrijs las als uitgezet. */
+	font-size: 0.63rem;
+	font-weight: 800;
+	letter-spacing: 0.16em;
 	text-transform: uppercase;
-	color: #a9adb5;
+	color: var(--wp--preset--color--wit);
 }
 /* Een kort rood streepje onder elk kopje: dat maakt van drie grijze
    regeltjes drie herkenbare kopjes. */
@@ -2799,11 +2802,10 @@ body.admin-bar .hdp-zijbalk {
    vlak; het werkblad ligt daar als een licht paneel in, met afgeronde
    hoeken aan de kant van het menu en een rode rand eromheen.
 
-   Daarvoor moeten drie dingen weg op het welkomscherm: de rode rand onder
-   de balk en boven de voettekst (die sneed het donker in drieën), de
-   ruimte die WordPress tussen blokken zet, en de lichte waas over de
-   voettekst — daardoor was die zichtbaar lichter dan de balk en het menu,
-   terwijl het hetzelfde vlak hoort te zijn. */
+   Daarvoor moeten twee dingen weg op het welkomscherm: de rode rand onder
+   de balk en boven de voettekst (die sneed het donker in drieën), en de
+   ruimte die WordPress tussen blokken zet. De lichte waas die over de
+   voettekst lag is sitebreed verdwenen; zie het thema. */
 
 body.home .hdp-site-header {
 	border-bottom: 0;
@@ -2813,7 +2815,6 @@ body.home .hdp-site-header {
 body.home .hdp-site-footer {
 	border-top: 0;
 	margin-top: 0;
-	background: var(--wp--preset--color--donkergrijs);
 }
 
 body.home .hdp-app,
