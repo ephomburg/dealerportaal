@@ -2807,24 +2807,24 @@ body.admin-bar .hdp-zijbalk {
    ruimte die WordPress tussen blokken zet. De lichte waas die over de
    voettekst lag is sitebreed verdwenen; zie het thema. */
 
-body.home .hdp-site-header {
+body.hdp-app-layout .hdp-site-header {
 	border-bottom: 0;
 	background: var(--wp--preset--color--donkergrijs);
 }
 
-body.home .hdp-site-footer {
+body.hdp-app-layout .hdp-site-footer {
 	border-top: 0;
 	margin-top: 0;
 }
 
-body.home .hdp-app,
-body.home .hdp-app + footer.wp-block-template-part,
-body.home header.wp-block-template-part + .hdp-app {
+body.hdp-app-layout .hdp-app,
+body.hdp-app-layout .hdp-app + footer.wp-block-template-part,
+body.hdp-app-layout header.wp-block-template-part + .hdp-app {
 	margin-top: 0;
 	margin-bottom: 0;
 }
 
-body.home .hdp-app {
+body.hdp-app-layout .hdp-app {
 	background: var(--wp--preset--color--donkergrijs);
 }
 
@@ -2833,19 +2833,52 @@ body.home .hdp-app {
    donkere vlak heen breekt. Dus de pagina minstens zo hoog als het scherm
    maken, met het werkblad als het deel dat meegroeit — en de achtergrond
    zelf donker, voor wat er bij doorscrollen onder vandaan komt. */
-body.home {
+body.hdp-app-layout {
 	background: var(--wp--preset--color--donkergrijs);
 }
-body.home .wp-site-blocks {
+body.hdp-app-layout .wp-site-blocks {
 	display: flex;
 	flex-direction: column;
 	min-height: 100vh;
 }
-body.home .hdp-app {
+body.hdp-app-layout .hdp-app {
 	flex: 1 0 auto;
 }
 
-body.home .hdp-app-inhoud {
+/* Staat het menu er niet (een bezoeker zonder toegang), dan blijft alleen
+   de inhoud over: geen lege donkere kolom en geen paneel dat nergens
+   tegenaan ligt. */
+body:not(.hdp-app-layout) .hdp-app-zijbalk {
+	display: none;
+}
+
+/* De paginakop was een witte band over de volle paginabreedte, met de
+   inhoud op 15% inspringing. Binnen het werkblad klopt dat niet meer: dan
+   is het een witte kaart in een grijs vlak, met een eigen marge die niet
+   op de rest aansluit. De titel hoort hier direct op het werkblad te
+   staan, net als de begroeting op het welkomscherm. */
+.hdp-app-inhoud .hdp-welkom {
+	background: none;
+	border-bottom: 0;
+	padding: 0;
+	margin: 0 0 1.8rem;
+}
+.hdp-app-inhoud .hdp-welkom-inner {
+	padding: 0;
+}
+
+/* De accountpagina's (bestellingen, favorieten, snel bestellen) houden hun
+   eigen 70%-breedte aan en gingen daardoor binnen het werkblad nog eens
+   inspringen — met een brede lege strook rechts tot gevolg. Die regel is
+   specifieker dan de algemene hierboven, dus hier met evenveel gewicht
+   terug. */
+body.hdp-app-layout.woocommerce-account .hdp-app-inhoud .woocommerce {
+	max-width: none;
+	margin-left: 0;
+	margin-right: 0;
+}
+
+body.hdp-app-layout .hdp-app-inhoud {
 	background: var(--wp--preset--color--grijs-licht);
 	border: 4px solid var(--wp--preset--color--homburg-rood);
 	/* Rechts loopt het werkblad gewoon tegen de rand van het scherm aan;
@@ -2932,7 +2965,7 @@ body.home .hdp-app-inhoud {
 /* --- Smal scherm: het menu wordt een strook boven de inhoud ---------- */
 
 @media (max-width: 56rem) {
-	body.home .hdp-app-inhoud {
+	body.hdp-app-layout .hdp-app-inhoud {
 		/* Het menu staat hier niet naast maar boven de inhoud; een paneel
 		   met ronde hoeken aan de linkerkant zou dan nergens op slaan. */
 		border-left: 0;

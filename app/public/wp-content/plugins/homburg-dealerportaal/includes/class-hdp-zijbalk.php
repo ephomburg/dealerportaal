@@ -49,6 +49,56 @@ class HDP_Zijbalk {
 	/** De kopjes, op volgorde. */
 	const GROEPEN = array( 'bestellen', 'service', 'materiaal' );
 
+	/** Het sjabloon waarmee een pagina zegt dat ze bij het portaal hoort. */
+	const SJABLOON = 'portaalpagina';
+
+	public static function init() {
+		add_filter( 'body_class', array( __CLASS__, 'body_class' ) );
+	}
+
+	/**
+	 * Staat op deze pagina het zijmenu?
+	 *
+	 * Het sjabloon zet het omhulsel altijd neer, ook voor een bezoeker die
+	 * niet ingelogd is. Zonder deze vlag bleef daar een lege donkere kolom
+	 * van staan.
+	 *
+	 * @return bool
+	 */
+	public static function gebruikt_zijmenu() {
+		if ( ! is_user_logged_in() || ! HDP_Roles::mag_portaal_zien( get_current_user_id() ) ) {
+			return false;
+		}
+
+		if ( is_front_page() ) {
+			return true;
+		}
+
+		// De accountpagina's (bestellingen, favorieten, snel bestellen) horen
+		// net zo goed bij het portaal, maar hebben hun eigen sjabloon.
+		if ( function_exists( 'is_account_page' ) && is_account_page() ) {
+			return true;
+		}
+
+		return self::SJABLOON === get_page_template_slug();
+	}
+
+	/**
+	 * Een klasse op <body> zodat de opmaak weet dat deze pagina het
+	 * zijmenu heeft: de balk bovenaan en de voettekst zien er dan anders
+	 * uit (één doorlopend donker vlak met het werkblad erin).
+	 *
+	 * @param array $classes Klassen van WordPress.
+	 * @return array
+	 */
+	public static function body_class( $classes ) {
+		if ( self::gebruikt_zijmenu() ) {
+			$classes[] = 'hdp-app-layout';
+		}
+
+		return $classes;
+	}
+
 	/**
 	 * De onderdelen uit de portaalkaarten van de startpagina.
 	 *

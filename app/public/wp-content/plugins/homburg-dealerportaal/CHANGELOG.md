@@ -8,6 +8,17 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.71.0
+
+**Het zijmenu staat nu op alle portaalpagina's, niet alleen op het welkomscherm** (thema 1.31.0).
+- Downloads, Content, Huisstijl & media, Garantie, Bestelgeschiedenis en de accountpagina's (bestellingen, snel bestellen, favorieten, instellingen) hebben dezelfde opzet als het welkomscherm: het donkere vlak met het werkblad als afgerond paneel erin, en links het menu. Het onderdeel waar u bent licht op.
+- Er is een sjabloon "Portaalpagina (met zijmenu)" bijgekomen. Pagina's die daarop staan krijgen het menu; publieke pagina's zoals de privacyverklaring blijven ongemoeid. Een nieuwe portaalpagina zet u er zelf op via Pagina-instellingen → Sjabloon.
+- De paginatitel staat nu direct op het werkblad, zoals de begroeting op het welkomscherm. Dat was een witte band over de volle breedte, wat binnen het werkblad als een losse kaart oogde.
+- De accountpagina's hielden hun eigen smalle breedte aan en sprongen daardoor binnen het werkblad nog eens in; die vullen nu de ruimte.
+- Een bezoeker zonder toegang ziet gewoon het inlogscherm: geen lege donkere kolom.
+- De webshop (winkel, product, winkelwagen, afrekenen) is bewust ongemoeid gelaten — die heeft een eigen filterkolom.
+- Tests: 316 (was 312).
+
 ## 1.70.2
 
 **De voettekst is op de hele site een stuk compacter** (thema 1.30.1).

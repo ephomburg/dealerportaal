@@ -27,6 +27,7 @@ class Zijbalk_Test extends WP_UnitTestCase {
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
 		update_option( 'page_on_front', 0 );
+		update_option( 'show_on_front', 'posts' );
 		parent::tearDown();
 	}
 
@@ -52,6 +53,9 @@ class Zijbalk_Test extends WP_UnitTestCase {
 			)
 		);
 
+		// Allebei: zonder show_on_front blijft is_front_page() onwaar, ook al
+		// staat page_on_front goed.
+		update_option( 'show_on_front', 'page' );
 		update_option( 'page_on_front', $this->pagina_id );
 	}
 
@@ -185,6 +189,69 @@ class Zijbalk_Test extends WP_UnitTestCase {
 		HDP_Zijbalk::render();
 
 		$this->assertSame( '', trim( ob_get_clean() ) );
+	}
+
+	/* --- Op welke pagina's --------------------------------------------- */
+
+	/**
+	 * De opmaak hangt aan een klasse op <body>: met zijmenu ziet de balk
+	 * bovenaan en de voettekst er anders uit. Zonder die klasse zou op een
+	 * gewone pagina een lege donkere kolom blijven staan.
+	 */
+	public function test_het_welkomscherm_krijgt_de_app_klasse() {
+		$this->maak_startpagina(
+			array( array( 'titel' => 'Webshop', 'icoon' => 'webshop', 'url' => '/shop/' ) )
+		);
+		$this->go_to( get_permalink( $this->pagina_id ) );
+		wp_set_current_user( $this->dealer_id );
+
+		$this->assertTrue( HDP_Zijbalk::gebruikt_zijmenu() );
+		$this->assertContains( 'hdp-app-layout', HDP_Zijbalk::body_class( array() ) );
+	}
+
+	/** Een pagina met het portaalsjabloon hoort het menu ook te krijgen. */
+	public function test_een_pagina_met_het_portaalsjabloon_krijgt_het_menu() {
+		$pagina = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Downloads',
+			)
+		);
+		update_post_meta( $pagina, '_wp_page_template', HDP_Zijbalk::SJABLOON );
+
+		$this->go_to( get_permalink( $pagina ) );
+		wp_set_current_user( $this->dealer_id );
+
+		$this->assertTrue( HDP_Zijbalk::gebruikt_zijmenu() );
+	}
+
+	/** Een gewone pagina (privacyverklaring) blijft zoals hij was. */
+	public function test_een_gewone_pagina_krijgt_geen_menu() {
+		$pagina = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Privacyverklaring',
+			)
+		);
+
+		$this->go_to( get_permalink( $pagina ) );
+		wp_set_current_user( $this->dealer_id );
+
+		$this->assertFalse( HDP_Zijbalk::gebruikt_zijmenu() );
+		$this->assertNotContains( 'hdp-app-layout', HDP_Zijbalk::body_class( array() ) );
+	}
+
+	/** En een bezoeker zonder toegang nergens. */
+	public function test_zonder_toegang_nooit_de_app_klasse() {
+		$this->maak_startpagina(
+			array( array( 'titel' => 'Webshop', 'icoon' => 'webshop', 'url' => '/shop/' ) )
+		);
+		$this->go_to( get_permalink( $this->pagina_id ) );
+		wp_set_current_user( 0 );
+
+		$this->assertFalse( HDP_Zijbalk::gebruikt_zijmenu() );
 	}
 
 	public function test_een_goedgekeurde_dealer_ziet_het_menu_met_kopjes() {
