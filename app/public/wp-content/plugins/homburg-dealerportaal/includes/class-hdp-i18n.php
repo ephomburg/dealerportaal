@@ -629,6 +629,17 @@ class HDP_I18N {
 				'fr' => 'Mentionnez le numéro de ticket sur l’envoi. La demande ne peut être traitée qu’une fois la pièce reçue.',
 			),
 
+			'garantie_regel_uren'          => array( 'nl' => 'Uren', 'fr' => 'Heures' ),
+			/* translators: %d is het regelnummer. */
+			'garantie_regel_uren_van'      => array( 'nl' => 'Uren regel %d', 'fr' => 'Heures ligne %d' ),
+			'garantie_regels_hint_uren'    => array(
+				'nl' => 'Vul per onderdeel in hoeveel uur eraan is gewerkt, exclusief reistijd. Is er aan een onderdeel geen tijd besteed, vul dan 0 in.',
+				'fr' => 'Indiquez pour chaque pièce le nombre d’heures de travail, hors temps de trajet. Si aucune heure n’a été consacrée à une pièce, indiquez 0.',
+			),
+			'garantie_fout_uren_per_regel' => array(
+				'nl' => 'Vul bij elk onderdeel de uren in. Is er aan een onderdeel geen tijd besteed, vul dan 0 in.',
+				'fr' => 'Indiquez les heures pour chaque pièce. Si aucune heure n’a été consacrée à une pièce, indiquez 0.',
+			),
 			'garantie_fout_geen_regels'    => array(
 				'nl' => 'Vul minstens één te claimen onderdeel in.',
 				'fr' => 'Indiquez au moins une pièce à déclarer.',

@@ -1489,6 +1489,12 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	gap: 0.5rem;
 	align-items: center;
 }
+/* Bij een machineclaim komt de urenkolom erbij, tussen het bedrag en de
+   herkomst: twee getallen naast elkaar leest prettiger dan een getal, een
+   keuzemenu en dan weer een getal. */
+.hdp-claimregels-met-uren .hdp-claimregel {
+	grid-template-columns: minmax(0, 2fr) 4.5rem minmax(0, 1fr) 4.5rem minmax(0, 1.2fr);
+}
 .hdp-claimregel-kop {
 	font-size: 0.72rem;
 	font-weight: 700;

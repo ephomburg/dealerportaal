@@ -8,6 +8,16 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.72.0
+
+**Bij een machineclaim staan de uren nu per onderdeel, en dat is verplicht.**
+- Er was één veld "te claimen tijd" voor de hele claim. Daarmee kwam alle tijd op één hoop en viel achteraf niet meer te zien waar hij aan op was gegaan — niet bij ons en niet bij de fabrikant.
+- De regels "te claimen onderdelen" hebben er een kolom Uren bij gekregen, tussen het bedrag en de herkomst. Elke ingevulde regel moet een urenopgave hebben; is er aan een onderdeel geen tijd besteed, dan vult de dealer 0 in. Niets invullen levert een duidelijke melding op en houdt de claim tegen.
+- Het losse veld voor de hele claim is bij een machineclaim vervallen — twee plekken waar tijd staat is er één te veel. Het totaal gaat nog steeds mee naar de claimadministratie, maar wordt opgeteld uit de regels, zodat het nooit iets anders kan zeggen dan wat eronder staat.
+- Een komma als decimaalteken werkt (0,25 uur); negatieve uren worden 0.
+- Bij een onderdelenclaim verandert er niets: die gaat over geleverde onderdelen en niet over werkuren, en houdt het losse veld.
+- Tests: 332 (was 319).
+
 ## 1.71.2
 
 **Kortere paginatitels: "Downloads" en "Content" in plaats van "Downloads voor dealers" en "Content voor dealers".**

@@ -733,24 +733,32 @@ class HDP_Garantie_Render {
 	/**
 	 * De regels van "te claimen onderdelen".
 	 *
-	 * Vier kolommen per regel, en een paar lege regels klaar. De herkomst is
-	 * een keuzemenu en geen vinkje: een vinkje dat uit staat stuurt niets
-	 * mee, waardoor de rijtjes niet meer gelijk lopen en bedrag 2 bij
-	 * onderdeel 3 belandt.
+	 * Vier kolommen per regel, en bij een machineclaim vijf: daar staan de
+	 * uren per onderdeel erbij. Eén totaal voor de hele claim zei niets
+	 * over wat er aan wélk onderdeel is gedaan.
 	 *
-	 * @param array $eerder Wat er na een afgekeurde invoer al stond.
+	 * De herkomst is een keuzemenu en geen vinkje: een vinkje dat uit staat
+	 * stuurt niets mee, waardoor de rijtjes niet meer gelijk lopen en bedrag
+	 * 2 bij onderdeel 3 belandt.
+	 *
+	 * @param array $eerder    Wat er na een afgekeurde invoer al stond.
+	 * @param bool  $met_uren  Of de urenkolom erbij hoort.
 	 */
-	private static function render_claimregels( $eerder ) {
+	private static function render_claimregels( $eerder, $met_uren = false ) {
 		$eerder = is_array( $eerder ) ? array_values( $eerder ) : array();
 		// Altijd een lege regel onderaan om in te vullen, en minstens drie.
 		$aantal = max( 3, count( $eerder ) + 1 );
+		$hint   = $met_uren ? 'garantie_regels_hint_uren' : 'garantie_regels_hint';
 		?>
-		<span class="hdp-veld-hint"><?php echo esc_html( HDP_I18N::t( 'garantie_regels_hint' ) ); ?></span>
-		<div class="hdp-claimregels" id="hdp-claimregels">
+		<span class="hdp-veld-hint"><?php echo esc_html( HDP_I18N::t( $hint ) ); ?></span>
+		<div class="hdp-claimregels<?php echo $met_uren ? ' hdp-claimregels-met-uren' : ''; ?>" id="hdp-claimregels">
 			<div class="hdp-claimregel hdp-claimregel-kop" aria-hidden="true">
 				<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_nummer' ) ); ?></span>
 				<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_aantal' ) ); ?></span>
 				<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_bedrag' ) ); ?></span>
+				<?php if ( $met_uren ) : ?>
+					<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_uren' ) ); ?></span>
+				<?php endif; ?>
 				<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_herkomst' ) ); ?></span>
 			</div>
 			<?php for ( $i = 0; $i < $aantal; $i++ ) : ?>
@@ -759,10 +767,13 @@ class HDP_Garantie_Render {
 				$nummer = isset( $regel['nummer'] ) ? $regel['nummer'] : '';
 				$stuks  = isset( $regel['aantal'] ) ? $regel['aantal'] : '';
 				// Opgeslagen in centen; hier weer als "1021,31" in het veld.
-				$bedrag  = isset( $regel['bedrag_cent'] ) && null !== $regel['bedrag_cent']
+				$bedrag = isset( $regel['bedrag_cent'] ) && null !== $regel['bedrag_cent']
 					? number_format( $regel['bedrag_cent'] / 100, 2, ',', '' )
 					: '';
-				$derden  = isset( $regel['homburg_factuur'] ) && ! $regel['homburg_factuur'];
+				$derden = isset( $regel['homburg_factuur'] ) && ! $regel['homburg_factuur'];
+				// 0 is een geldig antwoord (onderdeel geleverd, geen tijd aan
+				// besteed), dus niet op leegheid maar op null controleren.
+				$uren    = isset( $regel['uren'] ) && null !== $regel['uren'] ? $regel['uren'] : '';
 				$regelnr = $i + 1;
 				?>
 				<div class="hdp-claimregel">
@@ -778,6 +789,13 @@ class HDP_Garantie_Render {
 						<span class="hdp-vh"><?php printf( esc_html( HDP_I18N::t( 'garantie_regel_bedrag_van' ) ), (int) $regelnr ); ?></span>
 						<input type="text" inputmode="decimal" name="onderdeel_bedrag[]" value="<?php echo esc_attr( $bedrag ); ?>" placeholder="0,00">
 					</label>
+					<?php if ( $met_uren ) : ?>
+						<label>
+							<span class="hdp-vh"><?php printf( esc_html( HDP_I18N::t( 'garantie_regel_uren_van' ) ), (int) $regelnr ); ?></span>
+							<?php // Geen "required": een lege regel onderaan hoort niet tegengehouden te worden. De controle gebeurt bij het indienen, op de regels die daadwerkelijk ingevuld zijn. ?>
+							<input type="number" min="0" step="0.25" name="onderdeel_uren[]" value="<?php echo esc_attr( $uren ); ?>" placeholder="0">
+						</label>
+					<?php endif; ?>
 					<label>
 						<span class="hdp-vh"><?php printf( esc_html( HDP_I18N::t( 'garantie_regel_herkomst_van' ) ), (int) $regelnr ); ?></span>
 						<select name="onderdeel_herkomst[]">
@@ -899,7 +917,7 @@ class HDP_Garantie_Render {
 										accept="<?php echo esc_attr( self::toegestane_bestanden() ); ?>">
 									<span class="hdp-veld-hint"><?php echo esc_html( HDP_I18N::t( 'claim' === $soort ? 'garantie_fotos_hint' : 'garantie_bijlagen_hint' ) ); ?></span>
 								<?php elseif ( 'regels' === $veld['type'] ) : ?>
-									<?php self::render_claimregels( HDP_Garantie_Formulier::eerder( 'regels', array() ) ); ?>
+									<?php self::render_claimregels( HDP_Garantie_Formulier::eerder( 'regels', array() ), ! empty( $veld['uren'] ) ); ?>
 								<?php elseif ( 'probleem' === $veld['type'] ) : ?>
 									<select id="<?php echo esc_attr( $veld_id ); ?>" name="<?php echo esc_attr( $naam ); ?>" required>
 										<option value=""><?php echo esc_html( HDP_I18N::t( 'garantie_kies' ) ); ?></option>

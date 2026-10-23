@@ -157,6 +157,13 @@ class HDP_Garantie_Formulier {
 			self::terug_met_fout( 'claim', HDP_I18N::t( 'garantie_fout_geen_regels' ), $waarden, $terug );
 		}
 
+		// Bij een machineclaim horen de uren per onderdeel te staan. Zonder
+		// die eis belandt alle tijd op één hoop en valt achteraf niet meer
+		// te zien waar hij aan op is gegaan.
+		if ( HDP_Garantie::SOORT_MACHINE === $soort && self::mist_uren( $waarden['regels'] ) ) {
+			self::terug_met_fout( 'claim', HDP_I18N::t( 'garantie_fout_uren_per_regel' ), $waarden, $terug );
+		}
+
 		// Onderdelen die niet van een Homburg-factuur komen, kunnen hier niet
 		// nagekeken worden; zonder de factuur van de leverancier valt er niets
 		// te claimen. Dus: dan moet er een bijlage mee.
@@ -223,6 +230,7 @@ class HDP_Garantie_Formulier {
 		$aantallen = self::lijst( 'onderdeel_aantal' );
 		$bedragen  = self::lijst( 'onderdeel_bedrag' );
 		$herkomst  = self::lijst( 'onderdeel_herkomst' );
+		$uren      = self::lijst( 'onderdeel_uren' );
 
 		$regels = array();
 		foreach ( $nummers as $i => $nummer ) {
@@ -233,15 +241,31 @@ class HDP_Garantie_Formulier {
 
 			$aantal = isset( $aantallen[ $i ] ) ? (int) $aantallen[ $i ] : 1;
 
+			// null en niet 0: "niets ingevuld" is iets anders dan "nul uur
+			// aan gewerkt", en op dat verschil wordt verderop gecontroleerd.
+			$dit_uur = isset( $uren[ $i ] ) ? trim( (string) $uren[ $i ] ) : '';
+
 			$regels[] = array(
 				'nummer'          => $nummer,
 				'aantal'          => max( 1, $aantal ),
 				'bedrag_cent'     => self::bedrag( isset( $bedragen[ $i ] ) ? $bedragen[ $i ] : '' ),
 				'homburg_factuur' => 'derden' !== ( isset( $herkomst[ $i ] ) ? $herkomst[ $i ] : 'homburg' ),
+				'uren'            => '' === $dit_uur ? null : max( 0.0, (float) str_replace( ',', '.', $dit_uur ) ),
 			);
 		}
 
 		return $regels;
+	}
+
+	/** Of er een regel bij zit waar de uren niet zijn ingevuld. */
+	private static function mist_uren( $regels ) {
+		foreach ( (array) $regels as $regel ) {
+			if ( ! isset( $regel['uren'] ) || null === $regel['uren'] ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/** Of er minstens één regel van een andere leverancier bij zit. */

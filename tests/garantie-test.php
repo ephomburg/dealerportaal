@@ -831,10 +831,15 @@ class Garantie_Test extends WP_UnitTestCase {
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
-		foreach ( array( 'te_claimen_tijd', 'klantreferentie', 'opmerkingen', 'onderdeel_retour' ) as $veld ) {
+		foreach ( array( 'klantreferentie', 'opmerkingen', 'onderdeel_retour' ) as $veld ) {
 			$this->assertStringContainsString( 'hdp-claim-' . $veld, $html, "Veld $veld ontbreekt." );
 		}
 		$this->assertStringContainsString( 'onderdeel_nummer[]', $html );
+
+		// De tijd wordt hier per onderdeel gevraagd en niet meer als één
+		// getal voor de hele claim; zie test_uren_staan_per_onderdeel().
+		$this->assertStringContainsString( 'onderdeel_uren[]', $html );
+		$this->assertStringNotContainsString( 'hdp-claim-te_claimen_tijd', $html );
 	}
 
 	public function test_velden_verschillen_per_claimsoort() {
@@ -847,10 +852,15 @@ class Garantie_Test extends WP_UnitTestCase {
 		$this->assertNotContains( 'onderdeel_probleem', $machine );
 
 		// Wat allebei vragen, blijft allebei vragen.
-		foreach ( array( 'klacht', 'regels', 'te_claimen_tijd', 'opmerkingen', 'fotos' ) as $gedeeld ) {
+		foreach ( array( 'klacht', 'regels', 'opmerkingen', 'fotos' ) as $gedeeld ) {
 			$this->assertContains( $gedeeld, $machine );
 			$this->assertContains( $gedeeld, $onderdeel );
 		}
+
+		// De te claimen tijd staat bij een machineclaim per onderdeel in de
+		// regels; alleen de onderdelenclaim vraagt nog om één totaal.
+		$this->assertNotContains( 'te_claimen_tijd', $machine );
+		$this->assertContains( 'te_claimen_tijd', $onderdeel );
 	}
 
 	public function test_claimformulier_vraagt_niet_wat_de_machine_al_weet() {

@@ -162,11 +162,13 @@ class HDP_Garantie {
 			// stand op het moment van de klacht, niet die bij aanmelding.
 			'hectares'         => array( 'type' => 'number', 'verplicht' => false ),
 			'klacht'           => array( 'type' => 'textarea', 'verplicht' => true, 'hint' => true ),
-			'regels'           => array( 'type' => 'regels', 'verplicht' => false ),
+			// Met uren per regel: zie render_claimregels(). Eén totaal voor
+			// de hele claim zei niets over wat er aan wélk onderdeel is
+			// gedaan, en daar valt achteraf niets meer uit te halen.
+			'regels'           => array( 'type' => 'regels', 'verplicht' => false, 'uren' => true ),
 			// Hier optioneel: bij een machineclaim komen de onderdelen vaak
 			// van een werkbon zonder los factuurnummer.
 			'factuurnummer'    => array( 'type' => 'text', 'verplicht' => false, 'hint' => true ),
-			'te_claimen_tijd'  => array( 'type' => 'uren', 'verplicht' => false, 'hint' => true ),
 			'klantreferentie'  => array( 'type' => 'text', 'verplicht' => false, 'hint' => true ),
 			'opmerkingen'      => array( 'type' => 'textarea', 'verplicht' => false, 'hint' => true ),
 			'onderdeel_retour' => array( 'type' => 'checkbox', 'verplicht' => false, 'hint' => true ),
@@ -878,6 +880,31 @@ class HDP_Garantie {
 		return ( '' === $waarde || null === $waarde ) ? null : $waarde;
 	}
 
+	/**
+	 * De uren van alle regels bij elkaar.
+	 *
+	 * Het totaal verdwijnt niet nu de dealer per onderdeel invult: er kijkt
+	 * van alles naar dat ene getal. Het wordt alleen niet meer apart
+	 * gevraagd maar opgeteld, zodat het nooit meer iets anders kan zeggen
+	 * dan de regels eronder.
+	 *
+	 * @param array $regels Regels zoals ze worden opgeslagen.
+	 * @return float|string Het totaal, of '' als geen enkele regel uren heeft.
+	 */
+	public static function tel_uren_op( $regels ) {
+		$totaal   = 0.0;
+		$gevonden = false;
+
+		foreach ( (array) $regels as $regel ) {
+			if ( isset( $regel['uren'] ) && null !== $regel['uren'] ) {
+				$totaal  += (float) $regel['uren'];
+				$gevonden = true;
+			}
+		}
+
+		return $gevonden ? $totaal : '';
+	}
+
 	public static function dien_claim_in( $waarden ) {
 		$dealer = self::dealervelden();
 		if ( ! $dealer ) {
@@ -931,6 +958,8 @@ class HDP_Garantie {
 			if ( ! $machine ) {
 				return new WP_Error( 'hdp_onbekende_machine', HDP_I18N::t( 'garantie_fout_machine' ) );
 			}
+
+			$rij['te_claimen_tijd'] = self::of_niets( self::tel_uren_op( $rij['te_claimen_onderdelen'] ) );
 
 			$rij['machine_id'] = $machine['id'];
 			$rij['hectares']   = self::of_niets( isset( $waarden['hectares'] ) ? $waarden['hectares'] : '' );
