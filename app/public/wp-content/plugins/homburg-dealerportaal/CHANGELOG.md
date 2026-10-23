@@ -8,6 +8,16 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.74.0
+
+**Garantie werkt nu ook bij een dealer met honderd machines.**
+- Opgelost, en dit was ernstig: de machinelijst telde per machine de lopende claims en haalde daarvoor elke keer opnieuw de hele claimlijst op. Bij honderd machines waren dat ruim honderd aanvragen naar de claimadministratie voor één pagina — die zou simpelweg niet meer laden. De gegevens worden nu binnen één paginalaad onthouden: gemeten van 101 aanvragen naar 2.
+- De machinekeuze op het claimformulier krijgt vanaf acht machines een zoekveld erboven, dat de lijst al tijdens het typen uitdunt op machinenaam, serienummer én klantnaam. Een gewone keuzelijst van honderd regels was niet te doorzoeken: de typehulp van de browser kijkt alleen naar het begin van de regel, dus op serienummer werkte die niet.
+- In die lijst staat nu ook de klantnaam: wie honderd machines heeft zoekt meestal "die van Jansen" en niet een serienummer uit zijn hoofd.
+
+**Opgelost: losse backslashes in vier teksten.** Er stond "klant\…" en "num\éro" in plaats van "klant…" en "numéro". Zelfde soort fout als eerder met de \u-reeksen; er staat nu ook een test op dat patroon.
+- Tests: 342 (was 336).
+
 ## 1.73.0
 
 **De webshop heeft nu dezelfde opzet als de rest van het portaal** (thema 1.32.0).

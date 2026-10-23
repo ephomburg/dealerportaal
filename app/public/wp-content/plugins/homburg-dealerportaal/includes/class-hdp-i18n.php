@@ -630,6 +630,10 @@ class HDP_I18N {
 				'fr' => 'Mentionnez le numéro de ticket sur l’envoi. La demande ne peut être traitée qu’une fois la pièce reçue.',
 			),
 
+			'garantie_machine_zoek'        => array(
+				'nl' => 'Zoek op machine, serienummer of klant…',
+				'fr' => 'Rechercher par machine, numéro de série ou client…',
+			),
 			'garantie_regel_uren'          => array( 'nl' => 'Uren', 'fr' => 'Heures' ),
 			/* translators: %d is het regelnummer. */
 			'garantie_regel_uren_van'      => array( 'nl' => 'Uren regel %d', 'fr' => 'Heures ligne %d' ),

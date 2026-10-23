@@ -305,6 +305,25 @@ class HDP_Garantie {
 		);
 	}
 
+	/**
+	 * Wat er binnen deze paginalaad al is opgehaald.
+	 *
+	 * De machinelijst roept per machine claims_van_machine() aan om te
+	 * tellen hoeveel claims er lopen, en dat haalde elke keer opnieuw de
+	 * hele claimlijst op. Bij honderd machines waren dat honderd ronden
+	 * naar de claimadministratie voor één pagina — dan laadt die pagina
+	 * niet meer.
+	 *
+	 * Alleen voor de duur van één verzoek: gegevens die ondertussen in de
+	 * app veranderen, zijn bij de volgende paginalaad gewoon weer vers.
+	 */
+	private static $gebufferd = array();
+
+	/** Weggooien wat we onthouden hadden; na elke wijziging. */
+	private static function vergeet_buffer() {
+		self::$gebufferd = array();
+	}
+
 	/** Het accountnummer waarop gefilterd wordt; '' als er niemand (geldig) is ingelogd. */
 	private static function dealer_id( $user_id = 0 ) {
 		$user_id = $user_id ? (int) $user_id : get_current_user_id();
@@ -344,6 +363,11 @@ class HDP_Garantie {
 			return array();
 		}
 
+		$sleutel = 'machines_' . $dealer_id;
+		if ( isset( self::$gebufferd[ $sleutel ] ) ) {
+			return self::$gebufferd[ $sleutel ];
+		}
+
 		$rijen = HDP_Supabase::selecteer(
 			HDP_Supabase::APP,
 			'machines',
@@ -354,7 +378,15 @@ class HDP_Garantie {
 			)
 		);
 
-		return is_wp_error( $rijen ) ? $rijen : array_map( array( __CLASS__, 'machine_uit_rij' ), $rijen );
+		if ( is_wp_error( $rijen ) ) {
+			// Een storing niet onthouden: dan blijft hij deze hele
+			// paginalaad hangen, ook als de volgende poging wel lukt.
+			return $rijen;
+		}
+
+		self::$gebufferd[ $sleutel ] = array_map( array( __CLASS__, 'machine_uit_rij' ), $rijen );
+
+		return self::$gebufferd[ $sleutel ];
 	}
 
 	/**
@@ -368,6 +400,11 @@ class HDP_Garantie {
 			return array();
 		}
 
+		$sleutel = 'claims_' . $dealer_id;
+		if ( isset( self::$gebufferd[ $sleutel ] ) ) {
+			return self::$gebufferd[ $sleutel ];
+		}
+
 		$rijen = HDP_Supabase::selecteer(
 			HDP_Supabase::APP,
 			'claims',
@@ -378,7 +415,13 @@ class HDP_Garantie {
 			)
 		);
 
-		return is_wp_error( $rijen ) ? $rijen : array_map( array( __CLASS__, 'claim_uit_rij' ), $rijen );
+		if ( is_wp_error( $rijen ) ) {
+			return $rijen;
+		}
+
+		self::$gebufferd[ $sleutel ] = array_map( array( __CLASS__, 'claim_uit_rij' ), $rijen );
+
+		return self::$gebufferd[ $sleutel ];
 	}
 
 	/**
@@ -848,6 +891,7 @@ class HDP_Garantie {
 		);
 
 		$rijen = HDP_Supabase::voeg_toe( HDP_Supabase::APP, 'machines', array( $rij ) );
+		self::vergeet_buffer();
 
 		if ( is_wp_error( $rijen ) ) {
 			return $rijen;
@@ -966,6 +1010,7 @@ class HDP_Garantie {
 		}
 
 		$rijen = HDP_Supabase::voeg_toe( HDP_Supabase::APP, 'claims', array( $rij ) );
+		self::vergeet_buffer();
 
 		if ( is_wp_error( $rijen ) ) {
 			return $rijen;

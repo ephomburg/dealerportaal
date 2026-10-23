@@ -64,6 +64,31 @@ class Teksten_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * En geen losse backslash voor een gewoon teken.
+	 *
+	 * In een PHP-tekst tussen enkele aanhalingstekens betekent een backslash
+	 * alleen iets vóór een andere backslash of een aanhalingsteken. Staat
+	 * hij ergens anders, dan komt hij letterlijk op het scherm: er stond
+	 * "klant\…" en "numéro" werd "num\éro". Zelfde oorzaak als hierboven —
+	 * een bewerkscript dat een escape half liet staan.
+	 */
+	public function test_geen_losse_backslash_voor_een_gewoon_teken() {
+		$fout = array();
+
+		foreach ( $this->alle_teksten() as $waar => $tekst ) {
+			if ( preg_match( '/\\\\[^\\\\\']/u', $tekst ) ) {
+				$fout[] = $waar . ' => ' . $tekst;
+			}
+		}
+
+		$this->assertSame(
+			array(),
+			$fout,
+			"Deze teksten hebben een losse backslash die op het scherm komt:\n" . implode( "\n", $fout )
+		);
+	}
+
+	/**
 	 * Elke sleutel hoort zowel Nederlands als Frans te hebben. Ontbreekt het
 	 * Frans, dan valt HDP_I18N terug op het Nederlands — dat is te verdedigen,
 	 * maar het hoort een bewuste keuze te zijn en geen vergeten regel.

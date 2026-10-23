@@ -1516,6 +1516,17 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
    Vier kolommen per regel. Een tabel zou hier netter lijken, maar de
    regels zijn invoervelden die op een telefoon onder elkaar moeten
    kunnen; een grid kan dat wél. */
+/* Zoekveld boven de machinekeuze, voor dealers met veel machines. */
+.hdp-machinezoek {
+	width: 100%;
+	box-sizing: border-box;
+	margin-bottom: 0.4rem;
+}
+.hdp-machinekeuze select[size] {
+	height: auto;
+	padding: 0.3rem;
+}
+
 .hdp-claimregels {
 	display: flex;
 	flex-direction: column;

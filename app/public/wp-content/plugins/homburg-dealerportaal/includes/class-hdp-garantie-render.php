@@ -969,18 +969,37 @@ class HDP_Garantie_Render {
 	 * de dealer het overtypen van serienummer en aankoopdatum, én het
 	 * voorkomt tikfouten in precies het veld waar de fabrikant op controleert.
 	 */
-	private static function render_machinekeuze() {
-		$machines = HDP_Garantie::machines();
+	private static function render_machinekeuze( $machines = null ) {
+		// De lijst mag meegegeven worden; dan is dit scherm te beproeven
+		// zonder de claimadministratie aan te spreken.
+		if ( null === $machines ) {
+			$machines = HDP_Garantie::machines();
+		}
 		if ( is_wp_error( $machines ) ) {
 			$machines = array();
 		}
 		?>
-		<p class="hdp-veld hdp-veld-breed hdp-machinekeuze">
+		<?php
+		// Een dealer met honderd machines kan in een keuzelijst van honderd
+		// regels niets vinden: de typehulp van de browser zoekt alleen vanaf
+		// het begin van de regel, dus op serienummer werkt die niet. Vanaf
+		// een stuk of acht komt er daarom een zoekveld boven dat de lijst
+		// meteen uitdunt. Bij een handvol machines zou dat alleen in de weg
+		// staan.
+		$veel = count( $machines ) >= 8;
+		?>
+		<div class="hdp-veld hdp-veld-breed hdp-machinekeuze">
 			<label for="hdp-claim-machinekeuze">
 				<?php echo esc_html( HDP_I18N::t( 'garantie_kies_machine' ) ); ?>
 				<span class="hdp-veld-verplicht" aria-hidden="true">*</span>
 			</label>
-			<select id="hdp-claim-machinekeuze" name="machinekeuze" required>
+			<?php if ( $veel ) : ?>
+				<input type="search" class="hdp-machinezoek" id="hdp-machinezoek"
+					placeholder="<?php echo esc_attr( HDP_I18N::t( 'garantie_machine_zoek' ) ); ?>"
+					aria-label="<?php echo esc_attr( HDP_I18N::t( 'garantie_machine_zoek' ) ); ?>"
+					autocomplete="off">
+			<?php endif; ?>
+			<select id="hdp-claim-machinekeuze" name="machinekeuze" required<?php echo $veel ? ' size="8"' : ''; ?>>
 				<option value=""><?php echo esc_html( HDP_I18N::t( 'garantie_kies' ) ); ?></option>
 				<?php foreach ( $machines as $machine ) : ?>
 					<?php
@@ -990,6 +1009,10 @@ class HDP_Garantie_Render {
 					?>
 					<option value="<?php echo esc_attr( $machine['serienummer'] ); ?>" <?php selected( HDP_Garantie_Formulier::eerder( 'machine' ), $machine['serienummer'] ); ?>>
 						<?php echo esc_html( HDP_Garantie::machinenaam( $machine['machine'], $machine['serienummer'] ) ); ?>
+						<?php if ( ! empty( $machine['klant'] ) ) : ?>
+							<?php // De klantnaam erbij: wie honderd machines heeft, zoekt meestal "die van Jansen" en niet een serienummer uit zijn hoofd. ?>
+							&middot; <?php echo esc_html( $machine['klant'] ); ?>
+						<?php endif; ?>
 						<?php if ( 'goedgekeurd' !== $machine['status'] ) : ?>
 							— <?php echo esc_html( HDP_I18N::t( 'garantie_machine_' . $machine['status'] ) ); ?>
 						<?php endif; ?>
@@ -1002,7 +1025,39 @@ class HDP_Garantie_Render {
 					<?php echo esc_html( HDP_I18N::t( 'garantie_ingang_machine_knop' ) ); ?>
 				</a>
 			</span>
-		</p>
+		</div>
+		<?php if ( $veel ) : ?>
+		<script>
+		(function () {
+			var zoek  = document.getElementById( 'hdp-machinezoek' );
+			var lijst = document.getElementById( 'hdp-claim-machinekeuze' );
+			if ( ! zoek || ! lijst ) { return; }
+
+			var opties = Array.prototype.slice.call( lijst.options );
+
+			zoek.addEventListener( 'input', function () {
+				var term = zoek.value.trim().toLowerCase();
+
+				opties.forEach( function ( optie, i ) {
+					// De eerste optie is "maak een keuze" en blijft staan,
+					// anders heeft de lijst even geen geldige waarde.
+					if ( 0 === i || '' === term ) {
+						optie.hidden = false;
+						return;
+					}
+					optie.hidden = -1 === optie.text.toLowerCase().indexOf( term );
+				} );
+
+				// Staat de gekozen machine er niet meer bij, dan hoort de
+				// keuze losgelaten te worden; anders verstuurt het formulier
+				// iets dat je niet meer ziet staan.
+				if ( lijst.selectedOptions.length && lijst.selectedOptions[0].hidden ) {
+					lijst.selectedIndex = 0;
+				}
+			} );
+		})();
+		</script>
+		<?php endif; ?>
 		<?php
 	}
 
