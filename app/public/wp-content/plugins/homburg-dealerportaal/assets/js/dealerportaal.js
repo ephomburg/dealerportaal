@@ -70,3 +70,35 @@
 	keuze.addEventListener( 'change', bijwerken );
 	bijwerken();
 } )();
+
+/**
+ * Geeft de hoogte van de header door als --hdp-header-hoogte.
+ *
+ * De header blijft bij het scrollen bovenaan staan. Kolommen die zélf
+ * sticky zijn (de filterkolom bij garantie, de zijkolom bij een ticket)
+ * zouden daar zonder dit getal onder verdwijnen. De hoogte verschilt per
+ * schermbreedte — op een telefoon wrappen de knoppen naar een tweede
+ * regel — dus hem hier opmeten in plaats van ergens een vast getal in de
+ * CSS te zetten dat stilletjes niet meer klopt.
+ */
+( function () {
+	var header = document.querySelector( '.hdp-site-header' );
+	if ( ! header ) {
+		return;
+	}
+
+	function meten() {
+		document.documentElement.style.setProperty(
+			'--hdp-header-hoogte',
+			header.getBoundingClientRect().height + 'px'
+		);
+	}
+
+	meten();
+
+	if ( window.ResizeObserver ) {
+		new window.ResizeObserver( meten ).observe( header );
+	} else {
+		window.addEventListener( 'resize', meten );
+	}
+} )();

@@ -2,7 +2,7 @@
 Theme Name: Homburg Dealerportaal
 Description: Eigen blokthema voor het Homburg-dealerportaal, gebouwd op het originele HTML-ontwerp (rood/donkergrijs, Montserrat). Geen bloggerichte onderdelen; puur gericht op de dealerportaalsite.
 Author: Homburg Machinehandel BV
-Version: 1.28.0
+Version: 1.29.0
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -57,6 +57,31 @@ html { height: 100%; }
 	background: var(--wp--preset--color--donkergrijs);
 	color: var(--wp--preset--color--wit);
 	border-bottom: 4px solid var(--wp--preset--color--homburg-rood);
+}
+
+/* De header blijft bij het scrollen bovenaan staan.
+   Niet op .hdp-site-header zelf: het sjabloon zet daar nog een
+   <header class="wp-block-template-part"> omheen, en een sticky element
+   blijft alleen staan binnen zijn eigen ouder — dat omhulsel is precies zo
+   hoog als de header, dus die zou meteen meescrollen. Daarom op het
+   omhulsel, dat alleen de header is (de footer krijgt tagName "footer"). */
+header.wp-block-template-part {
+	position: sticky;
+	top: 0;
+	/* Boven de pagina-inhoud (die blijft onder z-index 30). De panelen van
+	   "Links" en "Mijn account" zitten in de header en liften mee. */
+	z-index: 100;
+}
+
+/* Ingelogde beheerders hebben de balk van WordPress al bovenaan vastzitten;
+   daar moet de header onder blijven in plaats van eronder te verdwijnen.
+   Onder 600px staat die balk niet vast en scrollt hij gewoon weg. */
+body.admin-bar header.wp-block-template-part { top: 32px; }
+@media screen and (max-width: 782px) {
+	body.admin-bar header.wp-block-template-part { top: 46px; }
+}
+@media screen and (max-width: 600px) {
+	body.admin-bar header.wp-block-template-part { top: 0; }
 }
 .hdp-header-inner {
 	/* Zelfde 70%-inhoudsbreedte als de rest van de site (hero, kaarten,
@@ -352,6 +377,23 @@ html { height: 100%; }
 	   knoppenrij, nooit meer bovenop een knop op de regel erboven/eronder. */
 	.hdp-hoofdmenu { position: relative; row-gap: 0.6rem; }
 	.hdp-links-menu, .hdp-account-menu { position: static; }
+
+	/* Nu de header blijft staan, telt elke pixel: op een telefoon was hij
+	   176px hoog (logo op een eigen regel, knoppen op twee regels) en dat
+	   is een vijfde van het scherm dat permanent bezet blijft. Kleiner
+	   logo en minder lucht eromheen brengt dat terug naar ongeveer de helft
+	   zonder dat er iets verdwijnt. */
+	.hdp-header-inner {
+		padding-top: 0.7rem;
+		padding-bottom: 0.7rem;
+		/* En aan de zijkanten niet langer de 70%-inhoudsbreedte van de
+		   rest van de site: op een telefoon van 412px bleef daardoor maar
+		   288px over voor de knoppen, en die wrapten naar drie regels. */
+		padding-left: 1.1rem;
+		padding-right: 1.1rem;
+	}
+	.hdp-logo { height: 24px; }
+	.hdp-hoofdmenu { gap: 0.5rem; row-gap: 0.4rem; }
 }
 
 /* ==========================================================================

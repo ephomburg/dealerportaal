@@ -2133,7 +2133,10 @@ a.hdp-garantie-item-actie:focus-visible { background: var(--hdp-aanzet-zacht-hov
 	gap: 1.1rem;
 	/* Blijft in beeld terwijl je het gesprek leest. */
 	position: sticky;
-	top: 1.5rem;
+	/* Onder de header blijven, die nu zelf bovenaan blijft staan. De hoogte
+	   zet dealerportaal.js in --hdp-header-hoogte; zonder script valt het
+	   terug op 0 en staat deze kolom waar hij eerst stond. */
+	top: calc(var(--hdp-header-hoogte, 0px) + 1.5rem);
 }
 
 /* ── Kop ─────────────────────────────────────────────────────── */
@@ -2455,7 +2458,7 @@ a.hdp-garantie-item-actie:focus-visible { background: var(--hdp-aanzet-zacht-hov
 	flex-direction: column;
 	gap: 1.6rem;
 	position: sticky;
-	top: 1.5rem;
+	top: calc(var(--hdp-header-hoogte, 0px) + 1.5rem);
 }
 .hdp-rail-knoppen { display: flex; flex-direction: column; gap: 0.5rem; }
 .hdp-rail-knoppen .hdp-btn { text-align: center; }
@@ -2515,7 +2518,7 @@ a.hdp-garantie-item-actie:focus-visible { background: var(--hdp-aanzet-zacht-hov
 .hdp-garantie-kolom-lijst .hdp-garantie-lijst { gap: 0.5rem; }
 
 /* ── De detailkolom ─────────────────────────────────────────────── */
-.hdp-garantie-kolom-detail { min-width: 0; position: sticky; top: 1.5rem; }
+.hdp-garantie-kolom-detail { min-width: 0; position: sticky; top: calc(var(--hdp-header-hoogte, 0px) + 1.5rem); }
 .hdp-detail-kaart { display: flex; flex-direction: column; gap: 1.1rem; }
 .hdp-detail-volledig { margin: 0; font-size: 0.88rem; font-weight: 700; }
 

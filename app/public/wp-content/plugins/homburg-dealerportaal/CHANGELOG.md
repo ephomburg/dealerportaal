@@ -8,6 +8,15 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.69.1
+
+**De header met het logo blijft bij het scrollen bovenaan staan** (thema 1.29.0).
+- Geldt op elke pagina: portaal, webshop, winkelwagen, afrekenen en Mijn account. De uitklapmenu's "Links" en "Mijn account" liften mee en blijven over de pagina-inhoud heen vallen.
+- Staat voor ingelogde beheerders netjes onder de balk van WordPress in plaats van erachter te verdwijnen.
+- De filterkolom bij garantie en de zijkolom bij een ticket waren zelf al sticky; die houden nu afstand tot de header in plaats van eronder te schuiven. Het gedeelde script meet de hoogte op (`--hdp-header-hoogte`), zodat daar geen vast getal in de CSS staat dat stilletijds niet meer klopt.
+- Op een telefoon was de header 176px hoog — een vijfde van het scherm, permanent bezet. Die is nu 139px: kleiner logo, minder lucht, en aan de zijkanten niet langer de 70%-inhoudsbreedte van de rest van de site (daardoor bleef er maar 288px over voor de knoppen).
+- Browsertests: 11 (was 9).
+
 ## 1.69.0
 
 **Een onderdelenclaim gaat pas in behandeling als het onderdeel in Stiens is — en dat staat nu op elk scherm waar de dealer het nodig heeft.**
