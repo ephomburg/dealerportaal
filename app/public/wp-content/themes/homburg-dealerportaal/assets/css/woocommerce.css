@@ -239,6 +239,14 @@ p.no-comments {
 	gap: 2rem;
 	align-items: start;
 }
+/* De lijstweergave kijkt naar de breedte van déze kolom en niet naar die
+   van het scherm. Dat scheelt: naast het zijmenu èn de merkenfilter blijft
+   van een scherm van 1440 nog ruim 850 pixels over, en een omslagpunt op
+   schermbreedte zou dat niet doorhebben. */
+.hdp-shop-main {
+	container-type: inline-size;
+	container-name: hdp-lijst;
+}
 @media (max-width: 780px) {
 	.hdp-shop-layout { grid-template-columns: minmax(0, 1fr); }
 }
@@ -839,14 +847,19 @@ ul.products.hdp-lijst-weergave li.product.hdp-card { position: relative; }
 	/* Allemaal vaste maten op één na: de laatste kolom mag niet "auto" zijn,
 	   want dan hangt de breedte af van de knoptekst en staan de kolomkoppen
 	   (waar die cel leeg is) boven de verkeerde kolom. De omschrijving is de
-	   enige die de overgebleven ruimte opvult. */
-	grid-template-columns: 124px minmax(0, 1fr) 150px 110px 64px 210px;
+	   enige die de overgebleven ruimte opvult.
+
+	   Die vaste maten waren samen zo breed dat er voor de omschrijving nog
+	   51 pixels overbleef: de productnaam werd afgekapt tot "12-ad…" en de
+	   kolomkop liep over die van het merk heen. Ze zijn nu krapper gezet,
+	   precies ruim genoeg voor wat erin staat. */
+	grid-template-columns: 110px minmax(0, 1fr) 124px 96px 56px 186px;
 	align-items: center;
-	column-gap: 1rem;
+	column-gap: 0.8rem;
 	row-gap: 0;
 	/* Rechts ruimte vrij voor het favorietenhartje, dat los boven de rij
 	   zweeft; de kolomkop houdt dezelfde marge aan, zodat beide uitlijnen. */
-	padding: 0.35rem 3.4rem 0.35rem 1rem;
+	padding: 0.35rem 3.15rem 0.35rem 0.9rem;
 	flex: 1 1 auto;
 	min-width: 0;
 }
@@ -959,10 +972,10 @@ ul.products.hdp-lijst-weergave li.product.hdp-card { position: relative; }
 body.hdp-shop-lijst .hdp-lijst-kop {
 	display: grid;
 	/* Exact dezelfde kolommen en dezelfde marge rechts als een rij. */
-	grid-template-columns: 124px minmax(0, 1fr) 150px 110px 64px 210px;
-	column-gap: 1rem;
+	grid-template-columns: 110px minmax(0, 1fr) 124px 96px 56px 186px;
+	column-gap: 0.8rem;
 	align-items: center;
-	padding: 0.55rem 3.4rem 0.55rem 1rem;
+	padding: 0.55rem 3.15rem 0.55rem 0.9rem;
 	background: var(--wp--preset--color--grijs-licht);
 	border: 1px solid var(--wp--preset--color--rand);
 	border-radius: var(--hdp-radius) var(--hdp-radius) 0 0;
@@ -1001,9 +1014,10 @@ ul.products:not(.hdp-lijst-weergave) .hdp-card__brand--cat { display: none; }
 	border: 0;
 }
 
-@media (max-width: 780px) {
+@container hdp-lijst (max-width: 50rem) {
 	/* Zes kolommen passen niet; merk en aantal zakken onder elkaar en de
-	   kolomkoppen vervallen (de rij spreekt dan voor zich). */
+	   kolomkoppen vervallen (de rij spreekt dan voor zich). Drie afgekapte
+	   kolommen naast elkaar leest slechter dan een regel onder elkaar. */
 	body.hdp-shop-lijst .hdp-lijst-kop { display: none; }
 	body.hdp-shop-lijst ul.products.hdp-lijst-weergave {
 		border-top: 1px solid var(--wp--preset--color--rand);

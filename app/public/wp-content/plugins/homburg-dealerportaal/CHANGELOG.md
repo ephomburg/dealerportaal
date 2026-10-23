@@ -8,6 +8,19 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.73.0
+
+**De webshop heeft nu dezelfde opzet als de rest van het portaal** (thema 1.32.0).
+- Winkel, productpagina, winkelwagen en afrekenen staan in hetzelfde donkere vlak met het zijmenu links en het werkblad als afgerond paneel. De merkenfilter blijft gewoon staan, als tweede kolom naast het menu.
+- "Webshop" blijft oplichten in het menu zolang u in de winkel bent — ook op een productpagina, in de winkelwagen en bij het afrekenen. Op padvergelijking alleen doofde dat zodra u op een product klikte.
+- De winkelwagen en afrekenen hebben hun eigen sjabloon op paginanaam gekregen, dus hiervoor hoeft er op geen enkele site iets aan de pagina's te veranderen.
+
+**Opgelost: in de lijstweergave liepen de kolomkoppen over elkaar heen.**
+- Voor de omschrijving bleef maar 51 pixels over: productnamen werden afgekapt tot "12-ad…" en de kop "Omschrijving" liep over die van "Merk" heen. De vaste kolommen (nummer, merk, prijs, aantal, knop) waren samen te breed.
+- Die zijn krapper gezet, waardoor de omschrijving de ruimte krijgt die overblijft. Op een scherm van 1440 is dat ruim 160 pixels in plaats van 51.
+- Het omslagpunt waarop de rij onder elkaar klapt, kijkt nu naar de breedte van de productkolom zelf in plaats van naar die van het scherm. Naast een zijmenu én een filterkolom blijft van 1440 pixels nog 860 over, en een omslagpunt op schermbreedte had dat niet door.
+- Browsertests: 16 (was 11).
+
 ## 1.72.1
 
 **De melding "er staan nieuwe documenten voor u klaar" is weg te klikken, en het logo lijnt uit met het zijmenu.**

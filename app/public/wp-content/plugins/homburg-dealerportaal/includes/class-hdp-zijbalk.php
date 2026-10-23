@@ -74,9 +74,10 @@ class HDP_Zijbalk {
 			return true;
 		}
 
-		// De accountpagina's (bestellingen, favorieten, snel bestellen) horen
-		// net zo goed bij het portaal, maar hebben hun eigen sjabloon.
-		if ( function_exists( 'is_account_page' ) && is_account_page() ) {
+		// De accountpagina's (bestellingen, favorieten, snel bestellen) en de
+		// winkel zelf horen net zo goed bij het portaal, maar hebben hun
+		// eigen sjablonen.
+		if ( function_exists( 'is_woocommerce' ) && ( is_woocommerce() || is_cart() || is_checkout() || is_account_page() ) ) {
 			return true;
 		}
 
@@ -247,6 +248,33 @@ class HDP_Zijbalk {
 		return $eigen && '' !== $daar && $hier === $daar;
 	}
 
+	/**
+	 * Hoort deze link bij de winkel, en zijn we ergens in de winkel?
+	 *
+	 * Een productpagina, de winkelwagen en afrekenen hebben elk een eigen
+	 * adres, dus op padvergelijking alleen dooft "Webshop" in het menu zodra
+	 * je op een product klikt — terwijl je de winkel helemaal niet verlaten
+	 * hebt.
+	 *
+	 * @param string $url De link van een menu-onderdeel.
+	 * @return bool
+	 */
+	private static function is_winkelgebied( $url ) {
+		if ( ! function_exists( 'is_woocommerce' ) || ! function_exists( 'wc_get_page_permalink' ) ) {
+			return false;
+		}
+
+		// De accountpagina's horen bij "Bestellingen" en niet bij de winkel.
+		if ( ! is_woocommerce() && ! is_cart() && ! is_checkout() ) {
+			return false;
+		}
+
+		$winkel = untrailingslashit( (string) wp_parse_url( wc_get_page_permalink( 'shop' ), PHP_URL_PATH ) );
+		$daar   = untrailingslashit( (string) wp_parse_url( $url, PHP_URL_PATH ) );
+
+		return '' !== $winkel && $winkel === $daar;
+	}
+
 	public static function render() {
 		if ( ! is_user_logged_in() || ! HDP_Roles::mag_portaal_zien( get_current_user_id() ) ) {
 			return;
@@ -292,7 +320,7 @@ class HDP_Zijbalk {
 			<ul class="hdp-zijbalk-lijst">
 				<?php foreach ( $in_groep as $onderdeel ) : ?>
 					<?php
-					$huidig = self::is_huidige( $onderdeel['url'] );
+					$huidig = self::is_huidige( $onderdeel['url'] ) || self::is_winkelgebied( $onderdeel['url'] );
 					// Alleen bij garantie telt er iets mee; dat hangt aan de
 					// claim-URL en niet aan de titel, zodat een hernoemde
 					// kaart het getal niet kwijtraakt.
