@@ -14,11 +14,11 @@
 		},
 		"titel": {
 			"type": "string",
-			"default": "Downloads voor dealers"
+			"default": "Downloads"
 		},
 		"titelFr": {
 			"type": "string",
-			"default": "Téléchargements pour revendeurs"
+			"default": "Téléchargements"
 		},
 		"omschrijving": {
 			"type": "string",

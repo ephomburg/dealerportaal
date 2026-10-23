@@ -8,6 +8,12 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.71.2
+
+**Kortere paginatitels: "Downloads" en "Content" in plaats van "Downloads voor dealers" en "Content voor dealers".**
+- Dat het voor dealers is, is in een afgeschermd dealerportaal met een menu waar "Downloads" in staat niet meer het vermelden waard. In het Frans net zo: "Téléchargements" en "Contenu".
+- De titels komen uit de standaardwaarden van de blokken en niet uit de pagina's zelf, dus dit werkt meteen — er hoeft op geen enkele site iets aan de pagina's te veranderen. Wie een eigen titel invult in de editor, houdt die.
+
 ## 1.71.1
 
 **Home bovenaan het zijmenu, en de "terug naar het portaal"-knoppen vervallen.**
