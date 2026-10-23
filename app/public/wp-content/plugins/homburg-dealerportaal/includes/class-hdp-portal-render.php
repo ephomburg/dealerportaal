@@ -15,6 +15,40 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class HDP_Portal_Render {
 
+	/** Tot wanneer de dealer de melding over nieuwe documenten heeft weggeklikt. */
+	const META_NIEUW_WEG = 'hdp_nieuw_weggeklikt_tot';
+
+	const NIEUW_WEG_VELD  = 'hdp_nieuw_weg';
+	const NIEUW_WEG_NONCE = 'hdp_nieuw_wegklikken';
+
+	public static function init() {
+		add_action( 'template_redirect', array( __CLASS__, 'verwerk_wegklikken' ) );
+	}
+
+	/**
+	 * De melding over nieuwe documenten wegklikken.
+	 *
+	 * Bewaart niet "weggeklikt ja/nee" maar tot welk moment: komt er daarna
+	 * een document bij, dan is de melding weer terecht en verschijnt hij
+	 * vanzelf. Met een enkele vlag zou de dealer hem één keer wegklikken en
+	 * er daarna nooit meer iets van horen.
+	 */
+	public static function verwerk_wegklikken() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- de nonce wordt hieronder gecontroleerd zodra we weten dát dit onze knop is.
+		if ( ! isset( $_POST[ self::NIEUW_WEG_VELD ] ) || ! is_user_logged_in() ) {
+			return;
+		}
+
+		check_admin_referer( self::NIEUW_WEG_NONCE );
+
+		update_user_meta( get_current_user_id(), self::META_NIEUW_WEG, time() );
+
+		// Terug naar dezelfde pagina, zodat een verversing niet opnieuw
+		// verstuurt.
+		wp_safe_redirect( remove_query_arg( array() ) );
+		exit;
+	}
+
 	public static function render_dealerportaal( $a ) {
 		ob_start();
 
@@ -128,11 +162,19 @@ class HDP_Portal_Render {
 	 * dealer er door zijn merkrechten nul van te zien krijgt.
 	 */
 	private static function render_nieuw_melding() {
+		// Alles van vóór het wegklikken telt niet meer mee; wat daarna is
+		// toegevoegd wél.
+		$sinds  = (int) get_user_meta( get_current_user_id(), self::META_NIEUW_WEG, true );
 		$aantal = 0;
+
 		foreach ( HDP_Downloads_Render::zichtbare_downloads( 'download' )['downloads'] as $download ) {
-			if ( HDP_Downloads_CPT::is_nieuw( $download->ID ) ) {
-				++$aantal;
+			if ( ! HDP_Downloads_CPT::is_nieuw( $download->ID ) ) {
+				continue;
 			}
+			if ( $sinds && (int) get_post_time( 'U', true, $download->ID ) <= $sinds ) {
+				continue;
+			}
+			++$aantal;
 		}
 
 		if ( ! $aantal ) {
@@ -141,11 +183,22 @@ class HDP_Portal_Render {
 
 		$tekst = 1 === $aantal ? HDP_I18N::t( 'nieuw_melding_een' ) : sprintf( HDP_I18N::t( 'nieuw_melding_meer' ), $aantal );
 		?>
-		<a class="hdp-nieuw-melding" href="<?php echo esc_url( home_url( '/downloads/' ) ); ?>">
-			<span class="hdp-nieuw-badge"><?php echo esc_html( HDP_I18N::t( 'badge_nieuw' ) ); ?></span>
-			<span class="hdp-nieuw-tekst"><?php echo esc_html( $tekst ); ?></span>
-			<span class="hdp-nieuw-pijl" aria-hidden="true">&rarr;</span>
-		</a>
+		<?php // Een <div> om de link heen en geen link om alles: een knop binnen een link is geen geldige opbouw, en de ene klik hoort niet de andere te worden. ?>
+		<div class="hdp-nieuw-melding">
+			<a class="hdp-nieuw-link" href="<?php echo esc_url( home_url( '/downloads/' ) ); ?>">
+				<span class="hdp-nieuw-badge"><?php echo esc_html( HDP_I18N::t( 'badge_nieuw' ) ); ?></span>
+				<span class="hdp-nieuw-tekst"><?php echo esc_html( $tekst ); ?></span>
+				<span class="hdp-nieuw-pijl" aria-hidden="true">&rarr;</span>
+			</a>
+			<form class="hdp-nieuw-weg" method="post">
+				<?php wp_nonce_field( self::NIEUW_WEG_NONCE ); ?>
+				<input type="hidden" name="<?php echo esc_attr( self::NIEUW_WEG_VELD ); ?>" value="1">
+				<button type="submit" title="<?php echo esc_attr( HDP_I18N::t( 'nieuw_melding_weg' ) ); ?>">
+					<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg>
+					<span><?php echo esc_html( HDP_I18N::t( 'nieuw_melding_weg' ) ); ?></span>
+				</button>
+			</form>
+		</div>
 		<?php
 	}
 

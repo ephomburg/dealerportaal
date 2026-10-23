@@ -8,6 +8,14 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.72.1
+
+**De melding "er staan nieuwe documenten voor u klaar" is weg te klikken, en het logo lijnt uit met het zijmenu.**
+- De melding heeft een knop "Niet meer tonen" gekregen, met tekst erbij: een los kruisje is makkelijk over het hoofd te zien en dan blijft die balk er wekenlang staan.
+- Wegklikken onthoudt niet "weggeklikt ja/nee" maar tot welk moment. Komt er daarna een document bij, dan verschijnt de melding vanzelf weer — en telt alleen het nieuwe mee, niet wat al weggeklikt was. Met een enkele vlag zou een dealer hem één keer wegklikken en daarna nooit meer horen dat er iets klaarstaat.
+- Het logo in de balk bovenaan hield de 70%-inhoudsbreedte aan en begon daardoor 15% naar binnen, terwijl het zijmenu eronder tegen de rand staat. Op de portaalpagina's lijnt het nu uit met de menu-items, en staan de knoppen rechts in lijn met de rand van het werkblad.
+- Tests: 336 (was 332).
+
 ## 1.72.0
 
 **Bij een machineclaim staan de uren nu per onderdeel, en dat is verplicht.**

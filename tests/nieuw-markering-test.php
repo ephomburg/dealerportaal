@@ -50,6 +50,73 @@ class Nieuw_Markering_Test extends WP_UnitTestCase {
 		return $id;
 	}
 
+	/** De attentieregel zoals de startpagina hem toont. */
+	private function melding() {
+		$methode = new ReflectionMethod( 'HDP_Portal_Render', 'render_nieuw_melding' );
+		$methode->setAccessible( true );
+
+		ob_start();
+		$methode->invoke( null );
+
+		return ob_get_clean();
+	}
+
+	/* --- Wegklikken ----------------------------------------------------- */
+
+	/**
+	 * De regel moet weg kunnen. Blijft hij staan tot het bestand vanzelf
+	 * niet meer "nieuw" is, dan kijkt een dealer er drie weken tegenaan en
+	 * leest hij hem op dag twee al niet meer.
+	 */
+	public function test_de_melding_heeft_een_knop_om_hem_weg_te_klikken() {
+		$this->maak_download( 'Verse prijslijst', 1 );
+
+		$html = $this->melding();
+
+		$this->assertStringContainsString( 'hdp-nieuw-melding', $html );
+		$this->assertStringContainsString( HDP_Portal_Render::NIEUW_WEG_VELD, $html );
+		$this->assertStringContainsString( HDP_I18N::t( 'nieuw_melding_weg' ), $html );
+	}
+
+	/** Weggeklikt is weg: alles van vóór dat moment telt niet meer mee. */
+	public function test_na_wegklikken_verdwijnt_de_melding() {
+		$this->maak_download( 'Verse prijslijst', 1 );
+		$this->assertNotSame( '', trim( $this->melding() ) );
+
+		update_user_meta( $this->dealer_id, HDP_Portal_Render::META_NIEUW_WEG, time() );
+
+		$this->assertSame( '', trim( $this->melding() ) );
+	}
+
+	/**
+	 * Maar komt er daarna iets bij, dan is de melding weer terecht. Met een
+	 * simpele "weggeklikt"-vlag zou een dealer hem één keer wegklikken en
+	 * daarna nooit meer horen dat er iets klaarstaat.
+	 */
+	public function test_een_nieuwer_bestand_brengt_de_melding_terug() {
+		$this->maak_download( 'Oudere prijslijst', 3 );
+		update_user_meta( $this->dealer_id, HDP_Portal_Render::META_NIEUW_WEG, time() - DAY_IN_SECONDS );
+
+		$this->assertSame( '', trim( $this->melding() ), 'Wat er al stond hoort weggeklikt te blijven.' );
+
+		$this->maak_download( 'Gloednieuwe prijslijst', 0 );
+
+		$this->assertNotSame( '', trim( $this->melding() ), 'Een nieuwer bestand hoort de melding terug te brengen.' );
+	}
+
+	/** En dan telt alleen het nieuwe mee, niet wat al weggeklikt was. */
+	public function test_alleen_het_nieuwe_wordt_geteld() {
+		$this->maak_download( 'Eerste', 3 );
+		$this->maak_download( 'Tweede', 3 );
+		update_user_meta( $this->dealer_id, HDP_Portal_Render::META_NIEUW_WEG, time() - DAY_IN_SECONDS );
+
+		$this->maak_download( 'Derde', 0 );
+
+		$this->assertStringContainsString( HDP_I18N::t( 'nieuw_melding_een' ), $this->melding() );
+	}
+
+	/* --- De markering zelf ---------------------------------------------- */
+
 	public function test_recent_bestand_geldt_als_nieuw() {
 		$vers = $this->maak_download( 'Verse prijslijst', 2 );
 
