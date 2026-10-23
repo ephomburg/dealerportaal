@@ -408,6 +408,15 @@ class HDP_I18N {
 			'groet_ochtend'           => array( 'nl' => 'Goedemorgen', 'fr' => 'Bonjour' ),
 			'groet_middag'            => array( 'nl' => 'Goedemiddag', 'fr' => 'Bonjour' ),
 			'groet_avond'             => array( 'nl' => 'Goedenavond', 'fr' => 'Bonsoir' ),
+			'nieuw_voor_u'            => array( 'nl' => 'Nieuw voor u', 'fr' => 'Nouveau pour vous' ),
+			'nieuw_alle_downloads'    => array( 'nl' => 'Alle downloads', 'fr' => 'Tous les téléchargements' ),
+			'nieuw_nog_een'           => array( 'nl' => 'En nog één document', 'fr' => 'Et encore un document' ),
+			/* translators: %d is een aantal documenten. */
+			'nieuw_nog_meer'          => array( 'nl' => 'En nog %d documenten', 'fr' => 'Et encore %d documents' ),
+			'home_zoek_plaatshouder'  => array(
+				'nl' => 'Zoek een artikelnummer of omschrijving in de webshop…',
+				'fr' => 'Recherchez un numéro d’article ou une description dans la boutique…',
+			),
 			'nieuw_melding_weg'       => array( 'nl' => 'Niet meer tonen', 'fr' => 'Ne plus afficher' ),
 			'zijbalk_home'            => array( 'nl' => 'Home', 'fr' => 'Accueil' ),
 			'zijbalk_bestellingen'    => array( 'nl' => 'Bestellingen', 'fr' => 'Commandes' ),

@@ -8,6 +8,17 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.75.0
+
+**De startpagina opnieuw ingericht.**
+- Het zoekveld staat over de volle breedte onder de groet, in plaats van weggedrukt in de rechterbovenhoek. Het is de snelste weg de webshop in.
+- "Nieuw voor u" toont de nieuwste documenten zélf — titel, merk en datum, hooguit drie regels met een telling voor de rest. Er stond een balk die alleen meldde dát er iets klaarstond; dan moet je nog klikken om te zien wat het is.
+- De merken staan nu links en breed, de praktische informatie rechts als rustige kolom. Dat was andersom, met de merken onder drie stukjes vaste tekst — terwijl dat juist links zijn waar men naartoe gaat.
+- Het kopje "Overige informatie" is weg. Dat was geen kopje maar een restbak; de informatie eronder is naslag en hoort niet als eigen hoofdstuk op de startpagina.
+- De kolommen zijn ook in de pagina zelf omgedraaid en niet alleen met een CSS-truc, zodat de volgorde op het scherm gelijk loopt met die van het toetsenbord.
+- Het wegklikken werkt zoals het werkte: weg blijft weg tot er een nieuwer document bij komt.
+- Tests: 345 (was 342).
+
 ## 1.74.0
 
 **Garantie werkt nu ook bij een dealer met honderd machines.**

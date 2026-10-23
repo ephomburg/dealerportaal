@@ -119,9 +119,14 @@ class HDP_Portal_Render {
 				<p class="hdp-welkomkop-datum"><?php echo esc_html( HDP_I18N::datum( 'l j F Y', $nu ) ); ?></p>
 			</div>
 			<?php if ( function_exists( 'wc_get_page_permalink' ) ) : ?>
+				<?php
+				// Over de volle breedte en onder de groet, niet ernaast in de
+				// hoek: dit is de snelste weg de webshop in en daarmee het
+				// meestgebruikte ding op deze pagina.
+				?>
 				<form class="hdp-welkomkop-zoek" role="search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
 					<label for="hdp-home-zoek" class="hdp-vh"><?php echo esc_html( HDP_I18N::t( 'home_zoek_label' ) ); ?></label>
-					<input id="hdp-home-zoek" type="search" name="s" placeholder="<?php echo esc_attr( HDP_I18N::t( 'home_zoek_label' ) ); ?>">
+					<input id="hdp-home-zoek" type="search" name="s" placeholder="<?php echo esc_attr( HDP_I18N::t( 'home_zoek_plaatshouder' ) ); ?>">
 					<?php // Zonder dit zoekt WordPress door berichten en pagina's heen; hier gaat het altijd om artikelen. ?>
 					<input type="hidden" name="post_type" value="product">
 					<button type="submit"><?php echo esc_html( HDP_I18N::t( 'home_zoek_knop' ) ); ?></button>
@@ -162,10 +167,77 @@ class HDP_Portal_Render {
 	 * dealer er door zijn merkrechten nul van te zien krijgt.
 	 */
 	private static function render_nieuw_melding() {
+		$nieuwe = self::nieuwe_downloads();
+		if ( ! $nieuwe ) {
+			return;
+		}
+
+		// Niet alles: drie regels is genoeg om te laten zien wát er klaarstaat
+		// zonder dat de startpagina een tweede downloadspagina wordt.
+		$tonen = array_slice( $nieuwe, 0, 3 );
+		$rest  = count( $nieuwe ) - count( $tonen );
+		?>
+		<section class="hdp-nieuw-sectie" aria-labelledby="hdp-nieuw-kop">
+			<div class="hdp-nieuw-kop">
+				<h2 id="hdp-nieuw-kop"><?php echo esc_html( HDP_I18N::t( 'nieuw_voor_u' ) ); ?></h2>
+				<div class="hdp-nieuw-kop-rechts">
+					<a href="<?php echo esc_url( home_url( '/downloads/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'nieuw_alle_downloads' ) ); ?></a>
+					<?php // Een eigen formulier en geen knop binnen een link: dat laatste is geen geldige opbouw. ?>
+					<form class="hdp-nieuw-weg" method="post">
+						<?php wp_nonce_field( self::NIEUW_WEG_NONCE ); ?>
+						<input type="hidden" name="<?php echo esc_attr( self::NIEUW_WEG_VELD ); ?>" value="1">
+						<button type="submit" title="<?php echo esc_attr( HDP_I18N::t( 'nieuw_melding_weg' ) ); ?>">
+							<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg>
+							<span><?php echo esc_html( HDP_I18N::t( 'nieuw_melding_weg' ) ); ?></span>
+						</button>
+					</form>
+				</div>
+			</div>
+
+			<div class="hdp-nieuw-lijst">
+				<?php foreach ( $tonen as $i => $download ) : ?>
+					<?php
+					$merk    = (string) get_post_meta( $download->ID, '_hdp_merk', true );
+					$wanneer = HDP_I18N::datum( 'j F', (int) get_post_time( 'U', false, $download->ID ) );
+					?>
+					<a class="hdp-nieuw-regel" href="<?php echo esc_url( home_url( '/downloads/' ) ); ?>">
+						<span class="hdp-nieuw-regel-icoon<?php echo 0 === $i ? ' hdp-nieuw-regel-icoon-vers' : ''; ?>" aria-hidden="true">
+							<?php echo HDP_Icons::svg_icoon( 'downloads' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
+						</span>
+						<span class="hdp-nieuw-regel-tekst">
+							<strong><?php echo esc_html( get_the_title( $download->ID ) ); ?></strong>
+							<span><?php echo esc_html( $merk ? $merk . ' · ' . $wanneer : $wanneer ); ?></span>
+						</span>
+						<?php if ( 0 === $i ) : ?>
+							<span class="hdp-nieuw-badge"><?php echo esc_html( HDP_I18N::t( 'badge_nieuw' ) ); ?></span>
+						<?php endif; ?>
+					</a>
+				<?php endforeach; ?>
+
+				<?php if ( $rest > 0 ) : ?>
+					<a class="hdp-nieuw-regel hdp-nieuw-regel-rest" href="<?php echo esc_url( home_url( '/downloads/' ) ); ?>">
+						<?php echo esc_html( 1 === $rest ? HDP_I18N::t( 'nieuw_nog_een' ) : sprintf( HDP_I18N::t( 'nieuw_nog_meer' ), $rest ) ); ?>
+					</a>
+				<?php endif; ?>
+			</div>
+		</section>
+		<?php
+	}
+
+	/**
+	 * De documenten die voor deze dealer nieuw zijn, nieuwste eerst.
+	 *
+	 * Telt via HDP_Downloads_Render::zichtbare_downloads(), dezelfde bron
+	 * als de downloadspagina — anders kan hier iets staan wat de dealer
+	 * door zijn merkrechten niet eens mag zien.
+	 *
+	 * @return array Lijst WP_Post.
+	 */
+	private static function nieuwe_downloads() {
 		// Alles van vóór het wegklikken telt niet meer mee; wat daarna is
 		// toegevoegd wél.
 		$sinds  = (int) get_user_meta( get_current_user_id(), self::META_NIEUW_WEG, true );
-		$aantal = 0;
+		$nieuwe = array();
 
 		foreach ( HDP_Downloads_Render::zichtbare_downloads( 'download' )['downloads'] as $download ) {
 			if ( ! HDP_Downloads_CPT::is_nieuw( $download->ID ) ) {
@@ -174,32 +246,17 @@ class HDP_Portal_Render {
 			if ( $sinds && (int) get_post_time( 'U', true, $download->ID ) <= $sinds ) {
 				continue;
 			}
-			++$aantal;
+			$nieuwe[] = $download;
 		}
 
-		if ( ! $aantal ) {
-			return;
-		}
+		usort(
+			$nieuwe,
+			static function ( $a, $b ) {
+				return (int) get_post_time( 'U', true, $b->ID ) - (int) get_post_time( 'U', true, $a->ID );
+			}
+		);
 
-		$tekst = 1 === $aantal ? HDP_I18N::t( 'nieuw_melding_een' ) : sprintf( HDP_I18N::t( 'nieuw_melding_meer' ), $aantal );
-		?>
-		<?php // Een <div> om de link heen en geen link om alles: een knop binnen een link is geen geldige opbouw, en de ene klik hoort niet de andere te worden. ?>
-		<div class="hdp-nieuw-melding">
-			<a class="hdp-nieuw-link" href="<?php echo esc_url( home_url( '/downloads/' ) ); ?>">
-				<span class="hdp-nieuw-badge"><?php echo esc_html( HDP_I18N::t( 'badge_nieuw' ) ); ?></span>
-				<span class="hdp-nieuw-tekst"><?php echo esc_html( $tekst ); ?></span>
-				<span class="hdp-nieuw-pijl" aria-hidden="true">&rarr;</span>
-			</a>
-			<form class="hdp-nieuw-weg" method="post">
-				<?php wp_nonce_field( self::NIEUW_WEG_NONCE ); ?>
-				<input type="hidden" name="<?php echo esc_attr( self::NIEUW_WEG_VELD ); ?>" value="1">
-				<button type="submit" title="<?php echo esc_attr( HDP_I18N::t( 'nieuw_melding_weg' ) ); ?>">
-					<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg>
-					<span><?php echo esc_html( HDP_I18N::t( 'nieuw_melding_weg' ) ); ?></span>
-				</button>
-			</form>
-		</div>
-		<?php
+		return $nieuwe;
 	}
 
 	/** Contactgegevens uit de plugin-instellingen; stil als die niet ingevuld zijn. */

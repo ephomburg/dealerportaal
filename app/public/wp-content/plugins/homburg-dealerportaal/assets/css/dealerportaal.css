@@ -547,6 +547,72 @@ body.hdp-login-actief {
 	.hdp-herbestellen-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 }
 
+/* --- Nieuw voor u ---------------------------------------------------
+   Toont de nieuwste documenten zelf. Er stond een balk die alleen meldde
+   dát er iets klaarstond; dan moet een dealer nog klikken om te zien wat
+   het is, en dat deed niemand. */
+
+.hdp-nieuw-sectie { margin: 0 0 1.9rem; }
+.hdp-nieuw-kop {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 0.9rem;
+}
+.hdp-nieuw-kop h2 {
+	margin: 0;
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-nieuw-kop-rechts { display: flex; align-items: center; gap: 1rem; }
+.hdp-nieuw-kop-rechts > a { font-size: 0.82rem; font-weight: 600; }
+
+.hdp-nieuw-lijst {
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: var(--hdp-radius);
+	overflow: hidden;
+}
+.hdp-nieuw-regel {
+	display: flex;
+	align-items: center;
+	gap: 0.9rem;
+	padding: 0.85rem 1rem;
+	color: var(--wp--preset--color--donkergrijs);
+	text-decoration: none;
+}
+.hdp-nieuw-regel + .hdp-nieuw-regel { border-top: 1px solid #eceef1; }
+.hdp-nieuw-regel:hover { background: #fafbfc; }
+.hdp-nieuw-regel-icoon {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	border-radius: 8px;
+	background: var(--wp--preset--color--grijs-licht);
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-nieuw-regel-icoon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; }
+/* Het nieuwste bestand springt eruit; de rest is gewoon context. */
+.hdp-nieuw-regel-icoon-vers { background: #fdecec; color: var(--wp--preset--color--homburg-rood); }
+.hdp-nieuw-regel-tekst { flex: 1 1 auto; min-width: 0; }
+.hdp-nieuw-regel-tekst strong { display: block; font-size: 0.9rem; font-weight: 700; }
+.hdp-nieuw-regel-tekst span { display: block; font-size: 0.8rem; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-nieuw-regel-rest {
+	justify-content: center;
+	background: #fafbfc;
+	font-size: 0.82rem;
+	font-weight: 600;
+	color: var(--wp--preset--color--homburg-rood);
+}
+
 /* De "plak een lijst"-kaart achteraan de herbestelstrook. Gestippelde rand
    en geen afbeelding: het is geen artikel maar een manier van bestellen, en
    dat hoort niet te lijken op de kaartjes ernaast. */
@@ -2963,13 +3029,9 @@ body.hdp-app-layout .hdp-app-inhoud {
 /* --- De kop van het werkblad ---------------------------------------- */
 
 .hdp-welkomkop {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 1.2rem;
-	align-items: flex-end;
-	justify-content: space-between;
 	margin-bottom: 1.8rem;
 }
+.hdp-welkomkop-tekst { margin-bottom: 1.1rem; }
 .hdp-welkomkop h1 {
 	margin: 0 0 0.3rem;
 	font-size: 1.75rem;
@@ -2982,13 +3044,15 @@ body.hdp-app-layout .hdp-app-inhoud {
 	font-size: 0.88rem;
 	color: var(--wp--preset--color--grijs-tekst);
 }
-.hdp-welkomkop-zoek { display: flex; flex: 0 1 320px; min-width: 240px; }
+/* Over de volle breedte: dit is de snelste weg de webshop in, en in een
+   hoek van 320px leek het een bijzaak. */
+.hdp-welkomkop-zoek { display: flex; width: 100%; }
 .hdp-welkomkop-zoek input[type="search"] {
 	flex: 1 1 auto;
 	min-width: 0;
-	min-height: 44px;
+	min-height: 48px;
 	box-sizing: border-box;
-	padding: 0.6rem 0.9rem;
+	padding: 0.7rem 1rem;
 	border: 1px solid #c3c7ce;
 	border-right: 0;
 	border-radius: 8px 0 0 8px;
@@ -2998,8 +3062,8 @@ body.hdp-app-layout .hdp-app-inhoud {
 }
 .hdp-welkomkop-zoek button {
 	flex: 0 0 auto;
-	min-height: 44px;
-	padding: 0.6rem 1.1rem;
+	min-height: 48px;
+	padding: 0.7rem 1.6rem;
 	border: 0;
 	border-radius: 0 8px 8px 0;
 	background: var(--wp--preset--color--homburg-rood);
@@ -3010,6 +3074,38 @@ body.hdp-app-layout .hdp-app-inhoud {
 	cursor: pointer;
 }
 .hdp-welkomkop-zoek button:hover { background: var(--wp--preset--color--homburg-rood-donker); }
+
+/* --- De onderste sectie van de startpagina --------------------------- */
+/* Was "Overige informatie": een kopje boven drie stukjes vaste tekst links
+   en de merken rechts. Die merken zijn links waar men naartoe gaat en
+   horen niet onder de naslag; de naslag is naslag en hoort niet als eigen
+   hoofdstuk op de startpagina. Dus omgedraaid en anders verdeeld. */
+
+body.home .hdp-info-sectie > .hdp-info-titel { display: none; }
+
+body.home .hdp-info-split {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2rem;
+}
+/* De merkenkolom staat nu ook in de pagina zelf voorop, dus hier geen
+   order-truc: dan zou iemand met het toetsenbord eerst door de naslag
+   moeten voordat hij bij de merken komt. */
+body.home .hdp-info-split > .wp-block-column:nth-child(1) {
+	flex: 999 1 460px;
+	min-width: 0;
+}
+/* En de naslag wordt een rustige kolom ernaast. */
+body.home .hdp-info-split > .wp-block-column:nth-child(2) {
+	flex: 1 1 290px;
+	min-width: 0;
+	align-self: flex-start;
+	padding: 1.1rem 1.2rem;
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: var(--hdp-radius);
+}
+body.home .hdp-info-split > .wp-block-column:nth-child(2) .hdp-info-kaart:first-child { padding-top: 0; }
 
 /* --- In de kolom hoeft niets meer de volle breedte te pakken --------- */
 
@@ -3034,6 +3130,11 @@ body.hdp-app-layout .hdp-app-inhoud {
 	padding-left: 0;
 	padding-right: 0;
 }
+/* Die secties hielden allemaal hun eigen lucht bovenaan aan, bedoeld voor
+   een pagina waar ze los onder elkaar stonden. Binnen het werkblad stapelt
+   dat op tot gaten van negentig pixels. */
+.hdp-app-inhoud .hdp-herbestellen-sectie { padding-top: 1.9rem; }
+.hdp-app-inhoud .hdp-berichten { padding-top: 0; }
 
 /* --- Smal scherm: het menu wordt een strook boven de inhoud ---------- */
 

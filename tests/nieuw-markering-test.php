@@ -73,9 +73,50 @@ class Nieuw_Markering_Test extends WP_UnitTestCase {
 
 		$html = $this->melding();
 
-		$this->assertStringContainsString( 'hdp-nieuw-melding', $html );
+		$this->assertStringContainsString( 'hdp-nieuw-sectie', $html );
 		$this->assertStringContainsString( HDP_Portal_Render::NIEUW_WEG_VELD, $html );
 		$this->assertStringContainsString( HDP_I18N::t( 'nieuw_melding_weg' ), $html );
+	}
+
+	/**
+	 * De regel noemt de bestanden zelf. Een balk die alleen meldt dát er
+	 * iets klaarstaat, laat de dealer klikken om te zien wát het is.
+	 */
+	public function test_de_melding_noemt_de_bestanden_zelf() {
+		$this->maak_download( 'Prijslijst Väderstad 2027', 1, 'Väderstad' );
+
+		$html = $this->melding();
+
+		$this->assertStringContainsString( 'Prijslijst Väderstad 2027', $html );
+		$this->assertStringContainsString( 'Väderstad', $html );
+		$this->assertStringContainsString( HDP_I18N::t( 'nieuw_voor_u' ), $html );
+	}
+
+	/** Niet de hele downloadspagina: hooguit drie regels, de rest als telling. */
+	public function test_hooguit_drie_bestanden_op_de_startpagina() {
+		foreach ( range( 1, 5 ) as $i ) {
+			$this->maak_download( 'Document ' . $i, $i );
+		}
+
+		$html = $this->melding();
+
+		$this->assertSame( 3, substr_count( $html, 'hdp-nieuw-regel-tekst' ), 'Drie regels, niet meer.' );
+		$this->assertStringContainsString( sprintf( HDP_I18N::t( 'nieuw_nog_meer' ), 2 ), $html );
+	}
+
+	/** De nieuwste staat bovenaan, want die is het meest de moeite. */
+	public function test_het_nieuwste_bestand_staat_bovenaan() {
+		$this->maak_download( 'Oudste', 10 );
+		$this->maak_download( 'Nieuwste', 0 );
+		$this->maak_download( 'Middelste', 5 );
+
+		$html = $this->melding();
+
+		$this->assertLessThan(
+			strpos( $html, 'Middelste' ),
+			strpos( $html, 'Nieuwste' ),
+			'Het nieuwste bestand hoort boven het oudere te staan.'
+		);
 	}
 
 	/** Weggeklikt is weg: alles van vóór dat moment telt niet meer mee. */
@@ -112,7 +153,11 @@ class Nieuw_Markering_Test extends WP_UnitTestCase {
 
 		$this->maak_download( 'Derde', 0 );
 
-		$this->assertStringContainsString( HDP_I18N::t( 'nieuw_melding_een' ), $this->melding() );
+		$html = $this->melding();
+
+		$this->assertStringContainsString( 'Derde', $html );
+		$this->assertStringNotContainsString( 'Eerste', $html, 'Wat al weggeklikt was, hoort niet terug te komen.' );
+		$this->assertStringNotContainsString( 'Tweede', $html );
 	}
 
 	/* --- De markering zelf ---------------------------------------------- */
