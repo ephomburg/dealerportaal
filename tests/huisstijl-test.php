@@ -144,6 +144,42 @@ class Huisstijl_Test extends WP_UnitTestCase {
 		$this->assertSame( 'download', HDP_Downloads_CPT::get_categorie( $id ) );
 	}
 
+	/* --- De FileBird-mappen -------------------------------------------- */
+
+	/**
+	 * Elke categorie hoort een hoofdmap te hebben om mee gevuld te worden.
+	 * Zonder dat is een categorie alleen met de hand te vullen, en dat is
+	 * precies wat de koppeling moest wegnemen.
+	 */
+	public function test_elke_categorie_heeft_een_filebird_hoofdmap() {
+		$met_map = array_values( HDP_FileBird_Sync::ROOTS );
+
+		foreach ( HDP_Downloads_CPT::CATEGORIEEN as $categorie ) {
+			$this->assertContains( $categorie, $met_map, "Categorie \"$categorie\" heeft geen FileBird-hoofdmap." );
+		}
+	}
+
+	/** En omgekeerd: een hoofdmap mag niet naar een onbekende categorie wijzen. */
+	public function test_elke_hoofdmap_wijst_naar_een_bestaande_categorie() {
+		foreach ( HDP_FileBird_Sync::ROOTS as $map => $categorie ) {
+			$this->assertContains( $categorie, HDP_Downloads_CPT::CATEGORIEEN, "Map \"$map\" wijst naar een onbekende categorie." );
+		}
+	}
+
+	/**
+	 * De mappen worden één keer per versie aangemaakt. Komt er een hoofdmap
+	 * bij zonder dat dit nummer omhooggaat, dan verschijnt die map nooit op
+	 * een site waar het aanmaken al gedraaid heeft — en doet de koppeling
+	 * daar stilletjes niets.
+	 */
+	public function test_mappenversie_hoort_bij_het_aantal_hoofdmappen() {
+		$this->assertGreaterThanOrEqual(
+			2,
+			HDP_FileBird_Sync::MAPPEN_VERSIE,
+			'Bij het toevoegen van een hoofdmap hoort MAPPEN_VERSIE omhoog.'
+		);
+	}
+
 	/* --- De pagina ------------------------------------------------------ */
 
 	public function test_de_pagina_toont_de_huisstijlbestanden() {

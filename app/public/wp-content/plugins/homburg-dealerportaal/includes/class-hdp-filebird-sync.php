@@ -44,8 +44,22 @@ class HDP_FileBird_Sync {
 	 */
 	const ROOTS = array(
 		'Downloads dealerportaal' => 'download',
+		'Content dealerportaal'   => 'content',
 		'Huisstijl dealerportaal' => 'huisstijl',
 	);
+
+	/**
+	 * Hoogste nummer waarvoor de mappen zijn aangemaakt.
+	 *
+	 * Niet één vlag "gedaan", want dan verschijnt een hoofdmap die later
+	 * wordt toegevoegd nooit op een site waar die vlag al stond — en dan
+	 * doet de koppeling stilletjes niets. Hoog dit nummer op zodra ROOTS
+	 * verandert; het aanmaken zelf is onschadelijk om over te doen
+	 * (newOrGet maakt alleen aan wat er nog niet is).
+	 *
+	 * 1 = alleen Downloads. 2 = Content en Huisstijl erbij.
+	 */
+	const MAPPEN_VERSIE = 2;
 
 	/** Behouden voor bestaande verwijzingen; de downloadsmap blijft de hoofdmoot. */
 	const ROOT_FOLDER_NAAM = 'Downloads dealerportaal';
@@ -57,14 +71,14 @@ class HDP_FileBird_Sync {
 		add_action( 'fbv_after_set_folder', array( __CLASS__, 'on_folder_gewijzigd' ), 10, 2 );
 		add_action( 'fbv_after_assign_folder', array( __CLASS__, 'on_bulk_toegewezen' ), 10, 2 );
 
-		// Eenmalig (via een option-vlag, niet bij elke paginalaad) de
-		// hoofdmap + per-merk NL/FR/EN-submappen aanmaken zodat die meteen
+		// Eenmalig per mappenversie (niet bij elke paginalaad) de
+		// hoofdmappen + submappen aanmaken zodat die meteen
 		// klaarstaan in de mediabibliotheek — alleen relevant in wp-admin,
 		// dealers komen hier nooit. Draait na een deploy dus vanzelf één
 		// keer mee bij het eerstvolgende bezoek aan wp-admin, zonder dat
 		// daar op de live site met de hand iets voor aangemaakt hoeft te
 		// worden.
-		if ( is_admin() && ! get_option( 'hdp_filebird_mappen_aangemaakt' ) ) {
+		if ( is_admin() && (int) get_option( 'hdp_filebird_mappen_versie' ) < self::MAPPEN_VERSIE ) {
 			add_action( 'admin_init', array( __CLASS__, 'maak_mappen_indien_nodig' ) );
 		}
 	}
@@ -91,6 +105,9 @@ class HDP_FileBird_Sync {
 			}
 		}
 
+		update_option( 'hdp_filebird_mappen_versie', self::MAPPEN_VERSIE );
+		// De oude vlag blijft staan voor wie er nog naar kijkt; de versie
+		// hierboven is wat telt.
 		update_option( 'hdp_filebird_mappen_aangemaakt', 1 );
 	}
 

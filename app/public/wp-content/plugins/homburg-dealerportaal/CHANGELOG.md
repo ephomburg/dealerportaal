@@ -8,6 +8,15 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.68.1
+
+**Content en huisstijl worden nu ook via FileBird gevuld, en de mappen verschijnen ook op een site waar ze al eens zijn aangemaakt.**
+- De contentbibliotheek had nog geen eigen FileBird-hoofdmap: die bestanden moesten met de hand als "content" worden aangemerkt. Nu geldt voor alle drie de bibliotheken dezelfde werkwijze — bestand in de juiste map zetten in de mediabibliotheek en het staat in het portaal.
+- Mappen onder "Content dealerportaal" houden de taalcode (`Merk (NL)`), want bij advertentiemateriaal maakt de taal uit. Onder "Huisstijl dealerportaal" blijft die weg: een logo heeft geen taal en hoort bij iedere dealer te staan.
+- Verplaatst iemand een bestand van de ene hoofdmap naar de andere, dan verhuist het nu ook in het portaal naar de bijbehorende pagina.
+- Opgelost: de mappen werden eenmalig aangemaakt met een vlag "gedaan" in de database. Op een site waar die vlag al stond — zoals live, van de downloadsmappen — zouden de nieuwe hoofdmappen er nooit bijkomen en deed de koppeling daar stilletjes niets. Die vlag is vervangen door een versienummer, dat omhoog kan zodra er een map bijkomt.
+- Tests: 282 (was 279).
+
 ## 1.68.0
 
 **Huisstijl & media: logo's, kleuren en lettertypen om te downloaden.**
