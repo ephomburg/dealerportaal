@@ -23,6 +23,12 @@
 			return;
 		}
 
+		// Tegengehouden door de controle hieronder: dan gaat er niets weg en
+		// hoort de knop gewoon bruikbaar te blijven.
+		if ( e.defaultPrevented ) {
+			return;
+		}
+
 		var knop = form.querySelector( 'button[type="submit"], input[type="submit"]' );
 		if ( ! knop || knop.disabled ) {
 			return;
@@ -39,6 +45,99 @@
 			knop.classList.add( 'hdp-btn-bezig' );
 		}, 0 );
 	} );
+} )();
+
+/**
+ * Controle vóór het versturen bij de garantieformulieren.
+ *
+ * Wat de server afkeurde kwam pas na een volledige retour terug, en dan
+ * waren de gekozen foto's weg — een browser laat een bestandsveld niet door
+ * een website vullen. Bij een te grote verzending kwam de dealer zelfs
+ * zonder melding terug op een leeg formulier. Dus dezelfde regels hier,
+ * vóór er iets weggaat. De server controleert daarna gewoon nog een keer.
+ *
+ * De grenzen en de teksten staan op het formulier zelf (data-attributen,
+ * zie HDP_Garantie_Render::controle_attributen()), zodat ze in de juiste
+ * taal zijn en niet twee keer bijgehouden worden.
+ *
+ * In de capture-fase, zodat dit vóór het uitschakelen van de knop
+ * hierboven draait.
+ */
+( function () {
+	document.addEventListener( 'submit', function ( e ) {
+		var form = e.target;
+		if ( ! ( form instanceof HTMLFormElement ) || ! form.hasAttribute( 'data-hdp-controle' ) ) {
+			return;
+		}
+
+		var melding = fout( form );
+		var vak = form.querySelector( '.hdp-js-melding' );
+
+		if ( ! melding ) {
+			if ( vak ) {
+				vak.remove();
+			}
+			return;
+		}
+
+		e.preventDefault();
+
+		if ( ! vak ) {
+			vak = document.createElement( 'p' );
+			vak.className = 'hdp-garantie-storing hdp-js-melding';
+			vak.setAttribute( 'role', 'alert' );
+			form.insertBefore( vak, form.firstChild );
+		}
+		vak.textContent = melding;
+		vak.scrollIntoView( { behavior: 'smooth', block: 'center' } );
+	}, true );
+
+	function fout( form ) {
+		var d = form.dataset;
+		var bestanden = [];
+		form.querySelectorAll( 'input[type="file"]' ).forEach( function ( veld ) {
+			Array.prototype.forEach.call( veld.files || [], function ( b ) { bestanden.push( b ); } );
+		} );
+
+		if ( bestanden.length > Number( d.maxAantal ) ) {
+			return d.meldingAantal;
+		}
+
+		var totaal = 0;
+		for ( var i = 0; i < bestanden.length; i++ ) {
+			if ( bestanden[ i ].size > Number( d.maxBestand ) ) {
+				return d.meldingBestand.replace( '%s', bestanden[ i ].name );
+			}
+			totaal += bestanden[ i ].size;
+		}
+		if ( totaal > Number( d.maxTotaal ) ) {
+			return d.meldingTotaal;
+		}
+
+		// De onderdelenregels: alleen de regels waar een nummer in staat
+		// tellen, net als op de server.
+		var regels = form.querySelectorAll( '.hdp-claimregel:not(.hdp-claimregel-kop)' );
+		var derden = false;
+		for ( var r = 0; r < regels.length; r++ ) {
+			var nummer = regels[ r ].querySelector( '[name="onderdeel_nummer[]"]' );
+			if ( ! nummer || '' === nummer.value.trim() ) {
+				continue;
+			}
+			var uren = regels[ r ].querySelector( '[name="onderdeel_uren[]"]' );
+			if ( uren && '' === uren.value.trim() ) {
+				return d.meldingUren;
+			}
+			var herkomst = regels[ r ].querySelector( '[name="onderdeel_herkomst[]"]' );
+			if ( herkomst && 'derden' === herkomst.value ) {
+				derden = true;
+			}
+		}
+		if ( derden && ! bestanden.length ) {
+			return d.meldingFactuur;
+		}
+
+		return '';
+	}
 } )();
 
 /**

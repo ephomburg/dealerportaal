@@ -21,6 +21,7 @@ class HDP_Admin_Upload {
 	const GEBRUIKER_NONCE_ACTIE       = 'hdp_gebruiker_bijwerken';
 	const BULK_GOEDKEUREN_NONCE_ACTIE = 'hdp_bulk_goedkeuren';
 	const BULK_DOWNLOADS_NONCE_ACTIE  = 'hdp_bulk_downloads';
+	const VERSIE_NONCE_ACTIE          = 'hdp_download_versie';
 
 	/**
 	 * E-mailadressen die het adminportaal mogen gebruiken zónder dat ze
@@ -36,6 +37,7 @@ class HDP_Admin_Upload {
 		add_action( 'init', array( __CLASS__, 'verwerk_gebruiker_bijwerken' ) );
 		add_action( 'init', array( __CLASS__, 'verwerk_bulk_goedkeuren' ) );
 		add_action( 'init', array( __CLASS__, 'verwerk_bulk_downloads' ) );
+		add_action( 'init', array( __CLASS__, 'verwerk_versie' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
 	}
 
@@ -104,47 +106,31 @@ class HDP_Admin_Upload {
 
 		$terug_naar = self::terug_naar_url();
 
-		$titel = isset( $_POST['hdp_titel'] ) ? sanitize_text_field( wp_unslash( $_POST['hdp_titel'] ) ) : '';
-		if ( ! $titel ) {
-			self::redirect_met_status( $terug_naar, 'fout', 'Geef een titel op.' );
-		}
-
-		if ( empty( $_FILES['hdp_bestand']['name'] ) ) {
+		$bestanden = self::bestanden_uit( 'hdp_bestand' );
+		if ( ! $bestanden ) {
 			self::redirect_met_status( $terug_naar, 'fout', 'Kies eerst een bestand.' );
 		}
 
-		if ( ! function_exists( 'wp_handle_upload' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-		}
-		require_once ABSPATH . 'wp-admin/includes/image.php';
-		require_once ABSPATH . 'wp-admin/includes/media.php';
-
-		$upload = wp_handle_upload(
-			$_FILES['hdp_bestand'],
-			array(
-				'test_form' => false,
-				'mimes'     => self::toegestane_mimes(),
-			)
-		);
-
-		if ( isset( $upload['error'] ) ) {
-			self::redirect_met_status( $terug_naar, 'fout', $upload['error'] );
+		// Leeg laten mag: dan een nette titel uit de bestandsnaam. Eerder
+		// werd de bestandsnaam vaak letterlijk overgetypt of geplakt, en
+		// stonden er titels als "Gebruikershandleiding_HOMBURG_JUNIOR_-_NL".
+		$titel = isset( $_POST['hdp_titel'] ) ? sanitize_text_field( wp_unslash( $_POST['hdp_titel'] ) ) : '';
+		if ( ! $titel ) {
+			$titel = HDP_Downloads_CPT::nette_titel( $bestanden[0]['name'] );
 		}
 
-		$attachment_id = wp_insert_attachment(
-			array(
-				'post_mime_type' => $upload['type'],
-				'post_title'     => $titel,
-				'post_status'    => 'inherit',
-			),
-			$upload['file']
-		);
-
-		if ( is_wp_error( $attachment_id ) ) {
-			self::redirect_met_status( $terug_naar, 'fout', 'Uploaden van het bestand is mislukt.' );
+		// Meerdere bestanden in één keer zijn hetzelfde document in
+		// verschillende formaten (PDF + Excel): het eerste is het
+		// hoofdbestand, de rest extra formaten onder dezelfde titel.
+		$bijlagen = array();
+		foreach ( $bestanden as $bestand ) {
+			$attachment_id = self::sla_bestand_op( $bestand, $titel );
+			if ( is_wp_error( $attachment_id ) ) {
+				self::redirect_met_status( $terug_naar, 'fout', $attachment_id->get_error_message() );
+			}
+			$bijlagen[] = $attachment_id;
 		}
-
-		wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $upload['file'] ) );
+		$attachment_id = array_shift( $bijlagen );
 
 		$categorie = isset( $_POST['hdp_categorie'] ) && 'content' === $_POST['hdp_categorie'] ? 'content' : 'download';
 		$merk      = isset( $_POST['hdp_merk'] ) ? sanitize_text_field( wp_unslash( $_POST['hdp_merk'] ) ) : '';
@@ -176,12 +162,133 @@ class HDP_Admin_Upload {
 		}
 
 		update_post_meta( $download_id, '_hdp_attachment_id', $attachment_id );
+		HDP_Downloads_CPT::zet_extra_bestanden( $download_id, $bijlagen );
 		update_post_meta( $download_id, '_hdp_categorie', $categorie );
 		update_post_meta( $download_id, '_hdp_merk', $merk );
 		update_post_meta( $download_id, '_hdp_regios', implode( ',', $regios ) );
 
 		$doelpagina = 'content' === $categorie ? 'de contentpagina' : 'de downloadspagina';
 		self::redirect_met_status( $terug_naar, 'gelukt', $titel . ' is geüpload en staat nu op ' . $doelpagina . '.' );
+	}
+
+	/**
+	 * Een nieuwe versie of een extra formaat bij een bestaande download,
+	 * vanuit de lijst "Geüploade bestanden".
+	 *
+	 * Een nieuwe versie vervangt het bestand (zie
+	 * HDP_Downloads_CPT::vervang_bestand()): één regel met de actuele
+	 * prijslijst in plaats van de oude en de nieuwe naast elkaar.
+	 */
+	public static function verwerk_versie() {
+		if ( ! isset( $_POST['hdp_versie_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hdp_versie_nonce'] ) ), self::VERSIE_NONCE_ACTIE ) ) {
+			return;
+		}
+		if ( ! self::mag_gebruiken() ) {
+			return;
+		}
+
+		$terug_naar  = self::terug_naar_url();
+		$download_id = isset( $_POST['hdp_download_id'] ) ? absint( $_POST['hdp_download_id'] ) : 0;
+		$actie       = isset( $_POST['hdp_versie_actie'] ) ? sanitize_key( wp_unslash( $_POST['hdp_versie_actie'] ) ) : '';
+		$download    = get_post( $download_id );
+
+		if ( ! $download || HDP_Downloads_CPT::POST_TYPE !== $download->post_type || ! in_array( $actie, array( 'vervang', 'toevoegen' ), true ) ) {
+			self::redirect_met_status( $terug_naar, 'fout', 'Onbekende download.' );
+		}
+
+		$bestanden = self::bestanden_uit( 'hdp_versie_bestand' );
+		if ( ! $bestanden ) {
+			self::redirect_met_status( $terug_naar, 'fout', 'Kies eerst een bestand.' );
+		}
+
+		$attachment_id = self::sla_bestand_op( $bestanden[0], $download->post_title );
+		if ( is_wp_error( $attachment_id ) ) {
+			self::redirect_met_status( $terug_naar, 'fout', $attachment_id->get_error_message() );
+		}
+
+		if ( 'vervang' === $actie ) {
+			HDP_Downloads_CPT::vervang_bestand( $download_id, $attachment_id );
+			self::redirect_met_status( $terug_naar, 'gelukt', $download->post_title . ': nieuwe versie staat online en is als nieuw gemarkeerd.' );
+		}
+
+		HDP_Downloads_CPT::zet_extra_bestanden( $download_id, array_merge( HDP_Downloads_CPT::extra_bestanden( $download_id ), array( $attachment_id ) ) );
+		self::redirect_met_status( $terug_naar, 'gelukt', $download->post_title . ': formaat ' . HDP_Downloads_CPT::type_label( $download_id, $attachment_id ) . ' toegevoegd.' );
+	}
+
+	/**
+	 * De bestanden uit een uploadveld, als losse lijst — of het veld nu één
+	 * bestand doorgeeft of meerdere (name="...[]").
+	 *
+	 * @return array Lijst in de vorm die wp_handle_upload() verwacht.
+	 */
+	private static function bestanden_uit( $veld ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- nonce is al gecontroleerd door de aanroeper; wp_handle_upload() controleert de inhoud.
+		$ruw = isset( $_FILES[ $veld ] ) ? $_FILES[ $veld ] : array();
+		if ( empty( $ruw['name'] ) ) {
+			return array();
+		}
+
+		if ( ! is_array( $ruw['name'] ) ) {
+			return array( $ruw );
+		}
+
+		$lijst = array();
+		foreach ( array_keys( $ruw['name'] ) as $i ) {
+			if ( '' === (string) $ruw['name'][ $i ] ) {
+				continue;
+			}
+			$lijst[] = array(
+				'name'     => $ruw['name'][ $i ],
+				'type'     => $ruw['type'][ $i ],
+				'tmp_name' => $ruw['tmp_name'][ $i ],
+				'error'    => $ruw['error'][ $i ],
+				'size'     => $ruw['size'][ $i ],
+			);
+		}
+
+		return $lijst;
+	}
+
+	/**
+	 * Zet één geüpload bestand in de mediabibliotheek.
+	 *
+	 * @return int|WP_Error Bijlage-ID.
+	 */
+	private static function sla_bestand_op( $bestand, $titel ) {
+		if ( ! function_exists( 'wp_handle_upload' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+
+		$upload = wp_handle_upload(
+			$bestand,
+			array(
+				'test_form' => false,
+				'mimes'     => self::toegestane_mimes(),
+			)
+		);
+
+		if ( isset( $upload['error'] ) ) {
+			return new WP_Error( 'hdp_upload', $upload['error'] );
+		}
+
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_mime_type' => $upload['type'],
+				'post_title'     => $titel,
+				'post_status'    => 'inherit',
+			),
+			$upload['file']
+		);
+
+		if ( is_wp_error( $attachment_id ) ) {
+			return new WP_Error( 'hdp_upload', 'Uploaden van het bestand is mislukt.' );
+		}
+
+		wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $upload['file'] ) );
+
+		return $attachment_id;
 	}
 
 	/**
@@ -403,13 +510,15 @@ class HDP_Admin_Upload {
 				<?php wp_nonce_field( self::NONCE_ACTIE, 'hdp_admin_upload_nonce' ); ?>
 
 				<div class="hdp-veld">
-					<label for="hdp_titel">Titel</label>
-					<input type="text" id="hdp_titel" name="hdp_titel" required>
+					<label for="hdp_bestand">Bestand</label>
+					<input type="file" id="hdp_bestand" name="hdp_bestand[]" multiple required>
+					<span class="hdp-veld-hint">Hetzelfde document in meerdere formaten (bijv. PDF én Excel)? Kies ze samen: ze komen onder één titel, met een knop per formaat.</span>
 				</div>
 
 				<div class="hdp-veld">
-					<label for="hdp_bestand">Bestand</label>
-					<input type="file" id="hdp_bestand" name="hdp_bestand" required>
+					<label for="hdp_titel">Titel</label>
+					<input type="text" id="hdp_titel" name="hdp_titel" placeholder="Leeg laten = nette titel uit de bestandsnaam">
+					<span class="hdp-veld-hint">Dit ziet de dealer. Bijv. "Gebruikershandleiding Homburg Junior (2016–2020)" in plaats van de bestandsnaam.</span>
 				</div>
 
 				<div class="hdp-veld">
@@ -439,7 +548,7 @@ class HDP_Admin_Upload {
 				<button type="submit" class="hdp-btn">Uploaden</button>
 			</form>
 
-			<h2 class="hdp-admin-recent-titel">Recent geüpload</h2>
+			<h2 class="hdp-admin-recent-titel">Geüploade bestanden</h2>
 			<?php echo self::render_recente_uploads(); // phpcs:ignore WordPress.Security.EscapeOutput -- reeds ge-escaped in render_recente_uploads(). ?>
 		</div>
 		<?php
@@ -544,7 +653,8 @@ class HDP_Admin_Upload {
 		$downloads = get_posts(
 			array(
 				'post_type'      => HDP_Downloads_CPT::POST_TYPE,
-				'posts_per_page' => 10,
+				// Alles, niet de laatste tien: een oudere prijslijst moet ook een nieuwe versie kunnen krijgen.
+				'posts_per_page' => -1,
 				'post_status'    => 'publish',
 				'orderby'        => 'date',
 				'order'          => 'DESC',
@@ -607,6 +717,17 @@ class HDP_Admin_Upload {
 						</span>
 					</span>
 					<a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( HDP_Downloads_CPT::download_url( $download->ID ) ); ?>">Bekijk</a>
+					<?php
+					// Eigen formulier per regel: de lijst zelf staat niet in een
+					// formulier (zie hierboven), dus dat mag.
+					?>
+					<form method="post" enctype="multipart/form-data" class="hdp-versie-formulier">
+						<?php wp_nonce_field( self::VERSIE_NONCE_ACTIE, 'hdp_versie_nonce' ); ?>
+						<input type="hidden" name="hdp_download_id" value="<?php echo esc_attr( $download->ID ); ?>">
+						<input type="file" name="hdp_versie_bestand" required aria-label="Bestand voor <?php echo esc_attr( $download->post_title ); ?>">
+						<button type="submit" name="hdp_versie_actie" value="vervang" class="hdp-btn hdp-btn-secundair hdp-btn-klein">Nieuwe versie</button>
+						<button type="submit" name="hdp_versie_actie" value="toevoegen" class="hdp-btn hdp-btn-secundair hdp-btn-klein">Formaat toevoegen</button>
+					</form>
 				</div>
 			<?php endforeach; ?>
 		</div>

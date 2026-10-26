@@ -217,12 +217,88 @@ class HDP_Supabase {
 			// bruikbaar, dus die gaat mee terug in plaats van verloren.
 			$melding = self::melding_uit( $tekst );
 			HDP_Log::schrijf( 'Supabase (' . $verbinding . ') ' . $methode . ' ' . $bron . ' gaf HTTP ' . $code . ': ' . $melding, 'WAARSCHUWING' );
-			return new WP_Error( 'hdp_supabase_fout', $melding, array( 'status' => $code ) );
+			return new WP_Error(
+				'hdp_supabase_fout',
+				$melding,
+				array(
+					'status'  => $code,
+					// De foutcode van Postgres. Een bewuste weigering uit de
+					// database (RAISE) heeft P0001; een technische fout iets
+					// anders. Zo kan de weergave het verschil zien.
+					'pg_code' => self::code_uit( $tekst ),
+				)
+			);
 		}
 
 		$data = json_decode( $tekst, true );
 
 		return is_array( $data ) ? $data : array();
+	}
+
+	/** De Postgres-foutcode uit een Supabase-antwoord, of '' als die er niet in staat. */
+	private static function code_uit( $tekst ) {
+		$data = json_decode( $tekst, true );
+		return is_array( $data ) && isset( $data['code'] ) ? (string) $data['code'] : '';
+	}
+
+	/**
+	 * Tijdelijke links naar bestanden in een privé opslagbak, in één ronde.
+	 *
+	 * De bak met foto's en facturen is niet openbaar. Wie een bestand mag
+	 * zien bepaalt WordPress (zie HDP_Garantie::claim_voor_dealer); daarna
+	 * krijgt alleen die bezoeker een link die na $seconden vanzelf vervalt.
+	 *
+	 * @param string   $bak      De opslagbak.
+	 * @param string[] $paden    Paden binnen de bak.
+	 * @param int      $seconden Hoelang de links geldig blijven.
+	 * @return array Pad => volledige URL. Een pad zonder link ontbreekt; bij
+	 *               een storing is de lijst leeg.
+	 */
+	public static function tijdelijke_links( $verbinding, $bak, $paden, $seconden = 3600 ) {
+		$paden = array_values( array_filter( array_map( 'strval', (array) $paden ) ) );
+		if ( ! $paden || ! self::beschikbaar( $verbinding ) ) {
+			return array();
+		}
+
+		$sleutel  = self::sleutel( $verbinding );
+		$antwoord = wp_remote_post(
+			self::url( $verbinding ) . '/storage/v1/object/sign/' . $bak,
+			array(
+				'headers' => array(
+					'apikey'        => $sleutel,
+					'Authorization' => 'Bearer ' . $sleutel,
+					'Content-Type'  => 'application/json',
+				),
+				'body'    => wp_json_encode(
+					array(
+						'expiresIn' => (int) $seconden,
+						'paths'     => $paden,
+					)
+				),
+				'timeout' => 15,
+			)
+		);
+
+		if ( is_wp_error( $antwoord ) ) {
+			HDP_Log::schrijf( 'Supabase-opslag onbereikbaar bij tijdelijke links: ' . $antwoord->get_error_message(), 'WAARSCHUWING' );
+			return array();
+		}
+
+		$data = json_decode( wp_remote_retrieve_body( $antwoord ), true );
+		if ( (int) wp_remote_retrieve_response_code( $antwoord ) >= 300 || ! is_array( $data ) ) {
+			return array();
+		}
+
+		$links = array();
+		foreach ( $data as $rij ) {
+			if ( empty( $rij['path'] ) || empty( $rij['signedURL'] ) ) {
+				continue;
+			}
+			// Supabase geeft de link relatief aan /storage/v1 terug.
+			$links[ (string) $rij['path'] ] = self::url( $verbinding ) . '/storage/v1' . $rij['signedURL'];
+		}
+
+		return $links;
 	}
 
 	/** Haalt de leesbare foutmelding uit een Supabase-antwoord. */

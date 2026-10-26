@@ -23,18 +23,18 @@ $link_icoon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 		<nav class="hdp-hoofdmenu" aria-label="<?php echo esc_attr( HDP_I18N::t( 'nav_aria' ) ); ?>">
 			<?php if ( is_user_logged_in() && class_exists( 'WooCommerce' ) && function_exists( 'homburg_wc_favoriete_ids' ) ) : ?>
 				<?php $hdp_aantal_favorieten = count( homburg_wc_favoriete_ids() ); ?>
-				<a class="hdp-favorieten-knop" href="<?php echo esc_url( wc_get_account_endpoint_url( 'favorieten' ) ); ?>" aria-label="<?php esc_attr_e( 'Mijn favorieten', 'homburg-dealerportaal' ); ?>">
+				<a class="hdp-favorieten-knop" href="<?php echo esc_url( wc_get_account_endpoint_url( 'favorieten' ) ); ?>" aria-label="<?php echo esc_attr( HDP_I18N::t( 'header_favorieten' ) ); ?>">
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
 					<span class="hdp-favorieten-aantal"<?php echo $hdp_aantal_favorieten ? '' : ' hidden'; ?>><?php echo (int) $hdp_aantal_favorieten; ?></span>
 				</a>
 			<?php endif; ?>
 			<div class="hdp-links-menu">
 				<input type="checkbox" id="hdp-links-menu-toggle" class="hdp-account-menu-toggle">
-				<label for="hdp-links-menu-toggle" class="hdp-links-menu-knop" aria-label="<?php esc_attr_e( 'Links naar Homburg Holland en Belgium', 'homburg-dealerportaal' ); ?>">
+				<label for="hdp-links-menu-toggle" class="hdp-links-menu-knop" aria-label="<?php echo esc_attr( HDP_I18N::t( 'header_links_label' ) ); ?>">
 					<span class="hdp-links-menu-hoofd">
 						<?php echo $link_icoon; // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
 						<?php // Eigen span: op een telefoon blijft alleen het icoontje over, maar wel zo dat een schermlezer het woord nog voorleest. ?>
-						<span class="hdp-knop-tekst"><?php esc_html_e( 'Links', 'homburg-dealerportaal' ); ?></span>
+						<span class="hdp-knop-tekst"><?php echo esc_html( HDP_I18N::t( 'header_links' ) ); ?></span>
 					</span>
 					<span class="hdp-links-menu-chevron-vak">
 						<svg class="hdp-links-menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
@@ -71,7 +71,7 @@ $link_icoon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 			</script>
 			<?php if ( class_exists( 'WooCommerce' ) && ( is_woocommerce() || is_cart() || is_checkout() ) ) : ?>
 				<?php $hdp_aantal_mandje = WC()->cart ? WC()->cart->get_cart_contents_count() : 0; ?>
-				<a class="hdp-mandje-knop" href="<?php echo esc_url( wc_get_cart_url() ); ?>" aria-label="<?php esc_attr_e( 'Winkelwagen', 'homburg-dealerportaal' ); ?>">
+				<a class="hdp-mandje-knop" href="<?php echo esc_url( wc_get_cart_url() ); ?>" aria-label="<?php echo esc_attr( HDP_I18N::t( 'header_winkelwagen' ) ); ?>">
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1.5"/><circle cx="19" cy="21" r="1.5"/><path d="M2 3h3l2.6 12.5a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H6"/></svg>
 					<span class="hdp-mandje-aantal"<?php echo $hdp_aantal_mandje ? '' : ' hidden'; ?>><?php echo (int) $hdp_aantal_mandje; ?></span>
 				</a>
@@ -84,10 +84,10 @@ $link_icoon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 							<?php // Rechtstreeks naar de bestellingen: /mijn-account/ stuurt daar toch naartoe (zie homburg_wc_myaccount_naar_bestellingen), dit scheelt een omleiding per klik. ?>
 							<a class="hdp-account-split-link" href="<?php echo esc_url( wc_get_account_endpoint_url( 'orders' ) ); ?>">
 								<?php echo HDP_Icons::svg_icoon( 'gebruiker' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
-								<span class="hdp-knop-tekst"><?php esc_html_e( 'Mijn account', 'homburg-dealerportaal' ); ?></span>
+								<span class="hdp-knop-tekst"><?php echo esc_html( HDP_I18N::t( 'header_mijn_account' ) ); ?></span>
 							</a>
 						<?php endif; ?>
-						<label for="hdp-account-menu-toggle" class="hdp-account-split-toggle" aria-label="<?php esc_attr_e( 'Accountmenu', 'homburg-dealerportaal' ); ?>">
+						<label for="hdp-account-menu-toggle" class="hdp-account-split-toggle" aria-label="<?php echo esc_attr( HDP_I18N::t( 'header_accountmenu' ) ); ?>">
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
 						</label>
 					</div>

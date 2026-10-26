@@ -1111,6 +1111,70 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 .hdp-download-item .hdp-btn { padding: 0.55rem 1.1rem; font-size: 0.85rem; flex-shrink: 0; }
 .hdp-terug { margin-top: 1.6rem; }
 
+/* Formaat, grootte en datum onder de titel: "PDF 14 MB · 6 okt 2026". */
+.hdp-download-info > .hdp-download-meta { margin-top: 0.2rem; font-size: 0.74rem; letter-spacing: 0.01em; }
+/* Bekijken, downloaden en (bij meerdere formaten) een knop per formaat. */
+.hdp-download-knoppen { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end; flex-shrink: 0; }
+
+/* --- Contentgalerij -------------------------------------------------- */
+/* Content is beeldmateriaal: kaarten met een voorbeeld in een raster, in
+   plaats van een lijst met bestandsnamen. */
+.hdp-content-alles { margin: 0 0 1rem; display: flex; justify-content: flex-end; }
+.hdp-download-lijst.hdp-content-galerij {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: 1.1rem;
+	background: none;
+	box-shadow: none;
+	overflow: visible;
+	border-radius: 0;
+}
+.hdp-content-galerij .hdp-download-item.hdp-content-kaart {
+	flex-direction: column;
+	align-items: stretch;
+	gap: 0;
+	padding: 0;
+	border: 0;
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	overflow: hidden;
+}
+.hdp-content-beeld {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	aspect-ratio: 4 / 3;
+	background: var(--wp--preset--color--grijs-licht);
+	overflow: hidden;
+}
+.hdp-content-beeld img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hdp-content-beeld-type {
+	padding: 0.4rem 0.7rem;
+	border-radius: 6px;
+	background: var(--wp--preset--color--donkergrijs);
+	color: var(--wp--preset--color--wit);
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+}
+.hdp-content-kaart .hdp-download-info { padding: 0.9rem 1rem 0.4rem; }
+.hdp-content-kaart .hdp-download-info > .hdp-content-bijschrift {
+	margin-top: 0.35rem;
+	white-space: pre-line;
+	display: -webkit-box;
+	-webkit-line-clamp: 4;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+.hdp-content-kaart .hdp-download-knoppen { justify-content: flex-start; padding: 0.4rem 1rem 1rem; margin-top: auto; }
+.hdp-content-kaart .hdp-download-knoppen .hdp-btn { padding: 0.45rem 0.85rem; font-size: 0.8rem; }
+
+/* Adminportaal: nieuwe versie of extra formaat per bestand. */
+.hdp-admin-sectie .hdp-download-item { flex-wrap: wrap; }
+.hdp-versie-formulier { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; flex-basis: 100%; padding-left: 62px; }
+.hdp-versie-formulier input[type="file"] { font-size: 0.8rem; max-width: 260px; }
+
 /* ==========================================================================
    BESTELGESCHIEDENIS
    ========================================================================== */
@@ -1363,7 +1427,9 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	.hdp-hero-plaat { left: 12px; right: 12px; bottom: 12px; max-width: none; padding: 1.2rem 1.3rem; }
 	.hdp-hero-plaat h1 { font-size: 1.4rem; }
 	.hdp-download-item { flex-wrap: wrap; }
-	.hdp-download-item .hdp-btn { width: 100%; }
+	.hdp-download-knoppen { width: 100%; }
+	.hdp-download-item .hdp-btn { flex: 1 1 auto; text-align: center; }
+	.hdp-versie-formulier { padding-left: 0; }
 }
 
 /* --------------------------------------------------------------------------
@@ -1977,6 +2043,75 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 .hdp-bijlage-icoon { display: inline-flex; }
 .hdp-bijlage-icoon svg { width: 16px; height: 16px; stroke: var(--wp--preset--color--grijs-tekst); fill: none; }
 
+/* Een bijlage is nu een link naar het bestand zelf. De link vult het hele
+   vakje, zodat er niet precies op de naam geklikt hoeft te worden. */
+.hdp-bijlage:has(.hdp-bijlage-link) { padding: 0; }
+.hdp-bijlage-link {
+	display: inline-flex;
+	align-items: center;
+	gap: .5rem;
+	padding: .55rem .9rem;
+	min-width: 0;
+	color: inherit;
+	text-decoration: none;
+	border-radius: 6px;
+}
+.hdp-bijlage-link:hover,
+.hdp-bijlage-link:focus-visible { background: var(--wp--preset--color--grijs-licht); }
+.hdp-bijlage-link:hover .hdp-bijlage-naam { text-decoration: underline; }
+.hdp-bijlage svg { flex: 0 0 auto; width: 16px; height: 16px; stroke: var(--wp--preset--color--grijs-tekst); fill: none; }
+.hdp-bijlage-naam { min-width: 0; overflow-wrap: anywhere; }
+.hdp-bijlage-voorbeeld {
+	flex: 0 0 auto;
+	width: 44px;
+	height: 44px;
+	object-fit: cover;
+	border-radius: 4px;
+	background: var(--wp--preset--color--grijs-licht);
+}
+.hdp-bijlage-van {
+	flex: 0 0 auto;
+	padding: .05rem .45rem;
+	border-radius: 20px;
+	background: var(--hdp-loopt-vlak);
+	color: var(--hdp-loopt-tekst);
+	font-size: .7rem;
+	font-weight: 700;
+}
+
+/* Enters in een klacht of bericht horen enters te blijven. Zonder dit
+   werd "Doos ingedeukt. / Twee lagers krom. / Groet, Gerard" één lap
+   tekst — zowel wat de dealer typte als wat Homburg in de app schreef. */
+.hdp-gesprek .hdp-bericht-tekst,
+.hdp-ticket-klacht dd,
+.hdp-ticket-actie p,
+.hdp-ticket-besluit p {
+	white-space: pre-line;
+}
+
+/* ── Het besluit op een afgeronde claim ───────────────────────── */
+.hdp-ticket-besluit {
+	padding: 1rem 1.2rem;
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	border-left: 4px solid;
+	font-size: .9rem;
+	line-height: 1.55;
+}
+.hdp-ticket-besluit-goedgekeurd { background: var(--hdp-klaar-vlak); border-left-color: var(--hdp-klaar-tekst); color: var(--hdp-klaar-tekst); }
+.hdp-ticket-besluit-afgewezen   { background: var(--hdp-gestopt-vlak); border-left-color: var(--hdp-gestopt-tekst); color: var(--hdp-gestopt-tekst); }
+.hdp-ticket-besluit-kop {
+	display: block;
+	font-size: .7rem;
+	font-weight: 800;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+	opacity: .8;
+}
+.hdp-ticket-besluit strong { display: block; font-size: 1.05rem; margin: .1rem 0 .3rem; }
+.hdp-ticket-besluit p { margin: 0 0 .5rem; color: var(--wp--preset--color--donkergrijs); }
+.hdp-ticket-besluit p.hdp-ticket-besluit-vraag { margin: 0; font-size: .82rem; color: inherit; }
+
 /* ── Wie is er aan zet ───────────────────────────────────────── */
 /* Staat in de zijkolom tussen de witte kaarten; zonder eigen vorm las het
    als losse tekst in het niets. */
@@ -1995,12 +2130,6 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	background: var(--hdp-aanzet-zacht);
 	border-left: 4px solid var(--hdp-aanzet-accent);
 	color: var(--hdp-aanzet-tekst);
-	font-weight: 600;
-}
-.hdp-ticket-ligtbij-klaar {
-	background: var(--hdp-klaar-vlak);
-	border-left-color: var(--hdp-klaar-tekst);
-	color: var(--hdp-klaar-tekst);
 	font-weight: 600;
 }
 
@@ -2152,6 +2281,21 @@ a.hdp-garantie-item-actie:focus-visible { background: var(--hdp-aanzet-zacht-hov
 .hdp-machine-balk i { display: block; height: 100%; background: var(--hdp-klaar-tekst); }
 .hdp-machine-balk-bijna i { background: var(--hdp-aanzet-accent); }
 .hdp-machine-balk-verlopen i { background: #c9cbd0; }
+.hdp-machine-claim { flex-shrink: 0; white-space: nowrap; }
+
+/* In het werkblad staat de machinelijst in de smalle middenkolom. Daar
+   werd alles op één regel geperst: de naam brak per woord af en de
+   garantiebalk viel buiten de kaart. Afhankelijk van de breedte van de
+   lijst zelf (niet van het scherm): is die smal, dan krijgt elk onderdeel
+   een eigen regel onder de naam. */
+.hdp-garantie-kolom-lijst { container-type: inline-size; }
+@container (max-width: 40rem) {
+	.hdp-machine { flex-wrap: wrap; align-items: flex-start; }
+	.hdp-machine-info { flex: 1 1 0; }
+	.hdp-machine-garantie,
+	.hdp-machine-beoordeling { flex: 1 1 100%; width: auto; max-width: none; }
+	.hdp-machine-claim { flex: 1 1 100%; text-align: center; }
+}
 
 /* ── Formulierscherm ─────────────────────────────────────────── */
 .hdp-machinekeuze select,
@@ -2184,6 +2328,7 @@ a.hdp-garantie-item-actie:focus-visible { background: var(--hdp-aanzet-zacht-hov
 	.hdp-garantie-aandacht .hdp-btn { width: 100%; text-align: center; }
 	.hdp-machine { flex-wrap: wrap; }
 	.hdp-machine-garantie { width: 100%; }
+	.hdp-machine-claim { width: 100%; text-align: center; }
 }
 
 /* ── Zoeken binnen garantie ──────────────────────────────────────
@@ -3100,6 +3245,42 @@ body.hdp-app-layout .hdp-app-inhoud {
 	border-radius: var(--hdp-werkblad-ronding) 0 0 var(--hdp-werkblad-ronding);
 }
 
+/* De rode bovenrand met de ronde hoek hoort te blijven staan. Het is de
+   rand van het werkblad zelf, dus bij het scrollen schoof hij mee omhoog
+   onder de balk door — en daarmee verdween de bocht waar het menu in de
+   balk overgaat.
+
+   Een randje van de bovenkant, dat onder de balk blijft plakken: zelfde
+   kleur, zelfde rand, zelfde ronding, precies over de echte rand heen
+   zolang er niet gescrold is. De inhoud schuift eronderdoor. Neemt geen
+   ruimte in (de negatieve marge onderaan), dus er verspringt niets.
+
+   Buiten de bocht hoort het donker van de balk te staan, niet de lichte
+   inhoud die eronder langs schuift. Een slagschaduw volgt de ronding en
+   wordt alleen buiten het randje getekend; een halve ronding naar
+   linksboven verschoven vult precies dat hoekje. */
+body.hdp-app-layout .hdp-app-inhoud::before {
+	content: "";
+	display: block;
+	position: sticky;
+	top: var(--hdp-header-hoogte, 0px);
+	z-index: 20;
+	height: var(--hdp-werkblad-ronding);
+	/* Boven: terug tot over de echte rand (padding + rand). Onder: zoveel
+	   terug dat het randje netto geen ruimte inneemt — hoogte plus beide
+	   marges optellen tot nul. */
+	margin: calc(-2rem - 4px) -2.2rem calc(2rem - var(--hdp-werkblad-ronding)) calc(-2.2rem - 4px);
+	background: var(--wp--preset--color--grijs-licht);
+	border-top: 4px solid var(--wp--preset--color--homburg-rood);
+	border-left: 4px solid var(--wp--preset--color--homburg-rood);
+	border-top-left-radius: var(--hdp-werkblad-ronding);
+	box-shadow: calc(-0.5 * var(--hdp-werkblad-ronding)) calc(-0.5 * var(--hdp-werkblad-ronding)) 0 0 var(--wp--preset--color--donkergrijs);
+	pointer-events: none;
+}
+body.admin-bar.hdp-app-layout .hdp-app-inhoud::before {
+	top: calc(var(--hdp-header-hoogte, 0px) + 32px);
+}
+
 /* --- De kop van het werkblad ---------------------------------------- */
 
 .hdp-welkomkop {
@@ -3171,7 +3352,12 @@ body.home .hdp-info-split > .wp-block-column:nth-child(1) {
 }
 /* En de naslag wordt een rustige kolom ernaast. */
 body.home .hdp-info-split > .wp-block-column:nth-child(2) {
-	flex: 1 1 290px;
+	/* Een vaste, ruime breedte in plaats van "wat er overblijft": naast
+	   merkentegels die alles mochten pakken bleef de naslag een smalle
+	   strook van zo'n 260px, met e-mailadressen die halverwege braken en
+	   tegels die het scherm domineerden. Op een smal scherm krimpt hij
+	   gewoon mee, of valt hij onder de tegels. */
+	flex: 0 1 400px;
 	min-width: 0;
 	align-self: flex-start;
 	padding: 1.1rem 1.2rem;
@@ -3180,6 +3366,224 @@ body.home .hdp-info-split > .wp-block-column:nth-child(2) {
 	border-radius: var(--hdp-radius);
 }
 body.home .hdp-info-split > .wp-block-column:nth-child(2) .hdp-info-kaart:first-child { padding-top: 0; }
+
+/* ==========================================================================
+   STARTPAGINA — "wat ligt er vandaag voor je klaar"
+   Eerst de groet met de vraag of het magazijn bereikbaar is, dan zoeken,
+   dan wat er op de dealer wacht. Daaronder links het nieuws, rechts de
+   merken en het magazijn als compacte naslag. Vervangt vier grote
+   merkentegels die de pagina domineerden zonder iets over vandaag te zeggen.
+   ========================================================================== */
+
+.hdp-welkomkop-boven {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 0.8rem 1.5rem;
+	margin-bottom: 1.1rem;
+}
+.hdp-welkomkop-boven .hdp-welkomkop-tekst { margin-bottom: 0; }
+
+/* Groen als je nu kunt bellen, neutraal grijs als het gesloten is: gesloten
+   is geen fout, dus geen rood. */
+.hdp-magazijn-status {
+	margin: 0;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.45rem 0.9rem;
+	border-radius: 20px;
+	background: var(--hdp-neutraal-vlak);
+	color: var(--hdp-neutraal-tekst);
+	font-size: 0.8rem;
+	font-weight: 700;
+}
+.hdp-magazijn-bol { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.hdp-magazijn-open { background: var(--hdp-klaar-vlak); color: var(--hdp-klaar-tekst); }
+
+.hdp-welkomkop-snel { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+.hdp-welkomkop-snel a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 40px;
+	padding: 0 0.95rem;
+	border-radius: 20px;
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
+	color: var(--wp--preset--color--donkergrijs);
+	font-size: 0.8rem;
+	font-weight: 600;
+	text-decoration: none;
+	transition: border-color 0.15s, color 0.15s;
+}
+.hdp-welkomkop-snel a:hover { border-color: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--homburg-rood); }
+
+/* --- Vandaag voor jou ------------------------------------------------ */
+.hdp-vandaag { margin: 1.8rem 0 2rem; }
+.hdp-vandaag-kop {
+	margin: 0 0 0.8rem;
+	font-size: 0.72rem;
+	font-weight: 800;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-vandaag-tegels {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 0.9rem;
+}
+.hdp-vandaag-tegel {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 1.1rem 1.2rem;
+	border-radius: 12px;
+	background: var(--wp--preset--color--wit);
+	border: 2px solid var(--wp--preset--color--rand);
+	color: var(--wp--preset--color--donkergrijs);
+	text-decoration: none;
+	transition: border-color 0.15s, box-shadow 0.15s;
+}
+.hdp-vandaag-tegel:hover { border-color: var(--wp--preset--color--homburg-rood); box-shadow: var(--hdp-schaduw); color: var(--wp--preset--color--donkergrijs); }
+.hdp-vandaag-tegel-boven { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.hdp-vandaag-tegel-label { font-size: 0.8rem; font-weight: 700; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-vandaag-tegel-getal { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+.hdp-vandaag-tegel-titel { font-size: 0.95rem; font-weight: 700; }
+.hdp-vandaag-tegel-tekst { font-size: 0.8rem; color: var(--wp--preset--color--grijs-tekst); }
+/* Waar de dealer zelf aan zet is: dezelfde oranje "jij bent aan zet"-kleuren als bij garantie. */
+.hdp-vandaag-tegel-aandacht { background: var(--hdp-aanzet-zacht); border-color: var(--hdp-aanzet-rand); }
+.hdp-vandaag-tegel-aandacht .hdp-vandaag-tegel-label,
+.hdp-vandaag-tegel-aandacht .hdp-vandaag-tegel-tekst { color: var(--hdp-aanzet-tekst); }
+.hdp-vandaag-tegel-aandacht .hdp-vandaag-tegel-getal { color: var(--hdp-aanzet-accent); }
+
+/* --- Twee kolommen: links het nieuws, rechts merken + magazijn ------- */
+.hdp-app-inhoud .hdp-info-sectie.hdp-home { padding: 0; }
+/* WordPress' kolommenblok zet de kolommen vanaf 782px naast elkaar met
+   gelijke breedte en zonder afbreken; hier bepalen de kolommen zelf hun
+   breedte en valt de rechter onder de linker als het te smal wordt. */
+.wp-block-columns.hdp-home-split {
+	display: flex;
+	flex-wrap: wrap !important;
+	align-items: flex-start;
+	gap: 1.5rem;
+	margin: 0;
+}
+.wp-block-columns.hdp-home-split > .wp-block-column.hdp-home-links { flex: 999 1 460px; min-width: 0; }
+.wp-block-columns.hdp-home-split > .wp-block-column.hdp-home-rechts {
+	flex: 1 1 320px;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+.hdp-home-rechts > *,
+.hdp-home-links > * { margin-block-start: 0; }
+.wp-block-columns.hdp-home-split > .wp-block-column.hdp-home-links { display: flex; flex-direction: column; gap: 1.5rem; }
+/* In de brede kolom staan de bel- en mailknop naast elkaar. */
+.hdp-home-links .hdp-info-kaart.is-style-tekst.hdp-home-magazijn .hdp-info-links { flex-direction: row; flex-wrap: wrap; }
+.hdp-home-links .hdp-info-kaart.is-style-tekst.hdp-home-magazijn .hdp-info-link { flex: 1 1 220px; }
+
+.hdp-home-links .hdp-nieuw-sectie { margin: 0; }
+.hdp-nieuw-leeg {
+	margin: 0;
+	padding: 1.1rem 1.3rem;
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	color: var(--wp--preset--color--grijs-tekst);
+	font-size: 0.88rem;
+}
+
+/* Merken als compacte lijst in een kaart, in plaats van vier grote tegels. */
+.hdp-home-merken {
+	background: var(--wp--preset--color--wit);
+	border-radius: 12px;
+	box-shadow: var(--hdp-schaduw);
+	overflow: hidden;
+}
+.hdp-home-merken > * { margin-block-start: 0; }
+.hdp-home-merken > .hdp-merken-hub-eyebrow,
+.hdp-home-merken > .hdp-merken-hub-titel,
+.hdp-home-merken > .hdp-merken-hub-intro { padding: 0 1.3rem; }
+.hdp-home-merken > .hdp-merken-hub-eyebrow { padding-top: 1.2rem; }
+.hdp-home-merken > .hdp-merken-hub-titel { font-size: 1.05rem; margin-bottom: 0.25rem; }
+.hdp-home-merken > .hdp-merken-hub-intro { font-size: 0.82rem; margin-bottom: 0.9rem; }
+.hdp-home-merken .hdp-merken-hub { display: flex; flex-direction: column; gap: 0; }
+.hdp-home-merken .hdp-merktegel {
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.8rem;
+	min-height: 52px;
+	padding: 0.65rem 1.3rem;
+	border-radius: 0;
+	border-top: 1px solid var(--wp--preset--color--rand);
+	/* Ook over een gekozen merkfoto heen (die staat inline op het blok). */
+	background: var(--wp--preset--color--wit) !important;
+	color: var(--wp--preset--color--donkergrijs);
+	transition: background-color 0.15s;
+}
+.hdp-home-merken .hdp-merktegel:hover { transform: none; background: #fafbfc !important; }
+/* Een rond rood icoontje (een tandwiel: onderdelen), voor elk merk gelijk.
+   Losse vierkantjes lazen als opsommingstekens, en rood/donker door
+   elkaar oogde onrustig in een lijst. */
+.hdp-home-merken .hdp-merktegel::before {
+	position: static;
+	inset: auto;
+	flex: 0 0 auto;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background-color: var(--wp--preset--color--homburg-rood);
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3Cpath d='M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z'/%3E%3C/svg%3E");
+	background-size: 16px 16px;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+/* Merknaam met de linktekst eronder: naast elkaar werd een langere naam
+   als "Oudere Rabe-machines" over drie regels geperst. */
+.hdp-home-merken .hdp-merktegel-tekst { flex: 1; flex-direction: column; align-items: flex-start; gap: 0.1rem; }
+.hdp-home-merken .hdp-merktegel-titel { font-size: 0.9rem; font-weight: 700; line-height: 1.3; }
+.hdp-home-merken .hdp-merktegel-link,
+.hdp-home-merken .hdp-merktegel-rood .hdp-merktegel-link { color: var(--wp--preset--color--grijs-tekst); font-size: 0.75rem; font-weight: 500; }
+.hdp-home-merken .hdp-merktegel-pijl { width: auto; height: auto; background: none; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-home-merken .hdp-merktegel:hover .hdp-merktegel-pijl { background: none; color: var(--wp--preset--color--homburg-rood); }
+.hdp-home-merken .hdp-merktegel-pijl svg { width: 14px; height: 14px; }
+
+/* Het magazijn als donkere kaart met grote bel- en mailknoppen. */
+.hdp-info-kaart.is-style-tekst.hdp-home-magazijn {
+	flex-direction: column;
+	gap: 0;
+	margin: 0;
+	padding: 1.3rem 1.4rem;
+	border: 0;
+	border-radius: 12px;
+	background: var(--wp--preset--color--donkergrijs);
+	color: var(--wp--preset--color--wit);
+}
+.hdp-home-magazijn .hdp-info-icoon { display: none; }
+.hdp-home-magazijn .hdp-info-body h3 { color: var(--wp--preset--color--wit); font-size: 1.05rem; margin: 0 0 0.4rem; }
+.hdp-home-magazijn .hdp-info-body p { color: #d5d7db; font-size: 0.85rem; line-height: 1.55; margin: 0; }
+.hdp-home-magazijn .hdp-info-body p a { color: var(--wp--preset--color--wit); font-weight: 600; }
+.hdp-info-kaart.is-style-tekst.hdp-home-magazijn .hdp-info-links { flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+.hdp-info-kaart.is-style-tekst.hdp-home-magazijn .hdp-info-link {
+	min-height: 44px;
+	padding: 0 0.95rem;
+	border-radius: 8px;
+	background: #3e4147;
+	color: var(--wp--preset--color--wit);
+	font-size: 0.88rem;
+	font-weight: 700;
+	gap: 0.6rem;
+}
+.hdp-info-kaart.is-style-tekst.hdp-home-magazijn .hdp-info-link:last-child { background: var(--wp--preset--color--homburg-rood); }
+.hdp-info-kaart.is-style-tekst.hdp-home-magazijn .hdp-info-link:hover { background: var(--wp--preset--color--homburg-rood-donker); color: var(--wp--preset--color--wit); text-decoration: none; }
+.hdp-info-kaart.is-style-tekst.hdp-home-magazijn .hdp-info-link svg { display: inline-block; }
+/* Het " · " tussen de links hoort bij de lopende-tekstversie; als knoppen
+   stond het als los puntje ín het knopje. */
+.hdp-info-kaart.is-style-tekst.hdp-home-magazijn .hdp-info-link::after { content: none; }
 
 /* --- In de kolom hoeft niets meer de volle breedte te pakken --------- */
 
@@ -3225,8 +3629,13 @@ body.home .hdp-info-split > .wp-block-column:nth-child(2) .hdp-info-kaart:first-
 		border-bottom: 0;
 		border-radius: 0;
 	}
+	/* Zonder ronde hoek is er ook geen bocht om vast te houden. */
+	body.hdp-app-layout .hdp-app-inhoud::before { display: none; }
 
-	.hdp-app-zijbalk { flex: 1 1 100%; max-width: none; }
+	/* min-width: 0, anders wordt dit blok zo breed als de hele rij
+	   menu-items en schuift de hele pagina opzij in plaats van alleen de
+	   strook. */
+	.hdp-app-zijbalk { flex: 1 1 100%; max-width: none; min-width: 0; }
 	.hdp-app-inhoud { flex: 1 1 100%; padding: 1.4rem 1.1rem 2.5rem; }
 
 	/* Alles op één regel die opzij schuift. Onder elkaar zou een

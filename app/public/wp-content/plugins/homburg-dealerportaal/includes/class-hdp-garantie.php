@@ -240,6 +240,12 @@ class HDP_Garantie {
 			// Geen hectares hier: bij aanmelding is die stand een
 			// momentopname die meteen veroudert. Wat telt is de stand op het
 			// moment van de klacht, en die vraagt het claimformulier.
+			//
+			// Homburg beoordeelt elke aanmelding. Een factuur of afleverbon
+			// erbij maakt dat sneller; de verwerking ervan bestond al, alleen
+			// stond het veld er niet. Niet verplicht: niet elke dealer heeft
+			// dat papier bij de hand op het moment van aanmelden.
+			'bijlagen'     => array( 'type' => 'file', 'verplicht' => false ),
 		);
 	}
 
@@ -524,18 +530,105 @@ class HDP_Garantie {
 		return $verloop;
 	}
 
+	/**
+	 * De bijlagen bij een claim, met een tijdelijke link om ze te openen.
+	 *
+	 * Eerder kwam alleen de bestandsnaam mee: een dealer zag "doos.jpg" staan
+	 * maar kon zijn eigen foto niet terugzien, en een document dat Homburg
+	 * toevoegde (een creditnota, een brief van de fabrikant) ook niet.
+	 *
+	 * Deze functie wordt alleen aangeroepen vanuit claim_voor_dealer(), dus
+	 * ná de controle dat de claim van deze dealer is. Pas dan worden er links
+	 * gemaakt, en die vervallen na een uur.
+	 *
+	 * @return array Lijst met naam, pad, door ('dealer'/'homburg') en url ('' als
+	 *               er geen link te maken was).
+	 */
 	private static function bijlagen_van( $claim_id ) {
 		$rijen = HDP_Supabase::selecteer(
 			HDP_Supabase::APP,
 			'bijlagen',
 			array(
-				'select'   => 'bestandsnaam,pad',
+				'select'   => 'bestandsnaam,pad,geupload_door',
 				'claim_id' => 'eq.' . $claim_id,
 				'order'    => 'aangemaakt_op.asc',
 			)
 		);
 
-		return is_wp_error( $rijen ) ? array() : wp_list_pluck( $rijen, 'bestandsnaam' );
+		if ( is_wp_error( $rijen ) || ! $rijen ) {
+			return array();
+		}
+
+		$links = HDP_Supabase::tijdelijke_links( HDP_Supabase::APP, self::BIJLAGEN_BAK, wp_list_pluck( $rijen, 'pad' ) );
+
+		$bijlagen = array();
+		foreach ( $rijen as $rij ) {
+			$pad        = isset( $rij['pad'] ) ? (string) $rij['pad'] : '';
+			$bijlagen[] = array(
+				'naam' => (string) $rij['bestandsnaam'],
+				'pad'  => $pad,
+				'door' => isset( $rij['geupload_door'] ) && 'dealer' !== $rij['geupload_door'] ? 'homburg' : 'dealer',
+				'url'  => isset( $links[ $pad ] ) ? $links[ $pad ] : '',
+			);
+		}
+
+		return $bijlagen;
+	}
+
+	/** Is dit een bestand dat een browser als plaatje kan tonen? HEIC kan dat meestal niet. */
+	public static function is_afbeelding( $naam ) {
+		return in_array( strtolower( pathinfo( (string) $naam, PATHINFO_EXTENSION ) ), array( 'jpg', 'jpeg', 'png', 'webp' ), true );
+	}
+
+	/**
+	 * De naam waaronder een claim in lijsten en boven het ticket staat.
+	 *
+	 * Bij een machineclaim de machine met serienummer. Een onderdelenclaim
+	 * heeft geen machine, en kreeg daardoor een lege titel: in de lijst
+	 * stonden zulke claims als naamloze regels met alleen een nummer. Daar
+	 * zegt het probleem plus het factuurnummer waar het om gaat.
+	 */
+	/** Gaat deze claim over bestelde onderdelen (en dus niet over een machine)? */
+	public static function is_onderdeelclaim( $claim ) {
+		return isset( $claim['soort'] ) && self::SOORT_ONDERDEEL === $claim['soort'];
+	}
+
+	public static function claimtitel( $claim ) {
+		if ( self::is_onderdeelclaim( $claim ) ) {
+			$delen = array();
+			if ( ! empty( $claim['onderdeel_probleem'] ) && in_array( $claim['onderdeel_probleem'], self::ONDERDEEL_PROBLEMEN, true ) ) {
+				$delen[] = HDP_I18N::t( 'garantie_probleem_' . $claim['onderdeel_probleem'] );
+			} else {
+				$delen[] = HDP_I18N::t( 'garantie_soort_onderdeel_titel' );
+			}
+			if ( ! empty( $claim['factuurnummer'] ) ) {
+				$delen[] = $claim['factuurnummer'];
+			}
+			return implode( ' · ', $delen );
+		}
+
+		return self::machinenaam( isset( $claim['machine'] ) ? $claim['machine'] : '', isset( $claim['serienummer'] ) ? $claim['serienummer'] : '' );
+	}
+
+	/**
+	 * Kan er een claim op deze machine worden ingediend? Zo niet: waarom.
+	 *
+	 * Een afgewezen machine weigerde de database pas nádat de dealer het hele
+	 * formulier had ingevuld. En op een machine waarvan de garantie verlopen
+	 * was, kon gewoon geclaimd worden — dat wordt nu tegengehouden. Een
+	 * machine die nog beoordeeld wordt mag wel: daar staat in de keuzelijst
+	 * al bij dat de beoordeling loopt.
+	 *
+	 * @return string '' als het kan, anders 'afgewezen' of 'verlopen'.
+	 */
+	public static function waarom_niet_claimbaar( $machine, $nu = 0 ) {
+		if ( isset( $machine['status'] ) && 'afgewezen' === $machine['status'] ) {
+			return 'afgewezen';
+		}
+		if ( self::garantiestand( $machine, $nu )['verlopen'] ) {
+			return 'verlopen';
+		}
+		return '';
 	}
 
 	/* --- Van databaserij naar wat de weergave verwacht ------------------ */
@@ -655,6 +748,12 @@ class HDP_Garantie {
 
 	/** De claims die bij één machine horen. */
 	public static function claims_van_machine( $serienummer, $user_id = 0 ) {
+		// Zonder serienummer is er geen machine: onderdelenclaims hebben er
+		// allemaal geen, en werden zo elkaars "eerdere claims".
+		if ( '' === (string) $serienummer ) {
+			return array();
+		}
+
 		$claims = self::claims( $user_id );
 		if ( is_wp_error( $claims ) ) {
 			return array();
@@ -1034,6 +1133,19 @@ class HDP_Garantie {
 				return new WP_Error( 'hdp_onbekende_machine', HDP_I18N::t( 'garantie_fout_machine' ) );
 			}
 
+			// Ook hier en niet alleen in de keuzelijst: een keuzelijst is te
+			// omzeilen, en de database kijkt niet naar de garantietermijn.
+			$waarom = self::waarom_niet_claimbaar( $machine );
+			if ( 'afgewezen' === $waarom ) {
+				return new WP_Error( 'hdp_machine_afgewezen', HDP_I18N::t( 'garantie_fout_machine_afgewezen' ) );
+			}
+			if ( 'verlopen' === $waarom ) {
+				return new WP_Error(
+					'hdp_garantie_verlopen',
+					sprintf( HDP_I18N::t( 'garantie_fout_verlopen' ), HDP_I18N::datum( 'j F Y', strtotime( $machine['garantie_tot'] ) ) )
+				);
+			}
+
 			$rij['te_claimen_tijd'] = self::of_niets( self::tel_uren_op( $rij['te_claimen_onderdelen'] ) );
 
 			$rij['machine_id'] = $machine['id'];
@@ -1134,6 +1246,16 @@ class HDP_Garantie {
 		}
 
 		$aantal = min( count( $bestanden['name'] ), self::BIJLAGE_AANTAL );
+
+		// Wat boven het maximum uitkomt viel eerder stilletjes weg. Nu staat
+		// het in de lijst van wat niet gelukt is, zodat de dealer het weet.
+		$alle_namen = count( $bestanden['name'] );
+		for ( $i = $aantal; $i < $alle_namen; $i++ ) {
+			$naam = sanitize_file_name( (string) $bestanden['name'][ $i ] );
+			if ( '' !== $naam ) {
+				$mislukt[] = $naam;
+			}
+		}
 
 		for ( $i = 0; $i < $aantal; $i++ ) {
 			$naam = sanitize_file_name( (string) $bestanden['name'][ $i ] );

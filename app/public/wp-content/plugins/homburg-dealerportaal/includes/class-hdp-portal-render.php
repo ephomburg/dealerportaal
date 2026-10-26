@@ -91,10 +91,184 @@ class HDP_Portal_Render {
 			<?php self::render_welkomkop( $user ); ?>
 			<?php // Berichten van Homburg staan bovenaan: een mededeling die je pas tegenkomt nadat je ergens heen geklikt hebt, is te laat. ?>
 			<?php HDP_Berichten::render(); ?>
-			<?php self::render_nieuw_melding(); ?>
-			<?php HDP_Herbestellen::render(); ?>
+			<?php self::render_vandaag(); ?>
+			<?php
+			// "Nieuw voor jou" staat sinds de nieuwe indeling als eigen blok
+			// in de pagina (links naast de merken), zie render_nieuw_voor_jou().
+			// "Snel herbestellen" staat niet meer op de startpagina: het zit
+			// bij de bestellingen, en "artikelnummers plakken" staat onder het
+			// zoekveld.
+			?>
 		</div>
 		<?php
+	}
+
+	/** De openingstijden van het magazijn: werkdagen, van ... tot ... uur. */
+	const MAGAZIJN_OPEN  = 8;
+	const MAGAZIJN_DICHT = 17;
+
+	/**
+	 * Is het magazijn nu bereikbaar, en zo niet: wanneer weer?
+	 *
+	 * Een dealer met een vraag wil weten of bellen nu zin heeft. Dat stond
+	 * er alleen als tijden in een lopende tekst.
+	 *
+	 * @param int $nu Tijdstempel in de tijdzone van de site.
+	 * @return array{open: bool, tekst: string}
+	 */
+	public static function magazijn_status( $nu ) {
+		// gmdate en niet wp_date: $nu is al de lokale tijd (strtotime op current_time()); wp_date zou de tijdzone er nóg een keer bij optellen.
+		$dag = (int) gmdate( 'N', $nu ); // 1 = maandag, 7 = zondag.
+		$uur = (int) gmdate( 'G', $nu );
+		$tot = sprintf( '%02d:00', self::MAGAZIJN_DICHT );
+		$van = sprintf( '%02d:00', self::MAGAZIJN_OPEN );
+
+		if ( $dag <= 5 && $uur >= self::MAGAZIJN_OPEN && $uur < self::MAGAZIJN_DICHT ) {
+			return array(
+				'open'  => true,
+				'tekst' => sprintf( HDP_I18N::t( 'magazijn_open' ), $tot ),
+			);
+		}
+
+		// Wanneer weer: vandaag nog (vóór openingstijd op een werkdag),
+		// morgen, of de eerstvolgende maandag.
+		if ( $dag <= 5 && $uur < self::MAGAZIJN_OPEN ) {
+			$wanneer = sprintf( HDP_I18N::t( 'magazijn_vandaag' ), $van );
+		} elseif ( $dag <= 4 ) {
+			$wanneer = sprintf( HDP_I18N::t( 'magazijn_morgen' ), $van );
+		} else {
+			$wanneer = sprintf( HDP_I18N::t( 'magazijn_maandag' ), $van );
+		}
+
+		return array(
+			'open'  => false,
+			'tekst' => sprintf( HDP_I18N::t( 'magazijn_dicht' ), $wanneer ),
+		);
+	}
+
+	/**
+	 * "Vandaag voor jou": vier tegels met wat er voor de dealer klaarligt.
+	 *
+	 * De startpagina had grote merkentegels en naslag, maar zei niets over
+	 * wat er op de dealer wacht. Dit zijn de vier vragen waarmee iemand
+	 * inlogt: moet ik iets doen bij garantie, wat loopt er nog, is er iets
+	 * nieuws, en ligt er nog iets in mijn winkelwagen.
+	 */
+	private static function render_vandaag() {
+		$tegels = array();
+
+		// Garantie: alleen als die koppeling er is. De telling is kort
+		// gebufferd en dezelfde als die van het rode cijfer in het zijmenu.
+		if ( class_exists( 'HDP_Garantie' ) && HDP_Garantie::beschikbaar() ) {
+			$telling  = HDP_Zijbalk::claimtellingen();
+			$wacht    = (int) $telling['wacht'];
+			$tegels[] = array(
+				'url'     => add_query_arg( 'toon', $wacht ? 'wacht' : 'alles', home_url( '/garantie/' ) ),
+				'label'   => HDP_I18N::t( 'tegel_garantie' ),
+				'getal'   => $wacht,
+				'titel'   => HDP_I18N::t( $wacht ? ( 1 === $wacht ? 'tegel_garantie_wacht_een' : 'tegel_garantie_wacht_meer' ) : 'tegel_garantie_niets' ),
+				'tekst'   => $telling['loopt'] ? sprintf( HDP_I18N::t( 'tegel_garantie_loopt' ), (int) $telling['loopt'] ) : HDP_I18N::t( 'tegel_garantie_naar' ),
+				'aandacht' => $wacht > 0,
+			);
+		}
+
+		if ( function_exists( 'wc_get_orders' ) ) {
+			$lopend   = wc_get_orders(
+				array(
+					'customer_id' => get_current_user_id(),
+					'status'      => array( 'processing', 'on-hold' ),
+					'orderby'     => 'date',
+					'order'       => 'DESC',
+					'limit'       => 50,
+				)
+			);
+			$laatste  = $lopend ? $lopend[0] : null;
+			$tegels[] = array(
+				'url'     => add_query_arg( 'hdp_bs', 'processing', wc_get_account_endpoint_url( 'orders' ) ),
+				'label'   => HDP_I18N::t( 'tegel_bestellingen' ),
+				'getal'   => count( $lopend ),
+				'titel'   => HDP_I18N::t( $lopend ? 'tegel_bestellingen_loopt' : 'tegel_bestellingen_geen' ),
+				'tekst'   => $laatste && $laatste->get_date_created()
+					? sprintf( HDP_I18N::t( 'tegel_bestellingen_laatste' ), $laatste->get_order_number(), HDP_I18N::datum( 'j F', $laatste->get_date_created()->getOffsetTimestamp() ) )
+					: HDP_I18N::t( 'tegel_bestellingen_alle' ),
+				'aandacht' => false,
+			);
+		}
+
+		$nieuw    = count( self::nieuwe_downloads() );
+		$tegels[] = array(
+			'url'     => home_url( '/downloads/' ),
+			'label'   => HDP_I18N::t( 'tegel_downloads' ),
+			'getal'   => $nieuw,
+			'titel'   => HDP_I18N::t( $nieuw ? 'tegel_downloads_nieuw' : 'tegel_downloads_geen' ),
+			'tekst'   => HDP_I18N::t( 'tegel_downloads_naar' ),
+			'aandacht' => false,
+		);
+
+		if ( function_exists( 'WC' ) && WC()->cart ) {
+			$in_wagen = (int) WC()->cart->get_cart_contents_count();
+			$tegels[] = array(
+				'url'     => $in_wagen ? wc_get_cart_url() : wc_get_page_permalink( 'shop' ),
+				'label'   => HDP_I18N::t( 'tegel_winkelwagen' ),
+				'getal'   => $in_wagen,
+				'titel'   => HDP_I18N::t( $in_wagen ? 'tegel_winkelwagen_vol' : 'tegel_winkelwagen_leeg' ),
+				'tekst'   => HDP_I18N::t( $in_wagen ? 'tegel_winkelwagen_afronden' : 'tegel_winkelwagen_naar_webshop' ),
+				'aandacht' => false,
+			);
+		}
+		?>
+		<section class="hdp-vandaag" aria-labelledby="hdp-vandaag-kop">
+			<h2 id="hdp-vandaag-kop" class="hdp-vandaag-kop"><?php echo esc_html( HDP_I18N::t( 'vandaag_kop' ) ); ?></h2>
+			<div class="hdp-vandaag-tegels">
+				<?php foreach ( $tegels as $tegel ) : ?>
+					<a class="hdp-vandaag-tegel<?php echo $tegel['aandacht'] ? ' hdp-vandaag-tegel-aandacht' : ''; ?>" href="<?php echo esc_url( $tegel['url'] ); ?>">
+						<span class="hdp-vandaag-tegel-boven">
+							<span class="hdp-vandaag-tegel-label"><?php echo esc_html( $tegel['label'] ); ?></span>
+							<span class="hdp-vandaag-tegel-getal"><?php echo esc_html( (string) $tegel['getal'] ); ?></span>
+						</span>
+						<strong class="hdp-vandaag-tegel-titel"><?php echo esc_html( $tegel['titel'] ); ?></strong>
+						<span class="hdp-vandaag-tegel-tekst"><?php echo esc_html( $tegel['tekst'] ); ?> &rarr;</span>
+					</a>
+				<?php endforeach; ?>
+			</div>
+		</section>
+		<?php
+	}
+
+	/**
+	 * Het blok "Nieuw voor jou" (homburg/nieuw-voor-jou), links op de
+	 * startpagina.
+	 *
+	 * Zelfde lijst als altijd (render_nieuw_melding()), maar staat er niets
+	 * nieuws, dan een rustige regel in plaats van niets: in een kolom naast
+	 * de merken zou een lege plek eruitzien alsof er iets kapot is.
+	 */
+	public static function render_nieuw_voor_jou() {
+		if ( ! is_user_logged_in() || ! HDP_Roles::mag_portaal_zien( get_current_user_id() ) ) {
+			return '';
+		}
+
+		ob_start();
+		self::render_nieuw_melding();
+		$lijst = ob_get_clean();
+
+		if ( '' !== trim( $lijst ) ) {
+			return $lijst;
+		}
+
+		ob_start();
+		?>
+		<section class="hdp-nieuw-sectie hdp-nieuw-sectie-leeg" aria-labelledby="hdp-nieuw-kop">
+			<div class="hdp-nieuw-kop">
+				<h2 id="hdp-nieuw-kop"><?php echo esc_html( HDP_I18N::t( 'nieuw_voor_u' ) ); ?></h2>
+				<div class="hdp-nieuw-kop-rechts">
+					<a href="<?php echo esc_url( home_url( '/downloads/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'nieuw_alle_downloads' ) ); ?></a>
+				</div>
+			</div>
+			<p class="hdp-nieuw-leeg"><?php echo esc_html( HDP_I18N::t( 'nieuw_niets' ) ); ?></p>
+		</section>
+		<?php
+		return ob_get_clean();
 	}
 
 	/**
@@ -113,10 +287,16 @@ class HDP_Portal_Render {
 		// waar HDP_I18N::datum() op rekent.
 		$nu = strtotime( current_time( 'mysql' ) );
 		?>
+		<?php $magazijn = self::magazijn_status( $nu ); ?>
 		<div class="hdp-welkomkop">
-			<div class="hdp-welkomkop-tekst">
-				<h1><?php echo esc_html( self::groet( $nu ) ); ?>, <?php echo esc_html( $user->display_name ); ?></h1>
-				<p class="hdp-welkomkop-datum"><?php echo esc_html( HDP_I18N::datum( 'l j F Y', $nu ) ); ?></p>
+			<div class="hdp-welkomkop-boven">
+				<div class="hdp-welkomkop-tekst">
+					<h1><?php echo esc_html( self::groet( $nu ) ); ?>, <?php echo esc_html( $user->display_name ); ?></h1>
+					<p class="hdp-welkomkop-datum"><?php echo esc_html( HDP_I18N::datum( 'l j F Y', $nu ) ); ?></p>
+				</div>
+				<p class="hdp-magazijn-status<?php echo $magazijn['open'] ? ' hdp-magazijn-open' : ''; ?>">
+					<span class="hdp-magazijn-bol" aria-hidden="true"></span><?php echo esc_html( $magazijn['tekst'] ); ?>
+				</p>
 			</div>
 			<?php if ( function_exists( 'wc_get_page_permalink' ) ) : ?>
 				<?php
@@ -131,6 +311,12 @@ class HDP_Portal_Render {
 					<input type="hidden" name="post_type" value="product">
 					<button type="submit"><?php echo esc_html( HDP_I18N::t( 'home_zoek_knop' ) ); ?></button>
 				</form>
+				<?php // De drie andere snelle wegen de webshop in, direct onder het zoekveld. ?>
+				<nav class="hdp-welkomkop-snel" aria-label="<?php echo esc_attr( HDP_I18N::t( 'home_snel_label' ) ); ?>">
+					<a href="<?php echo esc_url( wc_get_account_endpoint_url( 'snelbestellen' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'snelbestel_kop' ) ); ?></a>
+					<a href="<?php echo esc_url( wc_get_account_endpoint_url( 'favorieten' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'home_snel_favorieten' ) ); ?></a>
+					<a href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'home_snel_webshop' ) ); ?> &rarr;</a>
+				</nav>
 			<?php endif; ?>
 		</div>
 		<?php
@@ -147,7 +333,8 @@ class HDP_Portal_Render {
 	 * @return string
 	 */
 	private static function groet( $tijdstip ) {
-		$uur = (int) wp_date( 'G', $tijdstip );
+		// Zie magazijn_status(): de tijdstempel is al lokaal, dus gmdate.
+		$uur = (int) gmdate( 'G', $tijdstip );
 
 		if ( $uur < 12 ) {
 			return HDP_I18N::t( 'groet_ochtend' );

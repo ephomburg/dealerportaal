@@ -429,7 +429,9 @@ class HDP_Bestandsbeveiliging {
 	}
 
 	public static function on_meta_gewijzigd( $meta_id, $object_id, $meta_key, $meta_value ) {
-		if ( '_hdp_attachment_id' !== $meta_key || ! $meta_value ) {
+		// Een extra formaat (de Excel naast de PDF) is net zo vertrouwelijk
+		// als het hoofdbestand.
+		if ( ! in_array( $meta_key, array( '_hdp_attachment_id', HDP_Downloads_CPT::META_EXTRA ), true ) || ! $meta_value ) {
 			return;
 		}
 		self::beveilig( (int) $meta_value );
@@ -559,7 +561,7 @@ class HDP_Bestandsbeveiliging {
 
 		$download_id = self::vind_download( $attachment_id );
 
-		return $download_id ? HDP_Downloads_CPT::download_url( $download_id ) : $url;
+		return $download_id ? HDP_Downloads_CPT::download_url( $download_id, $attachment_id ) : $url;
 	}
 
 	/** Haalt beveiligde bestanden uit de openbare /wp-json/wp/v2/media-lijst. */
@@ -612,8 +614,18 @@ class HDP_Bestandsbeveiliging {
 			array(
 				'post_type'      => HDP_Downloads_CPT::POST_TYPE,
 				'post_status'    => array( 'publish', 'draft', 'pending', 'private' ),
-				'meta_key'       => '_hdp_attachment_id', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- kleine, beheerste dataset (dealerdownloads).
-				'meta_value'     => $attachment_id, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				// Hoofdbestand óf extra formaat.
+				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- kleine, beheerste dataset (dealerdownloads).
+					'relation' => 'OR',
+					array(
+						'key'   => '_hdp_attachment_id',
+						'value' => $attachment_id,
+					),
+					array(
+						'key'   => HDP_Downloads_CPT::META_EXTRA,
+						'value' => $attachment_id,
+					),
+				),
 				'fields'         => 'ids',
 				'posts_per_page' => 1,
 			)

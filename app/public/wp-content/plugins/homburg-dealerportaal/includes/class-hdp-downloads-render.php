@@ -239,32 +239,20 @@ class HDP_Downloads_Render {
 			</div>
 		</div>
 
-		<div class="hdp-download-lijst" id="hdp-download-lijst">
+		<?php
+		// Content is beeldmateriaal: dat wil een dealer zien voordat hij het
+		// downloadt. Daar dus een galerij met voorbeelden in plaats van een
+		// lijst met bestandsnamen.
+		$galerij = 'content' === $categorie;
+		?>
+		<?php if ( $galerij ) : ?>
+			<p class="hdp-content-alles">
+				<a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( HDP_Downloads_CPT::zip_url( 'content' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'btn_alles_downloaden' ) ); ?></a>
+			</p>
+		<?php endif; ?>
+		<div class="hdp-download-lijst<?php echo $galerij ? ' hdp-content-galerij' : ''; ?>" id="hdp-download-lijst">
 			<?php foreach ( $downloads as $download ) : ?>
-				<?php
-				$merk   = HDP_Downloads_CPT::get_merk( $download->ID );
-				$regios = HDP_Downloads_CPT::get_regios( $download->ID );
-				?>
-				<div class="hdp-download-item"
-					data-titel="<?php echo esc_attr( strtolower( $download->post_title ) ); ?>"
-					data-merk="<?php echo esc_attr( $merk ); ?>"
-					data-regios="<?php echo esc_attr( implode( ' ', $regios ) ); ?>"
-					data-datum="<?php echo esc_attr( get_post_time( 'U', true, $download ) ); ?>"
-					data-nieuw="<?php echo HDP_Downloads_CPT::is_nieuw( $download->ID ) ? '1' : '0'; ?>">
-					<span class="hdp-download-type"><?php echo esc_html( HDP_Downloads_CPT::type_label( $download->ID ) ); ?></span>
-					<span class="hdp-download-info">
-						<strong>
-							<?php echo esc_html( $download->post_title ); ?>
-							<?php if ( HDP_Downloads_CPT::is_nieuw( $download->ID ) ) : ?>
-								<span class="hdp-nieuw-badge"><?php echo esc_html( HDP_I18N::t( 'badge_nieuw' ) ); ?></span>
-							<?php endif; ?>
-						</strong>
-						<?php if ( $download->post_content ) : ?>
-							<span><?php echo esc_html( wp_strip_all_tags( $download->post_content ) ); ?></span>
-						<?php endif; ?>
-					</span>
-					<a class="hdp-btn" href="<?php echo esc_url( HDP_Downloads_CPT::download_url( $download->ID ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'btn_downloaden' ) ); ?></a>
-				</div>
+				<?php echo self::render_item( $download, $galerij ); // phpcs:ignore WordPress.Security.EscapeOutput -- render_item() escapet elk veld zelf. ?>
 			<?php endforeach; ?>
 		</div>
 
@@ -297,11 +285,25 @@ class HDP_Downloads_Render {
 
 			if (sorteerSelect) { sorteerSelect.addEventListener('change', sorteerToepassen); }
 
+			// "Kopieer tekst" bij content: de posttekst die bij een beeld hoort.
+			if (lijst) {
+				lijst.addEventListener('click', function (e) {
+					var knop = e.target.closest('.hdp-kopieer-tekst');
+					if (!knop || !navigator.clipboard) { return; }
+					navigator.clipboard.writeText(knop.dataset.tekst).then(function () {
+						var oud = knop.textContent;
+						knop.textContent = knop.dataset.gekopieerd;
+						setTimeout(function () { knop.textContent = oud; }, 1800);
+					});
+				});
+			}
+
 			function filterToepassen() {
 				var zoekterm = zoekveld ? zoekveld.value.trim().toLowerCase() : '';
 				var zichtbaar = 0;
 				items.forEach(function (item) {
-					var voldoetZoek = !zoekterm || item.dataset.titel.indexOf(zoekterm) !== -1;
+					// Titel, omschrijving en merk: eerder alleen de titel.
+					var voldoetZoek = !zoekterm || item.dataset.zoek.indexOf(zoekterm) !== -1;
 					var voldoetRegio = actieveRegio === 'alle' || item.dataset.regios.split(' ').indexOf(actieveRegio) !== -1;
 					var voldoetMerk = actieveMerken.length === 0 || actieveMerken.indexOf(item.dataset.merk) !== -1;
 					var zicht = voldoetZoek && voldoetRegio && voldoetMerk;
@@ -350,6 +352,94 @@ class HDP_Downloads_Render {
 			}
 		})();
 		</script>
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Eén bestand in de lijst of de galerij.
+	 *
+	 * Bij elk bestand staat nu wat voor bestand het is, hoe groot, en van
+	 * wanneer — er stond alleen een titel, waardoor niet te zien was welke
+	 * prijslijst de nieuwste was. Heeft een document meerdere formaten (PDF
+	 * en Excel), dan staan die onder één titel met een knop per formaat in
+	 * plaats van als twee losse regels.
+	 *
+	 * @param WP_Post $download De download.
+	 * @param bool    $galerij  Als kaart met voorbeeld (content) of als regel.
+	 * @return string
+	 */
+	private static function render_item( $download, $galerij = false ) {
+		$merk         = HDP_Downloads_CPT::get_merk( $download->ID );
+		$regios       = HDP_Downloads_CPT::get_regios( $download->ID );
+		$bestanden    = HDP_Downloads_CPT::bestanden( $download->ID );
+		$hoofd        = $bestanden ? $bestanden[0] : 0;
+		$omschrijving = trim( wp_strip_all_tags( $download->post_content ) );
+		$nieuw        = HDP_Downloads_CPT::is_nieuw( $download->ID );
+
+		// Formaat en grootte per bestand: "PDF 14 MB · XLSX 593 KB".
+		$formaten = array();
+		foreach ( $bestanden as $attachment_id ) {
+			$grootte    = HDP_Downloads_CPT::bestandsgrootte( $attachment_id );
+			$formaten[] = trim( HDP_Downloads_CPT::type_label( $download->ID, $attachment_id ) . ' ' . ( $grootte ? size_format( $grootte, $grootte >= MB_IN_BYTES ? 1 : 0 ) : '' ) );
+		}
+		$meta = implode( ' · ', array_filter( array_merge( $formaten, array( HDP_I18N::datum( 'j M Y', (int) get_post_time( 'U', false, $download ) ) ) ) ) );
+
+		$bekijkbaar = $hoofd && HDP_Downloads_CPT::is_bekijkbaar( get_post_mime_type( $hoofd ) );
+
+		ob_start();
+		?>
+		<div class="hdp-download-item<?php echo $galerij ? ' hdp-content-kaart' : ''; ?>"
+			data-titel="<?php echo esc_attr( mb_strtolower( $download->post_title ) ); ?>"
+			data-zoek="<?php echo esc_attr( mb_strtolower( implode( ' ', array_filter( array( $download->post_title, $omschrijving, $merk ) ) ) ) ); ?>"
+			data-merk="<?php echo esc_attr( $merk ); ?>"
+			data-regios="<?php echo esc_attr( implode( ' ', $regios ) ); ?>"
+			data-datum="<?php echo esc_attr( get_post_time( 'U', true, $download ) ); ?>"
+			data-nieuw="<?php echo $nieuw ? '1' : '0'; ?>">
+			<?php if ( $galerij ) : ?>
+				<a class="hdp-content-beeld" href="<?php echo esc_url( HDP_Downloads_CPT::download_url( $download->ID, 0, $bekijkbaar ? 'bekijken' : '' ) ); ?>" <?php echo $bekijkbaar ? 'target="_blank" rel="noopener"' : ''; ?> tabindex="-1" aria-hidden="true">
+					<?php if ( $hoofd && HDP_Downloads_CPT::is_afbeelding( $hoofd ) ) : ?>
+						<img src="<?php echo esc_url( HDP_Downloads_CPT::download_url( $download->ID, 0, 'voorbeeld' ) ); ?>" alt="" loading="lazy">
+					<?php else : ?>
+						<span class="hdp-content-beeld-type"><?php echo esc_html( HDP_Downloads_CPT::type_label( $download->ID ) ); ?></span>
+					<?php endif; ?>
+				</a>
+			<?php else : ?>
+				<span class="hdp-download-type"><?php echo esc_html( HDP_Downloads_CPT::type_label( $download->ID ) ); ?></span>
+			<?php endif; ?>
+			<span class="hdp-download-info">
+				<strong>
+					<?php echo esc_html( $download->post_title ); ?>
+					<?php if ( $nieuw ) : ?>
+						<span class="hdp-nieuw-badge"><?php echo esc_html( HDP_I18N::t( 'badge_nieuw' ) ); ?></span>
+					<?php endif; ?>
+				</strong>
+				<?php if ( $omschrijving ) : ?>
+					<span class="<?php echo $galerij ? 'hdp-content-bijschrift' : ''; ?>"><?php echo esc_html( $omschrijving ); ?></span>
+				<?php endif; ?>
+				<span class="hdp-download-meta"><?php echo esc_html( $meta ); ?></span>
+			</span>
+			<span class="hdp-download-knoppen">
+				<?php if ( $galerij && $omschrijving ) : ?>
+					<?php // De tekst die bij het beeld hoort, in één klik klaar om te plakken bij een post. ?>
+					<button type="button" class="hdp-btn hdp-btn-secundair hdp-kopieer-tekst" data-tekst="<?php echo esc_attr( $omschrijving ); ?>" data-gekopieerd="<?php echo esc_attr( HDP_I18N::t( 'tekst_gekopieerd' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'btn_kopieer_tekst' ) ); ?></button>
+				<?php endif; ?>
+				<?php if ( $bekijkbaar ) : ?>
+					<?php // Een handleiding even inkijken zonder hem eerst op te slaan. ?>
+					<a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( HDP_Downloads_CPT::download_url( $download->ID, 0, 'bekijken' ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( HDP_I18N::t( 'btn_bekijken' ) ); ?></a>
+				<?php endif; ?>
+				<?php if ( count( $bestanden ) > 1 ) : ?>
+					<?php foreach ( $bestanden as $attachment_id ) : ?>
+						<a class="hdp-btn" href="<?php echo esc_url( HDP_Downloads_CPT::download_url( $download->ID, $attachment_id ) ); ?>"
+							aria-label="<?php echo esc_attr( HDP_I18N::t( 'btn_downloaden' ) . ' ' . HDP_Downloads_CPT::type_label( $download->ID, $attachment_id ) ); ?>">
+							<?php echo esc_html( HDP_Downloads_CPT::type_label( $download->ID, $attachment_id ) ); ?>
+						</a>
+					<?php endforeach; ?>
+				<?php else : ?>
+					<a class="hdp-btn" href="<?php echo esc_url( HDP_Downloads_CPT::download_url( $download->ID ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'btn_downloaden' ) ); ?></a>
+				<?php endif; ?>
+			</span>
+		</div>
 		<?php
 		return ob_get_clean();
 	}

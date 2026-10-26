@@ -29,6 +29,12 @@ class Garantie_Test extends WP_UnitTestCase {
 	/** Zet op true voor een dealer die wel machines heeft, maar nog geen claims. */
 	private $zonder_claims = false;
 
+	/** Velden die over machine m-1 heen gaan (bijv. een verlopen garantie). */
+	private $m1_anders = array();
+
+	/** Extra claims bovenop de vaste set (bijv. een onderdelenclaim). */
+	private $extra_claims = array();
+
 	/** Zet op een melding om de database een schrijfactie te laten weigeren. */
 	private $weigeren = '';
 
@@ -57,7 +63,7 @@ class Garantie_Test extends WP_UnitTestCase {
 	public function tearDown(): void {
 		remove_filter( 'pre_http_request', array( $this, 'nagebootste_supabase' ), 10 );
 		wp_set_current_user( 0 );
-		unset( $_GET['ticket'], $_GET['volledig'], $_GET['toon'], $_GET['nieuw'], $_GET['soort'], $_COOKIE[ HDP_I18N::COOKIE ] );
+		unset( $_GET['ticket'], $_GET['volledig'], $_GET['toon'], $_GET['nieuw'], $_GET['soort'], $_GET['machine'], $_COOKIE[ HDP_I18N::COOKIE ] );
 		parent::tearDown();
 	}
 
@@ -202,6 +208,8 @@ class Garantie_Test extends WP_UnitTestCase {
 			),
 		);
 
+		$alle[0] = array_merge( $alle[0], $this->m1_anders );
+
 		return $this->alleen_van( $alle, $dealer );
 	}
 
@@ -274,6 +282,8 @@ class Garantie_Test extends WP_UnitTestCase {
 				),
 			),
 		);
+
+		$alle = array_merge( $alle, $this->extra_claims );
 
 		return $this->alleen_van( $alle, $dealer );
 	}
@@ -1009,6 +1019,184 @@ class Garantie_Test extends WP_UnitTestCase {
 
 		$this->assertIsArray( $claim );
 		$this->assertSame( 'm-2', $this->geschreven['claims'][0]['machine_id'] );
+	}
+
+	/* =====================================================================
+	 * Wanneer er niet geclaimd kan worden
+	 * ================================================================== */
+
+	/** Een machine met verlopen garantie wordt tegengehouden — ook buiten de keuzelijst om. */
+	public function test_claim_op_een_machine_met_verlopen_garantie_wordt_geweigerd() {
+		$this->m1_anders = array( 'garantie_tot' => '2024-07-18' );
+		$this->als_goedgekeurde_dealer();
+
+		$claim = HDP_Garantie::dien_claim_in( array( 'machine' => 'HN4-220718-0391', 'klacht' => 'Te laat.' ) );
+
+		$this->assertWPError( $claim );
+		$this->assertSame( 'hdp_garantie_verlopen', $claim->get_error_code() );
+		$this->assertArrayNotHasKey( 'claims', $this->geschreven );
+	}
+
+	public function test_claim_op_een_afgewezen_machine_wordt_vooraf_geweigerd() {
+		$this->m1_anders = array( 'status' => 'afgewezen' );
+		$this->als_goedgekeurde_dealer();
+
+		$claim = HDP_Garantie::dien_claim_in( array( 'machine' => 'HN4-220718-0391', 'klacht' => 'Afgewezen machine.' ) );
+
+		$this->assertWPError( $claim );
+		$this->assertSame( 'hdp_machine_afgewezen', $claim->get_error_code() );
+		$this->assertArrayNotHasKey( 'claims', $this->geschreven );
+	}
+
+	/** In de keuzelijst staan ze wel, maar uitgeschakeld; en de machinekaart heeft dan geen claimknop. */
+	public function test_verlopen_machine_is_niet_te_kiezen_en_heeft_geen_claimknop() {
+		$this->m1_anders = array( 'garantie_tot' => '2024-07-18' );
+		$this->als_goedgekeurde_dealer();
+
+		$_GET['nieuw'] = 'claim';
+		$_GET['soort'] = 'machine';
+		$formulier     = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+		$this->assertMatchesRegularExpression( '/value="HN4-220718-0391"[^>]*disabled/', $formulier );
+		$this->assertDoesNotMatchRegularExpression( '/value="BM35-240503-0042"[^>]*disabled/', $formulier );
+
+		unset( $_GET['nieuw'], $_GET['soort'] );
+		$_GET['toon'] = 'machines';
+		$lijst        = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+		$this->assertStringNotContainsString( 'machine=HN4-220718-0391', $lijst );
+		$this->assertStringContainsString( 'machine=BM35-240503-0042', $lijst );
+	}
+
+	/** Vanaf de machinekaart staat de machine al gekozen. */
+	public function test_claimknop_op_de_machine_kiest_die_machine_vooraf() {
+		$this->als_goedgekeurde_dealer();
+		$_GET['nieuw']   = 'claim';
+		$_GET['soort']   = 'machine';
+		$_GET['machine'] = 'BM35-240503-0042';
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+		unset( $_GET['machine'] );
+
+		$this->assertMatchesRegularExpression( '/value="BM35-240503-0042"\s+selected/', $html );
+	}
+
+	/* =====================================================================
+	 * Een claim op bestelde onderdelen
+	 * ================================================================== */
+
+	private function met_onderdelenclaim() {
+		$this->extra_claims = array(
+			array(
+				'id'                 => 'c-o1',
+				'nummer'             => 'T100050',
+				'dealer_id'          => (string) $this->dealer_id,
+				'machine_id'         => null,
+				'soort'              => 'onderdeel',
+				'onderdeel_probleem' => 'beschadigd_aangekomen',
+				'factuurnummer'      => 'F-2026-0412',
+				'status'             => 'ingediend',
+				'hectares'           => null,
+				'klacht'             => "Doos ingedeukt.\nTwee lagers krom.",
+				'onderdelen'         => '',
+				'behandelaar'        => null,
+				'ingediend_op'       => '2026-10-20T09:00:00+00:00',
+				'dealer_naam'        => 'Marijn van den Akker',
+				'machines'           => null,
+			),
+		);
+	}
+
+	/** Een onderdelenclaim stond als naamloze regel in de lijst. */
+	public function test_onderdelenclaim_heeft_een_titel_in_de_lijst() {
+		$this->als_goedgekeurde_dealer();
+		$this->met_onderdelenclaim();
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		$this->assertStringContainsString( 'Beschadigd aangekomen · F-2026-0412', $html );
+	}
+
+	/** Op het ticket: titel, het probleem, "Toelichting", en geen lege machinekaart. */
+	public function test_onderdelenclaim_ticket_toont_probleem_en_geen_machinekaart() {
+		$this->als_goedgekeurde_dealer();
+		$this->met_onderdelenclaim();
+		$_GET['ticket']   = 'T100050';
+		$_GET['volledig'] = '1';
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		$this->assertStringContainsString( '<h2>Beschadigd aangekomen · F-2026-0412</h2>', $html );
+		$this->assertStringContainsString( HDP_I18N::t( 'garantie_veld_onderdeel_probleem' ), $html );
+		$this->assertStringContainsString( HDP_I18N::t( 'garantie_veld_klacht_onderdeel' ), $html );
+		$this->assertStringNotContainsString( HDP_I18N::t( 'garantie_veld_klacht' ), $html );
+		$this->assertStringNotContainsString( 'hdp-ticket-machinenaam', $html );
+		// De enter in de toelichting staat er nog (de opmaak toont hem).
+		$this->assertStringContainsString( "Doos ingedeukt.\nTwee lagers krom.", $html );
+	}
+
+	/** Onderdelenclaims hebben geen serienummer en telden zo als elkaars "eerdere claims". */
+	public function test_zonder_serienummer_zijn_er_geen_claims_van_een_machine() {
+		$this->als_goedgekeurde_dealer();
+		$this->met_onderdelenclaim();
+
+		$this->assertSame( array(), HDP_Garantie::claims_van_machine( '' ) );
+	}
+
+	/* =====================================================================
+	 * Besluit en bijlagen
+	 * ================================================================== */
+
+	/** Een afgeronde claim zegt bovenaan wat het besluit is. */
+	public function test_afgeronde_claim_toont_het_besluit() {
+		$this->als_goedgekeurde_dealer();
+		$_GET['ticket']   = 'T100002';
+		$_GET['volledig'] = '1';
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		$this->assertStringContainsString( 'hdp-ticket-besluit-goedgekeurd', $html );
+		$this->assertStringContainsString( HDP_I18N::t( 'garantie_besluit_kop' ), $html );
+	}
+
+	/** Tijdelijke links: één ronde naar de opslag, en een relatieve link wordt een volledige. */
+	public function test_tijdelijke_links_worden_volledige_urls() {
+		$gevraagd = array();
+		$filter   = static function ( $kort, $args, $url ) use ( &$gevraagd ) {
+			$gevraagd[] = array( $url, json_decode( $args['body'], true ) );
+			return array(
+				'headers'  => array(),
+				'body'     => wp_json_encode( array( array( 'path' => 'claims/a.jpg', 'signedURL' => '/object/sign/garantie-bijlagen/claims/a.jpg?token=x' ) ) ),
+				'response' => array( 'code' => 200, 'message' => 'OK' ),
+				'cookies'  => array(),
+			);
+		};
+		// Alleen deze nabootsing: die van de claimadministratie hierboven zou
+		// de aanvraag als schrijfactie opvatten.
+		remove_filter( 'pre_http_request', array( $this, 'nagebootste_supabase' ), 10 );
+		add_filter( 'pre_http_request', $filter, 5, 3 );
+		$links = HDP_Supabase::tijdelijke_links( HDP_Supabase::APP, 'garantie-bijlagen', array( 'claims/a.jpg' ) );
+		remove_filter( 'pre_http_request', $filter, 5 );
+		add_filter( 'pre_http_request', array( $this, 'nagebootste_supabase' ), 10, 3 );
+
+		$this->assertCount( 1, $gevraagd );
+		$this->assertStringEndsWith( '/storage/v1/object/sign/garantie-bijlagen', $gevraagd[0][0] );
+		$this->assertSame( array( 'claims/a.jpg' ), $gevraagd[0][1]['paths'] );
+		$this->assertSame( 'https://test.supabase.co/storage/v1/object/sign/garantie-bijlagen/claims/a.jpg?token=x', $links['claims/a.jpg'] );
+	}
+
+	/* =====================================================================
+	 * Foutmeldingen
+	 * ================================================================== */
+
+	/** Alleen een bewuste weigering uit de database gaat letterlijk naar de dealer. */
+	public function test_technische_databasefout_wordt_een_nette_melding() {
+		$leesbaar = new ReflectionMethod( 'HDP_Garantie_Formulier', 'leesbaar' );
+		$leesbaar->setAccessible( true );
+
+		$bewust    = new WP_Error( 'hdp_supabase_fout', 'Deze machine is afgewezen.', array( 'pg_code' => 'P0001' ) );
+		$technisch = new WP_Error( 'hdp_supabase_fout', 'new row for relation "claims" violates check constraint', array( 'pg_code' => '23514' ) );
+
+		$this->assertSame( 'Deze machine is afgewezen.', $leesbaar->invoke( null, $bewust ) );
+		$this->assertSame( HDP_I18N::t( 'garantie_fout_algemeen' ), $leesbaar->invoke( null, $technisch ) );
 	}
 
 	/**

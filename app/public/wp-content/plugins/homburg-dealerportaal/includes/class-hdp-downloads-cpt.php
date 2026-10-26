@@ -15,6 +15,16 @@ class HDP_Downloads_CPT {
 	const QUERY_VAR = 'hdp_download';
 
 	/**
+	 * Extra formaten van hetzelfde document (bijv. de Excel naast de PDF).
+	 * Eén metaregel per bestand, zodat er op gezocht kan worden zonder in
+	 * een lijstje te moeten graven. Het hoofdbestand blijft _hdp_attachment_id.
+	 */
+	const META_EXTRA = '_hdp_extra_bestand';
+
+	/** Hoe breed een voorbeeldplaatje in de contentgalerij wordt. */
+	const VOORBEELD_BREEDTE = 640;
+
+	/**
 	 * Geen echt merk maar een "voor alle dealers"-markering: bestanden met
 	 * dit merk vallen bewust buiten de merkrechten-controle (zie
 	 * mag_merk_zien()). Staat daarom óók niet in HDP_Merken::lijst(), want
@@ -50,6 +60,7 @@ class HDP_Downloads_CPT {
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_assets' ) );
 		add_filter( 'query_vars', array( __CLASS__, 'register_query_var' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'handle_download' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'handle_zip' ) );
 		add_filter( 'manage_' . self::POST_TYPE . '_posts_columns', array( __CLASS__, 'columns' ) );
 		add_action( 'manage_' . self::POST_TYPE . '_posts_custom_column', array( __CLASS__, 'column_content' ), 10, 2 );
 	}
@@ -202,16 +213,29 @@ class HDP_Downloads_CPT {
 	public static function render_meta_box( $post ) {
 		wp_nonce_field( 'hdp_bestand_save', 'hdp_bestand_nonce' );
 		$attachment_id = get_post_meta( $post->ID, '_hdp_attachment_id', true );
-		$url           = $attachment_id ? wp_get_attachment_url( $attachment_id ) : '';
+		$naam          = $attachment_id ? get_attached_file( $attachment_id ) : '';
+		$extra         = self::extra_bestanden( $post->ID );
 		?>
 		<p>
 			<input type="hidden" name="hdp_attachment_id" id="hdp_attachment_id" value="<?php echo esc_attr( $attachment_id ); ?>">
-			<button type="button" class="button" id="hdp_kies_bestand">Bestand kiezen</button>
+			<button type="button" class="button" id="hdp_kies_bestand"><?php echo $attachment_id ? 'Nieuwe versie kiezen' : 'Bestand kiezen'; ?></button>
 		</p>
-		<p id="hdp_bestand_naam"><?php echo $url ? esc_html( basename( $url ) ) : 'Geen bestand gekozen'; ?></p>
+		<p id="hdp_bestand_naam"><?php echo $naam ? esc_html( basename( $naam ) ) : 'Geen bestand gekozen'; ?></p>
+		<?php if ( $attachment_id ) : ?>
+			<p class="description">Een nieuwe versie vervangt het bestand. De download krijgt de datum van vandaag en staat bij dealers weer als nieuw.</p>
+		<?php endif; ?>
+
+		<p><strong>Extra formaten</strong><br><span class="description">Hetzelfde document in een ander formaat, bijv. de Excel naast de PDF.</span></p>
+		<input type="hidden" name="hdp_extra_ids" id="hdp_extra_ids" value="<?php echo esc_attr( implode( ',', $extra ) ); ?>">
+		<ul id="hdp_extra_lijst" style="margin:0 0 .5em">
+			<?php foreach ( $extra as $extra_id ) : ?>
+				<li data-id="<?php echo esc_attr( $extra_id ); ?>"><?php echo esc_html( basename( (string) get_attached_file( $extra_id ) ) ); ?> <a href="#" class="hdp-extra-weg">verwijderen</a></li>
+			<?php endforeach; ?>
+		</ul>
+		<p><button type="button" class="button" id="hdp_kies_extra">Formaat toevoegen</button></p>
 		<script>
 		jQuery(function ($) {
-			var frame;
+			var frame, extraFrame;
 			$('#hdp_kies_bestand').on('click', function (e) {
 				e.preventDefault();
 				if (frame) { frame.open(); return; }
@@ -222,6 +246,28 @@ class HDP_Downloads_CPT {
 					$('#hdp_bestand_naam').text(attachment.filename);
 				});
 				frame.open();
+			});
+
+			function extraBijwerken() {
+				$('#hdp_extra_ids').val($('#hdp_extra_lijst li').map(function () { return $(this).data('id'); }).get().join(','));
+			}
+			$('#hdp_extra_lijst').on('click', '.hdp-extra-weg', function (e) {
+				e.preventDefault();
+				$(this).closest('li').remove();
+				extraBijwerken();
+			});
+			$('#hdp_kies_extra').on('click', function (e) {
+				e.preventDefault();
+				if (extraFrame) { extraFrame.open(); return; }
+				extraFrame = wp.media({ title: 'Formaat toevoegen', button: { text: 'Toevoegen' }, multiple: true });
+				extraFrame.on('select', function () {
+					extraFrame.state().get('selection').each(function (bijlage) {
+						var a = bijlage.toJSON();
+						$('<li>').attr('data-id', a.id).text(a.filename + ' ').append($('<a href="#" class="hdp-extra-weg">verwijderen</a>')).appendTo('#hdp_extra_lijst');
+					});
+					extraBijwerken();
+				});
+				extraFrame.open();
 			});
 		});
 		</script>
@@ -235,7 +281,19 @@ class HDP_Downloads_CPT {
 
 		if ( isset( $_POST['hdp_bestand_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hdp_bestand_nonce'] ) ), 'hdp_bestand_save' ) ) {
 			if ( isset( $_POST['hdp_attachment_id'] ) ) {
-				update_post_meta( $post_id, '_hdp_attachment_id', absint( $_POST['hdp_attachment_id'] ) );
+				$nieuw = absint( $_POST['hdp_attachment_id'] );
+				$oud   = (int) get_post_meta( $post_id, '_hdp_attachment_id', true );
+				if ( $oud && $nieuw && $oud !== $nieuw ) {
+					// Een ander bestand bij een bestaande download is een nieuwe
+					// versie: zelfde afhandeling als in het adminportaal.
+					self::vervang_bestand( $post_id, $nieuw );
+				} else {
+					update_post_meta( $post_id, '_hdp_attachment_id', $nieuw );
+				}
+			}
+			if ( isset( $_POST['hdp_extra_ids'] ) ) {
+				$ids = array_filter( array_map( 'absint', explode( ',', sanitize_text_field( wp_unslash( $_POST['hdp_extra_ids'] ) ) ) ) );
+				self::zet_extra_bestanden( $post_id, $ids );
 			}
 		}
 
@@ -274,11 +332,42 @@ class HDP_Downloads_CPT {
 			return;
 		}
 
-		$bestand = self::resolve_download( absint( $download_id ) );
+		// Welk formaat (bij meerdere) en hoe: downloaden, bekijken in de
+		// browser, of een voorbeeldplaatje. Alleen keuzes; de toegang wordt in
+		// resolve_download() gecontroleerd.
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- alleen lezen, zie hierboven.
+		$attachment_id = isset( $_GET['bestand'] ) ? absint( wp_unslash( $_GET['bestand'] ) ) : 0;
+		$modus         = isset( $_GET['modus'] ) ? sanitize_key( wp_unslash( $_GET['modus'] ) ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		// Een voorbeeldplaatje telt niet als download: dan zou elke keer dat
+		// een dealer de contentpagina opent de teller van elk beeld oplopen.
+		$bestand = self::resolve_download( absint( $download_id ), $attachment_id, 'voorbeeld' !== $modus );
+
+		if ( 'voorbeeld' === $modus ) {
+			$voorbeeld = self::voorbeeld_pad( $bestand['attachment_id'] );
+			if ( ! $voorbeeld ) {
+				status_header( 404 );
+				exit;
+			}
+			// Mag even in de browser blijven: anders laadt een galerij met
+			// veertig beelden bij elk bezoek alles opnieuw. Wel "private",
+			// zodat een tussenliggende server het niet bewaart.
+			header( 'Cache-Control: private, max-age=86400' );
+			header( 'Content-Type: image/jpeg' );
+			header( 'Content-Length: ' . filesize( $voorbeeld ) );
+			header( 'X-Content-Type-Options: nosniff' );
+			readfile( $voorbeeld ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
+			exit;
+		}
+
+		// Bekijken opent het bestand in de browser in plaats van het op te
+		// slaan — alleen voor wat een browser veilig zelf kan tonen.
+		$inline = 'bekijken' === $modus && self::is_bekijkbaar( $bestand['mime'] );
 
 		nocache_headers();
 		header( 'Content-Type: ' . $bestand['mime'] );
-		header( 'Content-Disposition: attachment; filename="' . basename( $bestand['pad'] ) . '"' );
+		header( 'Content-Disposition: ' . ( $inline ? 'inline' : 'attachment' ) . '; filename="' . basename( $bestand['pad'] ) . '"' );
 		header( 'Content-Length: ' . filesize( $bestand['pad'] ) );
 		header( 'X-Content-Type-Options: nosniff' );
 		// WP_Filesystem zou het hele bestand eerst in PHP-geheugen moeten laden;
@@ -288,13 +377,254 @@ class HDP_Downloads_CPT {
 		exit;
 	}
 
+	/** De parameter voor "alles downloaden" (zie handle_zip()). */
+	const ZIP_VAR = 'hdp_zip';
+
+	/** De categorieën waarvoor "alles downloaden" bestaat. */
+	const ZIP_CATEGORIEEN = array( 'content' );
+
+	public static function zip_url( $categorie ) {
+		return add_query_arg( self::ZIP_VAR, $categorie, home_url( '/' ) );
+	}
+
+	/**
+	 * Alles uit een categorie in één zip, zoals "alles downloaden" op de
+	 * contentpagina.
+	 *
+	 * Bevat precies wat deze dealer op de pagina ziet: dezelfde taal- en
+	 * merkfilter (HDP_Downloads_Render::zichtbare_downloads()), dus nooit een
+	 * bestand waar hij los niet bij zou mogen.
+	 */
+	public static function handle_zip() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- alleen lezen; de toegang wordt hieronder gecontroleerd.
+		$categorie = isset( $_GET[ self::ZIP_VAR ] ) ? sanitize_key( wp_unslash( $_GET[ self::ZIP_VAR ] ) ) : '';
+		if ( ! in_array( $categorie, self::ZIP_CATEGORIEEN, true ) ) {
+			return;
+		}
+
+		$pad = self::maak_zip( $categorie );
+
+		nocache_headers();
+		header( 'Content-Type: application/zip' );
+		header( 'Content-Disposition: attachment; filename="homburg-' . $categorie . '-' . gmdate( 'Y-m-d' ) . '.zip"' );
+		header( 'Content-Length: ' . filesize( $pad ) );
+		header( 'X-Content-Type-Options: nosniff' );
+		readfile( $pad ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
+		wp_delete_file( $pad );
+		exit;
+	}
+
+	/**
+	 * Maakt de zip en geeft het pad terug; stopt met een foutscherm bij geen
+	 * toegang. Los van handle_zip() zodat het te testen is zonder exit.
+	 */
+	public static function maak_zip( $categorie ) {
+		if ( ! is_user_logged_in() ) {
+			HDP_Foutscherm::stop( 'niet_ingelogd', __( 'Je bent niet meer ingelogd.', 'homburg-dealerportaal' ), 'Geen toegang', 403 );
+		}
+		if ( ! HDP_Roles::mag_portaal_zien( get_current_user_id() ) ) {
+			HDP_Foutscherm::stop( 'wacht_goedkeuring', __( 'Je account is nog niet goedgekeurd.', 'homburg-dealerportaal' ), 'Geen toegang', 403 );
+		}
+
+		$downloads = HDP_Downloads_Render::zichtbare_downloads( $categorie )['downloads'];
+		if ( ! $downloads || ! class_exists( 'ZipArchive' ) ) {
+			HDP_Foutscherm::stop( 'niet_gevonden', __( 'Bestand niet gevonden.', 'homburg-dealerportaal' ), 'Niet gevonden', 404 );
+		}
+
+		// wp_tempnam() staat in een beheerbestand dat op een gewone pagina
+		// niet geladen is.
+		if ( ! function_exists( 'wp_tempnam' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		$pad = wp_tempnam( 'hdp-' . $categorie . '.zip' );
+		$zip = new ZipArchive();
+		if ( true !== $zip->open( $pad, ZipArchive::OVERWRITE ) ) {
+			HDP_Foutscherm::stop( 'niet_gevonden', __( 'Bestand niet gevonden.', 'homburg-dealerportaal' ), 'Niet gevonden', 404 );
+		}
+
+		$namen = array();
+		foreach ( $downloads as $download ) {
+			foreach ( self::bestanden( $download->ID ) as $attachment_id ) {
+				$bestand = get_attached_file( $attachment_id );
+				if ( ! $bestand || ! file_exists( $bestand ) ) {
+					continue;
+				}
+				// Twee bestanden met dezelfde naam mogen elkaar niet overschrijven.
+				$naam = wp_basename( $bestand );
+				$i    = 2;
+				while ( isset( $namen[ $naam ] ) ) {
+					$naam = pathinfo( wp_basename( $bestand ), PATHINFO_FILENAME ) . '-' . ( $i++ ) . '.' . pathinfo( $bestand, PATHINFO_EXTENSION );
+				}
+				$namen[ $naam ] = true;
+				$zip->addFile( $bestand, $naam );
+			}
+			self::tel_download( $download->ID );
+		}
+		$zip->close();
+
+		return $pad;
+	}
+
+	/** Kan een browser dit zelf tonen? PDF en gewone afbeeldingen; geen SVG (kan scripts bevatten). */
+	public static function is_bekijkbaar( $mime ) {
+		return in_array( $mime, array( 'application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/gif' ), true );
+	}
+
+	/** Is dit een afbeelding waarvan een voorbeeldplaatje te maken is? */
+	public static function is_afbeelding( $attachment_id ) {
+		return in_array( get_post_mime_type( $attachment_id ), array( 'image/jpeg', 'image/png', 'image/webp', 'image/gif' ), true );
+	}
+
+	/**
+	 * Een verkleinde kopie voor de contentgalerij, in de afgeschermde map.
+	 *
+	 * WordPress maakt zelf ook kleinere formaten, maar die worden bij het
+	 * beveiligen weggegooid (ze stonden in de openbare map). Deze wordt pas
+	 * gemaakt als hij voor het eerst opgevraagd wordt, en daarna bewaard —
+	 * zo werkt het ook voor beelden die er al stonden.
+	 *
+	 * @return string Pad naar het plaatje, of '' als dat niet lukt.
+	 */
+	public static function voorbeeld_pad( $attachment_id ) {
+		if ( ! self::is_afbeelding( $attachment_id ) ) {
+			return '';
+		}
+
+		$bron    = get_attached_file( $attachment_id );
+		$uploads = wp_upload_dir();
+		if ( ! $bron || ! file_exists( $bron ) || ! empty( $uploads['error'] ) ) {
+			return '';
+		}
+
+		$map  = trailingslashit( $uploads['basedir'] ) . HDP_Bestandsbeveiliging::MAP . '/voorbeelden';
+		$doel = $map . '/' . (int) $attachment_id . '-' . self::VOORBEELD_BREEDTE . '.jpg';
+
+		// Opnieuw maken als het origineel nieuwer is (nieuwe versie geüpload).
+		if ( file_exists( $doel ) && filemtime( $doel ) >= filemtime( $bron ) ) {
+			return $doel;
+		}
+
+		if ( ! wp_mkdir_p( $map ) ) {
+			return '';
+		}
+
+		$editor = wp_get_image_editor( $bron );
+		if ( is_wp_error( $editor ) ) {
+			return '';
+		}
+		$editor->resize( self::VOORBEELD_BREEDTE, self::VOORBEELD_BREEDTE, false );
+		$editor->set_quality( 78 );
+		$opgeslagen = $editor->save( $doel, 'image/jpeg' );
+
+		return is_wp_error( $opgeslagen ) ? '' : $doel;
+	}
+
+	/**
+	 * Alle bestanden van een download: het hoofdbestand en de extra formaten.
+	 *
+	 * @return int[] Bijlage-ID's, hoofdbestand eerst.
+	 */
+	public static function bestanden( $post_id ) {
+		$hoofd = (int) get_post_meta( $post_id, '_hdp_attachment_id', true );
+		$alle  = array_merge( $hoofd ? array( $hoofd ) : array(), self::extra_bestanden( $post_id ) );
+
+		return array_values( array_unique( array_filter( $alle ) ) );
+	}
+
+	/** De extra formaten (zonder het hoofdbestand). */
+	public static function extra_bestanden( $post_id ) {
+		return array_values( array_filter( array_map( 'intval', (array) get_post_meta( $post_id, self::META_EXTRA, false ) ) ) );
+	}
+
+	/** Vervangt de lijst extra formaten. Elke toegevoegde wordt beveiligd (zie HDP_Bestandsbeveiliging). */
+	public static function zet_extra_bestanden( $post_id, $ids ) {
+		$hoofd = (int) get_post_meta( $post_id, '_hdp_attachment_id', true );
+		delete_post_meta( $post_id, self::META_EXTRA );
+		foreach ( array_unique( array_map( 'intval', (array) $ids ) ) as $id ) {
+			if ( $id && $id !== $hoofd && 'attachment' === get_post_type( $id ) ) {
+				add_post_meta( $post_id, self::META_EXTRA, $id );
+			}
+		}
+	}
+
+	/**
+	 * Een nieuwe versie: het bestand wordt vervangen, de download blijft.
+	 *
+	 * Eerder bleef bij een nieuwe prijslijst de oude gewoon staan, en dan
+	 * stonden er twee naast elkaar waarvan niemand zag welke gold. Nu blijft
+	 * het één regel met het nieuwe bestand. De datum gaat naar vandaag:
+	 * die staat in de lijst, de nieuwste staat bovenaan, en hij krijgt weer
+	 * het label "Nieuw" — de dealer hoort te merken dat er iets veranderd is.
+	 *
+	 * Het oude bestand blijft in de mediabibliotheek staan (afgeschermd en
+	 * nergens meer aan gekoppeld), zodat een vergissing terug te draaien is.
+	 */
+	public static function vervang_bestand( $post_id, $attachment_id ) {
+		update_post_meta( $post_id, '_hdp_attachment_id', (int) $attachment_id );
+
+		$nu = current_time( 'mysql' );
+		wp_update_post(
+			array(
+				'ID'            => $post_id,
+				'post_date'     => $nu,
+				'post_date_gmt' => get_gmt_from_date( $nu ),
+			)
+		);
+	}
+
+	/**
+	 * Een nette titel uit een bestandsnaam.
+	 *
+	 * Titels stonden er als "Gebruikershandleiding_HOMBURG_JUNIOR_-_1980-2011_-_NL".
+	 * Dit maakt daar "Gebruikershandleiding Homburg Junior 1980-2011 NL" van:
+	 * zonder extensie en liggende streepjes, woorden in hoofdletters alleen
+	 * met een hoofdletter vooraan — behalve merknamen die zo geschreven
+	 * worden (HARDI) en korte afkortingen (NL, CTS).
+	 */
+	public static function nette_titel( $bestandsnaam ) {
+		$naam = pathinfo( (string) $bestandsnaam, PATHINFO_FILENAME );
+		// WordPress plakt "-1", "-2" achter een naam die al bestond
+		// ("…2014-1"). Alleen na een cijfer: "Rev-2" is een versienummer.
+		$naam = preg_replace( '/(?<=\d)-\d$/', '', $naam );
+		$naam = str_replace( '_', ' ', $naam );
+		// Een los streepje tussen woorden is een scheiding; tussen cijfers
+		// (1980-2011) blijft hij staan.
+		$naam = preg_replace( '/(?<!\d)-|-(?!\d)/', ' ', $naam );
+		$naam = trim( preg_replace( '/\s+/', ' ', $naam ) );
+
+		$merken = array();
+		foreach ( array_merge( self::merk_opties(), HDP_Merken::lijst(), array( 'Homburg' ) ) as $merk ) {
+			$merken[ mb_strtolower( $merk ) ] = $merk;
+		}
+
+		$woorden = explode( ' ', $naam );
+		foreach ( $woorden as $i => $woord ) {
+			$klein = mb_strtolower( $woord );
+			if ( isset( $merken[ $klein ] ) ) {
+				$woorden[ $i ] = $merken[ $klein ];
+			} elseif ( mb_strlen( $woord ) > 3 && mb_strtoupper( $woord ) === $woord && preg_match( '/\p{L}/u', $woord ) ) {
+				$woorden[ $i ] = mb_strtoupper( mb_substr( $klein, 0, 1 ) ) . mb_substr( $klein, 1 );
+			}
+		}
+
+		$titel = implode( ' ', $woorden );
+
+		return '' === $titel ? (string) $bestandsnaam : mb_strtoupper( mb_substr( $titel, 0, 1 ) ) . mb_substr( $titel, 1 );
+	}
+
+	/** Grootte van een bestand in bytes, 0 als het er niet is. */
+	public static function bestandsgrootte( $attachment_id ) {
+		$pad = get_attached_file( $attachment_id );
+		return $pad && file_exists( $pad ) ? (int) filesize( $pad ) : 0;
+	}
+
 	/**
 	 * Controleert toegang en levert bestandsgegevens op, of stopt met
 	 * wp_die() bij geen toegang/ontbrekend bestand. Los van
 	 * handle_download() zodat dit getest kan worden zonder de
 	 * uiteindelijke exit uit te voeren (niet aanroepbaar binnen PHPUnit).
 	 */
-	public static function resolve_download( $download_id ) {
+	public static function resolve_download( $download_id, $attachment_id = 0, $tellen = true ) {
 		// Bewust drie losse gevallen in plaats van één "geen toegang": een
 		// verlopen sessie, een account dat nog op goedkeuring wacht en een
 		// bestand van een ander merk vragen elk om een ander antwoord aan de
@@ -320,21 +650,33 @@ class HDP_Downloads_CPT {
 			HDP_Foutscherm::stop( 'geen_merkrecht', __( 'Dit bestand hoort bij een merk dat niet aan je account gekoppeld is.', 'homburg-dealerportaal' ), 'Geen toegang', 403 );
 		}
 
-		$attachment_id = get_post_meta( $download_id, '_hdp_attachment_id', true );
-		$file          = $attachment_id ? get_attached_file( $attachment_id ) : '';
+		// Zonder keuze het hoofdbestand. Met keuze alleen een bestand dat écht
+		// bij déze download hoort: anders was met een ander nummer in de URL
+		// elk bestand op te halen via een download waar de dealer wél bij mag.
+		$bestanden = self::bestanden( $download_id );
+		if ( ! $attachment_id ) {
+			$attachment_id = $bestanden ? $bestanden[0] : 0;
+		} elseif ( ! in_array( (int) $attachment_id, $bestanden, true ) ) {
+			$attachment_id = 0;
+		}
+
+		$file = $attachment_id ? get_attached_file( $attachment_id ) : '';
 
 		if ( ! $attachment_id || ! $file || ! file_exists( $file ) ) {
 			HDP_Foutscherm::stop( 'niet_gevonden', __( 'Bestand niet gevonden.', 'homburg-dealerportaal' ), 'Niet gevonden', 404 );
 		}
 
-		self::tel_download( $download_id );
+		if ( $tellen ) {
+			self::tel_download( $download_id );
+		}
 
 		$mime = get_post_mime_type( $attachment_id );
 
 		return array(
-			'post_id' => $download_id,
-			'pad'     => $file,
-			'mime'    => $mime ? $mime : 'application/octet-stream',
+			'post_id'       => $download_id,
+			'attachment_id' => (int) $attachment_id,
+			'pad'           => $file,
+			'mime'          => $mime ? $mime : 'application/octet-stream',
 		);
 	}
 
@@ -410,12 +752,27 @@ class HDP_Downloads_CPT {
 		return (int) get_post_meta( $post_id, '_hdp_download_teller', true );
 	}
 
-	public static function download_url( $post_id ) {
-		return add_query_arg( self::QUERY_VAR, $post_id, home_url( '/' ) );
+	/**
+	 * @param int    $post_id       De download.
+	 * @param int    $attachment_id Een extra formaat; 0 of het hoofdbestand = de gewone link.
+	 * @param string $modus         '' (downloaden), 'bekijken' of 'voorbeeld'.
+	 */
+	public static function download_url( $post_id, $attachment_id = 0, $modus = '' ) {
+		$args = array( self::QUERY_VAR => $post_id );
+
+		if ( $attachment_id && (int) get_post_meta( $post_id, '_hdp_attachment_id', true ) !== (int) $attachment_id ) {
+			$args['bestand'] = (int) $attachment_id;
+		}
+		if ( $modus ) {
+			$args['modus'] = $modus;
+		}
+
+		return add_query_arg( $args, home_url( '/' ) );
 	}
 
-	public static function type_label( $post_id ) {
-		$attachment_id = get_post_meta( $post_id, '_hdp_attachment_id', true );
+	/** Het formaat in hoofdletters (PDF, XLSX); van een download of van één bijlage. */
+	public static function type_label( $post_id, $attachment_id = 0 ) {
+		$attachment_id = $attachment_id ? $attachment_id : get_post_meta( $post_id, '_hdp_attachment_id', true );
 		if ( ! $attachment_id ) {
 			return '';
 		}

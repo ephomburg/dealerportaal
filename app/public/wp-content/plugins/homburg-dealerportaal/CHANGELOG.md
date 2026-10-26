@@ -8,6 +8,87 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.80.1
+
+**Header en footer.**
+- De header is vertaald: een Franstalige dealer kreeg "Links" en "Mijn account" in het Nederlands, net als de labels voor schermlezers (favorieten, winkelwagen, accountmenu). Nu "Liens" en "Mon compte".
+- De link "Adminportaal (test)" in de footer staat er alleen nog voor wie het adminportaal mag openen. Hij stond er voor iedereen, ook voor dealers en voor bezoekers op het inlogscherm.
+- Het jaartal in de footer komt van de server. Het werd door een script ingevuld; zonder JavaScript stond er "© ·".
+- Tests: 401 (was 396).
+
+## 1.80.0
+
+**Nieuwe startpagina: wat ligt er vandaag voor je klaar.**
+- Bovenaan de groet met een label of het magazijn nu bereikbaar is ("tot 17:00"), en anders wanneer weer ("morgen vanaf 08:00", "maandag vanaf 08:00").
+- Onder het zoekveld snelle wegen: Artikelnummers plakken, Mijn favorieten, Hele webshop bekijken.
+- **"Vandaag voor jou"**: vier tegels met een getal. Garantieclaims die op jou wachten (oranje als dat zo is), bestellingen in behandeling met de laatste erbij, nieuwe documenten, en wat er nog in de winkelwagen ligt. Elke tegel gaat direct naar de juiste plek.
+- Daaronder links **"Nieuw voor jou"** (nu een eigen blok, met een rustige regel als er niets nieuws is) en de **magazijnkaart** met grote bel- en mailknoppen; rechts de **onderdelen per merk** als compacte lijst met een rood icoontje in plaats van vier grote tegels. "Oudere Rabe-machines" (Rabe Ersatzteilportal) staat in die lijst; dat stond onder "(Technische) informatie".
+- "Snel herbestellen" staat niet meer op de startpagina.
+- Alle links van de oude startpagina zijn er nog. Het blokpatroon "Overige informatie" volgt de nieuwe indeling.
+- Het losse puntje achter het e-mailadres van het magazijn is weg: dat was het scheidingsteken tussen links, dat binnen het knopje terechtkwam.
+
+**Tijd.** Groet en magazijnstatus rekenden de tijdzone er twee keer bij; op een site in Nederlandse tijd liep dat een of twee uur scheef. Daarnaast staat de live site op UTC: die hoort op Europe/Amsterdam (een instelling, geen code).
+
+**Telefoon: de pagina schuift niet meer opzij.** Het menublok werd zo breed als de hele rij menu-items, waardoor de hele pagina zijwaarts schoof in plaats van alleen de menustrook.
+- Tests: 396 (was 386).
+
+## 1.79.0
+
+**Downloads: meerdere formaten onder één titel.** Hetzelfde document als PDF én Excel stond als twee losse regels. Nu is het één regel met een knop per formaat. In het adminportaal kies je de formaten samen bij het uploaden, of voeg je er later een toe ("Formaat toevoegen"); in wp-admin staat het bij "Extra formaten". Een extra formaat wordt net zo afgeschermd als het hoofdbestand, en is alleen op te halen via de download waar het bij hoort.
+
+**Een nieuwe versie vervangt de oude.** Bij een nieuwe prijslijst bleef de oude staan. Nu: "Nieuwe versie" in het adminportaal (of een ander bestand kiezen in wp-admin). Het blijft één regel, met de datum van vandaag, bovenaan, en weer met het label "Nieuw". Het oude bestand blijft afgeschermd in de mediabibliotheek staan, zodat een vergissing terug te draaien is. De lijst in het adminportaal toont nu alle bestanden in plaats van de laatste tien, anders kon een oudere prijslijst nooit vervangen worden.
+
+**Nette titels.** De titel mag bij uploaden leeg blijven; dan wordt het een nette titel uit de bestandsnaam ("Gebruikershandleiding_HOMBURG_JUNIOR_-_NL.pdf" wordt "Gebruikershandleiding Homburg Junior NL"). Merknamen houden hun eigen schrijfwijze (HARDI), en een versienummer als "Rev-2" blijft staan.
+
+**Bij elk bestand: formaat, grootte en datum**, bijvoorbeeld "PDF 14 MB · 6 okt 2026". Er stond alleen een titel, waardoor niet te zien was welke prijslijst de nieuwste was.
+
+**Bekijken in de browser.** Een PDF of afbeelding heeft naast "Downloaden" een knop "Bekijken", die het bestand in een nieuw tabblad opent in plaats van het op te slaan. Niet voor SVG: die kan scripts bevatten.
+
+**Zoeken in titel, omschrijving en merk**, in plaats van alleen de titel.
+
+**Content is een galerij.** Kaarten met een voorbeeld van het beeld in plaats van een lijst met bestandsnamen, met de bijbehorende posttekst, een knop "Kopieer tekst" en bovenaan "Alles downloaden (zip)". De zip bevat precies wat de dealer ook los mag zien (zelfde taal- en merkfilter). De voorbeeldplaatjes worden pas gemaakt als ze voor het eerst nodig zijn, en staan in de afgeschermde map; een voorbeeld telt niet als download.
+**Footer: de icoontjes bij telefoon en e-mail zijn wit** (thema 1.33.1). Rood op donkergrijs was nauwelijks te zien.
+- Tests: 386 (was 374).
+
+## 1.78.0
+
+**Garantie: een claim op onderdelen ziet er niet meer kapot uit.**
+- Zo'n claim heeft geen machine en kreeg daardoor een lege titel: in de lijst stond alleen een nummer, en boven het ticket stond niets. Nu staat daar het probleem met het factuurnummer, bijvoorbeeld "Beschadigd aangekomen · F-2026-0412".
+- Op het ticket stond een lege machinekaart met "Eerdere claims: 1". Dat getal was fout: alle onderdelenclaims hebben geen serienummer en telden zo als elkaars eerdere claims. De kaart is weg bij een onderdelenclaim.
+- Wat er mis was met de onderdelen (defect, beschadigd, verkeerd geleverd…) koos de dealer wel, maar het stond nergens op het ticket. Nu wel, en het veld heet weer "Toelichting", net als op het formulier.
+
+**Enters blijven enters.** Een klacht of bericht over meerdere regels werd één lap tekst, ook wat Homburg vanuit de app schreef.
+
+**Bijlagen zijn te openen.** Er stond alleen de bestandsnaam. Nu is elke bijlage een link, met een voorbeeldje bij foto's en het label "Van Homburg" bij wat Homburg toevoegde. De links worden alleen gemaakt nadat vaststaat dat het ticket van deze dealer is, en ze vervallen na een uur.
+
+**Machine aanmelden: factuur of afleverbon meesturen.** De verwerking bestond al, het veld stond er niet. Niet verplicht. Een aankoopdatum in de toekomst wordt geweigerd: een tikfout als 2062 gaf een garantie die decennia doorliep.
+
+**Verlopen en afgewezen machines.**
+- Op een machine met verlopen garantie kan geen claim meer worden ingediend. Dat wordt ook op de server tegengehouden, niet alleen in de keuzelijst.
+- Een afgewezen machine weigerde de database pas nádat het hele formulier was ingevuld. Nu staat die in de keuzelijst wel, maar is hij niet te kiezen, met de reden erbij.
+- In de keuzelijst staat per machine tot wanneer de garantie loopt.
+
+**Vanaf de machine direct een claim.** Elke machinekaart waarop geclaimd kan worden heeft een knop "Claim indienen", met de machine al gekozen. Eerder: naar "Claim indienen", "machine" kiezen, en dezelfde machine in de lijst opnieuw zoeken. De kaarten breken in de smalle middenkolom nu netjes af; de garantiebalk viel daar buiten de kaart.
+
+**Het besluit staat bovenaan een afgeronde claim**, in groen of rood, met de laatste toelichting van Homburg. Er stond alleen "dit ticket is afgehandeld".
+
+**Controle vóór het versturen.**
+- Te veel of te grote bestanden, een onderdeelregel zonder uren, of een onderdeel van een andere leverancier zonder factuur: dat zegt het formulier nu meteen, vóór er iets wordt verstuurd. Eerder kwam die melding pas na een retour, en dan waren de gekozen foto's weg.
+- Komt er tóch een melding van de server, dan staat erbij dat de bestanden opnieuw gekozen moeten worden.
+- Was een verzending groter dan de server aankan, dan kwam de dealer zonder enige melding op een leeg formulier terug. Nu krijgt hij een melding. Bestanden boven het maximum van tien vielen stilletjes weg; die worden nu genoemd.
+
+**Nette foutmeldingen.** Een technische fout van de database (Engelse Postgres-tekst, soms een hele foutpagina) kwam letterlijk op het scherm. Alleen bewuste weigeringen van de database gaan nog letterlijk door; de rest wordt een gewone melding en staat in het logboek.
+
+**Startpagina: de rechterkolom is breder.** De merkentegels mochten alle ruimte pakken; de kolom met bestellen, contact en technische informatie bleef een strook van zo'n 260px, met e-mailadressen die halverwege braken. Die kolom is nu zo'n 400px.
+- Tests: 374 (was 364).
+
+## 1.77.1
+
+**De rode bocht linksboven blijft staan bij het scrollen.**
+- De rode rand met de ronde hoek, waar het menu in de balk overgaat, hoort bij de bovenkant van het werkblad. Bij het scrollen schoof hij daardoor mee onder de balk door en was de bocht weg.
+- Nu plakt er een smal randje van het werkblad onder de balk, met dezelfde rand en ronding. De inhoud schuift eronderdoor. Bovenaan ziet de pagina er precies hetzelfde uit als eerst.
+- Op een smal scherm heeft het werkblad geen ronde hoek, dus daar verandert niets.
+
 ## 1.77.0
 
 **Het portaal zegt overal "je"** (thema 1.33.0).

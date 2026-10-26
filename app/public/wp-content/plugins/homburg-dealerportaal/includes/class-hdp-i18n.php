@@ -207,6 +207,13 @@ class HDP_I18N {
 		return array(
 			// Header/footer
 			'header_caption'    => array( 'nl' => 'Dealerportaal', 'fr' => 'Portail concessionnaire' ),
+			// Header: stonden er als vaste Nederlandse tekst, ook voor een Franstalige dealer.
+			'header_favorieten'   => array( 'nl' => 'Mijn favorieten', 'fr' => 'Mes favoris' ),
+			'header_links'        => array( 'nl' => 'Links', 'fr' => 'Liens' ),
+			'header_links_label'  => array( 'nl' => 'Links naar Homburg Holland en Belgium', 'fr' => 'Liens vers Homburg Holland et Belgium' ),
+			'header_winkelwagen'  => array( 'nl' => 'Winkelwagen', 'fr' => 'Panier' ),
+			'header_mijn_account' => array( 'nl' => 'Mijn account', 'fr' => 'Mon compte' ),
+			'header_accountmenu'  => array( 'nl' => 'Accountmenu', 'fr' => 'Menu du compte' ),
 			'nav_aria'          => array( 'nl' => 'Homburg-websites', 'fr' => 'Sites Homburg' ),
 			'footer_volg_ons'   => array( 'nl' => 'Volg ons', 'fr' => 'Suivez-nous' ),
 			'footer_copyright'  => array(
@@ -247,10 +254,12 @@ class HDP_I18N {
 			// Garantie — formulieren
 			'garantie_kies'              => array( 'nl' => '— Maak een keuze —', 'fr' => '— Faites un choix —' ),
 			'garantie_annuleren'         => array( 'nl' => 'Annuleren', 'fr' => 'Annuler' ),
+			// Alleen bij "machine aanmelden"; de claim heeft garantie_fotos_hint.
 			'garantie_bijlagen_hint'     => array(
-				'nl' => 'JPG, PNG, WEBP, HEIC of PDF. Maximaal 10 bestanden van 10 MB.',
-				'fr' => 'JPG, PNG, WEBP, HEIC ou PDF. Maximum 10 fichiers de 10 Mo.',
+				'nl' => 'Bijvoorbeeld de factuur of afleverbon, en een foto van het typeplaatje. Daarmee kunnen we je aanmelding sneller beoordelen. JPG, PNG, WEBP, HEIC of PDF; maximaal 10 bestanden van 10 MB.',
+				'fr' => 'Par exemple la facture ou le bon de livraison, et une photo de la plaque signalétique. Cela nous permet de traiter votre enregistrement plus rapidement. JPG, PNG, WEBP, HEIC ou PDF ; maximum 10 fichiers de 10 Mo.',
 			),
+			'garantie_veld_bijlagen'     => array( 'nl' => 'Factuur of afleverbon', 'fr' => 'Facture ou bon de livraison' ),
 			/* translators: %s zijn de bestandsnamen die niet gelukt zijn. */
 			'garantie_bijlagen_mislukt'  => array(
 				'nl' => 'Deze bestanden konden we niet opslaan: %s. Je kunt ze alsnog meesturen via een bericht bij het ticket.',
@@ -320,6 +329,49 @@ class HDP_I18N {
 				'nl' => 'Er ging iets mis bij het opslaan. Probeer het nog een keer.',
 				'fr' => "Une erreur s'est produite lors de l'enregistrement. Réessayez.",
 			),
+			/* translators: %s is een datum. */
+			'garantie_fout_verlopen'     => array(
+				'nl' => 'De garantie op deze machine is verlopen op %s. Er kan geen claim meer op worden ingediend.',
+				'fr' => 'La garantie de cette machine a expiré le %s. Aucune demande ne peut plus être introduite.',
+			),
+			'garantie_fout_machine_afgewezen' => array(
+				'nl' => 'Deze machine is afgewezen voor garantie. Er kan geen claim op worden ingediend.',
+				'fr' => 'Cette machine a été refusée pour la garantie. Aucune demande ne peut être introduite.',
+			),
+			'garantie_machine_niet_kiesbaar' => array(
+				'nl' => 'Machines met verlopen garantie of een afgewezen aanmelding staan erbij, maar zijn niet te kiezen.',
+				'fr' => 'Les machines dont la garantie a expiré ou dont l’enregistrement a été refusé figurent dans la liste, mais ne peuvent pas être choisies.',
+			),
+			'garantie_fout_datum_toekomst' => array(
+				'nl' => 'De aankoopdatum ligt in de toekomst. Controleer de datum.',
+				'fr' => 'La date d’achat se situe dans le futur. Vérifiez la date.',
+			),
+			'garantie_bestanden_opnieuw' => array(
+				'nl' => 'Kies je bestanden opnieuw: die blijven na een foutmelding niet bewaard.',
+				'fr' => 'Sélectionnez à nouveau vos fichiers : ils ne sont pas conservés après un message d’erreur.',
+			),
+			/* translators: %s is een maximale grootte, bijv. "100 MB". */
+			'garantie_fout_te_groot'     => array(
+				'nl' => 'Er is niets verstuurd: de bestanden waren samen groter dan %s. Stuur minder of kleinere bestanden mee.',
+				'fr' => 'Rien n’a été envoyé : les fichiers dépassaient ensemble %s. Joignez moins de fichiers ou des fichiers plus petits.',
+			),
+			// Controle in de browser, vóór het versturen.
+			/* translators: %d is het maximale aantal bestanden. */
+			'garantie_js_te_veel'        => array(
+				'nl' => 'Je kunt maximaal %d bestanden tegelijk meesturen.',
+				'fr' => 'Vous pouvez joindre au maximum %d fichiers à la fois.',
+			),
+			/* translators: %1$s is een bestandsnaam, %2$s een maximale grootte. */
+			'garantie_js_bestand_te_groot' => array(
+				'nl' => '%1$s is groter dan %2$s. Kies een kleiner bestand.',
+				'fr' => '%1$s dépasse %2$s. Choisissez un fichier plus petit.',
+			),
+			/* translators: %s is een maximale grootte. */
+			'garantie_js_totaal_te_groot' => array(
+				'nl' => 'De bestanden zijn samen groter dan %s. Stuur minder of kleinere bestanden mee.',
+				'fr' => 'Les fichiers dépassent ensemble %s. Joignez moins de fichiers ou des fichiers plus petits.',
+			),
+			'garantie_bijlage_van_homburg' => array( 'nl' => 'Van Homburg', 'fr' => 'De Homburg' ),
 
 			'garantie_storing_kop'     => array( 'nl' => 'Even niet beschikbaar.', 'fr' => 'Momentanément indisponible.' ),
 			'garantie_storing_tekst'   => array(
@@ -428,6 +480,43 @@ class HDP_I18N {
 			'home_zoek_knop'          => array( 'nl' => 'Zoek', 'fr' => 'Rechercher' ),
 			'snelbestel_kop'          => array( 'nl' => 'Artikelnummers plakken', 'fr' => 'Coller des numéros d’article' ),
 			'snelbestel_tekst'        => array( 'nl' => 'Een hele lijst in één keer in je winkelwagen.', 'fr' => 'Toute une liste dans le panier en une fois.' ),
+			// Startpagina: snelle wegen onder het zoekveld.
+			'home_snel_label'         => array( 'nl' => 'Snel naar', 'fr' => 'Accès rapide' ),
+			'home_snel_favorieten'    => array( 'nl' => 'Mijn favorieten', 'fr' => 'Mes favoris' ),
+			'home_snel_webshop'       => array( 'nl' => 'Hele webshop bekijken', 'fr' => 'Voir toute la boutique' ),
+			// Startpagina: is het magazijn nu bereikbaar?
+			/* translators: %s is een tijd, bijv. 17:00. */
+			'magazijn_open'           => array( 'nl' => 'Magazijn nu bereikbaar · tot %s', 'fr' => 'Entrepôt joignable · jusqu’à %s' ),
+			/* translators: %s is wanneer weer, bijv. "morgen vanaf 08:00". */
+			'magazijn_dicht'          => array( 'nl' => 'Magazijn gesloten · weer bereikbaar %s', 'fr' => 'Entrepôt fermé · joignable %s' ),
+			'magazijn_vandaag'        => array( 'nl' => 'vandaag vanaf %s', 'fr' => 'aujourd’hui dès %s' ),
+			'magazijn_morgen'         => array( 'nl' => 'morgen vanaf %s', 'fr' => 'demain dès %s' ),
+			'magazijn_maandag'        => array( 'nl' => 'maandag vanaf %s', 'fr' => 'lundi dès %s' ),
+			// Startpagina: "Vandaag voor jou".
+			'vandaag_kop'             => array( 'nl' => 'Vandaag voor jou', 'fr' => 'Pour vous aujourd’hui' ),
+			'tegel_garantie'          => array( 'nl' => 'Garantie', 'fr' => 'Garantie' ),
+			'tegel_garantie_wacht_een' => array( 'nl' => 'Claim wacht op jou', 'fr' => 'Une demande attend votre réponse' ),
+			'tegel_garantie_wacht_meer' => array( 'nl' => 'Claims wachten op jou', 'fr' => 'Des demandes attendent votre réponse' ),
+			'tegel_garantie_niets'    => array( 'nl' => 'Niets dat op jou wacht', 'fr' => 'Rien ne vous attend' ),
+			/* translators: %d is een aantal claims. */
+			'tegel_garantie_loopt'    => array( 'nl' => '%d lopende claims', 'fr' => '%d demandes en cours' ),
+			'tegel_garantie_naar'     => array( 'nl' => 'Naar garantie', 'fr' => 'Vers la garantie' ),
+			'tegel_bestellingen'      => array( 'nl' => 'Bestellingen', 'fr' => 'Commandes' ),
+			'tegel_bestellingen_loopt' => array( 'nl' => 'In behandeling', 'fr' => 'En cours de traitement' ),
+			'tegel_bestellingen_geen' => array( 'nl' => 'Niets in behandeling', 'fr' => 'Rien en cours' ),
+			/* translators: %1$s is een ordernummer, %2$s een datum. */
+			'tegel_bestellingen_laatste' => array( 'nl' => 'Laatste: #%1$s, %2$s', 'fr' => 'Dernière : n° %1$s, %2$s' ),
+			'tegel_bestellingen_alle' => array( 'nl' => 'Alle bestellingen', 'fr' => 'Toutes les commandes' ),
+			'tegel_downloads'         => array( 'nl' => 'Downloads', 'fr' => 'Téléchargements' ),
+			'tegel_downloads_nieuw'   => array( 'nl' => 'Nieuwe documenten', 'fr' => 'Nouveaux documents' ),
+			'tegel_downloads_geen'    => array( 'nl' => 'Geen nieuwe documenten', 'fr' => 'Aucun nouveau document' ),
+			'tegel_downloads_naar'    => array( 'nl' => 'Naar downloads', 'fr' => 'Vers les téléchargements' ),
+			'tegel_winkelwagen'       => array( 'nl' => 'Winkelwagen', 'fr' => 'Panier' ),
+			'tegel_winkelwagen_vol'   => array( 'nl' => 'Nog niet besteld', 'fr' => 'Pas encore commandé' ),
+			'tegel_winkelwagen_leeg'  => array( 'nl' => 'Je winkelwagen is leeg', 'fr' => 'Votre panier est vide' ),
+			'tegel_winkelwagen_afronden' => array( 'nl' => 'Bestelling afronden', 'fr' => 'Finaliser la commande' ),
+			'tegel_winkelwagen_naar_webshop' => array( 'nl' => 'Naar de webshop', 'fr' => 'Vers la boutique' ),
+			'nieuw_niets'             => array( 'nl' => 'Er staan geen nieuwe documenten voor je klaar.', 'fr' => 'Aucun nouveau document ne vous attend.' ),
 			'berichten_titel'         => array( 'nl' => 'Berichten van Homburg', 'fr' => 'Messages de Homburg' ),
 			/* translators: %s is de titel van het bericht. */
 			'bericht_wegklikken'      => array(
@@ -544,9 +633,11 @@ class HDP_I18N {
 				'nl' => 'Dit ticket ligt bij Homburg. Je hoeft nu niets te doen.',
 				'fr' => "Ce ticket est chez Homburg. Vous n'avez rien à faire pour le moment.",
 			),
-			'garantie_ligt_bij_klaar'    => array(
-				'nl' => 'Dit ticket is afgehandeld.',
-				'fr' => 'Ce ticket est clôturé.',
+			// Het besluit bovenaan een afgeronde claim (zie render_besluit()).
+			'garantie_besluit_kop'       => array( 'nl' => 'Besluit', 'fr' => 'Décision' ),
+			'garantie_besluit_vragen'    => array(
+				'nl' => 'Vragen over dit besluit? Stuur een bericht bij dit ticket.',
+				'fr' => 'Des questions sur cette décision ? Envoyez un message sur ce ticket.',
 			),
 
 			// Garantie — formuliervelden. Sleutels komen overeen met HDP_Garantie::velden().
@@ -681,8 +772,8 @@ class HDP_I18N {
 			// Eigen hint voor de claim: op het machineformulier slaat "foto
 			// van het defect" nergens op, daar is nog niets stuk.
 			'garantie_fotos_hint'        => array(
-				'nl' => 'Stuur in elk geval een foto van het typeplaatje met het serienummer mee, en een foto van het defect zelf. Toegestaan: JPG, PNG, PDF.',
-				'fr' => 'Joignez en tout cas une photo de la plaque signalétique avec le numéro de série et une photo du défaut. Formats : JPG, PNG, PDF.',
+				'nl' => 'Stuur in elk geval een foto van het typeplaatje met het serienummer mee, en een foto van het defect zelf. JPG, PNG, WEBP, HEIC of PDF; maximaal 10 bestanden van 10 MB.',
+				'fr' => 'Joignez en tout cas une photo de la plaque signalétique avec le numéro de série et une photo du défaut. JPG, PNG, WEBP, HEIC ou PDF ; maximum 10 fichiers de 10 Mo.',
 			),
 
 			// Nieuw-markering
@@ -810,7 +901,8 @@ class HDP_I18N {
 			),
 
 			// Downloads
-			'zoek_placeholder'  => array( 'nl' => 'Zoek op bestandsnaam…', 'fr' => 'Rechercher par nom de fichier…' ),
+			// Zoekt in titel, omschrijving en merk (zie HDP_Downloads_Render::render_item()).
+			'zoek_placeholder'  => array( 'nl' => 'Zoek op titel, omschrijving of merk…', 'fr' => 'Rechercher par titre, description ou marque…' ),
 			'filter_regio'      => array( 'nl' => 'Regio', 'fr' => 'Région' ),
 			'filter_alles'      => array( 'nl' => 'Alles', 'fr' => 'Tous' ),
 			'filter_nederland'  => array( 'nl' => 'Nederland', 'fr' => 'Pays-Bas' ),
@@ -823,7 +915,7 @@ class HDP_I18N {
 			'sorteer_oud'       => array( 'nl' => 'Oudste eerst', 'fr' => "Plus anciens d'abord" ),
 			'sorteer_naam'      => array( 'nl' => 'Naam (A-Z)', 'fr' => 'Nom (A-Z)' ),
 			'telling_van'       => array( 'nl' => 'van', 'fr' => 'sur' ),
-			'telling_zichtbaar' => array( 'nl' => 'downloads zichtbaar', 'fr' => 'téléchargements visibles' ),
+			'telling_zichtbaar' => array( 'nl' => 'bestanden zichtbaar', 'fr' => 'fichiers visibles' ),
 			'wis_filters'       => array( 'nl' => 'Filters wissen', 'fr' => 'Réinitialiser les filtres' ),
 			'leeg_resultaat'    => array(
 				'nl' => 'Geen downloads gevonden voor deze combinatie van filters.',
@@ -849,6 +941,12 @@ class HDP_I18N {
 			),
 			'terug_naar_portaal' => array( 'nl' => '← Terug naar het portaal', 'fr' => '← Retour au portail' ),
 			'btn_downloaden'    => array( 'nl' => 'Downloaden', 'fr' => 'Télécharger' ),
+			// Een PDF of afbeelding in de browser openen in plaats van opslaan.
+			'btn_bekijken'      => array( 'nl' => 'Bekijken', 'fr' => 'Voir' ),
+			// Contentgalerij.
+			'btn_kopieer_tekst' => array( 'nl' => 'Kopieer tekst', 'fr' => 'Copier le texte' ),
+			'tekst_gekopieerd'  => array( 'nl' => 'Gekopieerd', 'fr' => 'Copié' ),
+			'btn_alles_downloaden' => array( 'nl' => 'Alles downloaden (zip)', 'fr' => 'Tout télécharger (zip)' ),
 		);
 	}
 }

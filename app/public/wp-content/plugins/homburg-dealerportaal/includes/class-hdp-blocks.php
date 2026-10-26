@@ -50,6 +50,7 @@ class HDP_Blocks {
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/merken-tegel' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/garantie' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/zijbalk' );
+		register_block_type( HDP_PLUGIN_DIR . 'blocks/nieuw-voor-jou' );
 	}
 
 	public static function enqueue_assets() {

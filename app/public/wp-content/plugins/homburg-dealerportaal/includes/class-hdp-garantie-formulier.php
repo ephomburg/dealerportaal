@@ -62,6 +62,8 @@ class HDP_Garantie_Formulier {
 	}
 
 	public static function verwerk() {
+		self::vang_te_groot_af();
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- de nonce wordt hieronder gecontroleerd zodra we weten dát dit een van onze formulieren is.
 		$actie = isset( $_POST[ self::ACTIE_VELD ] ) ? sanitize_key( wp_unslash( $_POST[ self::ACTIE_VELD ] ) ) : '';
 
@@ -84,6 +86,39 @@ class HDP_Garantie_Formulier {
 		}
 	}
 
+	/**
+	 * Een verzending die groter is dan de server aankan.
+	 *
+	 * Dan gooit PHP álles weg — de bestanden, maar ook de tekstvelden en
+	 * het veld dat zegt welk formulier het was. De dealer kwam zonder enige
+	 * melding terug op een leeg formulier. Het enige spoor is dat er wel
+	 * iets binnenkwam (Content-Length) maar er niets van over is.
+	 *
+	 * Geen nonce-controle nodig: er wordt niets opgeslagen, alleen een
+	 * melding getoond op de pagina waar de dealer al was.
+	 */
+	private static function vang_te_groot_af() {
+		$methode = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_key( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
+		$lengte  = isset( $_SERVER['CONTENT_LENGTH'] ) ? (int) $_SERVER['CONTENT_LENGTH'] : 0;
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- alleen kijken óf er iets is.
+		if ( 'post' !== $methode || ! $lengte || ! empty( $_POST ) || ! empty( $_FILES ) ) {
+			return;
+		}
+		if ( ! is_page( 'garantie' ) || ! is_user_logged_in() || ! HDP_Roles::mag_portaal_zien( get_current_user_id() ) ) {
+			return;
+		}
+
+		$terug = isset( $_SERVER['REQUEST_URI'] ) ? home_url( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) : home_url( '/garantie/' );
+
+		self::terug_met_fout(
+			'garantie',
+			sprintf( HDP_I18N::t( 'garantie_fout_te_groot' ), size_format( wp_convert_hr_to_bytes( ini_get( 'post_max_size' ) ) ) ),
+			array(),
+			$terug
+		);
+	}
+
 	/* ---------------------------------------------------------------- */
 
 	private static function verwerk_machine() {
@@ -102,6 +137,14 @@ class HDP_Garantie_Formulier {
 
 		if ( ! in_array( $waarden['merk'], HDP_Merken::lijst(), true ) ) {
 			self::terug_met_fout( 'machine', HDP_I18N::t( 'garantie_fout_merk' ), $waarden );
+		}
+
+		// Een tikfout als 2062 in plaats van 2026 gaf een garantie die
+		// decennia doorliep. Het veld zelf weigert al een datum na vandaag,
+		// maar dat is in de browser te omzeilen.
+		$aankoop = strtotime( $waarden['aankoopdatum'] );
+		if ( ! $aankoop || $aankoop > strtotime( current_time( 'Y-m-d' ) ) ) {
+			self::terug_met_fout( 'machine', HDP_I18N::t( 'garantie_fout_datum_toekomst' ), $waarden );
 		}
 
 		$machine = HDP_Garantie::meld_machine_aan( $waarden );
@@ -411,10 +454,31 @@ class HDP_Garantie_Formulier {
 			return HDP_I18N::t( 'garantie_storing_tekst' );
 		}
 
+		// Alleen een bewuste weigering van de database (RAISE, code P0001)
+		// gaat letterlijk door: die is voor mensen geschreven. Een
+		// technische fout kwam eerder ook letterlijk op het scherm, als
+		// Engelse Postgres-tekst of zelfs een HTML-foutpagina. Die staat in
+		// het logboek; de dealer krijgt een nette melding.
+		if ( 'hdp_supabase_fout' === $fout->get_error_code() ) {
+			$data = $fout->get_error_data();
+			return ( is_array( $data ) && isset( $data['pg_code'] ) && 'P0001' === $data['pg_code'] )
+				? $melding
+				: HDP_I18N::t( 'garantie_fout_algemeen' );
+		}
+
+		// Onze eigen meldingen (hdp_*) zijn al leesbaar.
 		return $melding;
 	}
 
 	private static function terug_met_fout( $soort, $melding, $waarden = array(), $url = '' ) {
+		// Tekst komt na een fout terug, gekozen bestanden niet: een browser
+		// laat een bestandsveld niet door een website vullen. Zonder deze
+		// zin verstuurde de dealer de tweede keer zonder foto's, zonder het
+		// te merken.
+		if ( self::heeft_bestand( self::bestanden( 'fotos' ) ) || self::heeft_bestand( self::bestanden( 'bijlagen' ) ) ) {
+			$melding .= ' ' . HDP_I18N::t( 'garantie_bestanden_opnieuw' );
+		}
+
 		set_transient( self::bewaarsleutel( 'fout' ), array( 'soort' => $soort, 'melding' => $melding ), 5 * MINUTE_IN_SECONDS );
 		if ( $waarden ) {
 			set_transient( self::bewaarsleutel( 'waarden' ), $waarden, 5 * MINUTE_IN_SECONDS );

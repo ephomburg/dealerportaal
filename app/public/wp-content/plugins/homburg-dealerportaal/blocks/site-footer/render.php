@@ -70,11 +70,16 @@ $socials = array(
 		</div>
 	</div>
 	<div class="hdp-footer-onder">
-		&copy; <span id="hdp-jaartal"></span> <?php echo esc_html( HDP_I18N::t( 'footer_copyright' ) ); ?> ·
-		<a href="https://www.homburg-holland.com/nl/privacy-statement/" target="_blank" rel="noopener noreferrer"><?php echo esc_html( HDP_I18N::t( 'footer_privacy' ) ); ?></a> ·
-		<a href="/adminportaal/"><?php echo esc_html( HDP_I18N::t( 'footer_admin' ) ); ?></a>
+		<?php // Het jaartal van de server, niet uit een script: zonder JavaScript stond er "© ·". ?>
+		&copy; <?php echo esc_html( current_time( 'Y' ) ); ?> <?php echo esc_html( HDP_I18N::t( 'footer_copyright' ) ); ?> ·
+		<a href="https://www.homburg-holland.com/nl/privacy-statement/" target="_blank" rel="noopener noreferrer"><?php echo esc_html( HDP_I18N::t( 'footer_privacy' ) ); ?></a>
+		<?php
+		// Alleen voor wie het adminportaal ook echt mag openen. De link stond
+		// voor iedereen in de footer, ook voor dealers en voor bezoekers op
+		// het inlogscherm.
+		if ( class_exists( 'HDP_Admin_Upload' ) && HDP_Admin_Upload::mag_gebruiken() ) :
+			?>
+			· <a href="/adminportaal/"><?php echo esc_html( HDP_I18N::t( 'footer_admin' ) ); ?></a>
+		<?php endif; ?>
 	</div>
-	<script>
-		document.getElementById('hdp-jaartal').textContent = new Date().getFullYear();
-	</script>
 </footer>
