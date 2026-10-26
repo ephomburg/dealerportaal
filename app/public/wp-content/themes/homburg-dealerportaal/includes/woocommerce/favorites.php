@@ -225,7 +225,7 @@ function homburg_wc_favorieten_inhoud() {
 				'hart',
 				__( 'Je hebt nog geen favorieten. Klik op het hartje bij een product om het hier te bewaren.', 'homburg-dealerportaal-theme' ),
 				get_permalink( wc_get_page_id( 'shop' ) ),
-				__( 'Ga naar de winkel', 'homburg-dealerportaal-theme' )
+				__( 'Ga naar de webshop', 'homburg-dealerportaal-theme' )
 			);
 			?>
 			<?php return; ?>

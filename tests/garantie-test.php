@@ -26,6 +26,9 @@ class Garantie_Test extends WP_UnitTestCase {
 	/** Wat er is weggeschreven, per tabel, voor controle achteraf. */
 	private $geschreven = array();
 
+	/** Zet op true voor een dealer die wel machines heeft, maar nog geen claims. */
+	private $zonder_claims = false;
+
 	/** Zet op een melding om de database een schrijfactie te laten weigeren. */
 	private $weigeren = '';
 
@@ -203,6 +206,10 @@ class Garantie_Test extends WP_UnitTestCase {
 	}
 
 	private function claims( $dealer ) {
+		if ( $this->zonder_claims ) {
+			return array();
+		}
+
 		$hardi = array(
 			'machine'      => 'HARDI Navigator 4000',
 			'merk'         => 'HARDI',
@@ -425,6 +432,40 @@ class Garantie_Test extends WP_UnitTestCase {
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
 		$this->assertStringContainsString( 'hdp-leeg-kaart', $html );
+	}
+
+	/**
+	 * Een nieuwe dealer, zonder machines en zonder claims. Rechts stond
+	 * "meld eerst een machine aan, daarna kun je claims indienen" — maar een
+	 * claim op bestelde onderdelen heeft geen machine nodig, en de lijst
+	 * ernaast bood intussen gewoon "Claim indienen" aan. Twee meldingen die
+	 * elkaar tegenspraken.
+	 */
+	public function test_nieuwe_dealer_krijgt_de_twee_routes_en_geen_tegenstrijdige_melding() {
+		$this->als_goedgekeurde_dealer();
+		// Een tweede dealer: de nagebootste gegevens horen bij de eerste.
+		$nieuw = self::factory()->user->create( array( 'role' => 'dealer' ) );
+		update_user_meta( $nieuw, 'hdp_goedgekeurd', '1' );
+		wp_set_current_user( $nieuw );
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		$this->assertStringContainsString( HDP_I18N::t( 'garantie_geen_claims_totaal' ), $html );
+		$this->assertStringContainsString( esc_html( HDP_I18N::t( 'garantie_nog_niets_tekst' ) ), $html );
+		$this->assertStringContainsString( 'bestelde onderdelen', $html );
+		$this->assertStringNotContainsString( 'daarna kun je er claims op indienen', $html );
+		$this->assertStringContainsString( 'nieuw=machine', $html );
+	}
+
+	/** Met machines maar zonder claims hoeft er rechts geen aanmeldknop te staan. */
+	public function test_dealer_met_machines_zonder_claims_krijgt_geen_aanmeldoproep() {
+		$this->zonder_claims = true;
+		$this->als_goedgekeurde_dealer();
+
+		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+
+		$this->assertStringContainsString( HDP_I18N::t( 'garantie_nog_niets_met_machines' ), $html );
+		$this->assertStringNotContainsString( esc_html( HDP_I18N::t( 'garantie_nog_niets_tekst' ) ), $html );
 	}
 
 	public function test_overzicht_toont_alleen_lopende_claims() {
@@ -1169,6 +1210,6 @@ class Garantie_Test extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'En attente de vous', $html, 'De filterkolom hoort Frans te zijn.' );
 		$this->assertStringContainsString( 'Retour au portail', $html );
-		$this->assertStringNotContainsString( 'Wacht op u', $html );
+		$this->assertStringNotContainsString( 'Wacht op jou', $html );
 	}
 }

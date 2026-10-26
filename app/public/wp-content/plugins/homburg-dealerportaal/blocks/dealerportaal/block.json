@@ -14,7 +14,7 @@
 		},
 		"loginIntro": {
 			"type": "string",
-			"default": "Log in met uw dealeraccount voor toegang tot de webshop, productconfigurator en downloads."
+			"default": "Log in met je dealeraccount voor toegang tot de webshop, productconfigurator en downloads."
 		},
 		"loginIntroFr": {
 			"type": "string",
@@ -22,7 +22,7 @@
 		},
 		"portaalIntro": {
 			"type": "string",
-			"default": "Kies hieronder waar u naartoe wilt. De webshop en productconfigurator openen in een nieuw tabblad."
+			"default": "Kies hieronder waar je naartoe wilt. De webshop en productconfigurator openen in een nieuw tabblad."
 		},
 		"portaalIntroFr": {
 			"type": "string",

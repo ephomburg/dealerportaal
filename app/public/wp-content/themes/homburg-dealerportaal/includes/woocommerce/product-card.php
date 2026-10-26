@@ -16,13 +16,13 @@ if ( ! class_exists( 'WooCommerce' ) ) {
 add_filter( 'woocommerce_product_add_to_cart_text', 'homburg_wc_knoptekst_kaart', 10, 2 );
 add_filter( 'woocommerce_product_single_add_to_cart_text', 'homburg_wc_knoptekst_kaart', 10, 2 );
 /**
- * "Toevoegen aan bestelling" wanneer het product direct besteld kan
+ * "In winkelwagen" wanneer het product direct besteld kan
  * worden; anders "Bekijk product" (bijv. een variabel product zonder
  * standaardkeuze).
  */
 function homburg_wc_knoptekst_kaart( $tekst, $product ) {
 	if ( $product && $product->is_purchasable() ) {
-		return 'Toevoegen aan bestelling';
+		return 'In winkelwagen';
 	}
 	return 'Bekijk product';
 }

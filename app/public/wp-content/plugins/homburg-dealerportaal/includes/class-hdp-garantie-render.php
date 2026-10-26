@@ -161,7 +161,7 @@ class HDP_Garantie_Render {
 			</div>
 
 			<div class="hdp-garantie-kolom-detail">
-				<?php self::render_detail( $alle ); ?>
+				<?php self::render_detail( $alle, $machines ); ?>
 			</div>
 		</div>
 		<?php
@@ -241,11 +241,11 @@ class HDP_Garantie_Render {
 	 * daar. Hier staat waar het om draait — bij wie het ligt en wat er
 	 * gezegd is — met een link naar de rest.
 	 */
-	private static function render_detail( $claims ) {
+	private static function render_detail( $claims, $machines ) {
 		$nummer = self::gekozen_ticket();
 
 		if ( '' === $nummer ) {
-			self::render_detail_leeg( $claims );
+			self::render_detail_leeg( $claims, $machines );
 			return;
 		}
 
@@ -276,14 +276,25 @@ class HDP_Garantie_Render {
 	 * Voor een nieuwe dealer is dit het eerste wat hij van garantie ziet,
 	 * met nul machines en nul claims. Dat scherm hoort te vertellen wat hij
 	 * kan doen, niet alleen te melden dat er niets is.
+	 *
+	 * De lijst ernaast zegt al "nog geen claims" met een knop om er een in te
+	 * dienen, dus hier niet nog eens hetzelfde. Hier stond eerder "meld eerst
+	 * een machine aan, daarna kun je claims indienen" — terwijl een claim op
+	 * bestelde onderdelen geen machine nodig heeft. Nu staan hier de twee
+	 * routes, en alleen zonder machines de knop om er een aan te melden.
 	 */
-	private static function render_detail_leeg( $claims ) {
-		if ( ! $claims ) {
+	private static function render_detail_leeg( $claims, $machines ) {
+		if ( ! $claims && ! $machines ) {
 			$tekst = HDP_I18N::t( 'garantie_nog_niets_tekst' );
 			$knop  = HDP_I18N::t( 'garantie_ingang_machine_knop' );
 			$url   = add_query_arg( 'nieuw', 'machine', home_url( '/garantie/' ) );
 
 			echo HDP_Icons::render_lege_status( 'garantie', $tekst, $url, $knop ); // phpcs:ignore WordPress.Security.EscapeOutput -- render_lege_status() escapet elk veld zelf.
+			return;
+		}
+
+		if ( ! $claims ) {
+			echo HDP_Icons::render_lege_status( 'garantie', HDP_I18N::t( 'garantie_nog_niets_met_machines' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- render_lege_status() escapet elk veld zelf.
 			return;
 		}
 

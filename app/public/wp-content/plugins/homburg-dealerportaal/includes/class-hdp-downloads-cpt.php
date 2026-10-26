@@ -300,11 +300,11 @@ class HDP_Downloads_CPT {
 		// bestand van een ander merk vragen elk om een ander antwoord aan de
 		// dealer (zie HDP_Foutscherm).
 		if ( ! is_user_logged_in() ) {
-			HDP_Foutscherm::stop( 'niet_ingelogd', __( 'U bent niet meer ingelogd.', 'homburg-dealerportaal' ), 'Geen toegang', 403 );
+			HDP_Foutscherm::stop( 'niet_ingelogd', __( 'Je bent niet meer ingelogd.', 'homburg-dealerportaal' ), 'Geen toegang', 403 );
 		}
 
 		if ( ! HDP_Roles::mag_portaal_zien( get_current_user_id() ) ) {
-			HDP_Foutscherm::stop( 'wacht_goedkeuring', __( 'Uw account is nog niet goedgekeurd.', 'homburg-dealerportaal' ), 'Geen toegang', 403 );
+			HDP_Foutscherm::stop( 'wacht_goedkeuring', __( 'Je account is nog niet goedgekeurd.', 'homburg-dealerportaal' ), 'Geen toegang', 403 );
 		}
 
 		$post = get_post( $download_id );
@@ -317,7 +317,7 @@ class HDP_Downloads_CPT {
 		// de URL op te hogen (de ID's lopen op). Een dealer kon zo bij de
 		// prijslijsten van merken die hij niet voert.
 		if ( ! self::mag_merk_zien( $download_id ) ) {
-			HDP_Foutscherm::stop( 'geen_merkrecht', __( 'Dit bestand hoort bij een merk dat niet aan uw account gekoppeld is.', 'homburg-dealerportaal' ), 'Geen toegang', 403 );
+			HDP_Foutscherm::stop( 'geen_merkrecht', __( 'Dit bestand hoort bij een merk dat niet aan je account gekoppeld is.', 'homburg-dealerportaal' ), 'Geen toegang', 403 );
 		}
 
 		$attachment_id = get_post_meta( $download_id, '_hdp_attachment_id', true );

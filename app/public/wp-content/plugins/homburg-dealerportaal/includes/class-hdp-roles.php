@@ -111,9 +111,9 @@ class HDP_Roles {
 	 */
 	public static function stuur_goedkeuringsmail( $gebruiker ) {
 		$login_url = home_url( '/dealerportaal/' );
-		$onderwerp = 'Uw dealeraccount is goedgekeurd / Votre compte revendeur est approuvé — Dealerportaal Homburg';
+		$onderwerp = 'Je dealeraccount is goedgekeurd / Votre compte revendeur est approuvé — Dealerportaal Homburg';
 		$body      = sprintf(
-			"Beste %1\$s,\n\nUw dealeraccount voor het Homburg-dealerportaal is goedgekeurd. U kunt nu inloggen:\n%2\$s\n\nMet vriendelijke groet,\nHomburg Machinehandel\n\n---\n\nCher/Chère %1\$s,\n\nVotre compte revendeur pour le portail concessionnaire Homburg a été approuvé. Vous pouvez maintenant vous connecter :\n%2\$s\n\nCordialement,\nHomburg Machinehandel",
+			"Beste %1\$s,\n\nJe dealeraccount voor het Homburg-dealerportaal is goedgekeurd. Je kunt nu inloggen:\n%2\$s\n\nMet vriendelijke groet,\nHomburg Machinehandel\n\n---\n\nCher/Chère %1\$s,\n\nVotre compte revendeur pour le portail concessionnaire Homburg a été approuvé. Vous pouvez maintenant vous connecter :\n%2\$s\n\nCordialement,\nHomburg Machinehandel",
 			$gebruiker->display_name,
 			$login_url
 		);

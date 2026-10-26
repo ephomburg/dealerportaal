@@ -58,7 +58,7 @@ function homburg_wc_terug_naar_winkel_html() {
 	return sprintf(
 		'<a class="hdp-terug-naar-winkel" href="%1$s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>%2$s</a>',
 		esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ),
-		esc_html__( 'Terug naar de winkel', 'homburg-dealerportaal-theme' )
+		esc_html__( 'Terug naar de webshop', 'homburg-dealerportaal-theme' )
 	);
 }
 
@@ -84,6 +84,78 @@ function homburg_wc_gerelateerd_args( $args ) {
 	$args['posts_per_page'] = 3;
 	$args['columns']        = 3;
 	return $args;
+}
+
+add_filter( 'woocommerce_catalog_orderby', 'homburg_wc_sorteeropties' );
+/**
+ * Alleen sorteringen waar een dealer iets aan heeft.
+ *
+ * WooCommerce biedt ook "populariteit" en "gemiddelde waardering" aan, maar
+ * hier worden geen beoordelingen gegeven en is populariteit niet iets waar
+ * een dealer op zoekt. Wel gemist: sorteren op artikelnummer, terwijl dealers
+ * daar juist in denken.
+ *
+ * "menu_order" blijft de sleutel van de standaardsortering (die staat zo in
+ * de WooCommerce-instellingen), maar sorteert hier op omschrijving — zie
+ * homburg_wc_sorteer_args(). "relevance" voegt WooCommerce zelf toe op een
+ * zoekresultaat; die blijft dan staan, anders klopt de keuzelijst daar niet.
+ */
+function homburg_wc_sorteeropties( $opties ) {
+	$eigen = array(
+		'menu_order' => __( 'Omschrijving (A–Z)', 'homburg-dealerportaal-theme' ),
+		'sku'        => __( 'Artikelnummer', 'homburg-dealerportaal-theme' ),
+		'price'      => __( 'Prijs: laag naar hoog', 'homburg-dealerportaal-theme' ),
+		'price-desc' => __( 'Prijs: hoog naar laag', 'homburg-dealerportaal-theme' ),
+	);
+
+	if ( isset( $opties['relevance'] ) ) {
+		$eigen = array( 'relevance' => $opties['relevance'] ) + $eigen;
+	}
+
+	return $eigen;
+}
+
+add_filter( 'woocommerce_get_catalog_ordering_args', 'homburg_wc_sorteer_args', 10, 2 );
+/**
+ * De query achter de eigen sorteringen.
+ *
+ * WooCommerce sorteert "menu_order" op handmatige volgorde en pas daarna op
+ * titel. Niemand zet hier een handmatige volgorde, maar mocht dat ooit
+ * gebeuren, dan zou "Omschrijving (A–Z)" stilletjes iets anders doen dan er
+ * staat — dus hier puur op titel.
+ */
+function homburg_wc_sorteer_args( $args, $orderby ) {
+	if ( 'menu_order' === $orderby ) {
+		$args['orderby']  = 'title';
+		$args['order']    = 'ASC';
+		$args['meta_key'] = ''; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- leegmaken, geen sortering op meta.
+	} elseif ( 'sku' === $orderby ) {
+		$args['orderby']  = 'meta_value';
+		$args['order']    = 'ASC';
+		$args['meta_key'] = '_sku'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- eenmalige sortering op de winkelpagina.
+	}
+
+	return $args;
+}
+
+add_filter( 'woocommerce_date_format', 'homburg_wc_datumformaat' );
+/**
+ * Datums in de WooCommerce-schermen (o.a. "geplaatst op ..." bij een losse
+ * bestelling) als "17 september 2026". Ze volgden de algemene
+ * site-instelling, en die stond op de Engelse volgorde "september 17, 2026".
+ */
+function homburg_wc_datumformaat() {
+	return 'j F Y';
+}
+
+add_filter( 'woocommerce_page_title', 'homburg_wc_webshop_titel' );
+/**
+ * "Webshop" als titel boven de winkel, zoals hij overal elders in het
+ * portaal heet (startpagina, zijmenu). De WooCommerce-pagina zelf heet
+ * "Winkel", en dat stond er dan als enige plek anders.
+ */
+function homburg_wc_webshop_titel( $titel ) {
+	return is_shop() ? __( 'Webshop', 'homburg-dealerportaal-theme' ) : $titel;
 }
 
 add_action( 'wp_enqueue_scripts', 'homburg_wc_enqueue_assets', 20 );

@@ -110,6 +110,25 @@ class Teksten_Test extends WP_UnitTestCase {
 		$this->assertSame( array(), $zonder_frans, 'Zonder Franse tekst: ' . implode( ', ', $zonder_frans ) );
 	}
 
+	/**
+	 * Het portaal spreekt een dealer aan met "je". Dat is één keer in één
+	 * keer omgezet — ruim zestig teksten — omdat het een mengsel was: de
+	 * startpagina zei "jouw socials", de rest "u heeft" en "uw account".
+	 * Zo'n mengsel ontstaat weer zodra er één nieuwe tekst met "u" bijkomt.
+	 * (Het Frans blijft "vous": "tu" is in zakelijk Frans ongebruikelijk.)
+	 */
+	public function test_nederlands_spreekt_de_dealer_aan_met_je() {
+		$fout = array();
+
+		foreach ( $this->alle_teksten() as $waar => $tekst ) {
+			if ( '.nl' === substr( $waar, -3 ) && preg_match( '/(?<![\p{L}])(u|uw)(?![\p{L}])/iu', $tekst ) ) {
+				$fout[] = $waar . ' => ' . $tekst;
+			}
+		}
+
+		$this->assertSame( array(), $fout, "Deze teksten gebruiken nog \"u\" of \"uw\":\n" . implode( "\n", $fout ) );
+	}
+
 	/** De teksten van het nieuwe zijmenu horen er allemaal te zijn. */
 	public function test_het_zijmenu_heeft_zijn_teksten() {
 		foreach ( array( 'zijbalk_label', 'zijbalk_bestellingen', 'zijbalk_groep_bestellen', 'zijbalk_groep_service', 'zijbalk_groep_materiaal' ) as $sleutel ) {

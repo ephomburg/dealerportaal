@@ -122,7 +122,7 @@ class HDP_Berichten {
 		<p>
 			<label for="hdp_bericht_tekst_fr"><strong>Tekst (Frans)</strong></label><br>
 			<textarea name="hdp_bericht_tekst_fr" id="hdp_bericht_tekst_fr" class="widefat" rows="6"><?php echo esc_textarea( $tekst ); ?></textarea>
-			<span class="description">Laat u dit leeg, dan krijgt een Franstalige dealer de Nederlandse tekst te zien.</span>
+			<span class="description">Laat je dit leeg, dan krijgt een Franstalige dealer de Nederlandse tekst te zien.</span>
 		</p>
 		<?php
 	}
@@ -159,7 +159,7 @@ class HDP_Berichten {
 			<label for="hdp_bericht_tot"><strong>Tonen tot en met</strong></label><br>
 			<input type="date" name="hdp_bericht_tot" id="hdp_bericht_tot" class="widefat"
 				value="<?php echo esc_attr( $tot ); ?>">
-			<span class="description">Leeg laten = blijft staan tot u het bericht weghaalt.</span>
+			<span class="description">Leeg laten = blijft staan tot je het bericht weghaalt.</span>
 		</p>
 		<?php
 	}

@@ -231,15 +231,15 @@ class HDP_I18N {
 			),
 			'account_titel'     => array( 'nl' => 'Account in behandeling', 'fr' => 'Compte en cours de validation' ),
 			'account_tekst'     => array(
-				'nl' => 'Uw aanmelding is bij ons binnengekomen. We controleren even of uw gegevens bij een bekend dealeraccount horen.',
+				'nl' => 'Je aanmelding is bij ons binnengekomen. We controleren even of je gegevens bij een bekend dealeraccount horen.',
 				'fr' => 'Votre inscription nous est bien parvenue. Nous vérifions si vos données correspondent à un compte concessionnaire connu.',
 			),
 			'account_stappen'   => array(
-				'nl' => 'U hoeft hier niets voor te doen: zodra uw account is goedgekeurd krijgt u daar automatisch een e-mail over. Doorgaans gebeurt dat binnen één werkdag.',
+				'nl' => 'Je hoeft hier niets voor te doen: zodra je account is goedgekeurd, krijg je daar automatisch een e-mail over. Doorgaans gebeurt dat binnen één werkdag.',
 				'fr' => "Vous n'avez rien à faire : dès que votre compte sera approuvé, vous recevrez automatiquement un e-mail. Cela se fait généralement en un jour ouvrable.",
 			),
 			'account_duurt_lang' => array(
-				'nl' => 'Duurt het langer, of heeft u haast? Neem gerust even contact op.',
+				'nl' => 'Duurt het langer, of heb je haast? Neem gerust even contact op.',
 				'fr' => "Cela prend plus de temps, ou vous êtes pressé ? N'hésitez pas à nous contacter.",
 			),
 
@@ -253,22 +253,22 @@ class HDP_I18N {
 			),
 			/* translators: %s zijn de bestandsnamen die niet gelukt zijn. */
 			'garantie_bijlagen_mislukt'  => array(
-				'nl' => 'Deze bestanden konden we niet opslaan: %s. U kunt ze alsnog meesturen via een bericht bij het ticket.',
+				'nl' => 'Deze bestanden konden we niet opslaan: %s. Je kunt ze alsnog meesturen via een bericht bij het ticket.',
 				'fr' => "Nous n'avons pas pu enregistrer ces fichiers : %s. Vous pouvez encore les envoyer via un message sur le ticket.",
 			),
 
 			'garantie_ok_machine'        => array(
-				'nl' => 'Uw machine is aangemeld. We beoordelen de aanmelding; u kunt er alvast een claim op indienen.',
+				'nl' => 'Je machine is aangemeld. We beoordelen de aanmelding; je kunt er alvast een claim op indienen.',
 				'fr' => "Votre machine est enregistrée. Nous examinons l'enregistrement ; vous pouvez déjà introduire une demande.",
 			),
 			/* translators: %s is het ticketnummer. */
 			'garantie_ok_claim'          => array(
-				'nl' => 'Uw claim is ingediend onder nummer %1$s. Stuurt u onderdelen retour naar Stiens? Vermeld dan %1$s op de zending — de claim kan pas behandeld worden zodra het onderdeel binnen is. Hieronder ziet u de stand van zaken.',
+				'nl' => 'Je claim is ingediend onder nummer %1$s. Stuur je onderdelen retour naar Stiens? Vermeld dan %1$s op de zending — de claim kan pas behandeld worden zodra het onderdeel binnen is. Hieronder zie je de stand van zaken.',
 				'fr' => 'Votre demande a été introduite sous le numéro %1$s. Vous renvoyez des pièces à Stiens ? Mentionnez alors %1$s sur l’envoi — la demande ne peut être traitée qu’une fois la pièce reçue. Vous voyez l’état ci-dessous.',
 			),
 			/* translators: %s is het ticketnummer. */
 			'garantie_ok_claim_onderdeel' => array(
-				'nl' => 'Uw claim is ingediend onder nummer %1$s. Stuur het onderdeel naar Stiens en vermeld %1$s op de zending — wij nemen de claim in behandeling zodra het onderdeel bij ons binnen is.',
+				'nl' => 'Je claim is ingediend onder nummer %1$s. Stuur het onderdeel naar Stiens en vermeld %1$s op de zending — wij nemen de claim in behandeling zodra het onderdeel bij ons binnen is.',
 				'fr' => 'Votre demande a été introduite sous le numéro %1$s. Renvoyez la pièce à Stiens en mentionnant %1$s sur l’envoi — nous traitons la demande dès que la pièce nous est parvenue.',
 			),
 			'garantie_dag_in_status'     => array( 'nl' => '1 dag op deze status', 'fr' => '1 jour à ce statut' ),
@@ -283,12 +283,12 @@ class HDP_I18N {
 				'fr' => 'Pièce(s) jointe(s) envoyée(s) : %s',
 			),
 			'garantie_ok_bericht'        => array(
-				'nl' => 'Uw bericht is verstuurd.',
+				'nl' => 'Je bericht is verstuurd.',
 				'fr' => 'Votre message a été envoyé.',
 			),
 
 			'garantie_fout_geen_toegang' => array(
-				'nl' => 'U heeft geen toegang tot het garantieportaal.',
+				'nl' => 'Je hebt geen toegang tot het garantieportaal.',
 				'fr' => "Vous n'avez pas accès au portail de garantie.",
 			),
 			/* translators: %s zijn de namen van de ontbrekende velden. */
@@ -313,7 +313,7 @@ class HDP_I18N {
 				'fr' => "Saisissez d'abord un message.",
 			),
 			'garantie_fout_serienummer_bestaat' => array(
-				'nl' => 'Dit serienummer is al aangemeld. Staat de machine niet in uw lijst? Neem dan even contact op.',
+				'nl' => 'Dit serienummer is al aangemeld. Staat de machine niet in je lijst? Neem dan even contact op.',
 				'fr' => 'Ce numéro de série est déjà enregistré. La machine ne figure pas dans votre liste ? Contactez-nous.',
 			),
 			'garantie_fout_algemeen'     => array(
@@ -323,7 +323,7 @@ class HDP_I18N {
 
 			'garantie_storing_kop'     => array( 'nl' => 'Even niet beschikbaar.', 'fr' => 'Momentanément indisponible.' ),
 			'garantie_storing_tekst'   => array(
-				'nl' => 'We kunnen uw garantiegegevens op dit moment niet ophalen. Probeer het over een paar minuten opnieuw; lukt het dan nog niet, neem dan even contact op.',
+				'nl' => 'We kunnen je garantiegegevens op dit moment niet ophalen. Probeer het over een paar minuten opnieuw; lukt het dan nog niet, neem dan even contact op.',
 				'fr' => 'Nous ne pouvons pas récupérer vos données de garantie pour le moment. Réessayez dans quelques minutes ; si cela ne fonctionne toujours pas, contactez-nous.',
 			),
 			'garantie_machine_in_behandeling' => array(
@@ -344,7 +344,7 @@ class HDP_I18N {
 			'garantie_serienummer'     => array( 'nl' => 'Serienummer:', 'fr' => 'Numéro de série :' ),
 			'garantie_ingediend_op'    => array( 'nl' => 'Ingediend op:', 'fr' => 'Introduite le :' ),
 			'garantie_actie_nodig'     => array(
-				'nl' => 'Wij hebben aanvullende informatie van u nodig om deze claim verder te kunnen behandelen.',
+				'nl' => 'Wij hebben aanvullende informatie van je nodig om deze claim verder te kunnen behandelen.',
 				'fr' => "Nous avons besoin d'informations complémentaires de votre part pour traiter cette demande.",
 			),
 			'garantie_nieuwe_claim'    => array( 'nl' => 'Nieuwe garantieclaim', 'fr' => 'Nouvelle demande de garantie' ),
@@ -375,7 +375,7 @@ class HDP_I18N {
 			// Garantie — overzichtspagina (twee ingangen)
 			'garantie_ingang_machine_titel' => array( 'nl' => 'Machine aanmelden', 'fr' => 'Enregistrer une machine' ),
 			'garantie_ingang_machine_tekst' => array(
-				'nl' => 'Meld een geleverde machine aan voor garantie. Daarna kunt u er claims op indienen zonder gegevens over te typen.',
+				'nl' => 'Meld een geleverde machine aan voor garantie. Daarna kun je er claims op indienen zonder gegevens over te typen.',
 				'fr' => 'Enregistrez une machine livrée pour la garantie. Vous pourrez ensuite introduire des demandes sans retaper les données.',
 			),
 			'garantie_ingang_machine_knop'  => array( 'nl' => 'Machine aanmelden', 'fr' => 'Enregistrer une machine' ),
@@ -386,9 +386,9 @@ class HDP_I18N {
 			),
 			'garantie_ingang_claim_knop'    => array( 'nl' => 'Claim indienen', 'fr' => 'Introduire une demande' ),
 
-			'garantie_wacht_een'    => array( 'nl' => 'Eén claim wacht op u', 'fr' => 'Une demande attend votre réponse' ),
+			'garantie_wacht_een'    => array( 'nl' => 'Eén claim wacht op jou', 'fr' => 'Une demande attend votre réponse' ),
 			/* translators: %d is het aantal claims. */
-			'garantie_wacht_meer'   => array( 'nl' => '%d claims wachten op u', 'fr' => '%d demandes attendent votre réponse' ),
+			'garantie_wacht_meer'   => array( 'nl' => '%d claims wachten op jou', 'fr' => '%d demandes attendent votre réponse' ),
 			'garantie_bekijken'     => array( 'nl' => 'Bekijken', 'fr' => 'Consulter' ),
 
 			'garantie_zoek_label'          => array( 'nl' => 'Zoeken in claims en machines', 'fr' => 'Rechercher dans les demandes et les machines' ),
@@ -401,14 +401,14 @@ class HDP_I18N {
 				'fr' => 'Aucun résultat. Essayez une partie du nom de la machine ou du numéro de série.',
 			),
 			'garantie_lopende_claims'      => array( 'nl' => 'Lopende claims', 'fr' => 'Demandes en cours' ),
-			'garantie_geen_lopende_claims' => array( 'nl' => 'U heeft op dit moment geen lopende claims.', 'fr' => "Vous n'avez actuellement aucune demande en cours." ),
+			'garantie_geen_lopende_claims' => array( 'nl' => 'Je hebt op dit moment geen lopende claims.', 'fr' => "Vous n'avez actuellement aucune demande en cours." ),
 			/* translators: %d is het totale aantal claims. */
 			'garantie_toon_alle_claims'    => array( 'nl' => 'Alle claims tonen (%d)', 'fr' => 'Afficher toutes les demandes (%d)' ),
 
 			'groet_ochtend'           => array( 'nl' => 'Goedemorgen', 'fr' => 'Bonjour' ),
 			'groet_middag'            => array( 'nl' => 'Goedemiddag', 'fr' => 'Bonjour' ),
 			'groet_avond'             => array( 'nl' => 'Goedenavond', 'fr' => 'Bonsoir' ),
-			'nieuw_voor_u'            => array( 'nl' => 'Nieuw voor u', 'fr' => 'Nouveau pour vous' ),
+			'nieuw_voor_u'            => array( 'nl' => 'Nieuw voor jou', 'fr' => 'Nouveau pour vous' ),
 			'nieuw_alle_downloads'    => array( 'nl' => 'Alle downloads', 'fr' => 'Tous les téléchargements' ),
 			'nieuw_nog_een'           => array( 'nl' => 'En nog één document', 'fr' => 'Et encore un document' ),
 			/* translators: %d is een aantal documenten. */
@@ -427,7 +427,7 @@ class HDP_I18N {
 			'home_zoek_label'         => array( 'nl' => 'Artikelnummer of zoekterm', 'fr' => 'Numéro d’article ou mot-clé' ),
 			'home_zoek_knop'          => array( 'nl' => 'Zoek', 'fr' => 'Rechercher' ),
 			'snelbestel_kop'          => array( 'nl' => 'Artikelnummers plakken', 'fr' => 'Coller des numéros d’article' ),
-			'snelbestel_tekst'        => array( 'nl' => 'Een hele lijst in één keer in de winkelwagen.', 'fr' => 'Toute une liste dans le panier en une fois.' ),
+			'snelbestel_tekst'        => array( 'nl' => 'Een hele lijst in één keer in je winkelwagen.', 'fr' => 'Toute une liste dans le panier en une fois.' ),
 			'berichten_titel'         => array( 'nl' => 'Berichten van Homburg', 'fr' => 'Messages de Homburg' ),
 			/* translators: %s is de titel van het bericht. */
 			'bericht_wegklikken'      => array(
@@ -450,7 +450,7 @@ class HDP_I18N {
 				'fr' => 'Renvoyez la pièce à Stiens',
 			),
 			'garantie_retour_uitleg'    => array(
-				'nl' => 'Wij beoordelen het onderdeel zelf; op een foto is meestal niet te zien wat er mis is. Daarom nemen wij een onderdelenclaim pas in behandeling zodra het onderdeel bij ons in Stiens binnen is. Vermeld het ticketnummer op de zending — dat nummer krijgt u direct nadat u deze claim heeft ingediend.',
+				'nl' => 'Wij beoordelen het onderdeel zelf; op een foto is meestal niet te zien wat er mis is. Daarom nemen wij een onderdelenclaim pas in behandeling zodra het onderdeel bij ons in Stiens binnen is. Vermeld het ticketnummer op de zending — dat nummer krijg je direct nadat je deze claim hebt ingediend.',
 				'fr' => 'Nous évaluons la pièce elle-même ; une photo ne montre généralement pas ce qui ne va pas. C’est pourquoi nous ne traitons une demande de garantie sur pièces qu’à partir du moment où la pièce nous est parvenue à Stiens. Mentionnez le numéro de ticket sur l’envoi — vous recevez ce numéro dès que vous avez introduit cette demande.',
 			),
 			/* translators: %s is het ticketnummer. */
@@ -460,13 +460,13 @@ class HDP_I18N {
 			),
 			'garantie_rail_claims'    => array( 'nl' => 'Claims', 'fr' => 'Demandes' ),
 			'garantie_rail_alles'     => array( 'nl' => 'Alles', 'fr' => 'Tout' ),
-			'garantie_rail_wacht'     => array( 'nl' => 'Wacht op u', 'fr' => 'En attente de vous' ),
+			'garantie_rail_wacht'     => array( 'nl' => 'Wacht op jou', 'fr' => 'En attente de vous' ),
 			'garantie_rail_loopt'     => array( 'nl' => 'In behandeling', 'fr' => 'En cours' ),
 			'garantie_rail_klaar'     => array( 'nl' => 'Afgehandeld', 'fr' => 'Traité' ),
 			'garantie_rail_aangemeld' => array( 'nl' => 'Aangemeld', 'fr' => 'Enregistrées' ),
 			'garantie_rail_toon_alles' => array( 'nl' => 'Toon alle claims', 'fr' => 'Afficher toutes les demandes' ),
 			'garantie_geen_claims_totaal' => array(
-				'nl' => 'U heeft nog geen claims ingediend.',
+				'nl' => 'Je hebt nog geen claims ingediend.',
 				'fr' => "Vous n'avez encore introduit aucune demande.",
 			),
 			'garantie_geen_claims_filter' => array(
@@ -478,8 +478,12 @@ class HDP_I18N {
 				'fr' => 'Sélectionnez une demande à gauche pour la lire ici.',
 			),
 			'garantie_nog_niets_tekst' => array(
-				'nl' => 'U heeft nog geen claims. Meld eerst een machine aan; daarna kunt u er claims op indienen.',
-				'fr' => "Vous n'avez pas encore de demandes. Enregistrez d'abord une machine, puis vous pourrez introduire des demandes.",
+				'nl' => 'Een claim op bestelde onderdelen kun je meteen indienen. Voor een claim op een machine meld je eerst die machine aan.',
+				'fr' => "Une demande pour des pièces commandées peut être introduite immédiatement. Pour une demande sur une machine, enregistrez d'abord cette machine.",
+			),
+			'garantie_nog_niets_met_machines' => array(
+				'nl' => 'Zodra je een claim indient, lees je hem hier terug.',
+				'fr' => 'Dès que vous introduisez une demande, vous la retrouvez ici.',
 			),
 			'garantie_open_volledig'  => array(
 				'nl' => 'Open het volledige ticket',
@@ -487,7 +491,7 @@ class HDP_I18N {
 			),
 			'garantie_mijn_machines'  => array( 'nl' => 'Mijn machines', 'fr' => 'Mes machines' ),
 			'garantie_geen_machines'  => array(
-				'nl' => 'U heeft nog geen machines aangemeld. Meld een machine aan om er claims op in te kunnen dienen.',
+				'nl' => 'Je hebt nog geen machines aangemeld. Meld een machine aan om er claims op in te kunnen dienen.',
 				'fr' => "Vous n'avez pas encore enregistré de machine. Enregistrez-en une pour pouvoir introduire des demandes.",
 			),
 			'garantie_machine_lopend_een'  => array( 'nl' => '1 lopende claim', 'fr' => '1 demande en cours' ),
@@ -519,7 +523,7 @@ class HDP_I18N {
 			'garantie_bijlagen'          => array( 'nl' => 'Bijlagen', 'fr' => 'Pièces jointes' ),
 			'garantie_geen_bijlagen'     => array( 'nl' => 'Geen bijlagen bij dit ticket.', 'fr' => 'Aucune pièce jointe pour ce ticket.' ),
 			'garantie_van_homburg'       => array( 'nl' => 'Homburg', 'fr' => 'Homburg' ),
-			'garantie_van_dealer'        => array( 'nl' => 'U', 'fr' => 'Vous' ),
+			'garantie_van_dealer'        => array( 'nl' => 'Jij', 'fr' => 'Vous' ),
 			'garantie_bij_status'        => array( 'nl' => 'Bij status:', 'fr' => 'Pour le statut :' ),
 			'garantie_antwoord_label'    => array( 'nl' => 'Reageren op dit ticket', 'fr' => 'Répondre à ce ticket' ),
 			'garantie_antwoord_hint'     => array(
@@ -529,15 +533,15 @@ class HDP_I18N {
 			'garantie_antwoord_versturen' => array( 'nl' => 'Versturen', 'fr' => 'Envoyer' ),
 			'garantie_terug_naar_overzicht' => array( 'nl' => 'Terug naar mijn claims', 'fr' => 'Retour à mes demandes' ),
 			'garantie_ticket_onbekend'   => array(
-				'nl' => 'Dit ticket bestaat niet, of hoort niet bij uw account.',
+				'nl' => 'Dit ticket bestaat niet, of hoort niet bij je account.',
 				'fr' => "Ce ticket n'existe pas ou n'appartient pas à votre compte.",
 			),
 			'garantie_ligt_bij_u'        => array(
-				'nl' => 'Dit ticket wacht op u.',
+				'nl' => 'Dit ticket wacht op jou.',
 				'fr' => 'Ce ticket attend votre réponse.',
 			),
 			'garantie_ligt_bij_homburg'  => array(
-				'nl' => 'Dit ticket ligt bij Homburg. U hoeft nu niets te doen.',
+				'nl' => 'Dit ticket ligt bij Homburg. Je hoeft nu niets te doen.',
 				'fr' => "Ce ticket est chez Homburg. Vous n'avez rien à faire pour le moment.",
 			),
 			'garantie_ligt_bij_klaar'    => array(
@@ -556,7 +560,7 @@ class HDP_I18N {
 			// diagnose, en wat er vervangen is.
 			'garantie_veld_klacht'       => array( 'nl' => 'Te claimen defect', 'fr' => 'Défaut à déclarer' ),
 			'garantie_veld_klacht_hint'  => array(
-				'nl' => 'Beschrijf wat er gebeurd is, welke diagnose u heeft gesteld en wat u heeft vervangen. Bijvoorbeeld: storing wielsensor, diagnose gesteld, sensor vervangen.',
+				'nl' => 'Beschrijf wat er gebeurd is, welke diagnose je hebt gesteld en wat je hebt vervangen. Bijvoorbeeld: storing wielsensor, diagnose gesteld, sensor vervangen.',
 				'fr' => "Décrivez ce qui s'est passé, le diagnostic posé et ce que vous avez remplacé. Par exemple : panne du capteur de roue, diagnostic posé, capteur remplacé.",
 			),
 			'garantie_veld_onderdelen'   => array( 'nl' => 'Te claimen onderdelen', 'fr' => 'Pièces à déclarer' ),
@@ -565,14 +569,14 @@ class HDP_I18N {
 				'fr' => "Une pièce par ligne, avec le numéro, la quantité et le montant. Indiquez s'il s'agit d'une facture Homburg ; sinon, joignez cette facture.",
 			),
 			// Garantie — keuze vooraf en onderdelenclaim
-			'garantie_kies_soort_titel' => array( 'nl' => 'Waar gaat uw claim over?', 'fr' => 'Sur quoi porte votre demande ?' ),
+			'garantie_kies_soort_titel' => array( 'nl' => 'Waar gaat je claim over?', 'fr' => 'Sur quoi porte votre demande ?' ),
 			'garantie_kies_soort_tekst' => array(
-				'nl' => 'De twee soorten vragen om verschillende gegevens, dus kiest u eerst waar het om gaat.',
+				'nl' => 'De twee soorten vragen om verschillende gegevens, dus kies je eerst waar het om gaat.',
 				'fr' => 'Les deux types demandent des informations différentes ; choisissez donc d’abord de quoi il s’agit.',
 			),
 			'garantie_soort_machine_titel' => array( 'nl' => 'Een machine', 'fr' => 'Une machine' ),
 			'garantie_soort_machine_tekst' => array(
-				'nl' => 'Een defect aan een machine die u bij ons heeft aangemeld.',
+				'nl' => 'Een defect aan een machine die je bij ons hebt aangemeld.',
 				'fr' => 'Un défaut sur une machine que vous avez enregistrée chez nous.',
 			),
 			'garantie_soort_machine_knop'  => array( 'nl' => 'Claim op een machine', 'fr' => 'Demande pour une machine' ),
@@ -599,7 +603,7 @@ class HDP_I18N {
 
 			'garantie_veld_regels'           => array( 'nl' => 'Te claimen onderdelen', 'fr' => 'Pièces à déclarer' ),
 			'garantie_regels_hint'           => array(
-				'nl' => 'Vul alleen de regels in die u claimt. Komt een onderdeel van een andere leverancier, stuur die factuur dan mee als bijlage.',
+				'nl' => 'Vul alleen de regels in die je claimt. Komt een onderdeel van een andere leverancier, stuur die factuur dan mee als bijlage.',
 				'fr' => 'Ne remplissez que les lignes que vous déclarez. Si une pièce provient d’un autre fournisseur, joignez cette facture.',
 			),
 			'garantie_regel_nummer'          => array( 'nl' => 'Onderdeelnummer', 'fr' => 'Numéro de pièce' ),
@@ -625,7 +629,7 @@ class HDP_I18N {
 			),
 			'garantie_veld_klantreferentie'      => array( 'nl' => 'Referentie van de klant', 'fr' => 'Référence du client' ),
 			'garantie_veld_klantreferentie_hint' => array(
-				'nl' => 'Bijvoorbeeld uw eigen werkordernummer, zodat u deze claim later terugvindt.',
+				'nl' => 'Bijvoorbeeld je eigen werkordernummer, zodat je deze claim later terugvindt.',
 				'fr' => 'Par exemple votre propre numéro de bon de travail, pour retrouver cette demande plus tard.',
 			),
 			'garantie_veld_opmerkingen'          => array( 'nl' => 'Opmerkingen', 'fr' => 'Remarques' ),
@@ -684,12 +688,12 @@ class HDP_I18N {
 			// Nieuw-markering
 			'badge_nieuw'       => array( 'nl' => 'Nieuw', 'fr' => 'Nouveau' ),
 			'nieuw_melding_een' => array(
-				'nl' => 'Er staat 1 nieuw document voor u klaar',
+				'nl' => 'Er staat 1 nieuw document voor je klaar',
 				'fr' => 'Un nouveau document vous attend',
 			),
 			/* translators: %d is het aantal nieuwe documenten. */
 			'nieuw_melding_meer' => array(
-				'nl' => 'Er staan %d nieuwe documenten voor u klaar',
+				'nl' => 'Er staan %d nieuwe documenten voor je klaar',
 				'fr' => '%d nouveaux documents vous attendent',
 			),
 			'btn_uitloggen'     => array( 'nl' => 'Uitloggen', 'fr' => 'Déconnexion' ),
@@ -701,7 +705,7 @@ class HDP_I18N {
 			'sluiten'           => array( 'nl' => 'Sluiten', 'fr' => 'Fermer' ),
 			'instellingen_titel' => array( 'nl' => 'Accountinstellingen', 'fr' => 'Paramètres du compte' ),
 			'instellingen_intro' => array(
-				'nl' => 'Wijzig hier uw weergavenaam en wachtwoord voor het dealerportaal.',
+				'nl' => 'Wijzig hier je weergavenaam en wachtwoord voor het dealerportaal.',
 				'fr' => 'Modifiez ici votre nom d\'affichage et votre mot de passe pour le portail concessionnaire.',
 			),
 			'label_weergavenaam' => array( 'nl' => 'Weergavenaam', 'fr' => "Nom d'affichage" ),
@@ -713,7 +717,7 @@ class HDP_I18N {
 			'label_nieuw_wachtwoord'  => array( 'nl' => 'Nieuw wachtwoord', 'fr' => 'Nouveau mot de passe' ),
 			'label_nieuw_wachtwoord_herhaal' => array( 'nl' => 'Herhaal nieuw wachtwoord', 'fr' => 'Répétez le nouveau mot de passe' ),
 			'btn_opslaan'       => array( 'nl' => 'Opslaan', 'fr' => 'Enregistrer' ),
-			'instellingen_opgeslagen' => array( 'nl' => 'Uw wijzigingen zijn opgeslagen.', 'fr' => 'Vos modifications ont été enregistrées.' ),
+			'instellingen_opgeslagen' => array( 'nl' => 'Je wijzigingen zijn opgeslagen.', 'fr' => 'Vos modifications ont été enregistrées.' ),
 			'instellingen_fout_naam' => array(
 				'nl' => 'Vul een weergavenaam in.',
 				'fr' => "Veuillez saisir un nom d'affichage.",
@@ -743,14 +747,14 @@ class HDP_I18N {
 				'nl' => 'We hebben een bevestigingslink gestuurd naar het nieuwe e-mailadres. Klik op de link in die e-mail om de wijziging te voltooien.',
 				'fr' => 'Nous avons envoyé un lien de confirmation à la nouvelle adresse e-mail. Cliquez sur le lien dans cet e-mail pour finaliser la modification.',
 			),
-			'instellingen_email_bevestigd' => array( 'nl' => 'Uw e-mailadres is gewijzigd.', 'fr' => 'Votre adresse e-mail a été modifiée.' ),
+			'instellingen_email_bevestigd' => array( 'nl' => 'Je e-mailadres is gewijzigd.', 'fr' => 'Votre adresse e-mail a été modifiée.' ),
 			'instellingen_email_geannuleerd' => array( 'nl' => 'De wijziging is geannuleerd.', 'fr' => 'La modification a été annulée.' ),
 			'instellingen_fout_email_ongeldig' => array(
 				'nl' => 'Vul een geldig e-mailadres in.',
 				'fr' => 'Veuillez saisir une adresse e-mail valide.',
 			),
 			'instellingen_fout_email_zelfde' => array(
-				'nl' => 'Dit is al uw huidige e-mailadres.',
+				'nl' => 'Dit is al je huidige e-mailadres.',
 				'fr' => 'Il s\'agit déjà de votre adresse e-mail actuelle.',
 			),
 			'instellingen_fout_email_in_gebruik' => array(
@@ -762,15 +766,15 @@ class HDP_I18N {
 				'fr' => 'Ce lien de confirmation est invalide ou a expiré.',
 			),
 			'instellingen_fout_email_te_veel_pogingen' => array(
-				'nl' => 'U heeft te vaak een e-mailwijziging aangevraagd. Probeer het over een uur opnieuw.',
+				'nl' => 'Je hebt te vaak een e-mailwijziging aangevraagd. Probeer het over een uur opnieuw.',
 				'fr' => "Vous avez demandé trop souvent une modification d'e-mail. Réessayez dans une heure.",
 			),
 			'email_wijzig_onderwerp' => array(
-				'nl' => 'Bevestig uw nieuwe e-mailadres — Dealerportaal Homburg',
+				'nl' => 'Bevestig je nieuwe e-mailadres — Dealerportaal Homburg',
 				'fr' => 'Confirmez votre nouvelle adresse e-mail — Portail concessionnaire Homburg',
 			),
 			'email_wijzig_body' => array(
-				'nl' => "Beste dealer,\n\nU heeft een wijziging van uw e-mailadres aangevraagd voor het Homburg-dealerportaal. Klik op onderstaande link om deze wijziging te bevestigen:\n\n%s\n\nHeeft u dit niet zelf aangevraagd? Dan kunt u deze e-mail negeren.\n\nMet vriendelijke groet,\nHomburg Machinehandel",
+				'nl' => "Beste dealer,\n\nJe hebt een wijziging van je e-mailadres aangevraagd voor het Homburg-dealerportaal. Klik op onderstaande link om deze wijziging te bevestigen:\n\n%s\n\nHeb je dit niet zelf aangevraagd? Dan kun je deze e-mail negeren.\n\nMet vriendelijke groet,\nHomburg Machinehandel",
 				'fr' => "Cher/Chère revendeur/revendeuse,\n\nVous avez demandé une modification de votre adresse e-mail pour le portail concessionnaire Homburg. Cliquez sur le lien ci-dessous pour confirmer cette modification :\n\n%s\n\nVous n'êtes pas à l'origine de cette demande ? Vous pouvez ignorer cet e-mail.\n\nCordialement,\nHomburg Machinehandel",
 			),
 
@@ -788,7 +792,7 @@ class HDP_I18N {
 				'fr' => "Le lien vers la boutique en ligne n'est pas encore actif.",
 			),
 			'bestel_geen_bestellingen' => array(
-				'nl' => 'U heeft nog geen bestellingen geplaatst.',
+				'nl' => 'Je hebt nog geen bestellingen geplaatst.',
 				'fr' => "Vous n'avez pas encore passé de commande.",
 			),
 			'bestel_naar_webshop' => array( 'nl' => 'Naar de webshop', 'fr' => 'Vers la boutique en ligne' ),
@@ -836,11 +840,11 @@ class HDP_I18N {
 				'fr' => 'Aucun contenu disponible dans cette langue.',
 			),
 			'geen_downloads_merk' => array(
-				'nl' => 'Geen downloads beschikbaar voor uw geautoriseerde merken.',
+				'nl' => 'Geen downloads beschikbaar voor je geautoriseerde merken.',
 				'fr' => 'Aucun téléchargement disponible pour vos marques autorisées.',
 			),
 			'geen_content_merk' => array(
-				'nl' => 'Geen content beschikbaar voor uw geautoriseerde merken.',
+				'nl' => 'Geen content beschikbaar voor je geautoriseerde merken.',
 				'fr' => 'Aucun contenu disponible pour vos marques autorisées.',
 			),
 			'terug_naar_portaal' => array( 'nl' => '← Terug naar het portaal', 'fr' => '← Retour au portail' ),

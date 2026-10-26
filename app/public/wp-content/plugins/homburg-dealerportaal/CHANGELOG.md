@@ -8,6 +8,35 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.77.0
+
+**Het portaal zegt overal "je"** (thema 1.33.0).
+- Het was een mengsel: de startpagina zei "jouw socials", de rest "u heeft" en "uw account". Ruim zestig Nederlandse teksten zijn omgezet: garantie, account, meldingen, foutschermen, de goedkeuringsmail en de mail bij een e-mailwijziging.
+- Het Frans blijft "vous"; "tu" is in zakelijk Frans ongebruikelijk.
+- Een nieuwe test slaat alarm zodra er weer een tekst met "u" of "uw" bijkomt.
+
+**De webshop gebruikt één set woorden.**
+- De titel boven de winkel is "Webshop", net als op de startpagina en in het zijmenu; er stond "Winkel".
+- "Terug naar de winkel" en "Ga naar de winkel" zijn "... de webshop" geworden.
+- Het mandje heet overal "winkelwagen", zoals WooCommerce het zelf ook noemt in de winkelwagen en bij afrekenen. Op andere plekken stond "winkelmand" of "bestelling".
+- De bestelknop zegt "In winkelwagen" in plaats van "Toevoegen aan bestelling".
+
+**Sorteren in de webshop.**
+- "Populariteit", "gemiddelde waardering" en "nieuwste" zijn weg: hier worden geen beoordelingen gegeven en dealers zoeken daar niet op.
+- Nieuw: sorteren op artikelnummer.
+- De standaardsortering heet nu wat hij doet: "Omschrijving (A–Z)". Hij sorteert ook echt alleen op omschrijving, ook als iemand ooit een handmatige volgorde instelt.
+
+**Bestellingen.**
+- Datums staan als "17 september 2026"; er stond "september 17, 2026". Dat geldt ook voor de losse bestelling, en een Franstalige dealer krijgt de Franse maandnaam.
+- Het statusfilter toont alleen nog In behandeling, Afgerond en Geannuleerd. "Wachtend op betaling", "Terugbetaald", "Mislukt" en "Concept" horen bij een webwinkel met online betalen. "Alle statussen" toont nog steeds alles, dus er raakt geen bestelling uit beeld.
+
+**Garantie: geen tegenstrijdige melding meer bij een nieuwe dealer.**
+- Midden stond "nog geen claims" met een knop "Claim indienen", rechts "meld eerst een machine aan, daarna kun je claims indienen". Dat laatste klopte niet: een claim op bestelde onderdelen heeft geen machine nodig.
+- Rechts staan nu de twee routes, met alleen de knop om een machine aan te melden. Heeft de dealer al machines, dan staat daar geen aanmeldoproep.
+
+**Patroon "Overige informatie" bijgewerkt** naar de nieuwe startpagina: de link naar Downloads (er stond "verkoopdocumenten", een naam die nergens voorkomt), de magazijntijden (werkdagen 08:00–17:00), het blok "Onderdelen bestellen" en overal "Naar onderdelen" op de merktegels. Een bestaande pagina verandert hier niet door; dit patroon gebruik je alleen bij opnieuw invoegen.
+- Tests: 364 (was 358).
+
 ## 1.76.0
 
 **Een dealer ziet zijn eigen ingediende onderdelen terug op zijn ticket** (thema 1.32.1).

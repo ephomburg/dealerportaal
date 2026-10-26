@@ -71,7 +71,7 @@ $link_icoon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 			</script>
 			<?php if ( class_exists( 'WooCommerce' ) && ( is_woocommerce() || is_cart() || is_checkout() ) ) : ?>
 				<?php $hdp_aantal_mandje = WC()->cart ? WC()->cart->get_cart_contents_count() : 0; ?>
-				<a class="hdp-mandje-knop" href="<?php echo esc_url( wc_get_cart_url() ); ?>" aria-label="<?php esc_attr_e( 'Winkelmand', 'homburg-dealerportaal' ); ?>">
+				<a class="hdp-mandje-knop" href="<?php echo esc_url( wc_get_cart_url() ); ?>" aria-label="<?php esc_attr_e( 'Winkelwagen', 'homburg-dealerportaal' ); ?>">
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1.5"/><circle cx="19" cy="21" r="1.5"/><path d="M2 3h3l2.6 12.5a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H6"/></svg>
 					<span class="hdp-mandje-aantal"<?php echo $hdp_aantal_mandje ? '' : ' hidden'; ?>><?php echo (int) $hdp_aantal_mandje; ?></span>
 				</a>

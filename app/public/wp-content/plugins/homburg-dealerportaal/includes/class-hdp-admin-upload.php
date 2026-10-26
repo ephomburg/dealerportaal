@@ -330,7 +330,7 @@ class HDP_Admin_Upload {
 		}
 
 		if ( ! $merk_wijzigen && ! $regio_wijzigen ) {
-			return self::status_url( $terug_naar, 'fout', 'Kies eerst wat u wilt wijzigen.' );
+			return self::status_url( $terug_naar, 'fout', 'Kies eerst wat je wilt wijzigen.' );
 		}
 
 		$aantal = 0;

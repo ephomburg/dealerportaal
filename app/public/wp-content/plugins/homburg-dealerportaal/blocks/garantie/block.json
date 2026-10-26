@@ -22,7 +22,7 @@
 		},
 		"omschrijving": {
 			"type": "string",
-			"default": "Dien hier een garantieclaim in en volg de status van uw lopende claims."
+			"default": "Dien hier een garantieclaim in en volg de status van je lopende claims."
 		},
 		"omschrijvingFr": {
 			"type": "string",
@@ -30,7 +30,7 @@
 		},
 		"loginIntro": {
 			"type": "string",
-			"default": "Log in met uw dealeraccount om een garantieclaim in te dienen of de status van uw claims te bekijken."
+			"default": "Log in met je dealeraccount om een garantieclaim in te dienen of de status van je claims te bekijken."
 		},
 		"loginIntroFr": {
 			"type": "string",

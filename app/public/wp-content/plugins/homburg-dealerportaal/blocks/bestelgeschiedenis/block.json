@@ -14,7 +14,7 @@
 		},
 		"loginIntro": {
 			"type": "string",
-			"default": "Log in met uw dealeraccount voor toegang tot de webshop, productconfigurator en downloads."
+			"default": "Log in met je dealeraccount voor toegang tot de webshop, productconfigurator en downloads."
 		},
 		"loginIntroFr": {
 			"type": "string",
@@ -30,7 +30,7 @@
 		},
 		"omschrijving": {
 			"type": "string",
-			"default": "Een overzicht van al uw eerdere bestellingen bij Homburg."
+			"default": "Een overzicht van al je eerdere bestellingen bij Homburg."
 		},
 		"omschrijvingFr": {
 			"type": "string",

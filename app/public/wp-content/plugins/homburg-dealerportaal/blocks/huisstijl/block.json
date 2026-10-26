@@ -22,7 +22,7 @@
 		},
 		"omschrijving": {
 			"type": "string",
-			"default": "Logo's, kleuren en lettertypen van Homburg en van de merken die wij voeren — klaar voor gebruik op uw eigen site, briefpapier en advertenties."
+			"default": "Logo's, kleuren en lettertypen van Homburg en van de merken die wij voeren — klaar voor gebruik op je eigen site, briefpapier en advertenties."
 		},
 		"omschrijvingFr": {
 			"type": "string",

@@ -26,6 +26,9 @@ class HDP_Bestelgeschiedenis_Render {
 
 	const PER_PAGINA = 10;
 
+	/** De statussen in het filtermenu (zie render_bestellingen_lijst()). */
+	const MENU_STATUSSEN = array( 'wc-processing', 'wc-completed', 'wc-cancelled' );
+
 	public static function init() {
 		add_action( 'template_redirect', array( __CLASS__, 'verwijs_bestelgeschiedenis_naar_myaccount' ) );
 	}
@@ -110,6 +113,19 @@ class HDP_Bestelgeschiedenis_Render {
 
 		$filter_actief = '' !== $zoekterm || '' !== $status_filter;
 
+		// Het keuzemenu toont alleen de statussen die een dealerbestelling
+		// hier echt krijgt. WooCommerce's volledige lijst bevat ook "Wachtend
+		// op betaling", "Terugbetaald", "Mislukt" en "Concept" — die horen bij
+		// een webwinkel met online betalen, niet bij dit portaal. "Alle
+		// statussen" blijft wel álle statussen ophalen, zodat een bestelling
+		// met een andere status nooit uit beeld raakt. Komt iemand via een
+		// link met zo'n andere status binnen, dan blijft die ook in het menu
+		// staan, anders klopt de getoonde keuze niet met de lijst.
+		$menu_statussen = array_intersect_key( $statussen, array_flip( self::MENU_STATUSSEN ) );
+		if ( '' !== $status_filter && ! isset( $menu_statussen[ 'wc-' . $status_filter ] ) ) {
+			$menu_statussen[ 'wc-' . $status_filter ] = $statussen[ 'wc-' . $status_filter ];
+		}
+
 		$query_args = array(
 			'customer_id' => get_current_user_id(),
 			'status'      => $status_filter ? array( $status_filter ) : array_keys( $statussen ),
@@ -150,7 +166,7 @@ class HDP_Bestelgeschiedenis_Render {
 					<label class="hdp-filtergroep-label" for="hdp-bs"><?php echo esc_html( HDP_I18N::t( 'bestel_filter_status_label' ) ); ?></label>
 					<select id="hdp-bs" name="hdp_bs" class="hdp-sorteer-select">
 						<option value=""><?php echo esc_html( HDP_I18N::t( 'bestel_alle_statussen' ) ); ?></option>
-						<?php foreach ( $statussen as $sleutel => $label ) : ?>
+						<?php foreach ( $menu_statussen as $sleutel => $label ) : ?>
 							<?php $kort = str_replace( 'wc-', '', $sleutel ); ?>
 							<option value="<?php echo esc_attr( $kort ); ?>" <?php selected( $status_filter, $kort ); ?>><?php echo esc_html( $label ); ?></option>
 						<?php endforeach; ?>
@@ -186,7 +202,8 @@ class HDP_Bestelgeschiedenis_Render {
 					<div class="hdp-bestel-item">
 						<div class="hdp-bestel-info">
 							<strong>#<?php echo esc_html( $bestelling->get_order_number() ); ?></strong>
-							<span><?php echo esc_html( wc_format_datetime( $bestelling->get_date_created() ) ); ?></span>
+							<?php // Vast formaat i.p.v. de site-instelling: die stond op "september 17, 2026" (Engelse volgorde), en HDP_I18N::datum() geeft een Franse dealer ook de Franse maandnaam. ?>
+							<span><?php echo esc_html( HDP_I18N::datum( 'j F Y', $bestelling->get_date_created()->getOffsetTimestamp() ) ); ?></span>
 						</div>
 						<span class="hdp-bestel-status hdp-bestel-status-<?php echo esc_attr( $status ); ?>"><?php echo esc_html( wc_get_order_status_name( $status ) ); ?></span>
 						<span class="hdp-bestel-totaal"><?php echo wp_kses_post( $bestelling->get_formatted_order_total() ); // phpcs:ignore WordPress.Security.EscapeOutput -- get_formatted_order_total() wordt door WooCommerce zelf al veilig samengesteld. ?></span>

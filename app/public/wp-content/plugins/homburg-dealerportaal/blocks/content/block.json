@@ -22,7 +22,7 @@
 		},
 		"omschrijving": {
 			"type": "string",
-			"default": "Beeldmateriaal en teksten voor op uw eigen social media of advertenties, exclusief voor Homburg-dealers."
+			"default": "Beeldmateriaal en teksten voor op je eigen social media of advertenties, exclusief voor Homburg-dealers."
 		},
 		"omschrijvingFr": {
 			"type": "string",

@@ -105,7 +105,7 @@ class Downloads_Merk_Test extends WP_UnitTestCase {
 
 		$html = HDP_Downloads_Render::render_downloads_pagina( $this->attributen );
 
-		$this->assertStringContainsString( 'Geen downloads beschikbaar voor uw geautoriseerde merken.', $html );
+		$this->assertStringContainsString( 'Geen downloads beschikbaar voor je geautoriseerde merken.', $html );
 	}
 
 	public function test_taal_en_merkfilter_werken_samen() {

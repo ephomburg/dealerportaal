@@ -50,7 +50,7 @@ class Foutscherm_Test extends WP_UnitTestCase {
 		$goedkeuring = HDP_Foutscherm::html( 'wacht_goedkeuring', 403 );
 		$weg         = HDP_Foutscherm::html( 'niet_gevonden', 404 );
 
-		$this->assertStringContainsString( 'merk dat niet aan uw account gekoppeld is', $merk );
+		$this->assertStringContainsString( 'merk dat niet aan je account gekoppeld is', $merk );
 		$this->assertStringContainsString( 'niet meer ingelogd', $ingelogd );
 		$this->assertStringContainsString( 'in behandeling', $goedkeuring );
 		$this->assertStringContainsString( 'bestaat niet meer', $weg );

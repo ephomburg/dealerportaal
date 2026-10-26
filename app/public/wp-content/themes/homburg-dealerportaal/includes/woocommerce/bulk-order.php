@@ -87,11 +87,11 @@ function homburg_wc_snelbestellen_inhoud() {
 				<?php
 				printf(
 					/* translators: %d: aantal toegevoegde artikelen */
-					esc_html( _n( '%d artikel toegevoegd aan je winkelmand.', '%d artikelen toegevoegd aan je winkelmand.', count( $resultaat['toegevoegd'] ), 'homburg-dealerportaal-theme' ) ),
+					esc_html( _n( '%d artikel toegevoegd aan je winkelwagen.', '%d artikelen toegevoegd aan je winkelwagen.', count( $resultaat['toegevoegd'] ), 'homburg-dealerportaal-theme' ) ),
 					count( $resultaat['toegevoegd'] )
 				);
 				?>
-				<a href="<?php echo esc_url( wc_get_cart_url() ); ?>"><?php esc_html_e( 'Naar de winkelmand', 'homburg-dealerportaal-theme' ); ?></a>
+				<a href="<?php echo esc_url( wc_get_cart_url() ); ?>"><?php esc_html_e( 'Naar de winkelwagen', 'homburg-dealerportaal-theme' ); ?></a>
 			</div>
 		<?php endif; ?>
 		<?php if ( $resultaat['niet_gevonden'] ) : ?>
@@ -119,7 +119,7 @@ function homburg_wc_snelbestellen_inhoud() {
 		><?php echo isset( $_POST['hdp_snelbestellen_lijst'] ) ? esc_textarea( wp_unslash( $_POST['hdp_snelbestellen_lijst'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- esc_textarea hierboven. ?></textarea>
 		<p class="hdp-snelbestellen-hulp"><?php esc_html_e( 'Eén artikelnummer per regel. Zet er zo gewenst een aantal achter, bijv. "10714 x3".', 'homburg-dealerportaal-theme' ); ?></p>
 		<?php wp_nonce_field( 'hdp-snelbestellen', 'hdp_snelbestellen_nonce' ); ?>
-		<button type="submit" class="button"><?php esc_html_e( 'Toevoegen aan winkelmand', 'homburg-dealerportaal-theme' ); ?></button>
+		<button type="submit" class="button"><?php esc_html_e( 'Toevoegen aan winkelwagen', 'homburg-dealerportaal-theme' ); ?></button>
 	</form>
 	<?php
 }

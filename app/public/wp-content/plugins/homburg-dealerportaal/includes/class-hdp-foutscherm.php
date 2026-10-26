@@ -83,18 +83,18 @@ class HDP_Foutscherm {
 		return array(
 			'niet_ingelogd'   => array(
 				'icoon'   => 'slot',
-				'titel'   => array( 'nl' => 'U bent niet meer ingelogd', 'fr' => 'Vous n\'êtes plus connecté' ),
+				'titel'   => array( 'nl' => 'Je bent niet meer ingelogd', 'fr' => 'Vous n\'êtes plus connecté' ),
 				'tekst'   => array(
-					'nl' => 'Uw sessie is verlopen. Log opnieuw in om dit bestand te downloaden.',
+					'nl' => 'Je sessie is verlopen. Log opnieuw in om dit bestand te downloaden.',
 					'fr' => 'Votre session a expiré. Reconnectez-vous pour télécharger ce fichier.',
 				),
 				'contact' => false,
 			),
 			'wacht_goedkeuring' => array(
 				'icoon'   => 'wachten',
-				'titel'   => array( 'nl' => 'Uw account is nog in behandeling', 'fr' => 'Votre compte est en cours de validation' ),
+				'titel'   => array( 'nl' => 'Je account is nog in behandeling', 'fr' => 'Votre compte est en cours de validation' ),
 				'tekst'   => array(
-					'nl' => 'Zodra uw account is goedgekeurd kunt u alle bestanden in het dealerportaal downloaden. U krijgt hier automatisch bericht van.',
+					'nl' => 'Zodra je account is goedgekeurd, kun je alle bestanden in het dealerportaal downloaden. Je krijgt hier automatisch bericht van.',
 					'fr' => 'Dès que votre compte sera approuvé, vous pourrez télécharger tous les fichiers du portail concessionnaire. Vous en serez averti automatiquement.',
 				),
 				'contact' => true,
@@ -103,7 +103,7 @@ class HDP_Foutscherm {
 				'icoon'   => 'slot',
 				'titel'   => array( 'nl' => 'Dit bestand hoort bij een ander merk', 'fr' => 'Ce fichier concerne une autre marque' ),
 				'tekst'   => array(
-					'nl' => 'Dit bestand hoort bij een merk dat niet aan uw account gekoppeld is. Voert u dit merk wel? Neem dan even contact op, dan zetten we het voor u open.',
+					'nl' => 'Dit bestand hoort bij een merk dat niet aan je account gekoppeld is. Voer je dit merk wel? Neem dan even contact op, dan zetten we het voor je open.',
 					'fr' => "Ce fichier concerne une marque qui n'est pas liée à votre compte. Vous distribuez cette marque ? Contactez-nous et nous l'activerons pour vous.",
 				),
 				'contact' => true,

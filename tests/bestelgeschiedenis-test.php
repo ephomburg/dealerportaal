@@ -111,6 +111,46 @@ class Bestelgeschiedenis_Test extends WP_UnitTestCase {
 		$this->assertStringContainsString( '#' . $order->get_order_number(), $html );
 	}
 
+	/**
+	 * Het statusmenu toonde WooCommerce's volledige lijst, met o.a. "Wachtend
+	 * op betaling", "Terugbetaald", "Mislukt" en "Concept" — statussen die
+	 * een dealerbestelling hier niet krijgt.
+	 */
+	public function test_statusmenu_toont_alleen_statussen_die_hier_voorkomen() {
+		wp_set_current_user( $this->dealer_id );
+
+		$html = $this->render();
+
+		foreach ( array( 'processing', 'completed', 'cancelled' ) as $status ) {
+			$this->assertStringContainsString( 'value="' . $status . '"', $html );
+		}
+		foreach ( array( 'pending', 'refunded', 'failed', 'checkout-draft' ) as $status ) {
+			$this->assertStringNotContainsString( 'value="' . $status . '"', $html );
+		}
+	}
+
+	/** Wie via een link op een andere status filtert, ziet die keuze terug. */
+	public function test_status_uit_een_link_blijft_in_het_menu_staan() {
+		wp_set_current_user( $this->dealer_id );
+		$_GET['hdp_bs'] = 'failed';
+
+		$html = $this->render();
+
+		$this->assertMatchesRegularExpression( '/value="failed"\s+selected/', $html );
+	}
+
+	/** De datum stond in Engelse volgorde: "september 17, 2026". */
+	public function test_datum_staat_als_dag_maand_jaar() {
+		wp_set_current_user( $this->dealer_id );
+		$order = $this->maak_bestelling();
+		$order->set_date_created( '2026-09-17 10:00:00' );
+		$order->save();
+
+		$html = $this->render();
+
+		$this->assertMatchesRegularExpression( '/>17 \p{L}+ 2026</u', $html );
+	}
+
 	public function test_andere_dealer_ziet_deze_bestelling_niet() {
 		$this->maak_bestelling();
 
