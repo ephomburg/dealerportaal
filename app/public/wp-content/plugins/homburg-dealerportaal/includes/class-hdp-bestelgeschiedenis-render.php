@@ -204,6 +204,11 @@ class HDP_Bestelgeschiedenis_Render {
 							<strong>#<?php echo esc_html( $bestelling->get_order_number() ); ?></strong>
 							<?php // Vast formaat i.p.v. de site-instelling: die stond op "september 17, 2026" (Engelse volgorde), en HDP_I18N::datum() geeft een Franse dealer ook de Franse maandnaam. ?>
 							<span><?php echo esc_html( HDP_I18N::datum( 'j F Y', $bestelling->get_date_created()->getOffsetTimestamp() ) ); ?></span>
+							<?php $referentie = function_exists( 'homburg_wc_referentie' ) ? homburg_wc_referentie( $bestelling ) : ''; ?>
+							<?php if ( '' !== $referentie ) : ?>
+								<?php // De eigen referentie van de dealer (inkoopnummer, eindklant), zodat hij de bestelling in zijn administratie terugvindt. ?>
+								<span class="hdp-bestel-referentie"><?php echo esc_html( sprintf( HDP_I18N::t( 'bestel_referentie' ), $referentie ) ); ?></span>
+							<?php endif; ?>
 						</div>
 						<span class="hdp-bestel-status hdp-bestel-status-<?php echo esc_attr( $status ); ?>"><?php echo esc_html( wc_get_order_status_name( $status ) ); ?></span>
 						<span class="hdp-bestel-totaal"><?php echo wp_kses_post( $bestelling->get_formatted_order_total() ); // phpcs:ignore WordPress.Security.EscapeOutput -- get_formatted_order_total() wordt door WooCommerce zelf al veilig samengesteld. ?></span>

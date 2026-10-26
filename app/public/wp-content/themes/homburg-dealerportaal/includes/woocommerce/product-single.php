@@ -110,6 +110,8 @@ function homburg_wc_tab_specificaties() {
 		return;
 	}
 	?>
+	<?php // Een eigen kop: is dit het enige tabblad, dan verdwijnt de tabbalk (een tab zonder tweede tab is geen keuze) en zegt deze kop wat er staat. ?>
+	<h2 class="hdp-wc-specs-kop"><?php esc_html_e( 'Specificaties', 'homburg-dealerportaal-theme' ); ?></h2>
 	<table class="hdp-wc-specs">
 		<tbody>
 			<?php foreach ( $rijen as $label => $waarde ) : ?>
@@ -197,4 +199,17 @@ JS;
 	wp_register_script( 'hdp-wc-single', '', array(), wp_get_theme()->get( 'Version' ), true );
 	wp_enqueue_script( 'hdp-wc-single' );
 	wp_add_inline_script( 'hdp-wc-single', $js );
+}
+
+add_filter( 'woocommerce_post_class', 'homburg_wc_klasse_zonder_foto', 10, 2 );
+/**
+ * Markeert een product zonder foto, zodat de productpagina dan één compacte
+ * kolom wordt in plaats van een groot grijs vlak naast de gegevens. Bijna
+ * alle onderdelen hebben (nog) geen foto.
+ */
+function homburg_wc_klasse_zonder_foto( $klassen, $product ) {
+	if ( function_exists( 'is_product' ) && is_product() && $product && ! $product->get_image_id() ) {
+		$klassen[] = 'hdp-zonder-foto';
+	}
+	return $klassen;
 }

@@ -1753,3 +1753,126 @@ body.woocommerce-page table.shop_table td { padding: 0.8rem 1rem; border-top: 1p
 		linear-gradient(90deg, var(--wp--preset--color--rand) 1px, transparent 1px) 0 0 / 22px 22px,
 		var(--hdp-wc-blauwdruk);
 }
+
+/* ==========================================================================
+   WEBSHOP-RONDE: leesbare namen, compacte productpagina, rustiger winkel
+   ========================================================================== */
+
+/* --- Lijst: de naam niet meer afkappen --------------------------------- */
+/* "1e boom deel 17 HAL…" en "A.B. contactblok 1V f…": bij onderdelen die
+   alleen aan het eind van hun naam verschillen, kon een dealer ze niet uit
+   elkaar houden. Nu tot twee regels, en pas daarna "…". */
+.woocommerce ul.products.hdp-lijst-weergave li.product h3.hdp-card__title {
+	white-space: normal;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	line-height: 1.3;
+}
+
+/* --- Aantal-veldje ------------------------------------------------------ */
+/* De browser hield ruimte vrij voor zijn eigen pijltjes, waardoor de "1"
+   uit het midden stond. Even hoog als de knop ernaast. */
+.hdp-card__aantal input[type="number"] {
+	height: 37px;
+	padding: 0 0.3rem;
+	line-height: normal;
+	text-align: center;
+	-moz-appearance: textfield;
+	appearance: textfield;
+}
+.hdp-card__aantal input[type="number"]::-webkit-inner-spin-button,
+.hdp-card__aantal input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* --- Winkel ------------------------------------------------------------- */
+/* Het merkfilter bleef op 28% van de schermhoogte hangen en begon daardoor
+   lager dan de zoekbalk ernaast. Nu net onder de header, zoals de andere
+   vaste kolommen in het portaal. */
+.hdp-shop-merken {
+	top: calc(var(--hdp-header-hoogte, 0px) + 1.5rem);
+}
+/* Ingelogd als beheerder staat de zwarte WordPress-balk er nog boven en
+   schuift de header 32px op; zonder dit verdween de bovenkant van het
+   filter achter de header. */
+body.admin-bar .hdp-shop-merken {
+	top: calc(var(--hdp-header-hoogte, 0px) + 32px + 1.5rem);
+}
+/* Scrolde je met de muis boven het filter, dan schoof het hele vak mee en
+   verdween de kop "Merk" uit beeld. Nu scrolt alleen de lijst met merken;
+   kop en "Filter wissen" blijven staan. */
+@media (min-width: 781px) {
+	.hdp-shop-merken { max-height: none; overflow: visible; }
+	.hdp-shop-merken-lijst {
+		max-height: calc(100vh - var(--hdp-header-hoogte, 0px) - 11rem - var(--wp-admin--admin-bar--height, 0px));
+		overflow-y: auto;
+		scrollbar-width: thin;
+		margin-right: -0.5rem;
+		padding-right: 0.5rem;
+	}
+}
+
+/* Op een telefoon begon het eerste product pas na anderhalf scherm. */
+@media (max-width: 780px) {
+	.hdp-shop-layout { gap: 0.9rem; }
+	.hdp-shop-merken { padding: 0.75rem 1rem; }
+	.hdp-shop-main { gap: 0.9rem; }
+	.hdp-shop-balk { padding: 0.8rem 0.9rem; row-gap: 0.6rem; }
+	.hdp-shop-balk .woocommerce-result-count,
+	.hdp-shop-balk .woocommerce-ordering { padding-top: 0.6rem; font-size: 0.78rem; }
+}
+@media (max-width: 480px) {
+	/* Zoekveld en weergaveknoppen weer op één regel: de knoppen zijn klein
+	   genoeg, een eigen regel kostte alleen hoogte. */
+	.hdp-shop-zoeken { flex-basis: auto; flex: 1 1 0; min-width: 0; }
+}
+
+/* --- Accountmenu --------------------------------------------------------- */
+/* WooCommerce zelf geeft elk menu-item 1em ruimte boven en onder
+   (.woocommerce-account …-navigation li); dat stapelde op tot gaten van
+   zo’n 75 pixels per regel. */
+.woocommerce-account .woocommerce-MyAccount-navigation li,
+.woocommerce-account .woocommerce-MyAccount-navigation li:first-child { padding: 0; }
+
+/* --- Productpagina ------------------------------------------------------ */
+/* "Bewaar als favoriet" zweefde midden op de pagina: de knop rekte mee
+   over de volle breedte van de kolom. */
+.hdp-favoriet-knop--pdp { align-self: flex-start; }
+
+/* Zonder foto één compacte kolom, zonder groot grijs vlak (het
+   artikelnummer staat al groot naast de titel). */
+.woocommerce div.product.hdp-zonder-foto > .summary.entry-summary { max-width: 640px; }
+
+/* Minder lucht tussen de onderdelen van de pagina. */
+.woocommerce div.product { row-gap: 1.75rem; }
+.woocommerce div.product > .woocommerce-tabs { margin: 0; }
+/* WooCommerce zet 5em boven de gerelateerde producten en 2em onder het
+   tabpaneel; samen met de rij-afstand gaf dat een gat van 160 pixels. */
+.woocommerce div.product .related.products { margin-top: 0; }
+.woocommerce div.product .related.products > h2 { margin-top: 0; }
+.woocommerce div.product .woocommerce-tabs .panel { margin-bottom: 0; }
+
+/* Eén tabblad is geen keuze: dan geen tabbalk, de kop in het paneel zegt
+   wat er staat. */
+.woocommerce div.product .woocommerce-tabs ul.tabs:has(> li:only-child) { display: none; }
+.hdp-wc-specs-kop { margin: 0 0 0.8rem; font-size: 1.05rem; font-weight: 700; }
+.woocommerce div.product .woocommerce-tabs ul.tabs:not(:has(> li:only-child)) ~ .panel .hdp-wc-specs-kop { display: none; }
+
+/* Gerelateerde producten: zonder foto geen groot grijs vlak per kaart, en
+   dezelfde omlijnde knop als in de lijst — een rij rode knoppen onder de
+   eigen rode bestelknop trok de aandacht weg van waar het om gaat. */
+.related ul.products li.product.hdp-card .hdp-card__media:has(.hdp-plate) { display: none; }
+.related ul.products .hdp-card__btn.button {
+	background: var(--wp--preset--color--wit);
+	color: var(--wp--preset--color--donkergrijs) !important;
+	border: 1.5px solid var(--wp--preset--color--donkergrijs);
+}
+.related ul.products .hdp-card__btn.button:hover,
+.related ul.products .hdp-card__btn.button:focus-visible {
+	background: var(--wp--preset--color--donkergrijs);
+	color: var(--wp--preset--color--wit) !important;
+}
+
+/* --- Bestelling ---------------------------------------------------------- */
+/* Het artikelnummer op een eigen regel onder de naam (zie bestellen.php). */
+.hdp-wc-regel-sku { display: block; margin-top: 0.15rem; font-size: 0.8rem; color: var(--wp--preset--color--grijs-tekst); font-weight: 400; }
+.hdp-bestelbevestiging .wc-block-order-confirmation-status h1 { font-size: 1.75rem; font-weight: 800; }

@@ -345,4 +345,40 @@ class Zijbalk_Test extends WP_UnitTestCase {
 		// Materiaal is leeg in deze opzet en hoort dus niet te verschijnen.
 		$this->assertStringNotContainsString( HDP_I18N::t( 'zijbalk_groep_materiaal' ), $html );
 	}
+
+	/** Bestellingen hoort direct onder de webshop, de (externe) configurator daaronder. */
+	public function test_bestellingen_staat_tussen_webshop_en_configurator() {
+		$this->maak_startpagina(
+			array(
+				array( 'titel' => 'Webshop', 'icoon' => 'webshop', 'url' => '/shop/' ),
+				array( 'titel' => 'Productconfigurator', 'icoon' => 'configurator', 'url' => 'https://quootz.com/homburg/' ),
+			)
+		);
+
+		ob_start();
+		HDP_Zijbalk::render();
+		$html = ob_get_clean();
+
+		$webshop      = strpos( $html, '>Webshop<' );
+		$bestellingen = strpos( $html, '>' . HDP_I18N::t( 'zijbalk_bestellingen' ) . '<' );
+		$configurator = strpos( $html, '>Productconfigurator<' );
+
+		$this->assertLessThan( $bestellingen, $webshop );
+		$this->assertLessThan( $configurator, $bestellingen );
+	}
+
+	/** Een link naar een andere site krijgt het pijltje, ook zonder het vinkje "nieuw tabblad". */
+	public function test_een_externe_link_opent_in_een_nieuw_tabblad() {
+		$this->maak_startpagina(
+			array(
+				array( 'titel' => 'Webshop', 'icoon' => 'webshop', 'url' => '/shop/' ),
+				array( 'titel' => 'Productconfigurator', 'icoon' => 'configurator', 'url' => 'https://quootz.com/homburg/' ),
+			)
+		);
+
+		$onderdelen = HDP_Zijbalk::onderdelen();
+
+		$this->assertFalse( $onderdelen[0]['nieuwe_tab'], 'De eigen webshop blijft in hetzelfde tabblad.' );
+		$this->assertTrue( $onderdelen[1]['nieuwe_tab'] );
+	}
 }

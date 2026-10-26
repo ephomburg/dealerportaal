@@ -8,6 +8,38 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.81.1
+
+- Webshop (thema 1.34.1): scrolde je met de muis boven het merkenfilter, dan schoof het hele vak mee en verdween de kop "Merk" boven uit beeld. Nu scrolt alleen de lijst met merken; de kop en "Filter wissen" blijven staan.
+- Ingelogd als beheerder (met de zwarte WordPress-balk bovenin) zat het merkenfilter, en bij garantie de filter- en detailkolom en de zijkolom bij een ticket, 32px te hoog en verdween de bovenkant achter de header. Die houden nu rekening met die balk, net als het menu links al deed.
+
+## 1.81.0
+
+**Webshop: bestellen zoals een dealer bestelt** (thema 1.34.0).
+- **Op rekening, levering volgens afspraak.** Er was geen betaal- en geen verzendmethode, dus afrekenen liep vast. Nu: "Op rekening" (WooCommerce' ingebouwde methode onder eigen naam, in NL/FR; de bestelling gaat meteen "in behandeling") en "Levering volgens afspraak" (kosteloos, Nederland en België). Dat zijn instellingen; in Local staan ze aan, op live nog niet.
+- **Afleveradres.** Bij afrekenen staat eerst het afleveradres, met "zelfde adres voor facturering". Heeft een dealer nog geen afleveradres, dan staat zijn factuuradres er al in; leveren bij een eindklant kan door het aan te passen.
+- **Jouw referentie.** Een veld voor een eigen inkoopnummer of de naam van de eindklant. Komt terug in de bevestiging, de e-mail, bij de bestelling, in het beheer en in het bestellingenoverzicht ("Ref. …").
+- **Artikelnummers** in de winkelwagen, bij afrekenen, in de bevestiging, bij een bestelling en in de e-mails. Er stond alleen de omschrijving.
+- **De leveringsvoorwaarden zijn een link** naar de Metaalunievoorwaarden 2025, in het Nederlands of Frans naar de taal van de dealer. Er stond "Algemene voorwaarden" zonder link.
+- **De bevestigingspagina na het bestellen was kapot**: een donker scherm met twee losse productlinks. WooCommerce gebruikte een eigen sjabloon zonder het portaal eromheen; het thema heeft er nu een.
+- **"Opnieuw bestellen" stond twee keer** bij een bestelling, en een bestelling zonder adres toonde "N/B" (nu het factuuradres van het account).
+- **De winkelwagen staat altijd in de kop**, ook op Snel bestellen, Favorieten en Bestellingen. Hij verdween buiten de winkel.
+
+**Webshop: rustiger en leesbaarder.**
+- Productnamen in de lijst lopen over twee regels in plaats van "1e boom deel 17 HAL…".
+- Productpagina zonder foto: geen groot grijs vlak meer, één compacte kolom. Eén tabblad "Specificaties" is geen tabbalk meer maar een kop. "Bewaar als favoriet" staat links onder het nummer in plaats van midden op de pagina. Het gat van 160 pixels boven "Gerelateerde producten" is weg; die kaarten tonen geen grijs vlak en hebben dezelfde omlijnde knop als de lijst.
+- Het merkfilter begint op dezelfde hoogte als de zoekbalk (het hing op 28% van de schermhoogte). Op een telefoon staat het eerste product weer op het eerste scherm.
+- Het accountmenu had gaten van ~75 pixels per regel (WooCommerce' eigen lijstruimte).
+- Het aantal-veldje: de "1" staat in het midden en het veld is even hoog als de knop.
+- Tests: 403 PHPUnit, 18 browsertests (was 16).
+
+## 1.80.2
+
+**Zijmenu: Bestellingen direct onder de webshop, de productconfigurator daaronder.** De configurator is een externe site en hoort achteraan in de groep; Bestellingen werd er tot nu toe achter geplakt.
+
+**Een externe link in het zijmenu krijgt altijd het pijltje** en opent in een nieuw tabblad, ook als het vinkje "nieuw tabblad" op de kaart uit staat. Op live stond dat vinkje uit bij de productconfigurator, waardoor niet te zien was dat je het portaal verliet.
+- Tests: 403 (was 401).
+
 ## 1.80.1
 
 **Header en footer.**

@@ -52,3 +52,4 @@ require_once get_theme_file_path( 'includes/woocommerce/reorder.php' );
 require_once get_theme_file_path( 'includes/woocommerce/search-autosuggest.php' );
 require_once get_theme_file_path( 'includes/woocommerce/bulk-order.php' );
 require_once get_theme_file_path( 'includes/woocommerce/favorites.php' );
+require_once get_theme_file_path( 'includes/woocommerce/bestellen.php' );

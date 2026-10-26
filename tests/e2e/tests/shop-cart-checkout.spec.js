@@ -4,7 +4,7 @@ const { emptyCart } = require('./utils');
 /**
  * De kernflow van de webshop: een product vinden, toevoegen, terugzien in
  * de winkelwagen, en de afrekenpagina laten laden met dat product erin.
- * Rondt de bestelling zelf niet af — er staat geen betaalmethode op Local.
+ * Rondt de bestelling zelf niet af, zodat de testdealer niet volloopt (zie ook bestellen.spec.js).
  */
 test.describe('Winkel → winkelwagen → afrekenen', () => {
 	test.beforeEach(async ({ page }) => {

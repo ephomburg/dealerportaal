@@ -21,6 +21,13 @@ if ( ! $product ) {
 }
 
 $image_id = $product->get_image_id();
+
+// Zonder foto geen groot grijs vlak met het artikelnummer erin: dat nummer
+// staat al groot naast de titel. De pagina wordt dan één compacte kolom
+// (zie de klasse hdp-zonder-foto in product-single.php).
+if ( ! $image_id ) {
+	return;
+}
 ?>
 <div class="hdp-pdp-media">
 	<?php

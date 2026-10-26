@@ -894,6 +894,16 @@ class HDP_I18N {
 			'bestel_zoek_placeholder' => array( 'nl' => 'Zoek op ordernummer of naam…', 'fr' => 'Rechercher par numéro de commande ou nom…' ),
 			'bestel_filter_status_label' => array( 'nl' => 'Status', 'fr' => 'Statut' ),
 			'bestel_alle_statussen' => array( 'nl' => 'Alle statussen', 'fr' => 'Tous les statuts' ),
+			/* translators: %s is de eigen referentie van de dealer. */
+			'bestel_referentie'     => array( 'nl' => 'Ref. %s', 'fr' => 'Réf. %s' ),
+			// Webshop: winkelwagen, afrekenen en bestelling (thema, includes/woocommerce/bestellen.php).
+			'wc_artikelnummer'      => array( 'nl' => 'Artikelnummer', 'fr' => 'Référence' ),
+			'wc_referentie'         => array( 'nl' => 'Jouw referentie', 'fr' => 'Votre référence' ),
+			'wc_referentie_optioneel' => array( 'nl' => 'Jouw referentie (optioneel)', 'fr' => 'Votre référence (facultatif)' ),
+			'wc_voorwaarden'        => array( 'nl' => 'Algemene voorwaarden', 'fr' => 'Conditions générales' ),
+			'wc_op_rekening'        => array( 'nl' => 'Op rekening', 'fr' => 'Sur facture' ),
+			'wc_op_rekening_uitleg' => array( 'nl' => 'Je ontvangt de factuur van Homburg. Betalen volgens je gebruikelijke afspraken.', 'fr' => 'Vous recevez la facture de Homburg. Paiement selon vos conditions habituelles.' ),
+			'wc_levering_afspraak'  => array( 'nl' => 'Levering volgens afspraak', 'fr' => 'Livraison selon accord' ),
 			'bestel_filteren'   => array( 'nl' => 'Filteren', 'fr' => 'Filtrer' ),
 			'bestel_leeg_resultaat' => array(
 				'nl' => 'Geen bestellingen gevonden voor deze zoekopdracht/status.',

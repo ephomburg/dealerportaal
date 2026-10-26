@@ -167,11 +167,20 @@ class HDP_Zijbalk {
 			return null;
 		}
 
+		$url = 0 === strpos( $url, '/' ) ? home_url( $url ) : $url;
+
+		// Een link naar een andere website opent in een nieuw tabblad en
+		// krijgt het pijltje — ook als het vinkje "nieuw tabblad" op de kaart
+		// niet aan staat. Op live stond het uit bij de productconfigurator,
+		// en dan was niet te zien dat je het portaal verliet.
+		$host   = wp_parse_url( $url, PHP_URL_HOST );
+		$extern = $host && wp_parse_url( home_url(), PHP_URL_HOST ) !== $host;
+
 		return array(
 			'icoon'      => isset( $attrs['icoon'] ) ? $attrs['icoon'] : 'webshop',
 			'titel'      => $titel,
-			'url'        => 0 === strpos( $url, '/' ) ? home_url( $url ) : $url,
-			'nieuwe_tab' => ! empty( $attrs['nieuweTab'] ),
+			'url'        => $url,
+			'nieuwe_tab' => ! empty( $attrs['nieuweTab'] ) || $extern,
 		);
 	}
 
@@ -289,14 +298,23 @@ class HDP_Zijbalk {
 
 		// Bestellingen staat niet als kaart op de pagina, maar hoort wel in
 		// deze rij: het is waar een dealer na het bestellen het vaakst
-		// terugkomt.
+		// terugkomt. Direct onder de webshop, en dus vóór de
+		// productconfigurator: die is een externe site en hoort achteraan.
 		if ( function_exists( 'wc_get_account_endpoint_url' ) ) {
-			$onderdelen[] = array(
+			$bestellingen = array(
 				'icoon'      => 'bestellen',
 				'titel'      => HDP_I18N::t( 'zijbalk_bestellingen' ),
 				'url'        => wc_get_account_endpoint_url( 'orders' ),
 				'nieuwe_tab' => false,
 			);
+			$plek         = count( $onderdelen );
+			foreach ( $onderdelen as $i => $onderdeel ) {
+				if ( 'webshop' === $onderdeel['icoon'] ) {
+					$plek = $i + 1;
+					break;
+				}
+			}
+			array_splice( $onderdelen, $plek, 0, array( $bestellingen ) );
 		}
 
 		$per_groep = self::verdeel_over_groepen( $onderdelen );

@@ -1,0 +1,54 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<!-- wp:group {"tagName":"div","className":"hdp-app","layout":{"type":"default"}} -->
+<div class="wp-block-group hdp-app">
+	<!-- wp:template-part {"slug":"zijbalk","tagName":"div","className":"hdp-app-zijbalk"} /-->
+
+	<!-- wp:group {"tagName":"main","className":"hdp-app-inhoud hdp-bestelbevestiging","layout":{"type":"default"}} -->
+	<main class="wp-block-group hdp-app-inhoud hdp-bestelbevestiging">
+		<!-- wp:woocommerce/order-confirmation-status {"fontSize":"large"} /-->
+
+		<!-- wp:woocommerce/order-confirmation-summary /-->
+
+		<!-- wp:woocommerce/order-confirmation-totals-wrapper -->
+		<!-- wp:pattern {"slug":"woocommerce/order-confirmation-totals-heading"} /-->
+
+		<!-- wp:woocommerce/order-confirmation-totals {"lock":{"remove":true}} /-->
+		<!-- /wp:woocommerce/order-confirmation-totals-wrapper -->
+
+		<!-- wp:columns {"className":"wc-block-order-confirmation-address-wrapper"} -->
+		<div class="wp-block-columns wc-block-order-confirmation-address-wrapper">
+			<!-- wp:column -->
+			<div class="wp-block-column">
+				<!-- wp:woocommerce/order-confirmation-shipping-wrapper -->
+				<!-- wp:pattern {"slug":"woocommerce/order-confirmation-shipping-heading"} /-->
+
+				<!-- wp:woocommerce/order-confirmation-shipping-address {"lock":{"remove":true}} /-->
+				<!-- /wp:woocommerce/order-confirmation-shipping-wrapper -->
+			</div>
+			<!-- /wp:column -->
+
+			<!-- wp:column -->
+			<div class="wp-block-column">
+				<!-- wp:woocommerce/order-confirmation-billing-wrapper -->
+				<!-- wp:pattern {"slug":"woocommerce/order-confirmation-billing-heading"} /-->
+
+				<!-- wp:woocommerce/order-confirmation-billing-address {"lock":{"remove":true}} /-->
+				<!-- /wp:woocommerce/order-confirmation-billing-wrapper -->
+			</div>
+			<!-- /wp:column -->
+		</div>
+		<!-- /wp:columns -->
+
+		<!-- wp:woocommerce/order-confirmation-additional-fields-wrapper -->
+		<!-- wp:pattern {"slug":"woocommerce/order-confirmation-additional-fields-heading"} /-->
+		<!-- wp:woocommerce/order-confirmation-additional-fields /-->
+		<!-- /wp:woocommerce/order-confirmation-additional-fields-wrapper -->
+
+		<!-- wp:woocommerce/order-confirmation-additional-information /-->
+	</main>
+	<!-- /wp:group -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

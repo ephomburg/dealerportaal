@@ -2881,6 +2881,13 @@ a.hdp-garantie-item-actie:focus-visible { background: var(--hdp-aanzet-zacht-hov
 
 /* ── De detailkolom ─────────────────────────────────────────────── */
 .hdp-garantie-kolom-detail { min-width: 0; position: sticky; top: calc(var(--hdp-header-hoogte, 0px) + 1.5rem); }
+/* Ingelogd als beheerder staat de zwarte WordPress-balk er nog boven; de
+   header schuift dan 32px op (zie style.css), deze kolommen dus ook. */
+body.admin-bar .hdp-ticket-zijkolom,
+body.admin-bar .hdp-garantie-rail,
+body.admin-bar .hdp-garantie-kolom-detail {
+	top: calc(var(--hdp-header-hoogte, 0px) + 32px + 1.5rem);
+}
 .hdp-detail-kaart { display: flex; flex-direction: column; gap: 1.1rem; }
 .hdp-detail-volledig { margin: 0; font-size: 0.88rem; font-weight: 700; }
 
