@@ -8,6 +8,12 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.84.0
+
+- Portaalgebruik: testaccounts tellen niet meer mee (vinkje "Testaccount" in het gebruikersprofiel; accounts waarvan de naam begint met `hdp-test-` vanzelf). "Niet meer geweest" gebruikt ook de laatste activiteit die WooCommerce al bijhield, zodat de lijst niet de eerste maand bij iedereen "nog nooit" zegt.
+- Webshop (thema 1.35.0): nieuw vinkje "Bestellen in de webshop" in Instellingen > Dealerportaal. Aan: "Op rekening", "Levering volgens afspraak" in Nederland en België en het afleveradres bij afrekenen worden vanzelf ingesteld en goed gehouden. Uit: "Op rekening" gaat uit, afrekenen kan dan niet. Op live staat het vinkje nog uit.
+- Opmaak webshop opgeruimd: de losse correcties onderaan woocommerce.css zitten nu in de regels waar ze bij horen. Op 17 van de 18 vergeleken schermen (computer en telefoon) pixel voor pixel gelijk; op de productpagina verschillen alleen de willekeurig gekozen gerelateerde producten.
+
 ## 1.83.0
 
 - Nieuw overzicht **Portaalgebruik** in wp-admin (Dashboard > Portaalgebruik, `HDP_Gebruik`), per periode van 30 dagen, 3 of 12 maanden: hoeveel dealers actief waren (ook per week), welke dealers 30 dagen of langer niet zijn geweest (met contactgegevens, om te bellen), zoektermen zonder resultaat en meest gezocht, meest geopende documenten en documenten die niemand opende, en bestellingen en omzet per dealer.

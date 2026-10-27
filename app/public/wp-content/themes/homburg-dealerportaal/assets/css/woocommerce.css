@@ -248,7 +248,9 @@ p.no-comments {
 	container-name: hdp-lijst;
 }
 @media (max-width: 780px) {
-	.hdp-shop-layout { grid-template-columns: minmax(0, 1fr); }
+	/* Minder tussenruimte: op een telefoon begon het eerste product anders
+	   pas na anderhalf scherm. */
+	.hdp-shop-layout { grid-template-columns: minmax(0, 1fr); gap: 0.9rem; }
 }
 
 .hdp-shop-merken {
@@ -257,15 +259,21 @@ p.no-comments {
 	border: 1px solid var(--wp--preset--color--rand);
 	border-radius: var(--hdp-wc-radius);
 	padding: 1.1rem 1.2rem 1.3rem;
-	/* Blijft in beeld tijdens het scrollen door een lange productlijst —
-	   bewust niet tegen de bovenkant geplakt maar rond het midden van het
-	   scherm, dat voelt minder opdringerig dan pal onder de header.
-	   Alleen relevant naast het raster (desktop) — op mobiel stapelt de
-	   kolom toch al boven de producten, dus daar weer uitgezet hieronder. */
+	/* Blijft in beeld tijdens het scrollen door een lange productlijst, net
+	   onder de header, zoals de andere vaste kolommen in het portaal (de
+	   hoogte meet dealerportaal.js). Alleen relevant naast het raster
+	   (desktop) — op mobiel stapelt de kolom toch al boven de producten,
+	   dus daar weer uitgezet hieronder. Het vak zelf scrolt niet: dan
+	   verdween de kop "Merk" uit beeld. Alleen de lijst met merken scrolt
+	   (zie .hdp-shop-merken-lijst). */
 	position: sticky;
-	top: 28vh;
-	max-height: 68vh;
-	overflow-y: auto;
+	top: calc(var(--hdp-header-hoogte, 0px) + 1.5rem);
+}
+/* Ingelogd als beheerder staat de zwarte WordPress-balk er nog boven en
+   schuift de header 32px op; zonder dit verdween de bovenkant van het
+   filter achter de header. */
+body.admin-bar .hdp-shop-merken {
+	top: calc(var(--hdp-header-hoogte, 0px) + 32px + 1.5rem);
 }
 .hdp-shop-merken-details summary {
 	margin: 0 0 0.8rem;
@@ -289,7 +297,7 @@ p.no-comments {
 	display: none;
 }
 @media (max-width: 780px) {
-	.hdp-shop-merken { position: static; max-height: none; overflow: visible; }
+	.hdp-shop-merken { position: static; padding: 0.75rem 1rem; }
 	.hdp-shop-merken-details summary {
 		pointer-events: auto;
 		cursor: pointer;
@@ -316,6 +324,15 @@ p.no-comments {
 	display: flex;
 	flex-direction: column;
 	gap: 0.15rem;
+}
+@media (min-width: 781px) {
+	.hdp-shop-merken-lijst {
+		max-height: calc(100vh - var(--hdp-header-hoogte, 0px) - 11rem - var(--wp-admin--admin-bar--height, 0px));
+		overflow-y: auto;
+		scrollbar-width: thin;
+		margin-right: -0.5rem;
+		padding-right: 0.5rem;
+	}
 }
 .hdp-shop-merken-lijst li {
 	border-radius: 6px;
@@ -514,6 +531,12 @@ p.no-comments {
 	flex: 1 1 auto;
 }
 .hdp-shop-balk .woocommerce-ordering { flex: none; margin-left: auto; }
+@media (max-width: 780px) {
+	.hdp-shop-main { gap: 0.9rem; }
+	.hdp-shop-balk { padding: 0.8rem 0.9rem; row-gap: 0.6rem; }
+	.hdp-shop-balk .woocommerce-result-count,
+	.hdp-shop-balk .woocommerce-ordering { padding-top: 0.6rem; font-size: 0.78rem; }
+}
 
 /* Actieve merkfilters als losse, opruimbare "chips" boven de resultaten
    — sneller te overzien/wijzigen dan alleen de aangevinkte vakjes in de
@@ -576,9 +599,10 @@ p.no-comments {
 }
 
 @media (max-width: 480px) {
-	/* Op een smal scherm past de zoekbalk niet meer naast de
-	   weergaveschakelaar — dan krijgt de zoekrij een eigen volle regel. */
-	.hdp-shop-zoeken { flex-basis: 100%; }
+	/* Zoekveld en weergaveknoppen op één regel: het veld krimpt mee, de
+	   knoppen zijn klein genoeg. Een eigen regel voor het veld kostte
+	   alleen hoogte. */
+	.hdp-shop-zoeken { flex: 1 1 0; min-width: 0; }
 }
 
 /* ==========================================================================
@@ -874,17 +898,21 @@ ul.products.hdp-lijst-weergave li.product.hdp-card { position: relative; }
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-/* Eén regel met "…" i.p.v. de vaste 2-regelige hoogte van de tegel; zelfde
-   .woocommerce ul.products-specificiteit nodig om die hoogte hier echt te
-   overschrijven. */
+/* Tot twee regels, en pas daarna "…" — bij onderdelen die alleen aan het
+   eind van hun naam verschillen ("1e boom deel 17 HAL…") kon een dealer ze
+   anders niet uit elkaar houden. Zelfde .woocommerce ul.products-
+   specificiteit nodig om de vaste hoogte van de tegel te overschrijven. */
 .woocommerce ul.products.hdp-lijst-weergave li.product h3.hdp-card__title {
 	grid-column: 2;
 	grid-row: 1;
-	display: block;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
 	height: auto;
 	min-height: 0;
 	margin: 0;
-	white-space: nowrap;
+	line-height: 1.3;
+	white-space: normal;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
@@ -953,17 +981,25 @@ ul.products.hdp-lijst-weergave li.product.hdp-card { position: relative; }
 /* Aantalveld. Buiten de lijst verborgen: in het raster is er geen kolom
    voor en is de knop zelf al de volle breedte. */
 .hdp-card__aantal { display: none; }
-.hdp-card__aantal input {
+/* Even hoog als de knop ernaast, en zonder de pijltjes van de browser:
+   daar hield hij ruimte voor vrij, waardoor de "1" uit het midden stond. */
+.hdp-card__aantal input[type="number"] {
 	width: 56px;
-	padding: 0.35rem 0.3rem;
+	height: 37px;
+	padding: 0 0.3rem;
 	border: 1px solid var(--wp--preset--color--rand);
 	border-radius: 6px;
 	background: var(--wp--preset--color--wit);
 	color: var(--wp--preset--color--donkergrijs);
 	font: inherit;
 	font-size: 0.85rem;
+	line-height: normal;
 	text-align: center;
+	-moz-appearance: textfield;
+	appearance: textfield;
 }
+.hdp-card__aantal input[type="number"]::-webkit-inner-spin-button,
+.hdp-card__aantal input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
 /* Kolomkoppen. Staan als los blok vóór ul.products in de HTML, dus ze
    richten zich op de class op <body> — CSS kan niet vooruitkijken naar
@@ -1036,10 +1072,7 @@ ul.products:not(.hdp-lijst-weergave) .hdp-card__brand--cat { display: none; }
 		padding: 0.7rem 0.9rem;
 	}
 	.hdp-lijst-weergave .hdp-card__sku { grid-area: sku; }
-	.woocommerce ul.products.hdp-lijst-weergave li.product h3.hdp-card__title {
-		grid-area: titel;
-		white-space: normal;
-	}
+	.woocommerce ul.products.hdp-lijst-weergave li.product h3.hdp-card__title { grid-area: titel; }
 	.hdp-lijst-weergave .hdp-card__brand { grid-area: merk; }
 	.hdp-lijst-weergave .hdp-card__price { grid-area: prijs; align-self: start; }
 	.hdp-lijst-weergave .hdp-card__aantal { grid-area: aantal; margin-top: 0.3rem; }
@@ -1096,6 +1129,9 @@ body.hdp-app-layout.woocommerce-account .hdp-app-inhoud > .entry-content > *:fir
 	font-size: 0.8rem;
 	font-weight: 600;
 	cursor: pointer;
+	/* Anders rekt hij mee over de volle breedte van de kolom en zweeft het
+	   hartje midden op de pagina. */
+	align-self: flex-start;
 }
 .hdp-favoriet-knop--pdp svg { width: 17px; height: 17px; }
 .hdp-favoriet-knop--pdp:hover { color: var(--wp--preset--color--homburg-rood); }
@@ -1123,7 +1159,7 @@ body.hdp-app-layout.woocommerce-account .hdp-app-inhoud > .entry-content > *:fir
 	display: flex;
 	flex-wrap: wrap;
 	align-items: flex-start;
-	gap: clamp(24px, 4vw, 48px);
+	gap: 1.75rem clamp(24px, 4vw, 48px);
 	max-width: 1000px;
 }
 .woocommerce div.product > .hdp-pdp-media {
@@ -1150,6 +1186,10 @@ body.hdp-app-layout.woocommerce-account .hdp-app-inhoud > .entry-content > *:fir
 	width: auto;
 	max-width: 1000px;
 }
+.woocommerce div.product > .woocommerce-tabs { margin: 0; }
+/* Zonder foto één compacte kolom, zonder groot grijs vlak (het
+   artikelnummer staat al groot naast de titel; zie product-image.php). */
+.woocommerce div.product.hdp-zonder-foto > .summary.entry-summary { max-width: 640px; }
 
 .hdp-pdp-media__img {
 	width: 100%;
@@ -1331,7 +1371,6 @@ body.hdp-app-layout.woocommerce-account .hdp-app-inhoud > .entry-content > *:fir
 	border-radius: var(--hdp-wc-radius);
 	box-shadow: var(--hdp-wc-schaduw);
 	padding: 1.5rem 1.8rem;
-	margin-top: 2rem;
 }
 .woocommerce-tabs ul.tabs { list-style: none; display: flex; gap: 1.5rem; padding: 0; margin: 0 0 1.2rem; border-bottom: 1px solid var(--wp--preset--color--rand); }
 .woocommerce-tabs ul.tabs li a { text-decoration: none; font-weight: 700; color: var(--wp--preset--color--grijs-tekst); padding-bottom: 0.6rem; display: inline-block; }
@@ -1343,6 +1382,13 @@ body.hdp-app-layout.woocommerce-account .hdp-app-inhoud > .entry-content > *:fir
    even diepe/diepere selector (die breekt weer als WooCommerce zijn eigen
    selector ooit wijzigt). */
 .woocommerce-tabs ul.tabs li.active a { color: var(--wp--preset--color--homburg-rood) !important; border-bottom: 2px solid var(--wp--preset--color--homburg-rood); }
+/* WooCommerce zet 2em onder het tabpaneel. */
+.woocommerce div.product .woocommerce-tabs .panel { margin-bottom: 0; }
+/* Eén tabblad is geen keuze: dan geen tabbalk, de kop in het paneel zegt
+   wat er staat. Met meer tabbladen zegt de tabbalk het al. */
+.woocommerce div.product .woocommerce-tabs ul.tabs:has(> li:only-child) { display: none; }
+.hdp-wc-specs-kop { margin: 0 0 0.8rem; font-size: 1.05rem; font-weight: 700; }
+.woocommerce div.product .woocommerce-tabs ul.tabs:not(:has(> li:only-child)) ~ .panel .hdp-wc-specs-kop { display: none; }
 
 /* Gerelateerde producten / up-sells onderaan de productpagina: dwing hier
    hetzelfde raster af als op de shop-pagina. Zonder dit staat WooCommerce's
@@ -1373,6 +1419,25 @@ ul.products.hdp-favorieten-lijst { grid-template-columns: repeat(4, 1fr); gap: 1
 @media (max-width: 480px)  { ul.products.hdp-favorieten-lijst { grid-template-columns: 1fr; } }
 .related.products > h2,
 .up-sells > h2 { font-size: 1.15rem; font-weight: 700; margin: 2.5rem 0 1.2rem; }
+/* WooCommerce zet 5em boven de gerelateerde producten; samen met de
+   rij-afstand van de pagina gaf dat een gat van 160 pixels. */
+.woocommerce div.product .related.products,
+.woocommerce div.product .related.products > h2 { margin-top: 0; }
+
+/* Gerelateerde producten: zonder foto geen groot grijs vlak per kaart, en
+   dezelfde omlijnde knop als in de lijst — een rij rode knoppen onder de
+   eigen rode bestelknop trok de aandacht weg van waar het om gaat. */
+.related ul.products li.product.hdp-card .hdp-card__media:has(.hdp-plate) { display: none; }
+.related ul.products .hdp-card__btn.button {
+	background: var(--wp--preset--color--wit);
+	color: var(--wp--preset--color--donkergrijs) !important;
+	border: 1.5px solid var(--wp--preset--color--donkergrijs);
+}
+.related ul.products .hdp-card__btn.button:hover,
+.related ul.products .hdp-card__btn.button:focus-visible {
+	background: var(--wp--preset--color--donkergrijs);
+	color: var(--wp--preset--color--wit) !important;
+}
 
 /* Harde begrenzing: geen enkele productafbeelding of placeholder mag de
    lay-out opblazen, ook niet als het raster onverhoopt niet grijpt. */
@@ -1482,9 +1547,12 @@ body.woocommerce-account .woocommerce {
 	padding: 1rem;
 }
 .woocommerce-MyAccount-navigation ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.2rem; }
-/* WooCommerce zet standaard ruimte onder elk lijstitem; in dit menu gaf dat
-   regels die veertig pixels uit elkaar stonden. */
+/* WooCommerce zet standaard ruimte onder elk lijstitem, en op
+   accountpagina's 1em boven en onder (.woocommerce-account …-navigation
+   li); samen gaf dat gaten van zo'n 75 pixels per regel. */
 .woocommerce-MyAccount-navigation li { margin: 0; }
+.woocommerce-account .woocommerce-MyAccount-navigation li,
+.woocommerce-account .woocommerce-MyAccount-navigation li:first-child { padding: 0; }
 .woocommerce-MyAccount-navigation a {
 	display: block;
 	padding: 0.55rem 0.9rem;
@@ -1755,124 +1823,8 @@ body.woocommerce-page table.shop_table td { padding: 0.8rem 1rem; border-top: 1p
 }
 
 /* ==========================================================================
-   WEBSHOP-RONDE: leesbare namen, compacte productpagina, rustiger winkel
+   BESTELLING (zie includes/woocommerce/bestellen.php)
    ========================================================================== */
-
-/* --- Lijst: de naam niet meer afkappen --------------------------------- */
-/* "1e boom deel 17 HAL…" en "A.B. contactblok 1V f…": bij onderdelen die
-   alleen aan het eind van hun naam verschillen, kon een dealer ze niet uit
-   elkaar houden. Nu tot twee regels, en pas daarna "…". */
-.woocommerce ul.products.hdp-lijst-weergave li.product h3.hdp-card__title {
-	white-space: normal;
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
-	line-height: 1.3;
-}
-
-/* --- Aantal-veldje ------------------------------------------------------ */
-/* De browser hield ruimte vrij voor zijn eigen pijltjes, waardoor de "1"
-   uit het midden stond. Even hoog als de knop ernaast. */
-.hdp-card__aantal input[type="number"] {
-	height: 37px;
-	padding: 0 0.3rem;
-	line-height: normal;
-	text-align: center;
-	-moz-appearance: textfield;
-	appearance: textfield;
-}
-.hdp-card__aantal input[type="number"]::-webkit-inner-spin-button,
-.hdp-card__aantal input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-
-/* --- Winkel ------------------------------------------------------------- */
-/* Het merkfilter bleef op 28% van de schermhoogte hangen en begon daardoor
-   lager dan de zoekbalk ernaast. Nu net onder de header, zoals de andere
-   vaste kolommen in het portaal. */
-.hdp-shop-merken {
-	top: calc(var(--hdp-header-hoogte, 0px) + 1.5rem);
-}
-/* Ingelogd als beheerder staat de zwarte WordPress-balk er nog boven en
-   schuift de header 32px op; zonder dit verdween de bovenkant van het
-   filter achter de header. */
-body.admin-bar .hdp-shop-merken {
-	top: calc(var(--hdp-header-hoogte, 0px) + 32px + 1.5rem);
-}
-/* Scrolde je met de muis boven het filter, dan schoof het hele vak mee en
-   verdween de kop "Merk" uit beeld. Nu scrolt alleen de lijst met merken;
-   kop en "Filter wissen" blijven staan. */
-@media (min-width: 781px) {
-	.hdp-shop-merken { max-height: none; overflow: visible; }
-	.hdp-shop-merken-lijst {
-		max-height: calc(100vh - var(--hdp-header-hoogte, 0px) - 11rem - var(--wp-admin--admin-bar--height, 0px));
-		overflow-y: auto;
-		scrollbar-width: thin;
-		margin-right: -0.5rem;
-		padding-right: 0.5rem;
-	}
-}
-
-/* Op een telefoon begon het eerste product pas na anderhalf scherm. */
-@media (max-width: 780px) {
-	.hdp-shop-layout { gap: 0.9rem; }
-	.hdp-shop-merken { padding: 0.75rem 1rem; }
-	.hdp-shop-main { gap: 0.9rem; }
-	.hdp-shop-balk { padding: 0.8rem 0.9rem; row-gap: 0.6rem; }
-	.hdp-shop-balk .woocommerce-result-count,
-	.hdp-shop-balk .woocommerce-ordering { padding-top: 0.6rem; font-size: 0.78rem; }
-}
-@media (max-width: 480px) {
-	/* Zoekveld en weergaveknoppen weer op één regel: de knoppen zijn klein
-	   genoeg, een eigen regel kostte alleen hoogte. */
-	.hdp-shop-zoeken { flex-basis: auto; flex: 1 1 0; min-width: 0; }
-}
-
-/* --- Accountmenu --------------------------------------------------------- */
-/* WooCommerce zelf geeft elk menu-item 1em ruimte boven en onder
-   (.woocommerce-account …-navigation li); dat stapelde op tot gaten van
-   zo’n 75 pixels per regel. */
-.woocommerce-account .woocommerce-MyAccount-navigation li,
-.woocommerce-account .woocommerce-MyAccount-navigation li:first-child { padding: 0; }
-
-/* --- Productpagina ------------------------------------------------------ */
-/* "Bewaar als favoriet" zweefde midden op de pagina: de knop rekte mee
-   over de volle breedte van de kolom. */
-.hdp-favoriet-knop--pdp { align-self: flex-start; }
-
-/* Zonder foto één compacte kolom, zonder groot grijs vlak (het
-   artikelnummer staat al groot naast de titel). */
-.woocommerce div.product.hdp-zonder-foto > .summary.entry-summary { max-width: 640px; }
-
-/* Minder lucht tussen de onderdelen van de pagina. */
-.woocommerce div.product { row-gap: 1.75rem; }
-.woocommerce div.product > .woocommerce-tabs { margin: 0; }
-/* WooCommerce zet 5em boven de gerelateerde producten en 2em onder het
-   tabpaneel; samen met de rij-afstand gaf dat een gat van 160 pixels. */
-.woocommerce div.product .related.products { margin-top: 0; }
-.woocommerce div.product .related.products > h2 { margin-top: 0; }
-.woocommerce div.product .woocommerce-tabs .panel { margin-bottom: 0; }
-
-/* Eén tabblad is geen keuze: dan geen tabbalk, de kop in het paneel zegt
-   wat er staat. */
-.woocommerce div.product .woocommerce-tabs ul.tabs:has(> li:only-child) { display: none; }
-.hdp-wc-specs-kop { margin: 0 0 0.8rem; font-size: 1.05rem; font-weight: 700; }
-.woocommerce div.product .woocommerce-tabs ul.tabs:not(:has(> li:only-child)) ~ .panel .hdp-wc-specs-kop { display: none; }
-
-/* Gerelateerde producten: zonder foto geen groot grijs vlak per kaart, en
-   dezelfde omlijnde knop als in de lijst — een rij rode knoppen onder de
-   eigen rode bestelknop trok de aandacht weg van waar het om gaat. */
-.related ul.products li.product.hdp-card .hdp-card__media:has(.hdp-plate) { display: none; }
-.related ul.products .hdp-card__btn.button {
-	background: var(--wp--preset--color--wit);
-	color: var(--wp--preset--color--donkergrijs) !important;
-	border: 1.5px solid var(--wp--preset--color--donkergrijs);
-}
-.related ul.products .hdp-card__btn.button:hover,
-.related ul.products .hdp-card__btn.button:focus-visible {
-	background: var(--wp--preset--color--donkergrijs);
-	color: var(--wp--preset--color--wit) !important;
-}
-
-/* --- Bestelling ---------------------------------------------------------- */
-/* Het artikelnummer op een eigen regel onder de naam (zie bestellen.php). */
+/* Het artikelnummer op een eigen regel onder de naam. */
 .hdp-wc-regel-sku { display: block; margin-top: 0.15rem; font-size: 0.8rem; color: var(--wp--preset--color--grijs-tekst); font-weight: 400; }
 .hdp-bestelbevestiging .wc-block-order-confirmation-status h1 { font-size: 1.75rem; font-weight: 800; }

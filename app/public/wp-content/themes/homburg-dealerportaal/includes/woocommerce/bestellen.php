@@ -200,3 +200,136 @@ function homburg_wc_levering_teksten( $tarieven ) {
 	}
 	return $tarieven;
 }
+
+/* --- De instellingen zelf ------------------------------------------------ */
+
+/**
+ * Of dealers kunnen bestellen. Eén vinkje in Instellingen > Dealerportaal
+ * ("Bestellen in de webshop"), zodat de webshop op live pas opengaat als
+ * Homburg dat wil, en de instellingen daarna niet meer met de hand in
+ * WooCommerce bijgehouden hoeven te worden.
+ */
+function homburg_wc_bestellen_aan() {
+	return class_exists( 'HDP_Settings' ) && (bool) HDP_Settings::get( 'bestellen_aan' );
+}
+
+/** Ophogen als de instellingen hieronder veranderen; dan worden ze opnieuw nagelopen. */
+const HOMBURG_WC_BESTELINSTELLINGEN_VERSIE = '1';
+
+add_action( 'wp_loaded', 'homburg_wc_bestelinstellingen_bijhouden' );
+/**
+ * Staat bestellen aan, dan één keer per versie nalopen of alles nog klopt.
+ * Kost daarna één optie-opvraag per pagina.
+ */
+function homburg_wc_bestelinstellingen_bijhouden() {
+	if ( ! homburg_wc_bestellen_aan() ) {
+		return;
+	}
+	if ( get_option( 'homburg_wc_bestelinstellingen' ) === HOMBURG_WC_BESTELINSTELLINGEN_VERSIE ) {
+		return;
+	}
+	homburg_wc_bestelinstellingen_toepassen();
+	update_option( 'homburg_wc_bestelinstellingen', HOMBURG_WC_BESTELINSTELLINGEN_VERSIE, false );
+}
+
+add_action( 'update_option_hdp_instellingen', 'homburg_wc_bestellen_omgezet', 10, 2 );
+/**
+ * Het vinkje omgezet. Aan: bij de volgende pagina alles nalopen. Uit: "Op
+ * rekening" uitzetten, dan kan er niet meer worden afgerekend. De
+ * verzendgebieden blijven staan; die doen zonder betaalmethode niets.
+ */
+function homburg_wc_bestellen_omgezet( $oud, $nieuw ) {
+	$was   = is_array( $oud ) && ! empty( $oud['bestellen_aan'] );
+	$wordt = is_array( $nieuw ) && ! empty( $nieuw['bestellen_aan'] );
+
+	if ( $wordt ) {
+		delete_option( 'homburg_wc_bestelinstellingen' );
+	} elseif ( $was ) {
+		$cheque            = get_option( 'woocommerce_cheque_settings', array() );
+		$cheque            = is_array( $cheque ) ? $cheque : array();
+		$cheque['enabled'] = 'no';
+		update_option( 'woocommerce_cheque_settings', $cheque );
+		delete_option( 'homburg_wc_bestelinstellingen' );
+	}
+}
+
+/**
+ * Zet alles klaar om te kunnen bestellen. Twee keer draaien maakt niets
+ * dubbel; wat er al goed staat, blijft staan.
+ *
+ * - Betaalmethode "Op rekening" (de ingebouwde cheque-methode; naam en
+ *   uitleg komen uit homburg_wc_op_rekening_teksten()).
+ * - Verzendgebieden Nederland en België, elk met "Levering volgens
+ *   afspraak" zonder kosten.
+ * - Bij afrekenen eerst het afleveradres.
+ *
+ * @return string[] Wat er veranderd is, voor in het logboek.
+ */
+function homburg_wc_bestelinstellingen_toepassen() {
+	if ( ! class_exists( 'WC_Shipping_Zones' ) ) {
+		return array();
+	}
+
+	$gedaan = array();
+
+	$cheque = get_option( 'woocommerce_cheque_settings', array() );
+	$cheque = is_array( $cheque ) ? $cheque : array();
+	if ( ! isset( $cheque['enabled'] ) || 'yes' !== $cheque['enabled'] ) {
+		$cheque['enabled']      = 'yes';
+		$cheque['title']        = 'Op rekening';
+		$cheque['description']  = 'Je ontvangt de factuur van Homburg. Betalen volgens je gebruikelijke afspraken.';
+		$cheque['instructions'] = '';
+		update_option( 'woocommerce_cheque_settings', $cheque );
+		$gedaan[] = 'Op rekening aangezet';
+	}
+
+	foreach ( array( 'NL' => 'Nederland', 'BE' => 'België' ) as $land => $naam ) {
+		$zone = null;
+		foreach ( WC_Shipping_Zones::get_zones() as $gegevens ) {
+			foreach ( $gegevens['zone_locations'] as $plek ) {
+				if ( 'country' === $plek->type && $land === $plek->code ) {
+					$zone = new WC_Shipping_Zone( $gegevens['id'] );
+				}
+			}
+		}
+
+		if ( ! $zone ) {
+			$zone = new WC_Shipping_Zone();
+			$zone->set_zone_name( $naam );
+			$zone->add_location( $land, 'country' );
+			$zone->save();
+			$gedaan[] = "Verzendgebied $naam aangemaakt";
+		}
+
+		$heeft_levering = false;
+		foreach ( $zone->get_shipping_methods() as $methode ) {
+			if ( 'flat_rate' === $methode->id && 'yes' === $methode->enabled ) {
+				$heeft_levering = true;
+			}
+		}
+
+		if ( ! $heeft_levering ) {
+			$instantie = $zone->add_shipping_method( 'flat_rate' );
+			update_option(
+				'woocommerce_flat_rate_' . $instantie . '_settings',
+				array(
+					'title'      => 'Levering volgens afspraak',
+					'tax_status' => 'none',
+					'cost'       => '0',
+				)
+			);
+			$gedaan[] = "Levering volgens afspraak toegevoegd aan $naam";
+		}
+	}
+
+	if ( 'shipping' !== get_option( 'woocommerce_ship_to_destination' ) ) {
+		update_option( 'woocommerce_ship_to_destination', 'shipping' );
+		$gedaan[] = 'Afleveradres eerst bij afrekenen';
+	}
+
+	if ( $gedaan ) {
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+	}
+
+	return $gedaan;
+}

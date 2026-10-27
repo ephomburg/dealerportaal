@@ -95,4 +95,27 @@ class Gebruik_Test extends WP_UnitTestCase {
 		$this->assertContains( $stil, $ids );
 		$this->assertNotContains( $this->dealer_id, $ids );
 	}
+
+	public function test_testaccount_telt_niet_mee() {
+		$aangevinkt = self::factory()->user->create( array( 'role' => 'dealer' ) );
+		update_user_meta( $aangevinkt, 'hdp_goedgekeurd', '1' );
+		update_user_meta( $aangevinkt, HDP_Gebruik::TEST_META, '1' );
+		$this->assertFalse( HDP_Gebruik::telt_mee( $aangevinkt ) );
+
+		$op_naam = self::factory()->user->create( array( 'role' => 'dealer', 'user_login' => 'hdp-test-dealer' ) );
+		update_user_meta( $op_naam, 'hdp_goedgekeurd', '1' );
+		$this->assertFalse( HDP_Gebruik::telt_mee( $op_naam ) );
+		$this->assertNotContains( $op_naam, wp_list_pluck( HDP_Gebruik::dealers(), 'ID' ) );
+
+		$this->assertTrue( HDP_Gebruik::telt_mee( $this->dealer_id ) );
+	}
+
+	public function test_laatste_activiteit_van_woocommerce_vult_het_gat() {
+		// Nog nooit door onze meting gezien, wel gisteren actief volgens WooCommerce.
+		update_user_meta( $this->dealer_id, 'wc_last_active', (string) ( time() - DAY_IN_SECONDS ) );
+		$this->assertNotContains( $this->dealer_id, wp_list_pluck( HDP_Gebruik::stille_dealers(), 'id' ) );
+
+		update_user_meta( $this->dealer_id, 'wc_last_active', (string) ( time() - 60 * DAY_IN_SECONDS ) );
+		$this->assertContains( $this->dealer_id, wp_list_pluck( HDP_Gebruik::stille_dealers(), 'id' ) );
+	}
 }

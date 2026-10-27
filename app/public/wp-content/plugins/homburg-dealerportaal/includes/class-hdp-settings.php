@@ -36,6 +36,9 @@ class HDP_Settings {
 		add_settings_field( 'webshop_url', 'Webshop-URL', array( __CLASS__, 'field_webshop_url' ), 'hdp-instellingen', 'hdp_urls' );
 		add_settings_field( 'configurator_url', 'Productconfigurator-URL', array( __CLASS__, 'field_configurator_url' ), 'hdp-instellingen', 'hdp_urls' );
 
+		add_settings_section( 'hdp_webshop', 'Webshop', '__return_false', 'hdp-instellingen' );
+		add_settings_field( 'bestellen_aan', 'Bestellen in de webshop', array( __CLASS__, 'field_bestellen_aan' ), 'hdp-instellingen', 'hdp_webshop' );
+
 		add_settings_section( 'hdp_contact', 'Contactgegevens', array( __CLASS__, 'sectie_contact_intro' ), 'hdp-instellingen' );
 		add_settings_field( 'contact_email', 'E-mailadres', array( __CLASS__, 'field_contact_email' ), 'hdp-instellingen', 'hdp_contact' );
 		add_settings_field( 'contact_telefoon', 'Telefoonnummer', array( __CLASS__, 'field_contact_telefoon' ), 'hdp-instellingen', 'hdp_contact' );
@@ -78,6 +81,7 @@ class HDP_Settings {
 			'contact_email'    => isset( $input['contact_email'] ) ? sanitize_email( $input['contact_email'] ) : '',
 			'contact_telefoon' => isset( $input['contact_telefoon'] ) ? sanitize_text_field( $input['contact_telefoon'] ) : '',
 			'merk_logos'       => $merk_logos,
+			'bestellen_aan'    => empty( $input['bestellen_aan'] ) ? '' : '1',
 		);
 	}
 
@@ -99,6 +103,19 @@ class HDP_Settings {
 			'<input type="url" name="%s[configurator_url]" value="%s" class="regular-text" placeholder="https://">',
 			esc_attr( self::OPTION ),
 			esc_attr( self::get( 'configurator_url' ) )
+		);
+	}
+
+	/**
+	 * Zet de webshop open: "Op rekening", levering volgens afspraak in
+	 * Nederland en België en het afleveradres bij afrekenen worden dan
+	 * vanzelf goed gezet en goed gehouden (zie bestellen.php in het thema).
+	 */
+	public static function field_bestellen_aan() {
+		printf(
+			'<label><input type="checkbox" name="%s[bestellen_aan]" value="1" %s> Dealers kunnen bestellen en afrekenen</label><p class="description">Aan: betalen "Op rekening", "Levering volgens afspraak" in Nederland en België, en het afleveradres bij afrekenen worden vanzelf ingesteld. Uit: afrekenen is niet mogelijk; de catalogus blijft zichtbaar.</p>',
+			esc_attr( self::OPTION ),
+			checked( self::get( 'bestellen_aan' ), '1', false )
 		);
 	}
 

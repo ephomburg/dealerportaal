@@ -25,6 +25,7 @@ class HDP_User_Fields {
 		$goedgekeurd = get_user_meta( $user->ID, 'hdp_goedgekeurd', true );
 		$merken      = get_user_meta( $user->ID, 'hdp_merken', true );
 		$korting     = get_user_meta( $user->ID, 'hdp_korting', true );
+		$test        = HDP_Gebruik::is_testaccount( $user->ID );
 
 		wp_nonce_field( 'hdp_user_fields', 'hdp_user_fields_nonce' );
 		?>
@@ -57,6 +58,15 @@ class HDP_User_Fields {
 					<input type="text" name="hdp_korting" id="hdp_korting" value="<?php echo esc_attr( $korting ); ?>" class="regular-text">
 				</td>
 			</tr>
+			<tr>
+				<th><label for="hdp_testaccount">Testaccount</label></th>
+				<td>
+					<label>
+						<input type="checkbox" name="hdp_testaccount" id="hdp_testaccount" value="1" <?php checked( $test ); ?>>
+						Telt niet mee in Dashboard &gt; Portaalgebruik
+					</label>
+				</td>
+			</tr>
 		</table>
 		<?php
 	}
@@ -80,6 +90,8 @@ class HDP_User_Fields {
 
 		$merken = isset( $_POST['hdp_merken'] ) ? HDP_Merken::uit_selectie( wp_unslash( $_POST['hdp_merken'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- HDP_Merken::uit_selectie() filtert de waarden zelf via array_intersect() tegen de vaste merkenlijst.
 		update_user_meta( $user_id, 'hdp_merken', $merken );
+
+		update_user_meta( $user_id, HDP_Gebruik::TEST_META, isset( $_POST['hdp_testaccount'] ) ? '1' : '' );
 
 		if ( isset( $_POST['hdp_korting'] ) ) {
 			update_user_meta( $user_id, 'hdp_korting', sanitize_text_field( wp_unslash( $_POST['hdp_korting'] ) ) );

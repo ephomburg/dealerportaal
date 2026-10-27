@@ -75,12 +75,45 @@ class HDP_Gebruik {
 		update_option( self::DB_OPTIE, self::DB_VERSIE, false );
 	}
 
-	/** Telt deze gebruiker mee? Alleen goedgekeurde dealers, geen beheerders. */
+	/** Telt deze gebruiker mee? Alleen goedgekeurde dealers, geen beheerders en geen testaccounts. */
 	public static function telt_mee( $user_id = 0 ) {
 		$user_id = $user_id ? (int) $user_id : get_current_user_id();
 		return $user_id
 			&& ! user_can( $user_id, 'manage_options' )
+			&& ! self::is_testaccount( $user_id )
 			&& HDP_Roles::mag_portaal_zien( $user_id );
+	}
+
+	/** Gebruikersmeta: aangevinkt in het profiel ("Testaccount"). */
+	const TEST_META = 'hdp_testaccount';
+
+	/**
+	 * Een account om het portaal mee te testen. Anders staat de testdealer
+	 * straks bovenaan "meest gezocht" en in de bestellingen per dealer.
+	 * Aangevinkt in het gebruikersprofiel, of herkenbaar aan de naam: de
+	 * testaccounts die bij het bouwen zijn gebruikt beginnen met "hdp-test-".
+	 */
+	public static function is_testaccount( $user_id ) {
+		if ( get_user_meta( $user_id, self::TEST_META, true ) ) {
+			return true;
+		}
+		$gebruiker = get_userdata( $user_id );
+		return $gebruiker && 0 === strpos( $gebruiker->user_login, 'hdp-test-' );
+	}
+
+	/**
+	 * Wanneer deze dealer voor het laatst iets deed.
+	 *
+	 * Onze eigen meting begint pas bij de livegang. WooCommerce houdt al
+	 * langer per klant de laatste activiteit bij (per dag); die vult het
+	 * gat, zodat "niet meer geweest" niet de eerste maand bij iedereen "nog
+	 * nooit" zegt.
+	 */
+	public static function laatst_actief( $user_id ) {
+		return max(
+			(int) get_user_meta( $user_id, self::LAATST_META, true ),
+			(int) get_user_meta( $user_id, 'wc_last_active', true )
+		);
 	}
 
 	/**
@@ -269,7 +302,7 @@ class HDP_Gebruik {
 		$lijst = array();
 
 		foreach ( self::dealers() as $dealer ) {
-			$laatst = (int) get_user_meta( $dealer->ID, self::LAATST_META, true );
+			$laatst = self::laatst_actief( $dealer->ID );
 			if ( $laatst && $laatst >= $grens ) {
 				continue;
 			}
@@ -366,6 +399,9 @@ class HDP_Gebruik {
 		$per_dealer = array();
 		foreach ( $orders as $order ) {
 			$id = (int) $order->get_customer_id();
+			if ( $id && self::is_testaccount( $id ) ) {
+				continue;
+			}
 			if ( ! isset( $per_dealer[ $id ] ) ) {
 				$per_dealer[ $id ] = array(
 					'id'      => $id,
@@ -456,7 +492,7 @@ class HDP_Gebruik {
 						<a href="<?php echo esc_url( add_query_arg( 'periode', $waarde ) ); ?>" class="<?php echo $waarde === $dagen ? 'is-actief' : ''; ?>"><?php echo esc_html( $label ); ?></a>
 					<?php endforeach; ?>
 			</p>
-			<p class="description">Alleen goedgekeurde dealers tellen mee, beheerders niet. Alles staat in de eigen database; gegevens ouder dan <?php echo (int) self::STERMIJN_DAGEN; ?> dagen worden automatisch verwijderd.</p>
+			<p class="description">Alleen goedgekeurde dealers tellen mee; beheerders en testaccounts (aan te vinken in het gebruikersprofiel) niet. Alles staat in de eigen database; gegevens ouder dan <?php echo (int) self::STERMIJN_DAGEN; ?> dagen worden automatisch verwijderd.</p>
 
 			<div class="hdp-g-tegels">
 				<div class="hdp-g-tegel"><strong><?php echo (int) $cijfers['actieve_dealers']; ?> <small>/ <?php echo (int) $cijfers['dealers']; ?></small></strong><span>dealers actief geweest</span></div>
