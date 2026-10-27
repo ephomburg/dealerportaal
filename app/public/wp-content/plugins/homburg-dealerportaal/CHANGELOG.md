@@ -8,6 +8,11 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.83.0
+
+- Nieuw overzicht **Portaalgebruik** in wp-admin (Dashboard > Portaalgebruik, `HDP_Gebruik`), per periode van 30 dagen, 3 of 12 maanden: hoeveel dealers actief waren (ook per week), welke dealers 30 dagen of langer niet zijn geweest (met contactgegevens, om te bellen), zoektermen zonder resultaat en meest gezocht, meest geopende documenten en documenten die niemand opende, en bestellingen en omzet per dealer.
+- Houdt daarvoor in een eigen tabel (`wp_hdp_gebruik`, maakt zichzelf aan) per goedgekeurde dealer bij: één bezoek per dag, zoekopdrachten uit de zoekbalk (alleen het eindwoord, niet elke toetsaanslag) en downloads met datum. Beheerders tellen niet mee. Niets gaat naar een externe dienst; na 400 dagen ruimt het zichzelf op.
+
 ## 1.82.0
 
 - Eén zoekbalk in de header (`HDP_Zoeken`): zoekt tegelijk in artikelen (titel en artikelnummer), eigen bestellingen (ordernummer, eigen referentie, artikel erin), eigen garantieclaims en machines (claim-, serie- en factuurnummer, machine, eindklant), documenten (downloads, content, huisstijl) en de onderdelen van het menu. Per soort maximaal vijf treffers, plus een link naar alle artikelen in de webshop. Elke bron houdt dezelfde zichtbaarheid aan als zijn eigen pagina (merk en taal bij documenten, alleen eigen claims en bestellingen).

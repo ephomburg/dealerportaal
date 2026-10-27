@@ -36,7 +36,18 @@ class HDP_Zoeken {
 
 		$term = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
 
-		wp_send_json_success( self::resultaten( $term ) );
+		$resultaten = self::resultaten( $term );
+
+		// Voor het overzicht Portaalgebruik, vooral de termen die niets opleveren.
+		if ( mb_strlen( $term ) >= self::MIN_LENGTE ) {
+			$treffers = 0;
+			foreach ( $resultaten['groepen'] as $groep ) {
+				$treffers += count( $groep['items'] );
+			}
+			HDP_Gebruik::noteer_zoekopdracht( $term, $treffers );
+		}
+
+		wp_send_json_success( $resultaten );
 	}
 
 	/**

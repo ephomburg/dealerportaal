@@ -738,6 +738,10 @@ class HDP_Downloads_CPT {
 			return;
 		}
 
+		// Met datum erbij, voor het overzicht Portaalgebruik; de teller
+		// hieronder is alleen een totaal.
+		HDP_Gebruik::noteer( 'download', (string) $post_id );
+
 		if ( ! add_post_meta( $post_id, '_hdp_download_teller', 1, true ) ) {
 			global $wpdb;
 			$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + 1 WHERE post_id = %d AND meta_key = %s", $post_id, '_hdp_download_teller' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- atomaire increment; via get_post_meta()+update_post_meta() zou de teller bij gelijktijdige downloads kunnen overschrijven.
