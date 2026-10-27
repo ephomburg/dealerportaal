@@ -8,6 +8,11 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.82.0
+
+- Eén zoekbalk in de header (`HDP_Zoeken`): zoekt tegelijk in artikelen (titel en artikelnummer), eigen bestellingen (ordernummer, eigen referentie, artikel erin), eigen garantieclaims en machines (claim-, serie- en factuurnummer, machine, eindklant), documenten (downloads, content, huisstijl) en de onderdelen van het menu. Per soort maximaal vijf treffers, plus een link naar alle artikelen in de webshop. Elke bron houdt dezelfde zichtbaarheid aan als zijn eigen pagina (merk en taal bij documenten, alleen eigen claims en bestellingen).
+- Bediening: "/" springt vanaf elke pagina naar het veld, pijltjes kiezen, Enter opent, Escape sluit. Op een telefoon eerst een vergrootglas dat het veld onder de header uitklapt. Zonder script zoekt het veld in de webshop.
+
 ## 1.81.1
 
 - Webshop (thema 1.34.1): scrolde je met de muis boven het merkenfilter, dan schoof het hele vak mee en verdween de kop "Merk" boven uit beeld. Nu scrolt alleen de lijst met merken; de kop en "Filter wissen" blijven staan.

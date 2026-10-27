@@ -201,3 +201,239 @@
 		window.addEventListener( 'resize', meten );
 	}
 } )();
+
+/**
+ * De zoekbalk in de header (zie HDP_Zoeken).
+ *
+ * Toont al tijdens het typen per soort een paar treffers: artikelen,
+ * bestellingen, claims, machines en documenten. Pijltjes omhoog/omlaag
+ * lopen door de treffers, Enter opent de gekozen (of de eerste), Escape
+ * sluit. "/" springt vanaf elke pagina naar het veld. Op een telefoon is
+ * het eerst alleen een vergrootglas; dat klapt het veld uit.
+ */
+( function () {
+	var balk = document.querySelector( '[data-hdp-zoekbalk]' );
+	var gegevens = window.HDP_PORTAAL_ZOEKEN;
+	if ( ! balk || ! gegevens ) {
+		return;
+	}
+
+	var form = balk.querySelector( '.hdp-zoekbalk-form' );
+	var veld = balk.querySelector( '.hdp-zoekbalk-veld' );
+	var paneel = balk.querySelector( '.hdp-zoekbalk-paneel' );
+	var openKnop = balk.querySelector( '.hdp-zoekbalk-open' );
+	var teksten = gegevens.teksten || {};
+	var timer = null;
+	var lopend = null;
+	var actief = -1;
+	var laatsteTerm = '';
+
+	function treffers() {
+		return paneel.querySelectorAll( '.hdp-zoekbalk-item' );
+	}
+
+	function sluiten() {
+		paneel.hidden = true;
+		paneel.innerHTML = '';
+		veld.setAttribute( 'aria-expanded', 'false' );
+		veld.removeAttribute( 'aria-activedescendant' );
+		actief = -1;
+	}
+
+	function melding( tekst ) {
+		paneel.innerHTML = '';
+		var p = document.createElement( 'p' );
+		p.className = 'hdp-zoekbalk-melding';
+		p.textContent = tekst;
+		paneel.appendChild( p );
+		paneel.hidden = false;
+		veld.setAttribute( 'aria-expanded', 'true' );
+	}
+
+	function link( item, id ) {
+		var a = document.createElement( 'a' );
+		a.className = 'hdp-zoekbalk-item';
+		a.href = item.url;
+		a.id = id;
+		a.setAttribute( 'role', 'option' );
+		if ( item.nieuwe_tab ) {
+			a.target = '_blank';
+			a.rel = 'noopener';
+			a.setAttribute( 'aria-description', teksten.nieuw || '' );
+		}
+		var titel = document.createElement( 'span' );
+		titel.className = 'hdp-zoekbalk-item-titel';
+		titel.textContent = item.titel;
+		a.appendChild( titel );
+		if ( item.sub ) {
+			var sub = document.createElement( 'span' );
+			sub.className = 'hdp-zoekbalk-item-sub';
+			sub.textContent = item.sub;
+			a.appendChild( sub );
+		}
+		return a;
+	}
+
+	function tonen( data ) {
+		paneel.innerHTML = '';
+		actief = -1;
+		var teller = 0;
+
+		( data.groepen || [] ).forEach( function ( groep ) {
+			var blok = document.createElement( 'div' );
+			blok.className = 'hdp-zoekbalk-groep';
+			blok.setAttribute( 'role', 'group' );
+			var kop = document.createElement( 'p' );
+			kop.className = 'hdp-zoekbalk-groep-kop';
+			kop.id = 'hdp-zoekbalk-kop-' + groep.sleutel;
+			kop.textContent = groep.titel;
+			blok.setAttribute( 'aria-labelledby', kop.id );
+			blok.appendChild( kop );
+			groep.items.forEach( function ( item ) {
+				blok.appendChild( link( item, 'hdp-zoekbalk-item-' + teller++ ) );
+			} );
+			paneel.appendChild( blok );
+		} );
+
+		if ( ! teller ) {
+			var p = document.createElement( 'p' );
+			p.className = 'hdp-zoekbalk-melding';
+			p.textContent = teksten.niets || '';
+			paneel.appendChild( p );
+		}
+
+		if ( data.meer ) {
+			var meer = link( { url: data.meer.url, titel: data.meer.tekst }, 'hdp-zoekbalk-item-' + teller++ );
+			meer.classList.add( 'hdp-zoekbalk-meer' );
+			paneel.appendChild( meer );
+		}
+
+		paneel.hidden = false;
+		veld.setAttribute( 'aria-expanded', 'true' );
+	}
+
+	function zoeken( term ) {
+		if ( lopend ) {
+			lopend.abort();
+		}
+		lopend = window.AbortController ? new AbortController() : null;
+		melding( teksten.laden || '' );
+
+		var url = gegevens.ajaxUrl + '?action=hdp_portaal_zoeken&nonce=' + encodeURIComponent( gegevens.nonce ) + '&q=' + encodeURIComponent( term );
+		fetch( url, { credentials: 'same-origin', signal: lopend ? lopend.signal : undefined } )
+			.then( function ( r ) { return r.json(); } )
+			.then( function ( antwoord ) {
+				if ( veld.value.trim() !== term ) {
+					return;
+				}
+				if ( antwoord && antwoord.success ) {
+					tonen( antwoord.data );
+				} else {
+					melding( teksten.fout || '' );
+				}
+			} )
+			.catch( function ( fout ) {
+				if ( fout && 'AbortError' === fout.name ) {
+					return;
+				}
+				melding( teksten.fout || '' );
+			} );
+	}
+
+	function markeer( index ) {
+		var lijst = treffers();
+		if ( ! lijst.length ) {
+			return;
+		}
+		actief = ( index + lijst.length ) % lijst.length;
+		lijst.forEach( function ( a, i ) {
+			a.classList.toggle( 'is-actief', i === actief );
+			a.setAttribute( 'aria-selected', i === actief ? 'true' : 'false' );
+		} );
+		veld.setAttribute( 'aria-activedescendant', lijst[ actief ].id );
+		lijst[ actief ].scrollIntoView( { block: 'nearest' } );
+	}
+
+	veld.addEventListener( 'input', function () {
+		var term = veld.value.trim();
+		clearTimeout( timer );
+		if ( term.length < 2 ) {
+			laatsteTerm = '';
+			sluiten();
+			return;
+		}
+		timer = setTimeout( function () {
+			laatsteTerm = term;
+			zoeken( term );
+		}, 220 );
+	} );
+
+	veld.addEventListener( 'focus', function () {
+		var term = veld.value.trim();
+		if ( term.length >= 2 && paneel.hidden ) {
+			zoeken( term );
+		}
+	} );
+
+	veld.addEventListener( 'keydown', function ( e ) {
+		if ( 'ArrowDown' === e.key ) {
+			e.preventDefault();
+			markeer( actief + 1 );
+		} else if ( 'ArrowUp' === e.key ) {
+			e.preventDefault();
+			markeer( actief - 1 );
+		} else if ( 'Escape' === e.key ) {
+			if ( ! paneel.hidden ) {
+				sluiten();
+			} else {
+				veld.blur();
+				balk.classList.remove( 'is-open' );
+				openKnop.setAttribute( 'aria-expanded', 'false' );
+			}
+		}
+	} );
+
+	// Enter: de gekozen treffer, of anders de eerste. Zijn er (nog) geen
+	// treffers, dan gewoon de webshop doorzoeken zoals zonder script.
+	form.addEventListener( 'submit', function ( e ) {
+		var lijst = treffers();
+		var doel = lijst[ actief >= 0 ? actief : 0 ];
+		if ( doel && veld.value.trim() === laatsteTerm ) {
+			e.preventDefault();
+			doel.click();
+		}
+	} );
+
+	document.addEventListener( 'click', function ( e ) {
+		if ( ! balk.contains( e.target ) ) {
+			sluiten();
+			balk.classList.remove( 'is-open' );
+			openKnop.setAttribute( 'aria-expanded', 'false' );
+		}
+	} );
+
+	// "/" vanaf elke pagina, behalve als je al ergens aan het typen bent.
+	document.addEventListener( 'keydown', function ( e ) {
+		if ( '/' !== e.key || e.ctrlKey || e.metaKey || e.altKey ) {
+			return;
+		}
+		var doel = e.target;
+		if ( doel && ( doel.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test( doel.tagName ) ) ) {
+			return;
+		}
+		e.preventDefault();
+		balk.classList.add( 'is-open' );
+		openKnop.setAttribute( 'aria-expanded', 'true' );
+		veld.focus();
+	} );
+
+	openKnop.addEventListener( 'click', function () {
+		var open = balk.classList.toggle( 'is-open' );
+		openKnop.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
+		if ( open ) {
+			veld.focus();
+		} else {
+			sluiten();
+		}
+	} );
+} )();

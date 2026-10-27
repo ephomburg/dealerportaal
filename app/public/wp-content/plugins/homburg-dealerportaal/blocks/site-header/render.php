@@ -20,6 +20,37 @@ $link_icoon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 				<span><?php echo esc_html( HDP_I18N::t( 'header_caption' ) ); ?></span>
 			</span>
 		</a>
+		<?php if ( is_user_logged_in() && HDP_Roles::mag_portaal_zien( get_current_user_id() ) && class_exists( 'HDP_Zoeken' ) ) : ?>
+			<?php
+			// Zonder script werkt het veld nog steeds: dan zoekt het in de
+			// webshop, de plek waar verreweg het meest gezocht wordt.
+			$hdp_zoek_actie = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' );
+			$hdp_zoek_icoon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
+			?>
+			<div class="hdp-zoekbalk" data-hdp-zoekbalk>
+				<button type="button" class="hdp-zoekbalk-open" aria-label="<?php echo esc_attr( HDP_I18N::t( 'zoeken_label' ) ); ?>" aria-expanded="false" aria-controls="hdp-zoekbalk-form">
+					<?php echo $hdp_zoek_icoon; // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
+				</button>
+				<form class="hdp-zoekbalk-form" id="hdp-zoekbalk-form" role="search" method="get" action="<?php echo esc_url( $hdp_zoek_actie ); ?>">
+					<?php echo $hdp_zoek_icoon; // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
+					<input
+						type="search"
+						name="zoek"
+						class="hdp-zoekbalk-veld"
+						placeholder="<?php echo esc_attr( HDP_I18N::t( 'zoeken_placeholder' ) ); ?>"
+						aria-label="<?php echo esc_attr( HDP_I18N::t( 'zoeken_label' ) ); ?>"
+						autocomplete="off"
+						role="combobox"
+						aria-autocomplete="list"
+						aria-expanded="false"
+						aria-controls="hdp-zoekbalk-paneel"
+					>
+					<kbd class="hdp-zoekbalk-toets" aria-hidden="true">/</kbd>
+					<div class="hdp-zoekbalk-paneel" id="hdp-zoekbalk-paneel" role="listbox" aria-label="<?php echo esc_attr( HDP_I18N::t( 'zoeken_label' ) ); ?>" hidden></div>
+				</form>
+				<script>window.HDP_PORTAAL_ZOEKEN = <?php echo wp_json_encode( HDP_Zoeken::script_gegevens() ); ?>;</script>
+			</div>
+		<?php endif; ?>
 		<nav class="hdp-hoofdmenu" aria-label="<?php echo esc_attr( HDP_I18N::t( 'nav_aria' ) ); ?>">
 			<?php if ( is_user_logged_in() && class_exists( 'WooCommerce' ) && function_exists( 'homburg_wc_favoriete_ids' ) ) : ?>
 				<?php $hdp_aantal_favorieten = count( homburg_wc_favoriete_ids() ); ?>

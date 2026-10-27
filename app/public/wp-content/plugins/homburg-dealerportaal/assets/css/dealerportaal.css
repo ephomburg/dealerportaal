@@ -3679,3 +3679,193 @@ body.home .hdp-info-split > .wp-block-column:nth-child(2) .hdp-info-kaart:first-
 	.hdp-welkomkop h1 { font-size: 1.45rem; }
 	.hdp-welkomkop-zoek { flex: 1 1 100%; }
 }
+
+/* --- Zoekbalk in de header (HDP_Zoeken) ------------------------------ */
+
+.hdp-zoekbalk {
+	position: relative;
+	flex: 1 1 18rem;
+	max-width: 34rem;
+	min-width: 0;
+	margin-right: auto;
+	margin-left: 1.5rem;
+	font-family: 'Montserrat', Arial, sans-serif;
+}
+.hdp-zoekbalk-open { display: none; }
+.hdp-zoekbalk-form {
+	position: relative;
+	display: flex;
+	align-items: center;
+	margin: 0;
+}
+.hdp-zoekbalk-form > svg {
+	position: absolute;
+	left: 0.8rem;
+	width: 17px;
+	height: 17px;
+	color: #b9bcc2;
+	pointer-events: none;
+}
+.hdp-site-header .hdp-zoekbalk-veld {
+	width: 100%;
+	height: 2.4rem;
+	margin: 0;
+	padding: 0 2.4rem 0 2.4rem;
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	border-radius: 8px;
+	background: rgba(255, 255, 255, 0.08);
+	color: var(--wp--preset--color--wit);
+	font: inherit;
+	font-size: 0.85rem;
+	box-shadow: none;
+	transition: background 0.15s, border-color 0.15s;
+	-webkit-appearance: none;
+	appearance: none;
+}
+.hdp-site-header .hdp-zoekbalk-veld::placeholder { color: #9fa3aa; opacity: 1; }
+.hdp-site-header .hdp-zoekbalk-veld::-webkit-search-cancel-button { -webkit-appearance: none; }
+.hdp-site-header .hdp-zoekbalk-veld:hover { background: rgba(255, 255, 255, 0.12); }
+.hdp-site-header .hdp-zoekbalk-veld:focus {
+	outline: none;
+	background: var(--wp--preset--color--wit);
+	border-color: var(--wp--preset--color--wit);
+	color: var(--wp--preset--color--donkergrijs);
+	box-shadow: 0 0 0 3px rgba(196, 18, 20, 0.45);
+}
+.hdp-zoekbalk-form:focus-within > svg { color: var(--wp--preset--color--grijs-tekst); }
+.hdp-zoekbalk-toets {
+	position: absolute;
+	right: 0.6rem;
+	padding: 0.05rem 0.4rem;
+	border: 1px solid rgba(255, 255, 255, 0.22);
+	border-radius: 4px;
+	color: #b9bcc2;
+	font: inherit;
+	font-size: 0.7rem;
+	line-height: 1.3;
+	pointer-events: none;
+}
+.hdp-zoekbalk-form:focus-within .hdp-zoekbalk-toets,
+.hdp-zoekbalk-veld:not(:placeholder-shown) ~ .hdp-zoekbalk-toets { display: none; }
+
+.hdp-zoekbalk-paneel {
+	position: absolute;
+	top: calc(100% + 0.45rem);
+	left: 0;
+	right: 0;
+	min-width: min(30rem, calc(100vw - 2rem));
+	max-height: min(70vh, 34rem);
+	overflow-y: auto;
+	padding: 0.4rem;
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: 10px;
+	box-shadow: 0 18px 40px rgba(20, 22, 26, 0.28);
+	z-index: 200;
+	color: var(--wp--preset--color--donkergrijs);
+	text-align: left;
+}
+.hdp-zoekbalk-paneel[hidden] { display: none; }
+.hdp-zoekbalk-groep + .hdp-zoekbalk-groep {
+	margin-top: 0.3rem;
+	padding-top: 0.3rem;
+	border-top: 1px solid var(--wp--preset--color--rand);
+}
+.hdp-zoekbalk-groep-kop {
+	margin: 0;
+	padding: 0.45rem 0.7rem 0.25rem;
+	font-size: 0.66rem;
+	font-weight: 800;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-zoekbalk-item {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1rem;
+	padding: 0.5rem 0.7rem;
+	border-radius: 6px;
+	color: var(--wp--preset--color--donkergrijs);
+	text-decoration: none;
+}
+.hdp-zoekbalk-item:hover,
+.hdp-zoekbalk-item.is-actief { background: #fbeceb; }
+.hdp-zoekbalk-item-titel {
+	font-size: 0.86rem;
+	font-weight: 700;
+	line-height: 1.3;
+}
+.hdp-zoekbalk-item.is-actief .hdp-zoekbalk-item-titel,
+.hdp-zoekbalk-item:hover .hdp-zoekbalk-item-titel { color: var(--wp--preset--color--homburg-rood); }
+.hdp-zoekbalk-item[target="_blank"] .hdp-zoekbalk-item-titel::after {
+	content: " ↗";
+	font-weight: 400;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-zoekbalk-item-sub {
+	font-size: 0.76rem;
+	color: var(--wp--preset--color--grijs-tekst);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.hdp-zoekbalk-meer {
+	margin-top: 0.3rem;
+	border-top: 1px solid var(--wp--preset--color--rand);
+	border-radius: 0 0 6px 6px;
+}
+.hdp-zoekbalk-meer .hdp-zoekbalk-item-titel { font-weight: 600; color: var(--wp--preset--color--homburg-rood); }
+.hdp-zoekbalk-melding {
+	margin: 0;
+	padding: 0.8rem 0.7rem;
+	font-size: 0.84rem;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+
+/* Smal scherm: eerst alleen een vergrootglas tussen de andere knoppen;
+   aangetikt klapt het veld uit over de volle breedte onder de balk. */
+@media (max-width: 900px) {
+	.hdp-zoekbalk {
+		order: 2;
+		flex: 0 0 auto;
+		margin: 0 0 0 auto;
+		position: static;
+	}
+	.hdp-hoofdmenu { order: 3; }
+	.hdp-zoekbalk-open {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.1rem;
+		height: 2.1rem;
+		padding: 0;
+		border: 0;
+		border-radius: 6px;
+		background: transparent;
+		color: var(--wp--preset--color--wit);
+		cursor: pointer;
+	}
+	.hdp-zoekbalk-open svg { width: 19px; height: 19px; }
+	.hdp-zoekbalk-open:hover,
+	.hdp-zoekbalk.is-open .hdp-zoekbalk-open { background: rgba(255, 255, 255, 0.12); }
+	/* Het veld hangt dan als een eigen strook direct onder de header,
+	   zodat de knoppenrij niet verspringt. */
+	.hdp-site-header .hdp-header-inner { position: relative; }
+	.hdp-zoekbalk-form { display: none; }
+	.hdp-zoekbalk.is-open .hdp-zoekbalk-form {
+		display: flex;
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		padding: 0 1.1rem 0.8rem;
+		background: var(--wp--preset--color--donkergrijs);
+		box-shadow: 0 10px 18px rgba(20, 22, 26, 0.25);
+		z-index: 150;
+	}
+	.hdp-zoekbalk.is-open .hdp-zoekbalk-form > svg { left: 1.9rem; }
+	.hdp-zoekbalk.is-open .hdp-zoekbalk-paneel { top: calc(100% - 0.3rem); left: 1.1rem; right: 1.1rem; }
+	.hdp-zoekbalk-toets { display: none; }
+	.hdp-zoekbalk-paneel { min-width: 0; }
+}
