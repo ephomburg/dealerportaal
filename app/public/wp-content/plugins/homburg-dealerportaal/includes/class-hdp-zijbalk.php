@@ -37,6 +37,7 @@ class HDP_Zijbalk {
 		'webshop'      => 'bestellen',
 		'configurator' => 'bestellen',
 		'bestellen'    => 'bestellen',
+		'occasion'     => 'bestellen',
 		'garantie'     => 'service',
 		'sleutel'      => 'service',
 		'machine'      => 'service',
@@ -278,6 +279,11 @@ class HDP_Zijbalk {
 			return false;
 		}
 
+		// Occasions heeft een eigen onderdeel in het menu.
+		if ( function_exists( 'homburg_wc_in_occasions' ) && homburg_wc_in_occasions() ) {
+			return false;
+		}
+
 		$winkel = untrailingslashit( (string) wp_parse_url( wc_get_page_permalink( 'shop' ), PHP_URL_PATH ) );
 		$daar   = untrailingslashit( (string) wp_parse_url( $url, PHP_URL_PATH ) );
 
@@ -317,6 +323,24 @@ class HDP_Zijbalk {
 			array_splice( $onderdelen, $plek, 0, array( $bestellingen ) );
 		}
 
+		// Occasions: direct onder de webshop, maar alleen zolang er iets te
+		// koop is. Een leeg onderdeel in het menu nodigt uit tot een klik
+		// die niets oplevert.
+		if ( function_exists( 'homburg_wc_aantal_occasions' ) && homburg_wc_aantal_occasions() > 0 && homburg_wc_occasions_url() ) {
+			$occasions = array(
+				'icoon'      => 'occasion',
+				'titel'      => HDP_I18N::t( 'zijbalk_occasions' ),
+				'url'        => homburg_wc_occasions_url(),
+				'nieuwe_tab' => false,
+			);
+			foreach ( $onderdelen as $i => $onderdeel ) {
+				if ( 'webshop' === $onderdeel['icoon'] ) {
+					array_splice( $onderdelen, $i + 1, 0, array( $occasions ) );
+					break;
+				}
+			}
+		}
+
 		$per_groep = self::verdeel_over_groepen( $onderdelen );
 		$home      = home_url( '/dealerportaal/' );
 		?>
@@ -338,7 +362,9 @@ class HDP_Zijbalk {
 			<ul class="hdp-zijbalk-lijst">
 				<?php foreach ( $in_groep as $onderdeel ) : ?>
 					<?php
-					$huidig = self::is_huidige( $onderdeel['url'] ) || self::is_winkelgebied( $onderdeel['url'] );
+					$huidig = 'occasion' === $onderdeel['icoon']
+						? homburg_wc_in_occasions()
+						: self::is_huidige( $onderdeel['url'] ) || self::is_winkelgebied( $onderdeel['url'] );
 					// Alleen bij garantie telt er iets mee; dat hangt aan de
 					// claim-URL en niet aan de titel, zodat een hernoemde
 					// kaart het getal niet kwijtraakt.

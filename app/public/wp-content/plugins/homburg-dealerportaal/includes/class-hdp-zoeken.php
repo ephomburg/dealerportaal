@@ -161,9 +161,10 @@ class HDP_Zoeken {
 			}
 			// Als platte tekst, dus "€ 55,00" en niet "&euro;&nbsp;55,00".
 			$prijs   = html_entity_decode( wp_strip_all_tags( wc_price( wc_get_price_to_display( $product ) ) ), ENT_QUOTES, 'UTF-8' );
+			$soort   = function_exists( 'homburg_wc_is_occasion' ) && homburg_wc_is_occasion( $product ) ? HDP_I18N::t( 'occasion_label' ) . ' · ' : '';
 			$items[] = self::item(
 				$product->get_name(),
-				trim( $product->get_sku() . ' · ' . $prijs, ' ·' ),
+				$soort . trim( $product->get_sku() . ' · ' . $prijs, ' ·' ),
 				get_permalink( $id )
 			);
 			if ( count( $items ) >= self::PER_GROEP ) {

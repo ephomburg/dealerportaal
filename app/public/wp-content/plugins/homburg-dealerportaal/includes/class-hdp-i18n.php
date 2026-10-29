@@ -214,6 +214,16 @@ class HDP_I18N {
 			'header_winkelwagen'  => array( 'nl' => 'Winkelwagen', 'fr' => 'Panier' ),
 			'header_mijn_account' => array( 'nl' => 'Mijn account', 'fr' => 'Mon compte' ),
 			'header_accountmenu'  => array( 'nl' => 'Accountmenu', 'fr' => 'Menu du compte' ),
+			// Occasions en restpartijen (occasions.php in het thema).
+			'zijbalk_occasions'        => array( 'nl' => 'Occasions', 'fr' => 'Occasions' ),
+			'occasion_label'           => array( 'nl' => 'Occasion', 'fr' => 'Occasion' ),
+			'occasion_staat'           => array( 'nl' => 'Staat', 'fr' => 'État' ),
+			'occasion_staat_nieuw'     => array( 'nl' => 'Nieuw', 'fr' => 'Neuf' ),
+			'occasion_staat_als_nieuw' => array( 'nl' => 'Als nieuw', 'fr' => 'Comme neuf' ),
+			'occasion_staat_gebruikt'  => array( 'nl' => 'Gebruikt', 'fr' => 'D’occasion' ),
+			'occasion_nog_een'         => array( 'nl' => 'Nog 1 beschikbaar', 'fr' => 'Encore 1 disponible' ),
+			'occasion_nog_meer'        => array( 'nl' => 'Nog %d beschikbaar', 'fr' => 'Encore %d disponibles' ),
+			'occasion_op_is_op'        => array( 'nl' => 'Op = op', 'fr' => 'Jusqu’à épuisement du stock' ),
 			// Zoekbalk in de header (HDP_Zoeken).
 			'zoeken_label'          => array( 'nl' => 'Zoeken in het portaal', 'fr' => 'Rechercher dans le portail' ),
 			'zoeken_placeholder'    => array( 'nl' => 'Zoek artikel, claim, bestelling of document…', 'fr' => 'Rechercher article, réclamation, commande ou document…' ),
@@ -480,9 +490,9 @@ class HDP_I18N {
 			'groet_avond'             => array( 'nl' => 'Goedenavond', 'fr' => 'Bonsoir' ),
 			'nieuw_voor_u'            => array( 'nl' => 'Nieuw voor jou', 'fr' => 'Nouveau pour vous' ),
 			'nieuw_alle_downloads'    => array( 'nl' => 'Alle downloads', 'fr' => 'Tous les téléchargements' ),
-			'nieuw_nog_een'           => array( 'nl' => 'En nog één document', 'fr' => 'Et encore un document' ),
+			'nieuw_nog_een'           => array( 'nl' => 'En nog één nieuw item', 'fr' => 'Et une autre nouveauté' ),
 			/* translators: %d is een aantal documenten. */
-			'nieuw_nog_meer'          => array( 'nl' => 'En nog %d documenten', 'fr' => 'Et encore %d documents' ),
+			'nieuw_nog_meer'          => array( 'nl' => 'En nog %d nieuwe items', 'fr' => 'Et %d autres nouveautés' ),
 			'home_zoek_plaatshouder'  => array(
 				'nl' => 'Zoek een artikelnummer of omschrijving in de webshop…',
 				'fr' => 'Recherchez un numéro d’article ou une description dans la boutique…',
@@ -534,7 +544,7 @@ class HDP_I18N {
 			'tegel_winkelwagen_leeg'  => array( 'nl' => 'Je winkelwagen is leeg', 'fr' => 'Votre panier est vide' ),
 			'tegel_winkelwagen_afronden' => array( 'nl' => 'Bestelling afronden', 'fr' => 'Finaliser la commande' ),
 			'tegel_winkelwagen_naar_webshop' => array( 'nl' => 'Naar de webshop', 'fr' => 'Vers la boutique' ),
-			'nieuw_niets'             => array( 'nl' => 'Er staan geen nieuwe documenten voor je klaar.', 'fr' => 'Aucun nouveau document ne vous attend.' ),
+			'nieuw_niets'             => array( 'nl' => 'Er staat niets nieuws voor je klaar.', 'fr' => 'Rien de nouveau ne vous attend.' ),
 			'berichten_titel'         => array( 'nl' => 'Berichten van Homburg', 'fr' => 'Messages de Homburg' ),
 			/* translators: %s is de titel van het bericht. */
 			'bericht_wegklikken'      => array(

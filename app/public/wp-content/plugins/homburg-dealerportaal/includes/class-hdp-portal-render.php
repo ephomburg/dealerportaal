@@ -354,7 +354,7 @@ class HDP_Portal_Render {
 	 * dealer er door zijn merkrechten nul van te zien krijgt.
 	 */
 	private static function render_nieuw_melding() {
-		$nieuwe = self::nieuwe_downloads();
+		$nieuwe = self::nieuwe_regels();
 		if ( ! $nieuwe ) {
 			return;
 		}
@@ -382,18 +382,14 @@ class HDP_Portal_Render {
 			</div>
 
 			<div class="hdp-nieuw-lijst">
-				<?php foreach ( $tonen as $i => $download ) : ?>
-					<?php
-					$merk    = (string) get_post_meta( $download->ID, '_hdp_merk', true );
-					$wanneer = HDP_I18N::datum( 'j F', (int) get_post_time( 'U', false, $download->ID ) );
-					?>
-					<a class="hdp-nieuw-regel" href="<?php echo esc_url( home_url( '/downloads/' ) ); ?>">
+				<?php foreach ( $tonen as $i => $regel ) : ?>
+					<a class="hdp-nieuw-regel" href="<?php echo esc_url( $regel['url'] ); ?>">
 						<span class="hdp-nieuw-regel-icoon<?php echo 0 === $i ? ' hdp-nieuw-regel-icoon-vers' : ''; ?>" aria-hidden="true">
-							<?php echo HDP_Icons::svg_icoon( 'downloads' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
+							<?php echo HDP_Icons::svg_icoon( $regel['icoon'] ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
 						</span>
 						<span class="hdp-nieuw-regel-tekst">
-							<strong><?php echo esc_html( get_the_title( $download->ID ) ); ?></strong>
-							<span><?php echo esc_html( $merk ? $merk . ' · ' . $wanneer : $wanneer ); ?></span>
+							<strong><?php echo esc_html( $regel['titel'] ); ?></strong>
+							<span><?php echo esc_html( $regel['sub'] ); ?></span>
 						</span>
 						<?php if ( 0 === $i ) : ?>
 							<span class="hdp-nieuw-badge"><?php echo esc_html( HDP_I18N::t( 'badge_nieuw' ) ); ?></span>
@@ -409,6 +405,44 @@ class HDP_Portal_Render {
 			</div>
 		</section>
 		<?php
+	}
+
+	/**
+	 * Alles wat nieuw is voor deze dealer: documenten en, als het thema ze
+	 * aanbiedt, nieuwe occasions. Nieuwste eerst.
+	 *
+	 * @return array<int, array{titel: string, sub: string, url: string, icoon: string, tijd: int}>
+	 */
+	private static function nieuwe_regels() {
+		$regels = array();
+
+		foreach ( self::nieuwe_downloads() as $download ) {
+			$merk     = (string) get_post_meta( $download->ID, '_hdp_merk', true );
+			$wanneer  = HDP_I18N::datum( 'j F', (int) get_post_time( 'U', false, $download->ID ) );
+			$regels[] = array(
+				'titel' => get_the_title( $download->ID ),
+				'sub'   => $merk ? $merk . ' · ' . $wanneer : $wanneer,
+				'url'   => home_url( '/downloads/' ),
+				'icoon' => 'downloads',
+				'tijd'  => (int) get_post_time( 'U', true, $download->ID ),
+			);
+		}
+
+		if ( function_exists( 'homburg_wc_nieuwe_occasions' ) ) {
+			$sinds = (int) get_user_meta( get_current_user_id(), self::META_NIEUW_WEG, true );
+			foreach ( homburg_wc_nieuwe_occasions( $sinds, HDP_Downloads_CPT::NIEUW_DAGEN ) as $occasion ) {
+				$regels[] = $occasion + array( 'icoon' => 'occasion' );
+			}
+		}
+
+		usort(
+			$regels,
+			static function ( $a, $b ) {
+				return $b['tijd'] - $a['tijd'];
+			}
+		);
+
+		return $regels;
 	}
 
 	/**

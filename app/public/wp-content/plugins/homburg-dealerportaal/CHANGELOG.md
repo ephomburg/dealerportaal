@@ -8,6 +8,14 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.85.0
+
+- Nieuw: **Occasions & restpartijen** (thema 1.36.0, `includes/woocommerce/occasions.php`). Een occasion is een gewoon product in de categorie "Occasions & restpartijen" (maakt zichzelf aan). In het productscherm onder "Algemeen" komen de velden "Staat" (nieuw / als nieuw / gebruikt) en "Toelichting staat".
+- Op = op: voor een occasion staat voorraadbeheer altijd aan (zonder aantal: 1 stuk), zonder nabestellingen. Wat uitverkocht is, verdwijnt uit de winkel, de zoekbalk, gerelateerde producten en favorieten. Er kan niet meer in de winkelwagen dan er is. De regel die gewone artikelen altijd "op voorraad" houdt, geldt niet voor occasions.
+- De dealer ziet een label "Occasion", de staat en "Nog 7 beschikbaar" op de kaart en de productpagina. Zolang er iets te koop is staat er een onderdeel "Occasions" in het menu links, onder Webshop. Nieuwe occasions verschijnen in "Nieuw voor jou" op de startpagina. Het merkenfilter toont Occasions niet als merk en staat niet op de occasionspagina zelf.
+- PowerAll: elke occasion krijgt het kenmerk `_hdp_handmatig` (vinkje "Handmatig beheerd", bij een occasion vanzelf aan). Een toekomstige koppeling moet producten waarvoor `homburg_wc_is_handmatig()` waar is, overslaan bij bijwerken en opruimen.
+- "Nieuw voor jou": de teksten "En nog …" en "Er staat niets nieuws voor je klaar." gaan nu over documenten én occasions.
+
 ## 1.84.0
 
 - Portaalgebruik: testaccounts tellen niet meer mee (vinkje "Testaccount" in het gebruikersprofiel; accounts waarvan de naam begint met `hdp-test-` vanzelf). "Niet meer geweest" gebruikt ook de laatste activiteit die WooCommerce al bijhield, zodat de lijst niet de eerste maand bij iedereen "nog nooit" zegt.

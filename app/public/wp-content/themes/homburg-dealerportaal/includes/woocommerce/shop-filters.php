@@ -122,19 +122,25 @@ function homburg_wc_shop_werkbalk_open() {
 		return;
 	}
 
-	$merken         = get_terms(
+	// Occasions is een eigen onderdeel en geen merk: niet in het filter, en
+	// op de occasionspagina zelf geen filter (de aantallen zouden over de
+	// hele winkel gaan).
+	$occasions      = function_exists( 'homburg_wc_in_occasions' ) ? get_term_by( 'slug', HOMBURG_WC_OCCASIONS, 'product_cat' ) : null;
+	$merken         = function_exists( 'homburg_wc_in_occasions' ) && homburg_wc_in_occasions() ? array() : get_terms(
 		array(
 			'taxonomy'   => 'product_cat',
 			'parent'     => 0,
 			'hide_empty' => true,
 			'orderby'    => 'name',
+			'exclude'    => $occasions ? array( $occasions->term_id ) : array(),
 		)
 	);
 	$actieve_merken = homburg_wc_actieve_merken();
 	$zoekterm       = isset( $_GET['zoek'] ) ? sanitize_text_field( wp_unslash( $_GET['zoek'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$met_filter     = ! is_wp_error( $merken ) && $merken;
 	?>
-	<div class="hdp-shop-layout">
-		<?php if ( ! is_wp_error( $merken ) && $merken ) : ?>
+	<div class="hdp-shop-layout<?php echo $met_filter ? '' : ' hdp-shop-layout--zonder-filter'; ?>">
+		<?php if ( $met_filter ) : ?>
 			<aside class="hdp-shop-merken">
 				<details class="hdp-shop-merken-details" open>
 					<summary><?php esc_html_e( 'Merk', 'homburg-dealerportaal-theme' ); ?></summary>

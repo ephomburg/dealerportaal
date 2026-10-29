@@ -247,6 +247,7 @@ p.no-comments {
 	container-type: inline-size;
 	container-name: hdp-lijst;
 }
+.hdp-shop-layout--zonder-filter { grid-template-columns: minmax(0, 1fr); }
 @media (max-width: 780px) {
 	/* Minder tussenruimte: op een telefoon begon het eerste product anders
 	   pas na anderhalf scherm. */
@@ -1828,3 +1829,57 @@ body.woocommerce-page table.shop_table td { padding: 0.8rem 1rem; border-top: 1p
 /* Het artikelnummer op een eigen regel onder de naam. */
 .hdp-wc-regel-sku { display: block; margin-top: 0.15rem; font-size: 0.8rem; color: var(--wp--preset--color--grijs-tekst); font-weight: 400; }
 .hdp-bestelbevestiging .wc-block-order-confirmation-status h1 { font-size: 1.75rem; font-weight: 800; }
+
+/* ==========================================================================
+   OCCASIONS & RESTPARTIJEN (zie includes/woocommerce/occasions.php)
+   ========================================================================== */
+/* Donker in plaats van rood: rood is al "Actie", en een occasion is geen
+   korting maar een ander soort aanbod. */
+.hdp-card__flag--occasion { background: var(--wp--preset--color--donkergrijs); }
+.hdp-card__flag + .hdp-card__flag--occasion { top: 34px; }
+
+.hdp-card__occasion {
+	display: block;
+	margin-top: 0.3rem;
+	font-size: 0.74rem;
+	font-weight: 600;
+	color: var(--wp--preset--color--homburg-rood);
+}
+/* In de lijst onder de naam, in dezelfde kolom. */
+.hdp-lijst-weergave .hdp-card__occasion { grid-column: 2; grid-row: 2; margin-top: 0.1rem; }
+@container hdp-lijst (max-width: 50rem) {
+	.hdp-lijst-weergave .hdp-card__body:has(.hdp-card__occasion) {
+		grid-template-areas:
+			"sku    prijs"
+			"titel  titel"
+			"merk   merk"
+			"occ    occ"
+			"aantal knop";
+	}
+	.hdp-lijst-weergave .hdp-card__occasion { grid-area: occ; margin-top: 0; }
+}
+
+/* Productpagina: label, staat en hoeveel er nog zijn, onder het artikelnummer. */
+.hdp-wc-occasion {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.35rem;
+	padding: 0.8rem 1rem;
+	border: 1px solid var(--wp--preset--color--rand);
+	border-left: 3px solid var(--wp--preset--color--donkergrijs);
+	border-radius: 8px;
+	background: var(--wp--preset--color--wit);
+}
+.hdp-wc-occasion-label {
+	font-size: 0.66rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	padding: 0.15rem 0.45rem;
+	border-radius: 5px;
+	background: var(--wp--preset--color--donkergrijs);
+	color: var(--wp--preset--color--wit);
+}
+.hdp-wc-occasion p { margin: 0; font-size: 0.88rem; }
+.hdp-wc-occasion-voorraad { font-weight: 700; color: var(--wp--preset--color--homburg-rood); }

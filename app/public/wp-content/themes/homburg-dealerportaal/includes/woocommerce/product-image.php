@@ -77,13 +77,19 @@ add_filter(
 // Voorraad-/beschikbaarheidsweergave overal uitzetten.
 add_filter( 'woocommerce_get_stock_html', '__return_empty_string' );
 add_filter( 'woocommerce_get_availability_text', '__return_empty_string' );
-add_filter( 'woocommerce_product_get_stock_status', 'homburg_wc_forceer_instock', 20 );
+add_filter( 'woocommerce_product_get_stock_status', 'homburg_wc_forceer_instock', 20, 2 );
 
 /**
  * Zonder voorraadbeheer beschouwt WooCommerce een product als leverbaar;
  * dit houdt dat gedrag stabiel, ook als een import per ongeluk een
  * afwijkende status meegeeft.
+ *
+ * Niet bij occasions: daar is de voorraad juist echt (op = op), zie
+ * occasions.php.
  */
-function homburg_wc_forceer_instock( $status ) {
+function homburg_wc_forceer_instock( $status, $product = null ) {
+	if ( $product && function_exists( 'homburg_wc_is_occasion' ) && homburg_wc_is_occasion( $product ) ) {
+		return $status;
+	}
 	return 'instock';
 }

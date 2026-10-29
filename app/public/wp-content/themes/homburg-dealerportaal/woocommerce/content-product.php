@@ -52,6 +52,10 @@ if ( '' === $brand ) {
 		if ( $product->is_on_sale() ) {
 			echo '<span class="hdp-card__flag">' . esc_html__( 'Actie', 'homburg-dealerportaal-theme' ) . '</span>';
 		}
+
+		if ( function_exists( 'homburg_wc_occasion_vlag' ) ) {
+			homburg_wc_occasion_vlag( $product );
+		}
 		?>
 	</a>
 	<?php
@@ -75,6 +79,12 @@ if ( '' === $brand ) {
 		<?php endif; ?>
 
 		<div class="hdp-card__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></div>
+
+		<?php
+		if ( function_exists( 'homburg_wc_occasion_kaartregel' ) ) {
+			homburg_wc_occasion_kaartregel( $product );
+		}
+		?>
 
 		<?php
 		// Aantalveld voor de lijstweergave: een dealer bestelt zelden één
