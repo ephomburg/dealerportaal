@@ -8,6 +8,11 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.85.3
+
+- Logo's in header, footer en inlogscherm staan nu in de plugin (`assets/img/`) in plaats van in de mediabibliotheek. Het witte logo was als huisstijl-download in FileBird gezet; de beveiliging verplaatste het bestand en verwijderde de openbare versies, waardoor nieuwe bezoekers geen logo meer zagen.
+- Downloads, Content en Huisstijl gebruiken binnen het werkblad de volle breedte en lijnen uit met de titel; de smalle, gecentreerde kolom liet links een groot leeg vlak.
+
 ## 1.85.2
 
 - Het label "Nieuw" en de lijst "Nieuw voor jou" gelden nu een week in plaats van drie weken (`HDP_Downloads_CPT::NIEUW_DAGEN`). Dat geldt voor documenten en occasions.

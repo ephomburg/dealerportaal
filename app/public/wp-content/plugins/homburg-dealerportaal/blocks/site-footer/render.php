@@ -34,8 +34,8 @@ $socials = array(
 	<div class="hdp-footer-boven">
 		<div class="hdp-footer-logo">
 			<img
-				src="/wp-content/uploads/2026/07/Logo-HOMBURG_WIT-768x102.png"
-				srcset="/wp-content/uploads/2026/07/Logo-HOMBURG_WIT-768x102.png 768w, /wp-content/uploads/2026/07/Logo-HOMBURG_WIT-1536x204.png 1536w"
+				src="<?php echo esc_url( HDP_PLUGIN_URL . 'assets/img/Logo-HOMBURG_WIT-768x102.png' ); ?>"
+				srcset="<?php echo esc_url( HDP_PLUGIN_URL . 'assets/img/Logo-HOMBURG_WIT-768x102.png' ); ?> 768w, <?php echo esc_url( HDP_PLUGIN_URL . 'assets/img/Logo-HOMBURG_WIT-1536x204.png' ); ?> 1536w"
 				sizes="180px"
 				alt="Homburg"
 			>

@@ -3869,3 +3869,13 @@ body.home .hdp-info-split > .wp-block-column:nth-child(2) .hdp-info-kaart:first-
 	.hdp-zoekbalk-toets { display: none; }
 	.hdp-zoekbalk-paneel { min-width: 0; }
 }
+
+/* Downloads, Content en Huisstijl binnen het werkblad: over de volle breedte en
+   gelijk met de titel. De smalle, gecentreerde kolom hoort bij de oude pagina
+   zonder zijmenu; hier gaf die een groot leeg vlak links onder de titel. */
+body.hdp-app-layout .hdp-downloads {
+	max-width: none;
+	margin: 0;
+	padding-left: 0;
+	padding-right: 0;
+}

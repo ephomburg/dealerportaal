@@ -125,7 +125,7 @@ class HDP_Login {
 		?>
 		<div class="hdp-login-sectie hdp-login-fullscreen alignfull" style="background-image:url('<?php echo esc_url( $a['heroAfbeelding'] ); ?>')">
 			<div class="hdp-login-kaart">
-				<img class="hdp-login-logo" src="/wp-content/uploads/2026/07/Logo-HOMBURG_RGB-300x40.png" alt="Homburg">
+				<img class="hdp-login-logo" src="<?php echo esc_url( HDP_PLUGIN_URL . 'assets/img/Logo-HOMBURG_RGB-300x40.png' ); ?>" alt="Homburg">
 				<h1><?php echo esc_html( HDP_I18N::t( 'login_titel' ) ); ?></h1>
 				<p class="hdp-intro"><?php echo esc_html( $intro ); ?></p>
 
