@@ -34,22 +34,34 @@ class HDP_Downloads_CPT {
 
 	/**
 	 * Vaste merkenlijst voor het indelen van downloads/content — bewust een
-	 * andere (kortere, eigen benaming) lijst dan HDP_Merken::lijst(), die
-	 * gaat over welke merken een dealer-account mag zien. Hier gaat het om
-	 * onder welk merk een bestand op de downloadspagina wordt getoond.
-	 * Vervangt het vrije tekstveld van vroeger (typefouten/inconsistente
-	 * merknamen gaven dan ook inconsistente filterknoppen op de pagina zelf).
+	 * andere vraag dan HDP_Merken::lijst(), die gaat over welke merken een
+	 * dealer-account mag zien. Hier gaat het om onder welk merk een bestand
+	 * op de downloadspagina wordt getoond. Vervangt het vrije tekstveld van
+	 * vroeger (typefouten/inconsistente merknamen gaven dan ook inconsistente
+	 * filterknoppen op de pagina zelf).
+	 *
+	 * Eerst de merken waar de meeste bestanden over gaan, dan de rest van
+	 * de merkenlijst. Die twee liepen uit elkaar: een FileBird-map
+	 * "SmartSOLUTIONS" werd stilletjes genegeerd omdat dat merk alleen in
+	 * HDP_Merken stond, terwijl dealers er wel rechten op hadden.
 	 */
 	public static function merk_opties() {
-		return array(
-			self::MERK_ALGEMEEN,
-			'Draincleaners',
-			'HARDI',
-			'Väderstad',
-			'Bogballe',
-			'Garford',
-			'Rabe',
-			'Tefen',
+		return array_values(
+			array_unique(
+				array_merge(
+					array(
+						self::MERK_ALGEMEEN,
+						'Draincleaners',
+						'HARDI',
+						'Väderstad',
+						'Bogballe',
+						'Garford',
+						'Rabe',
+						'Tefen',
+					),
+					HDP_Merken::lijst()
+				)
+			)
 		);
 	}
 

@@ -200,4 +200,22 @@ class Huisstijl_Test extends WP_UnitTestCase {
 		$this->assertStringNotContainsString( 'Prijslijst', $html );
 		$this->assertStringContainsString( 'Huisstijl &amp; media', $html );
 	}
+
+	/**
+	 * Een map in FileBird telt alleen als de naam een bekend merk is. SmartSOLUTIONS
+	 * stond wel in de merkenlijst van dealers maar niet in merk_opties(), en de map
+	 * werd daardoor zonder melding genegeerd.
+	 */
+	public function test_elk_dealermerk_is_een_geldige_mapnaam() {
+		foreach ( HDP_Merken::lijst() as $merk ) {
+			$this->assertSame( $merk, HDP_FileBird_Sync::vind_merk( $merk ) );
+		}
+	}
+
+	public function test_mapnaam_mag_anders_geschreven_zijn() {
+		$this->assertSame( 'SmartSOLUTIONS', HDP_FileBird_Sync::vind_merk( 'Smart Solutions' ) );
+		$this->assertSame( 'SmartSOLUTIONS', HDP_FileBird_Sync::vind_merk( 'smartsolutions' ) );
+		$this->assertSame( 'Väderstad', HDP_FileBird_Sync::vind_merk( 'Vaderstad' ) );
+		$this->assertNull( HDP_FileBird_Sync::vind_merk( 'Onbekend merk' ) );
+	}
 }

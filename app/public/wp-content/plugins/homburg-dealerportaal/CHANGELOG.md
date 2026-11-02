@@ -8,6 +8,12 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.85.1
+
+- FileBird: een map onder Downloads, Content of Huisstijl werd stilletjes genegeerd als het merk alleen in de merkenlijst van dealers stond (`HDP_Merken`) en niet in `merk_opties()`, zoals SmartSOLUTIONS. `merk_opties()` bevat nu ook die merken, dus ook in de merkkeuze bij uploaden en in het downloadscherm. De mapnaam mag anders geschreven zijn ("Smart Solutions").
+- Bestanden die al in zo'n map stonden worden eenmalig ingehaald bij het eerstvolgende bezoek aan wp-admin (`HDP_FileBird_Sync::inhalen()`). Wat al een download heeft, ook in de prullenbak, blijft ongemoeid.
+- Nieuwe melding in de mediabibliotheek als een map met bestanden niet herkend wordt, met uitleg over de juiste naam.
+
 ## 1.85.0
 
 - Nieuw: **Occasions & restpartijen** (thema 1.36.0, `includes/woocommerce/occasions.php`). Een occasion is een gewoon product in de categorie "Occasions & restpartijen" (maakt zichzelf aan). In het productscherm onder "Algemeen" komen de velden "Staat" (nieuw / als nieuw / gebruikt) en "Toelichting staat".

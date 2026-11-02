@@ -61,6 +61,15 @@ class HDP_FileBird_Sync {
 	 */
 	const MAPPEN_VERSIE = 2;
 
+	/**
+	 * Ophogen als er mappen herkend worden die dat eerst niet waren; bij het
+	 * eerstvolgende bezoek aan wp-admin worden de bestanden daarin dan
+	 * alsnog opgepikt.
+	 *
+	 * 1 = alle merken uit HDP_Merken erbij (SmartSOLUTIONS).
+	 */
+	const INHAAL_VERSIE = 1;
+
 	/** Behouden voor bestaande verwijzingen; de downloadsmap blijft de hoofdmoot. */
 	const ROOT_FOLDER_NAAM = 'Downloads dealerportaal';
 
@@ -81,6 +90,15 @@ class HDP_FileBird_Sync {
 		if ( is_admin() && (int) get_option( 'hdp_filebird_mappen_versie' ) < self::MAPPEN_VERSIE ) {
 			add_action( 'admin_init', array( __CLASS__, 'maak_mappen_indien_nodig' ) );
 		}
+
+		// Inhalen: de koppeling reageert alleen op het moment dat een bestand
+		// in een map komt. Stond het er al toen de map nog niet herkend werd,
+		// dan gebeurt dat nooit meer vanzelf.
+		if ( is_admin() && (int) get_option( 'hdp_filebird_inhaal_versie' ) < self::INHAAL_VERSIE ) {
+			add_action( 'admin_init', array( __CLASS__, 'inhalen_eenmalig' ) );
+		}
+
+		add_action( 'admin_notices', array( __CLASS__, 'meld_onbekende_mappen' ) );
 	}
 
 	public static function maak_mappen_indien_nodig() {
@@ -109,6 +127,96 @@ class HDP_FileBird_Sync {
 		// De oude vlag blijft staan voor wie er nog naar kijkt; de versie
 		// hierboven is wat telt.
 		update_option( 'hdp_filebird_mappen_aangemaakt', 1 );
+	}
+
+	public static function inhalen_eenmalig() {
+		self::inhalen();
+		update_option( 'hdp_filebird_inhaal_versie', self::INHAAL_VERSIE );
+	}
+
+	/**
+	 * De directe submappen van de hoofdmappen, met het aantal bestanden.
+	 *
+	 * @return array Lijst met id, name, bestanden (objecten).
+	 */
+	private static function submappen() {
+		global $wpdb;
+		$mappen   = $wpdb->prefix . 'fbv';
+		$koppelen = $wpdb->prefix . 'fbv_attachment_folder';
+		$namen    = array_keys( self::ROOTS );
+		$plek     = implode( ',', array_fill( 0, count( $namen ), '%s' ) );
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- tabellen van FileBird, tabelnamen uit het eigen prefix.
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT f.id, f.name, (SELECT COUNT(*) FROM {$koppelen} a WHERE a.folder_id = f.id) AS bestanden
+				FROM {$mappen} f INNER JOIN {$mappen} r ON r.id = f.parent
+				WHERE r.parent = 0 AND r.name IN ({$plek})",
+				$namen
+			)
+		);
+		// phpcs:enable
+	}
+
+	/**
+	 * Pikt bestanden op die in een herkende map staan maar nog geen download
+	 * hebben. Raakt niets wat al een download heeft, ook niet als die in de
+	 * prullenbak staat: dat was dan een bewuste keuze van een beheerder.
+	 *
+	 * @return int[] De bestanden waarvoor een download is aangemaakt.
+	 */
+	public static function inhalen() {
+		global $wpdb;
+		$koppelen = $wpdb->prefix . 'fbv_attachment_folder';
+		$gedaan   = array();
+
+		foreach ( self::submappen() as $map ) {
+			if ( ! self::match_merk_en_regio( (int) $map->id ) ) {
+				continue;
+			}
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- tabel van FileBird.
+			$bestanden = $wpdb->get_col( $wpdb->prepare( "SELECT attachment_id FROM {$koppelen} WHERE folder_id = %d", (int) $map->id ) );
+			foreach ( $bestanden as $bestand ) {
+				if ( self::vind_download_voor_attachment( (int) $bestand ) ) {
+					continue;
+				}
+				self::synchroniseer( (int) $bestand, (int) $map->id );
+				$gedaan[] = (int) $bestand;
+			}
+		}
+
+		return $gedaan;
+	}
+
+	/**
+	 * Waarschuwt in de mediabibliotheek voor een map met bestanden die niet
+	 * herkend wordt. Anders staan die bestanden daar en verschijnen ze
+	 * zonder enige uitleg niet op de website.
+	 */
+	public static function meld_onbekende_mappen() {
+		$scherm = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $scherm || 'upload' !== $scherm->id || ! current_user_can( 'upload_files' ) ) {
+			return;
+		}
+
+		$onbekend = array();
+		foreach ( self::submappen() as $map ) {
+			if ( (int) $map->bestanden > 0 && ! self::match_merk_en_regio( (int) $map->id ) ) {
+				$onbekend[] = $map->name;
+			}
+		}
+		if ( ! $onbekend ) {
+			return;
+		}
+		?>
+		<div class="notice notice-warning">
+			<p>
+				<strong>Dealerportaal: deze map(pen) komen niet op de website:</strong>
+				<?php echo esc_html( implode( ', ', $onbekend ) ); ?>.
+				De naam moet een merk uit de merkenlijst zijn, bij Downloads en Content met de taal erachter, bijvoorbeeld "HARDI (NL)". Bij Huisstijl is alleen de merknaam genoeg.
+			</p>
+		</div>
+		<?php
 	}
 
 	/** Eén bestand naar een (andere) map verplaatst — bij upload of handmatig slepen. */
@@ -283,17 +391,23 @@ class HDP_FileBird_Sync {
 	}
 
 	/**
-	 * Vergelijkt zonder hoofdletter-/accentgevoeligheid, zodat "Vaderstad"
-	 * (zonder umlaut — makkelijk gemaakt bij het typen van een mapnaam) ook
-	 * "Väderstad" uit HDP_Downloads_CPT::merk_opties() vindt.
+	 * Vergelijkt zonder hoofdletter-/accentgevoeligheid en zonder spaties of
+	 * streepjes, zodat "Vaderstad" (zonder umlaut — makkelijk gemaakt bij het
+	 * typen van een mapnaam) ook "Väderstad" uit
+	 * HDP_Downloads_CPT::merk_opties() vindt, en "Smart Solutions" ook
+	 * "SmartSOLUTIONS".
 	 */
-	private static function vind_merk( $ruwe_naam ) {
-		$genormaliseerd = remove_accents( mb_strtolower( $ruwe_naam ) );
+	public static function vind_merk( $ruwe_naam ) {
+		$genormaliseerd = self::vergelijkbaar( $ruwe_naam );
 		foreach ( HDP_Downloads_CPT::merk_opties() as $optie ) {
-			if ( remove_accents( mb_strtolower( $optie ) ) === $genormaliseerd ) {
+			if ( self::vergelijkbaar( $optie ) === $genormaliseerd ) {
 				return $optie;
 			}
 		}
 		return null;
+	}
+
+	private static function vergelijkbaar( $naam ) {
+		return preg_replace( '/[\s\-_]+/u', '', remove_accents( mb_strtolower( (string) $naam ) ) );
 	}
 }
