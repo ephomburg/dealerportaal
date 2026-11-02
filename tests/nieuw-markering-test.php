@@ -65,7 +65,7 @@ class Nieuw_Markering_Test extends WP_UnitTestCase {
 
 	/**
 	 * De regel moet weg kunnen. Blijft hij staan tot het bestand vanzelf
-	 * niet meer "nieuw" is, dan kijkt een dealer er drie weken tegenaan en
+	 * niet meer "nieuw" is, dan kijkt een dealer er een week tegenaan en
 	 * leest hij hem op dag twee al niet meer.
 	 */
 	public function test_de_melding_heeft_een_knop_om_hem_weg_te_klikken() {

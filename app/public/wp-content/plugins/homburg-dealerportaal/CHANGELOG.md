@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.85.2
+
+- Het label "Nieuw" en de lijst "Nieuw voor jou" gelden nu een week in plaats van drie weken (`HDP_Downloads_CPT::NIEUW_DAGEN`). Dat geldt voor documenten en occasions.
+
 ## 1.85.1
 
 - FileBird: een map onder Downloads, Content of Huisstijl werd stilletjes genegeerd als het merk alleen in de merkenlijst van dealers stond (`HDP_Merken`) en niet in `merk_opties()`, zoals SmartSOLUTIONS. `merk_opties()` bevat nu ook die merken, dus ook in de merkkeuze bij uploaden en in het downloadscherm. De mapnaam mag anders geschreven zijn ("Smart Solutions").

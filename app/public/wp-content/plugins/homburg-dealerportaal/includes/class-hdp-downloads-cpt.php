@@ -197,11 +197,11 @@ class HDP_Downloads_CPT {
 	 *
 	 * Bewust een vast venster en geen "sinds uw vorige bezoek"-teller per
 	 * dealer: dat laatste klinkt aardiger, maar telt bij elke tweede
-	 * paginalading al naar nul en is daardoor juist onbetrouwbaar. Drie weken
+	 * paginalading al naar nul en is daardoor juist onbetrouwbaar. Een week
 	 * past bij het tempo waarin hier bestanden bijkomen, en betekent voor
 	 * iedereen hetzelfde.
 	 */
-	const NIEUW_DAGEN = 21;
+	const NIEUW_DAGEN = 7;
 
 	/** Is dit bestand recent toegevoegd? Zie NIEUW_DAGEN. */
 	public static function is_nieuw( $post_id ) {
