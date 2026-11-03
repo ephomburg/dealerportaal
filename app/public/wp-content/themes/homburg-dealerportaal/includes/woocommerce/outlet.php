@@ -11,7 +11,7 @@
  * - op = op: de voorraad wordt altijd bijgehouden, en wat uitverkocht is
  *   verdwijnt uit de winkel;
  * - een label en "Nog 7 beschikbaar" op de kaart en de productpagina;
- * - een eigen onderdeel "Outlet" in het menu links, zolang er iets te
+ * - een eigen onderdeel "Outlet" in het menu links, ook als er niets te
  *   koop is (zie HDP_Zijbalk), en een regel in "Nieuw voor jou".
  *
  * PowerAll: elk outletproduct krijgt het kenmerk _hdp_handmatig. Een koppeling
@@ -106,15 +106,6 @@ function homburg_wc_in_outlet() {
 		return true;
 	}
 	return is_product() && homburg_wc_is_outlet( get_queried_object_id() );
-}
-
-/** Hoeveel outletproducten er nu te koop zijn. */
-function homburg_wc_aantal_outlet() {
-	static $aantal = null;
-	if ( null === $aantal ) {
-		$aantal = count( homburg_wc_outlet_ids( 'instock' ) );
-	}
-	return $aantal;
 }
 
 /**
@@ -265,6 +256,20 @@ function homburg_wc_uitverkochte_outlet_onzichtbaar( $zichtbaar, $product_id ) {
 }
 
 /* --- Wat de dealer ziet --------------------------------------------------- */
+
+add_action( 'woocommerce_no_products_found', 'homburg_wc_outlet_leeg', 5 );
+/**
+ * Het menu toont de outlet altijd, dus de pagina kan leeg zijn. De standaardtekst
+ * ("aan je selectie voldoen") klopt dan niet: de dealer heeft niets gekozen.
+ * Zoekt hij binnen een gevulde outlet zonder treffers, dan klopt die wel.
+ */
+function homburg_wc_outlet_leeg() {
+	if ( ! is_product_category( HOMBURG_WC_OUTLET ) || homburg_wc_outlet_ids( 'instock' ) ) {
+		return;
+	}
+	remove_action( 'woocommerce_no_products_found', 'wc_no_products_found' );
+	wc_print_notice( esc_html( homburg_wc_tekst( 'outlet_leeg', 'Er staat op dit moment niets in de outlet.' ) ), 'notice' );
+}
 
 /** "Nog 7 beschikbaar", of '' als dat niet bekend is. */
 function homburg_wc_outlet_beschikbaar( $product ) {

@@ -323,10 +323,8 @@ class HDP_Zijbalk {
 			array_splice( $onderdelen, $plek, 0, array( $bestellingen ) );
 		}
 
-		// Outlet: direct onder de webshop, maar alleen zolang er iets te
-		// koop is. Een leeg onderdeel in het menu nodigt uit tot een klik
-		// die niets oplevert.
-		if ( function_exists( 'homburg_wc_aantal_outlet' ) && homburg_wc_aantal_outlet() > 0 && homburg_wc_outlet_url() ) {
+		// Outlet: direct onder de webshop, ook als er niets te koop is.
+		if ( function_exists( 'homburg_wc_outlet_url' ) && homburg_wc_outlet_url() ) {
 			$outlet = array(
 				'icoon'      => 'outlet',
 				'titel'      => HDP_I18N::t( 'zijbalk_outlet' ),

@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.89.1
+
+- Het onderdeel **Outlet** staat nu altijd in het menu, ook als er niets te koop is. Een lege outlet toont "Er staat op dit moment niets in de outlet." in plaats van de standaardtekst over een selectie (thema 1.40.1).
+
 ## 1.89.0
 
 - "Occasions & restpartijen" heet nu **Outlet** (thema 1.40.0, `includes/woocommerce/outlet.php`): de categorie, het label, het menu en de zoekbalk, in het Nederlands en Frans. De bestaande categorie wordt vanzelf hernoemd en houdt haar producten; het adres wordt `/product-category/outlet/`. Outletproducten blijven handmatig in WooCommerce beheerd, niet via PowerAll.

@@ -376,6 +376,7 @@ class HDP_I18N {
 			'outlet_categorie_uitleg'   => array( 'nl' => 'Losse partijen en gebruikte onderdelen die Homburg zelf aanbiedt. Op = op.', 'fr' => 'Lots et pièces d’occasion proposés par Homburg. Jusqu’à épuisement du stock.' ),
 			'zijbalk_outlet'           => array( 'nl' => 'Outlet', 'fr' => 'Outlet' ),
 			'outlet_label'             => array( 'nl' => 'Outlet', 'fr' => 'Outlet' ),
+			'outlet_leeg'              => array( 'nl' => 'Er staat op dit moment niets in de outlet.', 'fr' => 'L’outlet est vide pour le moment.' ),
 			'outlet_staat'             => array( 'nl' => 'Staat', 'fr' => 'État' ),
 			'outlet_staat_nieuw'       => array( 'nl' => 'Nieuw', 'fr' => 'Neuf' ),
 			'outlet_staat_als_nieuw'   => array( 'nl' => 'Als nieuw', 'fr' => 'Comme neuf' ),

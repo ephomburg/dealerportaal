@@ -78,6 +78,31 @@ class Outlet_Test extends WP_UnitTestCase {
 		$this->assertTrue( homburg_wc_is_outlet( $product->get_id() ) );
 	}
 
+	public function test_menu_toont_outlet_ook_als_er_niets_te_koop_is() {
+		$this->assertSame( array(), homburg_wc_outlet_ids( 'instock' ) );
+
+		HDP_Roles::activate();
+		$dealer = self::factory()->user->create( array( 'role' => 'dealer' ) );
+		update_user_meta( $dealer, 'hdp_goedgekeurd', '1' );
+		wp_set_current_user( $dealer );
+		$pagina = self::factory()->post->create(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_content' => '<!-- wp:homburg/portaal-kaart {"titel":"Webshop","icoon":"webshop","url":"/shop/"} /-->',
+			)
+		);
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $pagina );
+
+		ob_start();
+		HDP_Zijbalk::render();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( esc_url( homburg_wc_outlet_url() ), $html );
+		$this->assertStringContainsString( HDP_I18N::t( 'zijbalk_outlet' ), $html );
+	}
+
 	public function test_uitverkochte_outlet_is_echt_uitverkocht_en_onzichtbaar() {
 		$op = $this->maak( 0 );
 		$this->assertSame( 'outofstock', $op->get_stock_status(), 'De gewone "altijd op voorraad"-regel mag niet voor de outlet gelden.' );
