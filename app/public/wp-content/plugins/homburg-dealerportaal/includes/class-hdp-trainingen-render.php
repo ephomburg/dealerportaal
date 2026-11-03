@@ -155,7 +155,7 @@ class HDP_Trainingen_Render {
 		$net_aangemeld = ! empty( $_GET['aangemeld'] ) && $eigen;
 		?>
 		<section class="hdp-trainingen hdp-training-detail">
-			<a class="hdp-terug-boven" href="<?php echo esc_url( HDP_Trainingen::url() ); ?>"><?php echo esc_html( HDP_I18N::t( 'training_terug' ) ); ?></a>
+			<a class="hdp-terug-boven" href="<?php echo esc_url( HDP_Trainingen::url() ); ?>">&larr; <?php echo esc_html( HDP_I18N::t( 'training_terug' ) ); ?></a>
 
 			<div class="hdp-training-kop">
 				<div class="hdp-training-uitleg">

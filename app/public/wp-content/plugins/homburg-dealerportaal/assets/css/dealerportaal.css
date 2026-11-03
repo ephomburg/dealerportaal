@@ -3985,7 +3985,6 @@ body.hdp-app-layout .hdp-downloads {
 
 .hdp-training-detail { display: grid; gap: 1.25rem; }
 .hdp-training-detail .hdp-terug-boven { width: fit-content; margin: 0; }
-.hdp-training-detail .hdp-terug-boven::before { content: '90'; margin-right: 0.5rem; }
 .hdp-training-kop {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) 360px;

@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.91.1
+
+- Trainingen: het pijltje bij "Terug naar de trainingen" verscheen als een vreemd teken.
+
 ## 1.91.0
 
 - Trainingen: nieuwe opmaak van de trainingspagina. Uitleg en gegevens staan samen in één kaart: de eerste alinea groter, rechts een donker paneel met kalenderblad, locatie, kosten, een balkje met de bezette plaatsen en een knop naar het formulier. Na aanmelden of een fout blijft de pagina bij het formulier.
