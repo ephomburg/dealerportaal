@@ -356,3 +356,18 @@ function homburg_wc_nieuwe_occasions( $sinds, $dagen ) {
 
 	return $lijst;
 }
+
+/* --- Frans ---------------------------------------------------------------- */
+
+add_filter( 'get_term', 'homburg_wc_occasions_categorie_vertalen', 10, 2 );
+/** De categorie is een vaste term; naam en uitleg staan in de teksten van het portaal. */
+function homburg_wc_occasions_categorie_vertalen( $term, $taxonomie ) {
+	if ( is_admin() || 'product_cat' !== $taxonomie || ! is_object( $term ) || HOMBURG_WC_OCCASIONS !== $term->slug ) {
+		return $term;
+	}
+	if ( class_exists( 'HDP_I18N' ) && HDP_I18N::is_frans() ) {
+		$term->name        = HDP_I18N::t( 'occasion_categorie' );
+		$term->description = HDP_I18N::t( 'occasion_categorie_uitleg' );
+	}
+	return $term;
+}

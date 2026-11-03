@@ -1883,3 +1883,7 @@ body.woocommerce-page table.shop_table td { padding: 0.8rem 1rem; border-top: 1p
 }
 .hdp-wc-occasion p { margin: 0; font-size: 0.88rem; }
 .hdp-wc-occasion-voorraad { font-weight: 700; color: var(--wp--preset--color--homburg-rood); }
+
+/* Product zonder prijs (zie setup.php). */
+.hdp-wc-op-aanvraag { font-weight: 600; font-size: 0.92em; color: var(--wp--preset--color--donkergrijs); }
+.hdp-wc-op-aanvraag-contact { margin: 0; font-size: 0.9rem; }

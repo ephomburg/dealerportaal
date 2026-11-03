@@ -21,6 +21,132 @@ class HDP_I18N {
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'verwerk_taalwissel' ) );
 		add_filter( 'language_attributes', array( __CLASS__, 'voeg_data_taal_toe' ) );
+		add_filter( 'locale', array( __CLASS__, 'frontend_locale' ) );
+		add_filter( 'gettext_homburg-dealerportaal-theme', array( __CLASS__, 'thema_tekst' ), 10, 2 );
+		add_filter( 'render_block', array( __CLASS__, 'vaste_sjabloontekst' ), 10, 2 );
+	}
+
+	/**
+	 * Het Frans van WordPress en WooCommerce zelf: winkelwagen, afrekenen,
+	 * accountmenu, adresvelden, foutmeldingen. Dat zijn te veel teksten om
+	 * met de hand bij te houden, en er zijn officiële vertalingen van. Dus
+	 * op de voorkant de hele site op fr_FR zodra de bezoeker Frans kiest.
+	 *
+	 * Alleen als die taalbestanden er echt staan: ze gaan niet mee met een
+	 * deploy (wp-content/languages), en zonder bestanden valt fr_FR terug op
+	 * Engels, wat erger is dan Nederlands. wp-admin blijft in de eigen taal.
+	 */
+	public static function frontend_locale( $locale ) {
+		if ( is_admin() || ! self::is_frans() || ! self::franse_taalbestanden() ) {
+			return $locale;
+		}
+		return 'fr_FR';
+	}
+
+	private static function franse_taalbestanden() {
+		static $aanwezig = null;
+		if ( null === $aanwezig ) {
+			$aanwezig = defined( 'WP_LANG_DIR' )
+				&& is_readable( WP_LANG_DIR . '/fr_FR.mo' )
+				&& is_readable( WP_LANG_DIR . '/plugins/woocommerce-fr_FR.mo' );
+		}
+		return $aanwezig;
+	}
+
+	/**
+	 * Teksten uit het thema staan in het Nederlands in de code, met __().
+	 * Het thema heeft geen eigen taalbestanden, dus hier het Frans erbij.
+	 */
+	public static function thema_tekst( $vertaling, $tekst ) {
+		if ( ! self::is_frans() ) {
+			return $vertaling;
+		}
+		$teksten = self::thema_teksten();
+		return isset( $teksten[ $tekst ] ) ? $teksten[ $tekst ] : $vertaling;
+	}
+
+	/**
+	 * De vaste tekst in de sjablonen 404.html en search.html. Die staat in de
+	 * blokken zelf en loopt dus niet langs __().
+	 */
+	public static function vaste_sjabloontekst( $inhoud, $blok ) {
+		if ( ! self::is_frans() || ! ( is_404() || is_search() ) ) {
+			return $inhoud;
+		}
+		if ( ! in_array( $blok['blockName'], array( 'core/heading', 'core/paragraph', 'core/search' ), true ) ) {
+			return $inhoud;
+		}
+		return strtr( $inhoud, self::thema_teksten() );
+	}
+
+	/**
+	 * De teksten uit het thema: Nederlands (zoals in de code) => Frans. Een
+	 * test bewaakt dat elke tekst die het thema gebruikt hier staat.
+	 *
+	 * @return array<string, string>
+	 */
+	public static function thema_teksten() {
+		return array(
+			'Aantal %s'                     => 'Quantité %s',
+			'Actie'                         => 'Promo',
+			'Afmetingen'                    => 'Dimensions',
+			'Alles wissen'                  => 'Tout effacer',
+			'Artikelnummer'                 => 'Référence',
+			'Bekijk product'                => 'Voir le produit',
+			'Bestelling %s opnieuw plaatsen' => 'Commander à nouveau la commande %s',
+			'Bewaar als favoriet'           => 'Ajouter aux favoris',
+			'Bewaard als favoriet'          => 'Ajouté aux favoris',
+			'Categorie'                     => 'Catégorie',
+			'Eén artikelnummer per regel. Zet er zo gewenst een aantal achter, bijv. "10714 x3".' => 'Une référence par ligne. Ajoutez une quantité si vous le souhaitez, par exemple « 10714 x3 ».',
+			'Favoriet'                      => 'Favori',
+			'Filter wissen'                 => 'Effacer le filtre',
+			'Ga naar de webshop'            => 'Aller à la boutique',
+			'Geen afbeelding beschikbaar'   => 'Aucune image disponible',
+			'Geen afbeelding beschikbaar voor %s' => 'Aucune image disponible pour %s',
+			'Geen resultaten gevonden. Probeer een andere zoekterm.' => 'Aucun résultat. Essayez un autre terme de recherche.',
+			'Gekopieerd'                    => 'Copié',
+			'Gewicht'                       => 'Poids',
+			'In winkelwagen'                => 'Ajouter au panier',
+			'Je hebt nog geen favorieten. Klik op het hartje bij een product om het hier te bewaren.' => 'Vous n’avez pas encore de favoris. Cliquez sur le cœur d’un produit pour l’enregistrer ici.',
+			'Ken je de artikelnummers al uit het hoofd of heb je zelf een inkooplijst? Plak of typ ze hieronder, één per regel — je hoeft ze niet apart op te zoeken.' => 'Vous connaissez déjà les références ou vous avez votre propre liste d’achat ? Collez-les ou saisissez-les ci-dessous, une par ligne : inutile de les rechercher une à une.',
+			'Kopieer'                       => 'Copier',
+			'Lijstweergave'                 => 'Affichage en liste',
+			'Meer'                          => 'Plus',
+			'Merk'                          => 'Marque',
+			'Mijn account'                  => 'Mon compte',
+			'Mijn favorieten'               => 'Mes favoris',
+			'Minder'                        => 'Moins',
+			'Naar de winkelwagen'           => 'Voir le panier',
+			'Niet gevonden (controleer het artikelnummer):' => 'Introuvable (vérifiez la référence) :',
+			'Nummer'                        => 'Référence',
+			'Omschrijving'                  => 'Description',
+			'Omschrijving (A–Z)'            => 'Description (A–Z)',
+			'Onderdeel'                     => 'Pièce',
+			'Opnieuw bestellen'             => 'Commander à nouveau',
+			'Prijs excl.'                   => 'Prix HT',
+			'Prijs: hoog naar laag'         => 'Prix : décroissant',
+			'Prijs: laag naar hoog'         => 'Prix : croissant',
+			'Rasterweergave'                => 'Affichage en grille',
+			'Snel bestellen'                => 'Commande rapide',
+			'Specificaties'                 => 'Caractéristiques',
+			'Terug naar de webshop'         => 'Retour à la boutique',
+			'Toegevoegd ✓'                  => 'Ajouté ✓',
+			'Toevoegen aan winkelwagen'     => 'Ajouter au panier',
+			'Typ een naam of artikelnummer…' => 'Saisissez un nom ou une référence…',
+			'Webshop'                       => 'Boutique',
+			'Winkelwagen'                   => 'Panier',
+			'Afrekenen'                     => 'Commande',
+			'Weergave'                      => 'Affichage',
+			'Weet je het artikelnummer niet uit het hoofd? Zoek het hier op:' => 'Vous ne connaissez pas la référence ? Recherchez-la ici :',
+			'Zoek op naam of artikelnummer…' => 'Rechercher par nom ou référence…',
+			'Zoeken'                        => 'Rechercher',
+			'excl. btw'                     => 'HT',
+			// 404.html.
+			'Pagina niet gevonden'          => 'Page introuvable',
+			'Deze pagina bestaat niet (meer). Ga terug naar het' => 'Cette page n’existe pas (ou plus). Retournez au',
+			'of zoek hieronder verder.'     => 'ou poursuivez votre recherche ci-dessous.',
+			'>dealerportaal<'               => '>portail concessionnaire<',
+		);
 	}
 
 	/**
@@ -214,7 +340,11 @@ class HDP_I18N {
 			'header_winkelwagen'  => array( 'nl' => 'Winkelwagen', 'fr' => 'Panier' ),
 			'header_mijn_account' => array( 'nl' => 'Mijn account', 'fr' => 'Mon compte' ),
 			'header_accountmenu'  => array( 'nl' => 'Accountmenu', 'fr' => 'Menu du compte' ),
+			'wc_prijs_op_aanvraag'     => array( 'nl' => 'Prijs op aanvraag', 'fr' => 'Prix sur demande' ),
+			'wc_op_aanvraag_contact'   => array( 'nl' => 'Vraag de prijs op:', 'fr' => 'Demandez le prix :' ),
 			// Occasions en restpartijen (occasions.php in het thema).
+			'occasion_categorie'       => array( 'nl' => 'Occasions & restpartijen', 'fr' => 'Occasions et fins de série' ),
+			'occasion_categorie_uitleg' => array( 'nl' => 'Losse partijen en gebruikte onderdelen die Homburg zelf aanbiedt. Op = op.', 'fr' => 'Lots et pièces d’occasion proposés par Homburg. Jusqu’à épuisement du stock.' ),
 			'zijbalk_occasions'        => array( 'nl' => 'Occasions', 'fr' => 'Occasions' ),
 			'occasion_label'           => array( 'nl' => 'Occasion', 'fr' => 'Occasion' ),
 			'occasion_staat'           => array( 'nl' => 'Staat', 'fr' => 'État' ),
@@ -226,7 +356,7 @@ class HDP_I18N {
 			'occasion_op_is_op'        => array( 'nl' => 'Op = op', 'fr' => 'Jusqu’à épuisement du stock' ),
 			// Zoekbalk in de header (HDP_Zoeken).
 			'zoeken_label'          => array( 'nl' => 'Zoeken in het portaal', 'fr' => 'Rechercher dans le portail' ),
-			'zoeken_placeholder'    => array( 'nl' => 'Zoek artikel, claim, bestelling of document…', 'fr' => 'Rechercher article, réclamation, commande ou document…' ),
+			'zoeken_placeholder'    => array( 'nl' => 'Zoek artikel, claim, bestelling of document…', 'fr' => 'Rechercher dans le portail…' ),
 			'zoeken_groep_paginas'      => array( 'nl' => 'Onderdelen', 'fr' => 'Rubriques' ),
 			'zoeken_groep_artikelen'    => array( 'nl' => 'Artikelen', 'fr' => 'Articles' ),
 			'zoeken_groep_bestellingen' => array( 'nl' => 'Bestellingen', 'fr' => 'Commandes' ),

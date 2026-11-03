@@ -38,7 +38,7 @@ function homburg_wc_zoeksuggesties_ajax() {
 		$producten[] = array(
 			'naam'   => $product->get_name(),
 			'sku'    => $product->get_sku(),
-			'prijs'  => wp_strip_all_tags( wc_price( wc_get_price_to_display( $product ) ) ),
+			'prijs'  => '' === $product->get_price() ? homburg_wc_prijs_op_aanvraag_tekst() : wp_strip_all_tags( wc_price( wc_get_price_to_display( $product ) ) ),
 			'url'    => get_permalink( $id ),
 			'beeld'  => $image_id ? wp_get_attachment_image_url( $image_id, 'woocommerce_thumbnail' ) : '',
 		);

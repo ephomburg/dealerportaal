@@ -8,6 +8,14 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.86.0
+
+- Frans compleet in webshop en account (thema 1.37.0). De voorkant schakelt bij FR over op `fr_FR`, zodat winkelwagen, afrekenen, accountmenu, adresvelden en meldingen de officiële vertalingen van WordPress en WooCommerce gebruiken (`HDP_I18N::frontend_locale`). Alleen als die taalbestanden op de server staan: ze gaan niet mee met een deploy, en anders blijft het Nederlands in plaats van Engels. wp-admin blijft in de eigen taal.
+- De Nederlandse teksten uit het thema hebben nu een Franse versie (`HDP_I18N::thema_teksten`), ook de vaste teksten in de scripts, de 404-pagina, zoekresultaten, paginatitels en de categorie Occasions. Een test bewaakt dat elke themetekst Frans heeft.
+- Producten zonder prijs tonen "Prijs op aanvraag" in plaats van niets, op de productpagina met de contactgegevens uit de instellingen. De zoekbalk en de zoeksuggesties toonden daar € 0,00.
+- Het portaal is uitgesloten voor zoekmachines: "noindex" op elke pagina en geen sitemap, vast in de code.
+- "Levering volgens afspraak" volgt nu ook de taal als de verzendregel al in de sessie stond.
+
 ## 1.85.3
 
 - Logo's in header, footer en inlogscherm staan nu in de plugin (`assets/img/`) in plaats van in de mediabibliotheek. Het witte logo was als huisstijl-download in FileBird gezet; de beveiliging verplaatste het bestand en verwijderde de openbare versies, waardoor nieuwe bezoekers geen logo meer zagen.

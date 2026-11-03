@@ -22,7 +22,7 @@ add_filter( 'woocommerce_product_single_add_to_cart_text', 'homburg_wc_knoptekst
  */
 function homburg_wc_knoptekst_kaart( $tekst, $product ) {
 	if ( $product && $product->is_purchasable() ) {
-		return 'In winkelwagen';
+		return __( 'In winkelwagen', 'homburg-dealerportaal-theme' );
 	}
-	return 'Bekijk product';
+	return __( 'Bekijk product', 'homburg-dealerportaal-theme' );
 }

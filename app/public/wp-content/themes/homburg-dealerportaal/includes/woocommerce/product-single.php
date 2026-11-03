@@ -196,6 +196,8 @@ function homburg_wc_single_inline_js() {
 })();
 JS;
 
+	$js = str_replace( "'Gekopieerd'", wp_json_encode( __( 'Gekopieerd', 'homburg-dealerportaal-theme' ) ), $js );
+
 	wp_register_script( 'hdp-wc-single', '', array(), wp_get_theme()->get( 'Version' ), true );
 	wp_enqueue_script( 'hdp-wc-single' );
 	wp_add_inline_script( 'hdp-wc-single', $js );

@@ -38,6 +38,41 @@ function homburg_wc_prijs_suffix() {
 	return ' <span class="hdp-wc-btw">' . esc_html__( 'excl. btw', 'homburg-dealerportaal-theme' ) . '</span>';
 }
 
+add_filter( 'woocommerce_empty_price_html', 'homburg_wc_prijs_op_aanvraag' );
+/**
+ * Een product zonder prijs is een product op aanvraag: dat kan niet in de
+ * winkelwagen, en zonder deze tekst stond er bij de prijs helemaal niets.
+ */
+function homburg_wc_prijs_op_aanvraag() {
+	return '<span class="hdp-wc-op-aanvraag">' . esc_html( homburg_wc_prijs_op_aanvraag_tekst() ) . '</span>';
+}
+
+function homburg_wc_prijs_op_aanvraag_tekst() {
+	return class_exists( 'HDP_I18N' ) ? HDP_I18N::t( 'wc_prijs_op_aanvraag' ) : 'Prijs op aanvraag';
+}
+
+add_action( 'woocommerce_single_product_summary', 'homburg_wc_op_aanvraag_contact', 31 );
+/** Op de productpagina: bij wie je de prijs opvraagt, als dat is ingesteld. */
+function homburg_wc_op_aanvraag_contact() {
+	global $product;
+	if ( ! $product || '' !== $product->get_price() || ! class_exists( 'HDP_Settings' ) ) {
+		return;
+	}
+	$email    = HDP_Settings::get( 'contact_email' );
+	$telefoon = HDP_Settings::get( 'contact_telefoon' );
+	if ( ! $email && ! $telefoon ) {
+		return;
+	}
+	echo '<p class="hdp-wc-op-aanvraag-contact">' . esc_html( HDP_I18N::t( 'wc_op_aanvraag_contact' ) ) . ' ';
+	if ( $email ) {
+		echo '<a href="mailto:' . esc_attr( $email ) . '">' . esc_html( $email ) . '</a>';
+	}
+	if ( $telefoon ) {
+		echo ( $email ? ' · ' : '' ) . esc_html( $telefoon );
+	}
+	echo '</p>';
+}
+
 add_filter( 'woocommerce_coupons_enabled', '__return_false' );
 /**
  * Homburg werkt niet met kortingsbonnen — haalt het coupon-veld (en de
@@ -357,4 +392,27 @@ function homburg_wc_winkel_oude_kop_weg() {
 
 	remove_action( 'woocommerce_before_main_content', 'woocommerce_breadcrumb', 20 );
 	add_filter( 'woocommerce_show_page_title', '__return_false' );
+}
+
+add_filter( 'the_title', 'homburg_wc_paginatitel', 10, 2 );
+add_filter( 'single_post_title', 'homburg_wc_paginatitel', 10, 2 );
+/**
+ * De titels van de WooCommerce-pagina's staan in de database, in het
+ * Nederlands. Via __() komen ze langs de Franse teksten van het thema.
+ *
+ * @param string      $titel De titel.
+ * @param int|WP_Post $post  De pagina.
+ */
+function homburg_wc_paginatitel( $titel, $post = 0 ) {
+	if ( is_admin() || ! class_exists( 'HDP_I18N' ) || ! HDP_I18N::is_frans() ) {
+		return $titel;
+	}
+	$id = $post instanceof WP_Post ? $post->ID : (int) $post;
+	$paginas = array(
+		wc_get_page_id( 'myaccount' ) => __( 'Mijn account', 'homburg-dealerportaal-theme' ),
+		wc_get_page_id( 'cart' )      => __( 'Winkelwagen', 'homburg-dealerportaal-theme' ),
+		wc_get_page_id( 'checkout' )  => __( 'Afrekenen', 'homburg-dealerportaal-theme' ),
+		wc_get_page_id( 'shop' )      => __( 'Webshop', 'homburg-dealerportaal-theme' ),
+	);
+	return isset( $paginas[ $id ] ) ? $paginas[ $id ] : $titel;
 }

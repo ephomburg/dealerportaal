@@ -11,6 +11,13 @@ class HDP_Roles {
 	const PAGINAS_VERSIE_OPTION = 'hdp_paginas_versie';
 
 	public static function init() {
+		// Dit portaal is er voor dealers, niet voor zoekmachines. In de code
+		// en niet alleen als instelling: zo staat het ook goed na een
+		// verhuizing of nieuwe installatie. Zorgt voor "noindex" op elke
+		// pagina en geen sitemap. robots.txt blijft bewust open: een
+		// zoekmachine moet de pagina kunnen lezen om de noindex te zien.
+		add_filter( 'pre_option_blog_public', array( __CLASS__, 'niet_voor_zoekmachines' ) );
+
 		// Zorg dat de capability ook bestaat als de rol al bestond vóór een pluginupdate.
 		$role = get_role( self::ROLE );
 		if ( $role && ! $role->has_cap( self::CAP ) ) {
@@ -32,6 +39,10 @@ class HDP_Roles {
 		// $wp_rewrite nodig, dat pas ná 'plugins_loaded' wordt opgebouwd —
 		// direct aanroepen crasht dus met "get_page_permastruct() on null".
 		add_action( 'init', array( __CLASS__, 'controleer_paginas' ) );
+	}
+
+	public static function niet_voor_zoekmachines() {
+		return '0';
 	}
 
 	public static function controleer_paginas() {

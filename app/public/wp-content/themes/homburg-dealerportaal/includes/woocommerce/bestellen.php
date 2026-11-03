@@ -187,6 +187,18 @@ function homburg_wc_op_rekening_status() {
 	return 'processing';
 }
 
+add_filter( 'woocommerce_shipping_rate_label', 'homburg_wc_levering_label', 20, 2 );
+/**
+ * Ook bij het tonen vertalen: WooCommerce onthoudt de verzendregels in de
+ * sessie, dus na het wisselen van taal bleef anders de oude tekst staan.
+ */
+function homburg_wc_levering_label( $label, $tarief ) {
+	if ( 'flat_rate' === $tarief->get_method_id() && 0.0 === (float) $tarief->get_cost() ) {
+		return homburg_wc_tekst( 'wc_levering_afspraak', 'Levering volgens afspraak' );
+	}
+	return $label;
+}
+
 add_filter( 'woocommerce_package_rates', 'homburg_wc_levering_teksten', 20 );
 /**
  * De verzendregel heet in de instellingen "Levering volgens afspraak"; hier

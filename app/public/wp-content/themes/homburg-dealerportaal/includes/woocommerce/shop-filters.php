@@ -452,5 +452,7 @@ JS;
 
 	wp_register_script( 'hdp-wc-shop', '', array( 'jquery' ), wp_get_theme()->get( 'Version' ), true );
 	wp_enqueue_script( 'hdp-wc-shop' );
+	$js = str_replace( "'Toegevoegd ✓'", wp_json_encode( __( 'Toegevoegd ✓', 'homburg-dealerportaal-theme' ), JSON_UNESCAPED_UNICODE ), $js );
+
 	wp_add_inline_script( 'hdp-wc-shop', $js );
 }
