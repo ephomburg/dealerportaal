@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.96.1
+
+- Het menu links toont geen witte schuifbalk meer als het niet in beeld past: het blijft scrollbaar, met een smalle balk in de kleur van het menu die alleen bij aanwijzen verschijnt.
+
 ## 1.96.0
 
 - Afwerking na een rondgang (thema 1.42.0). De lege winkelwagen is een nette Nederlandse en Franse tekst met een knop naar de webshop, in plaats van Engels met een huilend poppetje. Mijn favorieten toont de titel nog één keer; Accountdetails noemt geen beoordelingen meer; de adresknoppen heten "Factuuradres toevoegen" enz.

@@ -3067,6 +3067,12 @@ body.admin-bar .hdp-garantie-kolom-detail {
 	font-family: 'Montserrat', Arial, sans-serif;
 }
 
+/* Past het menu niet in beeld, dan blijft het scrollbaar, maar zonder de witte
+   standaardbalk: een smalle balk in de kleur van het menu, alleen bij aanwijzen. */
+.hdp-zijbalk { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+.hdp-zijbalk:hover,
+.hdp-zijbalk:focus-within { scrollbar-color: #5a5d63 transparent; }
+
 body.admin-bar .hdp-zijbalk {
 	top: calc(var(--hdp-header-hoogte, 0px) + 32px);
 	max-height: calc(100vh - var(--hdp-header-hoogte, 0px) - 32px);
