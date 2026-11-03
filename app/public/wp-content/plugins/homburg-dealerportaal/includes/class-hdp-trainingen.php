@@ -143,7 +143,16 @@ class HDP_Trainingen {
 	/* === De training ==================================================== */
 
 	public static function titel( $training_id ) {
-		return HDP_I18N::kies( get_the_title( $training_id ), get_post_meta( $training_id, self::META_TITEL_FR, true ) );
+		return HDP_I18N::kies( self::nl_titel( $training_id ), get_post_meta( $training_id, self::META_TITEL_FR, true ) );
+	}
+
+	/**
+	 * De titel als gewone tekst. get_the_title() maakt er HTML van ("&#8211;" voor een
+	 * streepje) en WordPress bewaart een & soms als &amp;. Dat hoort niet in een mail
+	 * of in tekst die nog geëscapet wordt.
+	 */
+	private static function nl_titel( $training_id ) {
+		return html_entity_decode( (string) get_post_field( 'post_title', $training_id ), ENT_QUOTES, 'UTF-8' );
 	}
 
 	/** De omschrijving in de taal van de bezoeker, klaar om te tonen. */
@@ -399,7 +408,7 @@ class HDP_Trainingen {
 		$user = get_userdata( $user_id );
 		$rij  = array(
 			'training_id'     => (int) $training_id,
-			'training_titel'  => get_the_title( $training_id ),
+			'training_titel'  => self::nl_titel( $training_id ),
 			'user_id'         => $user_id,
 			'dealer_naam'     => $user->display_name ? $user->display_name : $user->user_login,
 			'dealer_bedrijf'  => (string) get_user_meta( $user_id, 'billing_company', true ),
@@ -917,7 +926,7 @@ class HDP_Trainingen {
 				<label for="hdp-training-keuze"><strong>Training:</strong></label>
 				<select name="training" id="hdp-training-keuze" onchange="this.form.submit()">
 					<?php foreach ( $trainingen as $training ) : ?>
-						<option value="<?php echo esc_attr( $training->ID ); ?>" <?php selected( $training_id, $training->ID ); ?>><?php echo esc_html( get_the_title( $training ) ); ?></option>
+						<option value="<?php echo esc_attr( $training->ID ); ?>" <?php selected( $training_id, $training->ID ); ?>><?php echo esc_html( self::nl_titel( $training->ID ) ); ?></option>
 					<?php endforeach; ?>
 				</select>
 				<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=hdp_training_csv&training=' . $training_id ), 'hdp_training_csv' ) ); ?>">Download als Excel-bestand (CSV)</a>
@@ -1015,7 +1024,7 @@ class HDP_Trainingen {
 
 		nocache_headers();
 		header( 'Content-Type: text/csv; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename="aanmeldingen-' . sanitize_title( get_the_title( $training_id ) ) . '.csv"' );
+		header( 'Content-Disposition: attachment; filename="aanmeldingen-' . sanitize_title( self::nl_titel( $training_id ) ) . '.csv"' );
 
 		$regels = array( array_merge( array( 'Deelnemer', 'E-mail', 'Dealer', 'E-mail dealer' ), array_values( $vragen ), array( 'Aangemeld op', 'Status' ) ) );
 		foreach ( $rijen as $rij ) {

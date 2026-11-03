@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.90.1
+
+- Trainingen: een streepje of `&` in de titel verscheen als code (`&#8211;`) in de mails, het overzicht en de pagina. Nu overal de titel zoals ingevoerd.
+
 ## 1.90.0
 
 - Nieuw: **Trainingen** (`HDP_Trainingen`, `HDP_Trainingen_Render`, blok `homburg/trainingen-pagina`, pagina `/trainingen/`). Homburg plaatst een training in wp-admin met datum, locatie, kosten, plaatsen, sluitdatum, merken, Franse tekst en per training de eigen invulvelden. Dealers zien de komende trainingen, lezen de uitleg en melden deelnemers aan; een nieuwe training staat ook in "Nieuw voor jou".

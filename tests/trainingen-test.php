@@ -114,6 +114,28 @@ class Trainingen_Test extends WP_UnitTestCase {
 		$this->assertContains( 'Reply-To: piet@dealer.test', $this->mails[1]['headers'] );
 	}
 
+	public function test_titel_met_streepje_en_ampersand_blijft_leesbaar() {
+		$training = $this->maak_training();
+		wp_update_post(
+			array(
+				'ID'         => $training,
+				'post_title' => 'Service - onderhoud & afstellen',
+			)
+		);
+		HDP_Trainingen::meld_aan(
+			$training,
+			array(
+				'naam'  => 'Piet',
+				'email' => 'piet@dealer.test',
+			)
+		);
+
+		$this->assertSame( 'Service - onderhoud & afstellen', HDP_Trainingen::titel( $training ) );
+		$this->assertStringContainsString( 'Service - onderhoud & afstellen', $this->mails[0]['subject'] );
+		$this->assertStringContainsString( 'Service - onderhoud & afstellen', $this->mails[1]['message'] );
+		$this->assertSame( 'Service - onderhoud & afstellen', HDP_Trainingen::aanmeldingen( $training )[0]['training_titel'] );
+	}
+
 	public function test_eigen_trainingsadres_gaat_voor_op_algemeen_adres() {
 		update_option(
 			HDP_Settings::OPTION,
