@@ -3983,28 +3983,73 @@ body.hdp-app-layout .hdp-downloads {
 .hdp-training-kaart-tekst { font-size: 0.9rem; }
 .hdp-training-kaart-meer { margin-top: auto; padding-top: 0.4rem; font-size: 0.88rem; font-weight: 700; color: var(--wp--preset--color--homburg-rood); }
 
-.hdp-training-detail { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 1.5rem; align-items: start; }
-.hdp-training-hoofd > .hdp-training-beeld { display: block; width: 100%; max-height: 340px; margin-bottom: 1.25rem; object-fit: cover; border-radius: 10px; }
-.hdp-training-tekst { margin-bottom: 1.5rem; }
-.hdp-training-tekst > :first-child { margin-top: 0; }
-.hdp-training-tekst > :last-child { margin-bottom: 0; }
-.hdp-training-rail {
-	padding: 1.2rem;
+.hdp-training-detail { display: grid; gap: 1.25rem; }
+.hdp-training-detail .hdp-terug-boven { width: fit-content; margin: 0; }
+.hdp-training-detail .hdp-terug-boven::before { content: '90'; margin-right: 0.5rem; }
+.hdp-training-kop {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 360px;
+	overflow: hidden;
 	background: var(--wp--preset--color--wit);
 	border: 1px solid var(--wp--preset--color--rand);
-	border-radius: 10px;
+	border-radius: 14px;
 }
-.hdp-training-feiten { margin: 0; }
-.hdp-training-feiten > div + div { margin-top: 0.8rem; }
-.hdp-training-feiten dt { font-size: 0.75rem; font-weight: 700; color: var(--wp--preset--color--grijs-tekst); }
-.hdp-training-feiten dd { margin: 0.1rem 0 0; font-weight: 600; }
-.hdp-training-rail h2 { margin: 1.3rem 0 0.4rem; font-size: 0.95rem; }
-.hdp-training-eigen { margin: 0; padding-left: 1.1rem; font-size: 0.9rem; }
+.hdp-training-uitleg { min-width: 0; padding: 2.25rem 2.5rem 2.5rem; }
+.hdp-training-uitleg .hdp-training-beeld { display: block; width: 100%; max-height: 320px; margin-bottom: 1.5rem; object-fit: cover; border-radius: 10px; }
+.hdp-training-soort {
+	margin: 0 0 0.75rem;
+	color: var(--wp--preset--color--homburg-rood);
+	font-size: 0.75rem;
+	font-weight: 800;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+.hdp-training-uitleg h1 { margin: 0 0 1.25rem; font-size: clamp(1.6rem, 2.6vw, 2.15rem); font-weight: 800; line-height: 1.2; text-wrap: balance; }
+.hdp-training-tekst { max-width: 65ch; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-training-tekst > * { margin: 0 0 0.9rem; }
+.hdp-training-tekst > :last-child { margin-bottom: 0; }
+.hdp-training-tekst > p:first-child { color: var(--wp--preset--color--donkergrijs); font-size: 1.12rem; font-weight: 600; line-height: 1.55; }
+
+.hdp-training-feiten { display: flex; flex-direction: column; gap: 1.35rem; padding: 1.9rem; background: var(--wp--preset--color--donkergrijs); color: var(--wp--preset--color--wit); }
+.hdp-training-datum { display: flex; align-items: center; gap: 1rem; }
+.hdp-training-blad { flex: none; width: 72px; overflow: hidden; border-radius: 10px; background: var(--wp--preset--color--wit); color: var(--wp--preset--color--donkergrijs); text-align: center; }
+.hdp-training-blad span { display: block; padding: 0.2rem 0; background: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--wit); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; }
+.hdp-training-blad strong { display: block; padding: 0.3rem 0 0.45rem; font-size: 1.7rem; font-weight: 800; line-height: 1.1; }
+.hdp-training-datumtekst { min-width: 0; }
+.hdp-training-datumtekst strong { display: block; font-size: 1.05rem; font-weight: 700; line-height: 1.3; }
+.hdp-training-datumtekst small { color: #c9ccd2; font-size: 0.85rem; }
+.hdp-training-regels,
+.hdp-training-plaatsen,
+.hdp-training-eigen { padding-top: 1.1rem; border-top: 1px solid #3f4248; }
+.hdp-training-regels { display: grid; gap: 0.9rem; margin: 0; }
+.hdp-training-regels > div { display: grid; grid-template-columns: 22px minmax(0, 1fr); column-gap: 0.75rem; }
+.hdp-training-regels svg { grid-row: 1 / 3; width: 20px; height: 20px; margin-top: 0.15rem; fill: none; stroke: #c9ccd2; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.hdp-training-regels dt { color: #c9ccd2; font-size: 0.75rem; font-weight: 600; }
+.hdp-training-regels dd { margin: 0; font-size: 0.95rem; font-weight: 700; }
+.hdp-training-plaatsen p { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.2rem 0.75rem; margin: 0 0 0.55rem; font-size: 0.85rem; }
+.hdp-training-plaatsen strong { font-weight: 700; }
+.hdp-training-plaatsen span { color: #c9ccd2; }
+.hdp-training-stoelen { display: grid; grid-template-columns: repeat(var(--hdp-stoelen), 1fr); gap: 4px; }
+.hdp-training-stoelen i { height: 8px; border-radius: 2px; background: #3f4248; }
+.hdp-training-stoelen i.is-bezet { background: var(--wp--preset--color--homburg-rood); }
+.hdp-training-naar-formulier { justify-content: center; text-align: center; }
+.hdp-training-feiten .hdp-training-naar-formulier:focus-visible { outline: 3px solid var(--wp--preset--color--wit); outline-offset: 2px; }
+.hdp-training-eigen h2 { margin: 0 0 0.4rem; color: inherit; font-size: 0.9rem; font-weight: 700; }
+.hdp-training-eigen ul { margin: 0; padding-left: 1.1rem; font-size: 0.9rem; }
+.hdp-training-aanmelden { scroll-margin-top: 110px; }
+.hdp-training-aanmelden:empty { display: none; }
+.hdp-training-aanmelden .hdp-garantie-formulier { margin-top: 0; padding: 2rem 2.5rem 2.25rem; border: 1px solid var(--wp--preset--color--rand); border-radius: 14px; box-shadow: none; }
+.hdp-training-aanmelden .hdp-garantie-formulier h2 { margin-bottom: 1.1rem; font-weight: 800; }
 .hdp-training-fout { display: block; margin-top: 0.3rem; font-size: 0.82rem; font-weight: 600; color: var(--wp--preset--color--homburg-rood); }
 .hdp-training-vinkje { display: flex; gap: 0.55rem; align-items: flex-start; font-weight: 500; }
 .hdp-veld .hdp-training-vinkje input { width: auto; margin-top: 0.2rem; }
+@media (max-width: 1180px) {
+	.hdp-training-kop { grid-template-columns: minmax(0, 1fr); }
+	.hdp-training-feiten { order: -1; }
+}
 @media (max-width: 900px) {
-	.hdp-training-detail { grid-template-columns: minmax(0, 1fr); }
-	.hdp-training-rail { grid-row: 1; }
+	.hdp-training-feiten { padding: 1.4rem; }
+	.hdp-training-uitleg { padding: 1.5rem 1.4rem 1.6rem; }
+	.hdp-training-aanmelden .hdp-garantie-formulier { padding: 1.5rem 1.4rem; }
 	.hdp-training-lijst { grid-template-columns: minmax(0, 1fr); }
 }

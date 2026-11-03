@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.91.0
+
+- Trainingen: nieuwe opmaak van de trainingspagina. Uitleg en gegevens staan samen in één kaart: de eerste alinea groter, rechts een donker paneel met kalenderblad, locatie, kosten, een balkje met de bezette plaatsen en een knop naar het formulier. Na aanmelden of een fout blijft de pagina bij het formulier.
+
 ## 1.90.1
 
 - Trainingen: een streepje of `&` in de titel verscheen als code (`&#8211;`) in de mails, het overzicht en de pagina. Nu overal de titel zoals ingevoerd.

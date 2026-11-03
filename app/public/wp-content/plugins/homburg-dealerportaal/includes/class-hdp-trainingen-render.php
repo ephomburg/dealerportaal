@@ -18,6 +18,9 @@ class HDP_Trainingen_Render {
 	const NONCE      = 'hdp_training_aanmelden';
 	const ACTIE_VELD = 'hdp_training_aanmelden';
 
+	/** Meer streepjes passen niet netjes in het paneel. */
+	const MAX_STREEPJES = 24;
+
 	/** Fouten en invoer van een mislukte poging, om hetzelfde formulier ingevuld terug te tonen. */
 	private static $fouten = array();
 	private static $invoer = array();
@@ -51,7 +54,7 @@ class HDP_Trainingen_Render {
 			return;
 		}
 
-		wp_safe_redirect( add_query_arg( 'aangemeld', 1, HDP_Trainingen::url( $training_id ) ) );
+		wp_safe_redirect( add_query_arg( 'aangemeld', 1, HDP_Trainingen::url( $training_id ) ) . '#aanmelden' );
 		exit;
 	}
 
@@ -146,25 +149,27 @@ class HDP_Trainingen_Render {
 	}
 
 	private static function render_training( $id ) {
-		HDP_Paginakop::render(
-			array(
-				'titel'       => HDP_Trainingen::titel( $id ),
-				'terug_url'   => HDP_Trainingen::url(),
-				'terug_tekst' => HDP_I18N::t( 'training_terug' ),
-			)
-		);
 		$eigen = HDP_Trainingen::van_dealer( $id );
-		$over  = HDP_Trainingen::plaatsen_over( $id );
 		$stand = HDP_Trainingen::stand( $id );
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- alleen om de bevestiging te tonen.
 		$net_aangemeld = ! empty( $_GET['aangemeld'] ) && $eigen;
 		?>
 		<section class="hdp-trainingen hdp-training-detail">
-			<div class="hdp-training-hoofd">
-				<?php if ( has_post_thumbnail( $id ) ) : ?>
-					<?php echo get_the_post_thumbnail( $id, 'large', array( 'class' => 'hdp-training-beeld', 'alt' => '' ) ); ?>
-				<?php endif; ?>
-				<div class="hdp-training-tekst"><?php echo wp_kses_post( HDP_Trainingen::tekst( $id ) ); ?></div>
+			<a class="hdp-terug-boven" href="<?php echo esc_url( HDP_Trainingen::url() ); ?>"><?php echo esc_html( HDP_I18N::t( 'training_terug' ) ); ?></a>
+
+			<div class="hdp-training-kop">
+				<div class="hdp-training-uitleg">
+					<?php if ( has_post_thumbnail( $id ) ) : ?>
+						<?php echo get_the_post_thumbnail( $id, 'large', array( 'class' => 'hdp-training-beeld', 'alt' => '' ) ); ?>
+					<?php endif; ?>
+					<p class="hdp-training-soort"><?php echo esc_html( HDP_I18N::t( 'training_label' ) ); ?></p>
+					<h1><?php echo esc_html( HDP_Trainingen::titel( $id ) ); ?></h1>
+					<div class="hdp-training-tekst"><?php echo wp_kses_post( HDP_Trainingen::tekst( $id ) ); ?></div>
+				</div>
+				<?php self::render_feiten( $id, $stand, $eigen ); ?>
+			</div>
+
+			<div class="hdp-training-aanmelden" id="aanmelden">
 				<?php
 				if ( 'open' === $stand ) {
 					self::render_formulier( $id, $eigen, $net_aangemeld );
@@ -173,25 +178,100 @@ class HDP_Trainingen_Render {
 				}
 				?>
 			</div>
-			<aside class="hdp-training-rail">
-				<dl class="hdp-training-feiten">
-					<?php foreach ( HDP_Trainingen::feiten( $id ) as $label => $waarde ) : ?>
-						<div><dt><?php echo esc_html( $label ); ?></dt><dd><?php echo esc_html( $waarde ); ?></dd></div>
-					<?php endforeach; ?>
-					<?php if ( null !== $over && 'open' === $stand ) : ?>
-						<div><dt><?php echo esc_html( HDP_I18N::t( 'training_feit_plaatsen' ) ); ?></dt><dd><?php echo esc_html( sprintf( HDP_I18N::t( 'training_plaatsen_over' ), $over ) ); ?></dd></div>
+		</section>
+		<?php
+	}
+
+	/** Het donkere paneel: datum, locatie, kosten, plaatsen en de weg naar het formulier. */
+	private static function render_feiten( $id, $stand, $eigen ) {
+		$datum   = (string) get_post_meta( $id, HDP_Trainingen::META_DATUM, true );
+		$tijd    = (string) get_post_meta( $id, HDP_Trainingen::META_TIJD, true );
+		$locatie = (string) get_post_meta( $id, HDP_Trainingen::META_LOCATIE, true );
+		$kosten  = (string) get_post_meta( $id, HDP_Trainingen::META_KOSTEN, true );
+		?>
+		<aside class="hdp-training-feiten" aria-label="<?php echo esc_attr( HDP_I18N::t( 'training_feiten_label' ) ); ?>">
+			<div class="hdp-training-datum">
+				<?php if ( $datum ) : ?>
+					<div class="hdp-training-blad" aria-hidden="true">
+						<span><?php echo esc_html( rtrim( mb_strtoupper( HDP_I18N::datum( 'M', strtotime( $datum ) ) ), '.' ) ); ?></span>
+						<strong><?php echo esc_html( HDP_I18N::datum( 'j', strtotime( $datum ) ) ); ?></strong>
+					</div>
+				<?php endif; ?>
+				<div class="hdp-training-datumtekst">
+					<strong><?php echo esc_html( $datum ? HDP_Trainingen::datumtekst( $id ) : HDP_I18N::t( 'training_datum_volgt' ) ); ?></strong>
+					<?php if ( $tijd ) : ?>
+						<small><?php echo esc_html( $tijd ); ?></small>
+					<?php endif; ?>
+				</div>
+			</div>
+
+			<?php if ( $locatie || $kosten ) : ?>
+				<dl class="hdp-training-regels">
+					<?php if ( $locatie ) : ?>
+						<div>
+							<?php echo HDP_Icons::svg_icoon( 'adres' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- vaste opmaak. ?>
+							<dt><?php echo esc_html( HDP_I18N::t( 'training_feit_locatie' ) ); ?></dt>
+							<dd><?php echo esc_html( $locatie ); ?></dd>
+						</div>
+					<?php endif; ?>
+					<?php if ( $kosten ) : ?>
+						<div>
+							<?php echo HDP_Icons::svg_icoon( 'euro' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- vaste opmaak. ?>
+							<dt><?php echo esc_html( HDP_I18N::t( 'training_feit_kosten' ) ); ?></dt>
+							<dd><?php echo esc_html( $kosten ); ?></dd>
+						</div>
 					<?php endif; ?>
 				</dl>
-				<?php if ( $eigen ) : ?>
+			<?php endif; ?>
+
+			<?php self::render_plaatsen( $id, $stand ); ?>
+
+			<?php if ( 'open' === $stand ) : ?>
+				<a class="hdp-btn hdp-training-naar-formulier" href="#aanmelden"><?php echo esc_html( HDP_I18N::t( $eigen ? 'training_nog_iemand' : 'training_aanmelden' ) ); ?></a>
+			<?php endif; ?>
+
+			<?php if ( $eigen ) : ?>
+				<div class="hdp-training-eigen">
 					<h2><?php echo esc_html( HDP_I18N::t( 'training_jouw_aanmeldingen' ) ); ?></h2>
-					<ul class="hdp-training-eigen">
+					<ul>
 						<?php foreach ( $eigen as $rij ) : ?>
 							<li><?php echo esc_html( $rij['deelnemer_naam'] ); ?></li>
 						<?php endforeach; ?>
 					</ul>
-				<?php endif; ?>
-			</aside>
-		</section>
+				</div>
+			<?php endif; ?>
+		</aside>
+		<?php
+	}
+
+	/** Hoeveel plaatsen er nog zijn, met een balkje. Alleen als er een maximum is en de training nog komt. */
+	private static function render_plaatsen( $id, $stand ) {
+		$plaatsen = (int) get_post_meta( $id, HDP_Trainingen::META_PLAATSEN, true );
+		if ( $plaatsen <= 0 || 'voorbij' === $stand ) {
+			return;
+		}
+		$over  = (int) HDP_Trainingen::plaatsen_over( $id );
+		$bezet = $plaatsen - $over;
+		if ( 'vol' === $stand ) {
+			$kop = HDP_I18N::t( 'training_stand_vol' );
+		} else {
+			$kop = 1 === $over ? HDP_I18N::t( 'training_plaats_over' ) : sprintf( HDP_I18N::t( 'training_plaatsen_over' ), $over );
+		}
+		// Bij een grote groep past niet elke plaats als eigen streepje: dan op schaal.
+		$streepjes = min( $plaatsen, self::MAX_STREEPJES );
+		$gevuld    = (int) ceil( $bezet / $plaatsen * $streepjes );
+		?>
+		<div class="hdp-training-plaatsen">
+			<p>
+				<strong><?php echo esc_html( $kop ); ?></strong>
+				<span><?php echo esc_html( sprintf( HDP_I18N::t( 'training_plaatsen_bezet' ), $bezet, $plaatsen ) ); ?></span>
+			</p>
+			<div class="hdp-training-stoelen" style="--hdp-stoelen: <?php echo (int) $streepjes; ?>" aria-hidden="true">
+				<?php for ( $i = 0; $i < $streepjes; $i++ ) : ?>
+					<i<?php echo $i < $gevuld ? ' class="is-bezet"' : ''; ?>></i>
+				<?php endfor; ?>
+			</div>
+		</div>
 		<?php
 	}
 
@@ -208,7 +288,7 @@ class HDP_Trainingen_Render {
 		<?php if ( isset( $fouten['algemeen'] ) ) : ?>
 			<p class="hdp-training-melding hdp-training-melding-fout" role="alert"><?php echo esc_html( HDP_I18N::t( $fouten['algemeen'] ) ); ?></p>
 		<?php endif; ?>
-		<form class="hdp-garantie-formulier hdp-training-formulier" method="post" action="<?php echo esc_url( HDP_Trainingen::url( $id ) ); ?>">
+		<form class="hdp-garantie-formulier hdp-training-formulier" method="post" action="<?php echo esc_url( HDP_Trainingen::url( $id ) . '#aanmelden' ); ?>">
 			<?php wp_nonce_field( self::NONCE . '_' . $id ); ?>
 			<input type="hidden" name="<?php echo esc_attr( self::ACTIE_VELD ); ?>" value="<?php echo esc_attr( $id ); ?>">
 			<h2><?php echo esc_html( HDP_I18N::t( $eigen ? 'training_nog_iemand' : 'training_aanmelden' ) ); ?></h2>

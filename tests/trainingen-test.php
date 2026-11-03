@@ -283,6 +283,49 @@ class Trainingen_Test extends WP_UnitTestCase {
 		$this->assertSame( array( 'algemeen' => 'training_fout_geen_toegang' ), HDP_Trainingen::meld_aan( $training, array( 'naam' => 'Piet', 'email' => 'piet@dealer.test' ) ) );
 	}
 
+	public function test_gegevenspaneel_toont_datum_plaatsen_en_aanmeldknop() {
+		$training = $this->maak_training(
+			array(
+				HDP_Trainingen::META_DATUM    => '2099-12-13',
+				HDP_Trainingen::META_LOCATIE  => 'Leeuwarden',
+				HDP_Trainingen::META_KOSTEN   => '€ 95',
+				HDP_Trainingen::META_PLAATSEN => 2,
+			)
+		);
+		HDP_Trainingen::meld_aan( $training, array( 'naam' => 'Piet', 'email' => 'piet@dealer.test' ) );
+
+		$_GET['training'] = $training;
+		$html             = HDP_Trainingen_Render::render_pagina( array() );
+		$this->assertStringContainsString( 'hdp-training-blad', $html );
+		$this->assertStringContainsString( 'Leeuwarden', $html );
+		$this->assertStringContainsString( HDP_I18N::t( 'training_plaats_over' ), $html );
+		$this->assertStringContainsString( sprintf( HDP_I18N::t( 'training_plaatsen_bezet' ), 1, 2 ), $html );
+		$this->assertSame( 1, substr_count( $html, 'is-bezet' ) );
+		$this->assertStringContainsString( 'href="#aanmelden"', $html );
+		$this->assertSame( 1, substr_count( $html, '<h1' ) );
+
+		// Vol: geen knop en geen formulier meer.
+		HDP_Trainingen::meld_aan( $training, array( 'naam' => 'Kees', 'email' => 'kees@dealer.test' ) );
+		$html = HDP_Trainingen_Render::render_pagina( array() );
+		unset( $_GET['training'] );
+		$this->assertStringNotContainsString( 'href="#aanmelden"', $html );
+		$this->assertStringNotContainsString( '<form', $html );
+		$this->assertStringContainsString( HDP_I18N::t( 'training_stand_vol' ), $html );
+	}
+
+	public function test_zonder_datum_staat_er_datum_volgt_zonder_kalenderblad() {
+		$training = $this->maak_training();
+		delete_post_meta( $training, HDP_Trainingen::META_DATUM );
+
+		$_GET['training'] = $training;
+		$html             = HDP_Trainingen_Render::render_pagina( array() );
+		unset( $_GET['training'] );
+
+		$this->assertStringContainsString( HDP_I18N::t( 'training_datum_volgt' ), $html );
+		$this->assertStringNotContainsString( 'hdp-training-blad', $html );
+		$this->assertStringNotContainsString( 'hdp-training-stoelen', $html );
+	}
+
 	public function test_concept_is_niet_te_zien() {
 		$training = $this->maak_training();
 		wp_update_post( array( 'ID' => $training, 'post_status' => 'draft' ) );
