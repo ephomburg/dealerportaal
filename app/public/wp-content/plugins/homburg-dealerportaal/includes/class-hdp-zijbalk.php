@@ -37,7 +37,7 @@ class HDP_Zijbalk {
 		'webshop'      => 'bestellen',
 		'configurator' => 'bestellen',
 		'bestellen'    => 'bestellen',
-		'occasion'     => 'bestellen',
+		'outlet'     => 'bestellen',
 		'garantie'     => 'service',
 		'sleutel'      => 'service',
 		'machine'      => 'service',
@@ -279,8 +279,8 @@ class HDP_Zijbalk {
 			return false;
 		}
 
-		// Occasions heeft een eigen onderdeel in het menu.
-		if ( function_exists( 'homburg_wc_in_occasions' ) && homburg_wc_in_occasions() ) {
+		// De outlet heeft een eigen onderdeel in het menu.
+		if ( function_exists( 'homburg_wc_in_outlet' ) && homburg_wc_in_outlet() ) {
 			return false;
 		}
 
@@ -323,19 +323,19 @@ class HDP_Zijbalk {
 			array_splice( $onderdelen, $plek, 0, array( $bestellingen ) );
 		}
 
-		// Occasions: direct onder de webshop, maar alleen zolang er iets te
+		// Outlet: direct onder de webshop, maar alleen zolang er iets te
 		// koop is. Een leeg onderdeel in het menu nodigt uit tot een klik
 		// die niets oplevert.
-		if ( function_exists( 'homburg_wc_aantal_occasions' ) && homburg_wc_aantal_occasions() > 0 && homburg_wc_occasions_url() ) {
-			$occasions = array(
-				'icoon'      => 'occasion',
-				'titel'      => HDP_I18N::t( 'zijbalk_occasions' ),
-				'url'        => homburg_wc_occasions_url(),
+		if ( function_exists( 'homburg_wc_aantal_outlet' ) && homburg_wc_aantal_outlet() > 0 && homburg_wc_outlet_url() ) {
+			$outlet = array(
+				'icoon'      => 'outlet',
+				'titel'      => HDP_I18N::t( 'zijbalk_outlet' ),
+				'url'        => homburg_wc_outlet_url(),
 				'nieuwe_tab' => false,
 			);
 			foreach ( $onderdelen as $i => $onderdeel ) {
 				if ( 'webshop' === $onderdeel['icoon'] ) {
-					array_splice( $onderdelen, $i + 1, 0, array( $occasions ) );
+					array_splice( $onderdelen, $i + 1, 0, array( $outlet ) );
 					break;
 				}
 			}
@@ -362,8 +362,8 @@ class HDP_Zijbalk {
 			<ul class="hdp-zijbalk-lijst">
 				<?php foreach ( $in_groep as $onderdeel ) : ?>
 					<?php
-					$huidig = 'occasion' === $onderdeel['icoon']
-						? homburg_wc_in_occasions()
+					$huidig = 'outlet' === $onderdeel['icoon']
+						? homburg_wc_in_outlet()
 						: self::is_huidige( $onderdeel['url'] ) || self::is_winkelgebied( $onderdeel['url'] );
 					// Alleen bij garantie telt er iets mee; dat hangt aan de
 					// claim-URL en niet aan de titel, zodat een hernoemde

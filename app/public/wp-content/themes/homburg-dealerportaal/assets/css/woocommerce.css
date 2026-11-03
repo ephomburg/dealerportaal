@@ -1831,14 +1831,14 @@ body.woocommerce-page table.shop_table td { padding: 0.8rem 1rem; border-top: 1p
 .hdp-bestelbevestiging .wc-block-order-confirmation-status h1 { font-size: 1.75rem; font-weight: 800; }
 
 /* ==========================================================================
-   OCCASIONS & RESTPARTIJEN (zie includes/woocommerce/occasions.php)
+   OUTLET (zie includes/woocommerce/outlet.php)
    ========================================================================== */
-/* Donker in plaats van rood: rood is al "Actie", en een occasion is geen
+/* Donker in plaats van rood: rood is al "Actie", en een outletproduct is geen
    korting maar een ander soort aanbod. */
-.hdp-card__flag--occasion { background: var(--wp--preset--color--donkergrijs); }
-.hdp-card__flag + .hdp-card__flag--occasion { top: 34px; }
+.hdp-card__flag--outlet { background: var(--wp--preset--color--donkergrijs); }
+.hdp-card__flag + .hdp-card__flag--outlet { top: 34px; }
 
-.hdp-card__occasion {
+.hdp-card__outlet {
 	display: block;
 	margin-top: 0.3rem;
 	font-size: 0.74rem;
@@ -1846,9 +1846,9 @@ body.woocommerce-page table.shop_table td { padding: 0.8rem 1rem; border-top: 1p
 	color: var(--wp--preset--color--homburg-rood);
 }
 /* In de lijst onder de naam, in dezelfde kolom. */
-.hdp-lijst-weergave .hdp-card__occasion { grid-column: 2; grid-row: 2; margin-top: 0.1rem; }
+.hdp-lijst-weergave .hdp-card__outlet { grid-column: 2; grid-row: 2; margin-top: 0.1rem; }
 @container hdp-lijst (max-width: 50rem) {
-	.hdp-lijst-weergave .hdp-card__body:has(.hdp-card__occasion) {
+	.hdp-lijst-weergave .hdp-card__body:has(.hdp-card__outlet) {
 		grid-template-areas:
 			"sku    prijs"
 			"titel  titel"
@@ -1856,11 +1856,11 @@ body.woocommerce-page table.shop_table td { padding: 0.8rem 1rem; border-top: 1p
 			"occ    occ"
 			"aantal knop";
 	}
-	.hdp-lijst-weergave .hdp-card__occasion { grid-area: occ; margin-top: 0; }
+	.hdp-lijst-weergave .hdp-card__outlet { grid-area: occ; margin-top: 0; }
 }
 
 /* Productpagina: label, staat en hoeveel er nog zijn, onder het artikelnummer. */
-.hdp-wc-occasion {
+.hdp-wc-outlet {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
@@ -1871,7 +1871,7 @@ body.woocommerce-page table.shop_table td { padding: 0.8rem 1rem; border-top: 1p
 	border-radius: 8px;
 	background: var(--wp--preset--color--wit);
 }
-.hdp-wc-occasion-label {
+.hdp-wc-outlet-label {
 	font-size: 0.66rem;
 	font-weight: 700;
 	letter-spacing: 0.06em;
@@ -1881,8 +1881,8 @@ body.woocommerce-page table.shop_table td { padding: 0.8rem 1rem; border-top: 1p
 	background: var(--wp--preset--color--donkergrijs);
 	color: var(--wp--preset--color--wit);
 }
-.hdp-wc-occasion p { margin: 0; font-size: 0.88rem; }
-.hdp-wc-occasion-voorraad { font-weight: 700; color: var(--wp--preset--color--homburg-rood); }
+.hdp-wc-outlet p { margin: 0; font-size: 0.88rem; }
+.hdp-wc-outlet-voorraad { font-weight: 700; color: var(--wp--preset--color--homburg-rood); }
 
 /* Product zonder prijs (zie setup.php). */
 .hdp-wc-op-aanvraag { font-weight: 600; font-size: 0.92em; color: var(--wp--preset--color--donkergrijs); }

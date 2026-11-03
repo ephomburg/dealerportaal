@@ -1,20 +1,20 @@
 <?php
 /**
- * Occasions en restpartijen: losse partijen die Homburg zelf aanbiedt,
- * naast het gewone assortiment uit PowerAll. Bijvoorbeeld tien stalen
- * platen, of een gebruikt onderdeel dat van een machine is gekomen.
+ * Outlet: losse partijen die Homburg zelf aanbiedt, naast het gewone
+ * assortiment uit PowerAll. Bijvoorbeeld tien stalen platen, of een gebruikt
+ * onderdeel dat van een machine is gekomen.
  *
- * Een occasion is een gewoon WooCommerce-product in de categorie
- * "Occasions & restpartijen". Daarbij:
+ * Een outletproduct is een gewoon WooCommerce-product in de categorie
+ * "Outlet", met de hand aangemaakt en beheerd. Daarbij:
  * - een veld "Staat" (nieuw / als nieuw / gebruikt) met een korte
  *   toelichting, in het productscherm onder "Algemeen";
  * - op = op: de voorraad wordt altijd bijgehouden, en wat uitverkocht is
  *   verdwijnt uit de winkel;
  * - een label en "Nog 7 beschikbaar" op de kaart en de productpagina;
- * - een eigen onderdeel "Occasions" in het menu links, zolang er iets te
+ * - een eigen onderdeel "Outlet" in het menu links, zolang er iets te
  *   koop is (zie HDP_Zijbalk), en een regel in "Nieuw voor jou".
  *
- * PowerAll: elke occasion krijgt het kenmerk _hdp_handmatig. Een koppeling
+ * PowerAll: elk outletproduct krijgt het kenmerk _hdp_handmatig. Een koppeling
  * die het assortiment inleest, moet producten met dat kenmerk overslaan
  * (homburg_wc_is_handmatig()) — anders ruimt hij ze op omdat ze niet in
  * PowerAll staan.
@@ -28,7 +28,7 @@ if ( ! class_exists( 'WooCommerce' ) ) {
 	return;
 }
 
-const HOMBURG_WC_OCCASIONS         = 'occasions';
+const HOMBURG_WC_OUTLET         = 'outlet';
 const HOMBURG_WC_HANDMATIG         = '_hdp_handmatig';
 const HOMBURG_WC_STAAT             = '_hdp_staat';
 const HOMBURG_WC_STAAT_TOELICHTING = '_hdp_staat_toelichting';
@@ -36,46 +36,59 @@ const HOMBURG_WC_STAAT_TOELICHTING = '_hdp_staat_toelichting';
 /** De mogelijke staten, met hun tekstsleutel in HDP_I18N. */
 function homburg_wc_staten() {
 	return array(
-		'nieuw'     => homburg_wc_tekst( 'occasion_staat_nieuw', 'Nieuw' ),
-		'als-nieuw' => homburg_wc_tekst( 'occasion_staat_als_nieuw', 'Als nieuw' ),
-		'gebruikt'  => homburg_wc_tekst( 'occasion_staat_gebruikt', 'Gebruikt' ),
+		'nieuw'     => homburg_wc_tekst( 'outlet_staat_nieuw', 'Nieuw' ),
+		'als-nieuw' => homburg_wc_tekst( 'outlet_staat_als_nieuw', 'Als nieuw' ),
+		'gebruikt'  => homburg_wc_tekst( 'outlet_staat_gebruikt', 'Gebruikt' ),
 	);
 }
 
 /* --- De categorie -------------------------------------------------------- */
 
-add_action( 'init', 'homburg_wc_occasions_categorie_klaarzetten', 20 );
+add_action( 'init', 'homburg_wc_outlet_categorie_klaarzetten', 20 );
 /**
  * Zorgt dat de categorie er is, ook op live na een deploy: daar draait geen
  * installatiestap. Daarna één opvraag van een term per pagina.
  */
-function homburg_wc_occasions_categorie_klaarzetten() {
-	if ( get_term_by( 'slug', HOMBURG_WC_OCCASIONS, 'product_cat' ) ) {
+function homburg_wc_outlet_categorie_klaarzetten() {
+	if ( get_term_by( 'slug', HOMBURG_WC_OUTLET, 'product_cat' ) ) {
+		return;
+	}
+	// Heette eerst "Occasions & restpartijen": hernoemen, dan blijven de producten erin.
+	$oud = get_term_by( 'slug', 'occasions', 'product_cat' );
+	if ( $oud ) {
+		wp_update_term(
+			$oud->term_id,
+			'product_cat',
+			array(
+				'name' => 'Outlet',
+				'slug' => HOMBURG_WC_OUTLET,
+			)
+		);
 		return;
 	}
 	wp_insert_term(
-		'Occasions & restpartijen',
+		'Outlet',
 		'product_cat',
 		array(
-			'slug'        => HOMBURG_WC_OCCASIONS,
+			'slug'        => HOMBURG_WC_OUTLET,
 			'description' => 'Losse partijen en gebruikte onderdelen die Homburg zelf aanbiedt. Op = op.',
 		)
 	);
 }
 
-function homburg_wc_occasions_url() {
-	$term = get_term_by( 'slug', HOMBURG_WC_OCCASIONS, 'product_cat' );
+function homburg_wc_outlet_url() {
+	$term = get_term_by( 'slug', HOMBURG_WC_OUTLET, 'product_cat' );
 	$url  = $term ? get_term_link( $term ) : '';
 	return is_wp_error( $url ) ? '' : (string) $url;
 }
 
 /** @param WC_Product|int $product */
-function homburg_wc_is_occasion( $product ) {
+function homburg_wc_is_outlet( $product ) {
 	$id = $product instanceof WC_Product ? $product->get_id() : (int) $product;
 	if ( $product instanceof WC_Product && $product->get_parent_id() ) {
 		$id = $product->get_parent_id();
 	}
-	return $id && has_term( HOMBURG_WC_OCCASIONS, 'product_cat', $id );
+	return $id && has_term( HOMBURG_WC_OUTLET, 'product_cat', $id );
 }
 
 /**
@@ -87,19 +100,19 @@ function homburg_wc_is_handmatig( $product_id ) {
 	return '1' === get_post_meta( (int) $product_id, HOMBURG_WC_HANDMATIG, true );
 }
 
-/** Staan we op de occasionspagina of op de pagina van een occasion? Voor het menu links. */
-function homburg_wc_in_occasions() {
-	if ( is_product_category( HOMBURG_WC_OCCASIONS ) ) {
+/** Staan we op de outletpagina of op de pagina van een outletproduct? Voor het menu links. */
+function homburg_wc_in_outlet() {
+	if ( is_product_category( HOMBURG_WC_OUTLET ) ) {
 		return true;
 	}
-	return is_product() && homburg_wc_is_occasion( get_queried_object_id() );
+	return is_product() && homburg_wc_is_outlet( get_queried_object_id() );
 }
 
-/** Hoeveel occasions er nu te koop zijn. */
-function homburg_wc_aantal_occasions() {
+/** Hoeveel outletproducten er nu te koop zijn. */
+function homburg_wc_aantal_outlet() {
 	static $aantal = null;
 	if ( null === $aantal ) {
-		$aantal = count( homburg_wc_occasion_ids( 'instock' ) );
+		$aantal = count( homburg_wc_outlet_ids( 'instock' ) );
 	}
 	return $aantal;
 }
@@ -108,7 +121,7 @@ function homburg_wc_aantal_occasions() {
  * @param string $voorraad 'instock' of 'outofstock'.
  * @return int[]
  */
-function homburg_wc_occasion_ids( $voorraad ) {
+function homburg_wc_outlet_ids( $voorraad ) {
 	return get_posts(
 		array(
 			'post_type'      => 'product',
@@ -119,7 +132,7 @@ function homburg_wc_occasion_ids( $voorraad ) {
 				array(
 					'taxonomy' => 'product_cat',
 					'field'    => 'slug',
-					'terms'    => HOMBURG_WC_OCCASIONS,
+					'terms'    => HOMBURG_WC_OUTLET,
 				),
 			),
 			'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- kleine set.
@@ -134,16 +147,16 @@ function homburg_wc_occasion_ids( $voorraad ) {
 
 /* --- Productscherm in wp-admin ------------------------------------------- */
 
-add_action( 'woocommerce_product_options_general_product_data', 'homburg_wc_occasion_velden' );
-function homburg_wc_occasion_velden() {
+add_action( 'woocommerce_product_options_general_product_data', 'homburg_wc_outlet_velden' );
+function homburg_wc_outlet_velden() {
 	echo '<div class="options_group">';
 	woocommerce_wp_select(
 		array(
 			'id'          => HOMBURG_WC_STAAT,
-			'label'       => 'Staat (occasion)',
+			'label'       => 'Staat (outlet)',
 			'options'     => array( '' => '—' ) + homburg_wc_staten(),
 			'desc_tip'    => true,
-			'description' => 'Alleen voor producten in de categorie "Occasions & restpartijen". Staat op de kaart en de productpagina.',
+			'description' => 'Alleen voor producten in de categorie "Outlet". Staat op de kaart en de productpagina.',
 		)
 	);
 	woocommerce_wp_text_input(
@@ -160,18 +173,18 @@ function homburg_wc_occasion_velden() {
 			'id'          => HOMBURG_WC_HANDMATIG,
 			'label'       => 'Handmatig beheerd',
 			'cbvalue'     => '1',
-			'description' => 'Niet uit PowerAll: wordt bij het inlezen van het assortiment overgeslagen. Bij een occasion staat dit vanzelf aan.',
+			'description' => 'Niet uit PowerAll: wordt bij het inlezen van het assortiment overgeslagen. Bij een outletproduct staat dit vanzelf aan.',
 		)
 	);
 	echo '</div>';
 }
 
-add_action( 'woocommerce_admin_process_product_object', 'homburg_wc_occasion_opslaan' );
+add_action( 'woocommerce_admin_process_product_object', 'homburg_wc_outlet_opslaan' );
 /**
- * Slaat de velden op, en houdt een occasion "op = op": zonder voorraadbeheer
+ * Slaat de velden op, en houdt een outletproduct "op = op": zonder voorraadbeheer
  * telt WooCommerce niet af en blijft een verkochte partij te koop staan.
  */
-function homburg_wc_occasion_opslaan( $product ) {
+function homburg_wc_outlet_opslaan( $product ) {
 	// phpcs:disable WordPress.Security.NonceVerification.Missing -- WooCommerce controleert de nonce van het productscherm al.
 	$staat = isset( $_POST[ HOMBURG_WC_STAAT ] ) ? sanitize_key( wp_unslash( $_POST[ HOMBURG_WC_STAAT ] ) ) : '';
 	$product->update_meta_data( HOMBURG_WC_STAAT, isset( homburg_wc_staten()[ $staat ] ) ? $staat : '' );
@@ -184,26 +197,26 @@ function homburg_wc_occasion_opslaan( $product ) {
 
 	// De categorie komt uit hetzelfde formulier; die is op dit moment nog
 	// niet opgeslagen, dus hier uit de invoer lezen.
-	$occasion = homburg_wc_occasion_in_invoer() || homburg_wc_is_occasion( $product );
+	$outlet = homburg_wc_outlet_in_invoer() || homburg_wc_is_outlet( $product );
 
-	if ( $occasion ) {
+	if ( $outlet ) {
 		$handmatig = true;
-		homburg_wc_occasion_voorraad_aan( $product );
+		homburg_wc_outlet_voorraad_aan( $product );
 	}
 
 	$product->update_meta_data( HOMBURG_WC_HANDMATIG, $handmatig ? '1' : '' );
 }
 
-/** Staat het vinkje bij de categorie Occasions aan in het productformulier? */
-function homburg_wc_occasion_in_invoer() {
-	$term = get_term_by( 'slug', HOMBURG_WC_OCCASIONS, 'product_cat' );
-	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- zie homburg_wc_occasion_opslaan().
+/** Staat het vinkje bij de categorie Outlet aan in het productformulier? */
+function homburg_wc_outlet_in_invoer() {
+	$term = get_term_by( 'slug', HOMBURG_WC_OUTLET, 'product_cat' );
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- zie homburg_wc_outlet_opslaan().
 	$gekozen = isset( $_POST['tax_input']['product_cat'] ) ? array_map( 'intval', (array) wp_unslash( $_POST['tax_input']['product_cat'] ) ) : array();
 	return $term && in_array( (int) $term->term_id, $gekozen, true );
 }
 
 /** Voorraadbeheer aan; staat er nog geen aantal, dan 1 (één stuk). */
-function homburg_wc_occasion_voorraad_aan( $product ) {
+function homburg_wc_outlet_voorraad_aan( $product ) {
 	if ( ! $product->get_manage_stock() ) {
 		$product->set_manage_stock( true );
 		if ( null === $product->get_stock_quantity() ) {
@@ -216,19 +229,19 @@ function homburg_wc_occasion_voorraad_aan( $product ) {
 
 /* --- Uitverkocht = weg ---------------------------------------------------- */
 
-add_action( 'pre_get_posts', 'homburg_wc_uitverkochte_occasions_weg', 99 );
+add_action( 'pre_get_posts', 'homburg_wc_uitverkochte_outlet_weg', 99 );
 /**
- * Een uitverkochte occasion komt niet terug (anders dan een gewoon artikel,
+ * Een uitverkocht outletproduct komt niet terug (anders dan een gewoon artikel,
  * dat weer aangevuld wordt), dus die hoort niet meer in de winkel.
  *
  * Na de zoekfunctie van de winkel (shop-filters.php): die zet post__in, en
  * dan negeert WordPress post__not_in. Daarom uit allebei halen.
  */
-function homburg_wc_uitverkochte_occasions_weg( $query ) {
+function homburg_wc_uitverkochte_outlet_weg( $query ) {
 	if ( is_admin() || ! $query->is_main_query() || ! ( is_shop() || is_product_taxonomy() || is_search() ) ) {
 		return;
 	}
-	$weg = homburg_wc_occasion_ids( 'outofstock' );
+	$weg = homburg_wc_outlet_ids( 'outofstock' );
 	if ( ! $weg ) {
 		return;
 	}
@@ -241,10 +254,10 @@ function homburg_wc_uitverkochte_occasions_weg( $query ) {
 	}
 }
 
-add_filter( 'woocommerce_product_is_visible', 'homburg_wc_uitverkochte_occasion_onzichtbaar', 10, 2 );
+add_filter( 'woocommerce_product_is_visible', 'homburg_wc_uitverkochte_outlet_onzichtbaar', 10, 2 );
 /** Ook niet bij gerelateerde producten, in favorieten of in de zoekbalk. */
-function homburg_wc_uitverkochte_occasion_onzichtbaar( $zichtbaar, $product_id ) {
-	if ( $zichtbaar && homburg_wc_is_occasion( $product_id ) ) {
+function homburg_wc_uitverkochte_outlet_onzichtbaar( $zichtbaar, $product_id ) {
+	if ( $zichtbaar && homburg_wc_is_outlet( $product_id ) ) {
 		$product = wc_get_product( $product_id );
 		return $product && $product->is_in_stock();
 	}
@@ -254,90 +267,90 @@ function homburg_wc_uitverkochte_occasion_onzichtbaar( $zichtbaar, $product_id )
 /* --- Wat de dealer ziet --------------------------------------------------- */
 
 /** "Nog 7 beschikbaar", of '' als dat niet bekend is. */
-function homburg_wc_occasion_beschikbaar( $product ) {
+function homburg_wc_outlet_beschikbaar( $product ) {
 	$aantal = $product->get_manage_stock() ? (int) $product->get_stock_quantity() : 0;
 	if ( $aantal <= 0 ) {
 		return '';
 	}
 	return 1 === $aantal
-		? homburg_wc_tekst( 'occasion_nog_een', 'Nog 1 beschikbaar' )
-		: sprintf( homburg_wc_tekst( 'occasion_nog_meer', 'Nog %d beschikbaar' ), $aantal );
+		? homburg_wc_tekst( 'outlet_nog_een', 'Nog 1 beschikbaar' )
+		: sprintf( homburg_wc_tekst( 'outlet_nog_meer', 'Nog %d beschikbaar' ), $aantal );
 }
 
-function homburg_wc_occasion_staat( $product ) {
+function homburg_wc_outlet_staat( $product ) {
 	$staat  = (string) $product->get_meta( HOMBURG_WC_STAAT );
 	$staten = homburg_wc_staten();
 	return isset( $staten[ $staat ] ) ? $staten[ $staat ] : '';
 }
 
 /** Het label op het beeldvlak van de kaart. */
-function homburg_wc_occasion_vlag( $product ) {
-	if ( ! homburg_wc_is_occasion( $product ) ) {
+function homburg_wc_outlet_vlag( $product ) {
+	if ( ! homburg_wc_is_outlet( $product ) ) {
 		return;
 	}
-	echo '<span class="hdp-card__flag hdp-card__flag--occasion">' . esc_html( homburg_wc_tekst( 'occasion_label', 'Occasion' ) ) . '</span>';
+	echo '<span class="hdp-card__flag hdp-card__flag--outlet">' . esc_html( homburg_wc_tekst( 'outlet_label', 'Outlet' ) ) . '</span>';
 }
 
 /** Staat en "nog x beschikbaar" onder de prijs op de kaart. */
-function homburg_wc_occasion_kaartregel( $product ) {
-	if ( ! homburg_wc_is_occasion( $product ) ) {
+function homburg_wc_outlet_kaartregel( $product ) {
+	if ( ! homburg_wc_is_outlet( $product ) ) {
 		return;
 	}
-	$delen = array_filter( array( homburg_wc_occasion_staat( $product ), homburg_wc_occasion_beschikbaar( $product ) ) );
+	$delen = array_filter( array( homburg_wc_outlet_staat( $product ), homburg_wc_outlet_beschikbaar( $product ) ) );
 	if ( ! $delen ) {
 		return;
 	}
-	echo '<span class="hdp-card__occasion">' . esc_html( implode( ' · ', $delen ) ) . '</span>';
+	echo '<span class="hdp-card__outlet">' . esc_html( implode( ' · ', $delen ) ) . '</span>';
 }
 
-add_action( 'woocommerce_single_product_summary', 'homburg_wc_occasion_op_productpagina', 8 );
+add_action( 'woocommerce_single_product_summary', 'homburg_wc_outlet_op_productpagina', 8 );
 /** Op de productpagina, onder het artikelnummer: label, staat met toelichting, en hoeveel er nog zijn. */
-function homburg_wc_occasion_op_productpagina() {
+function homburg_wc_outlet_op_productpagina() {
 	global $product;
-	if ( ! $product || ! homburg_wc_is_occasion( $product ) ) {
+	if ( ! $product || ! homburg_wc_is_outlet( $product ) ) {
 		return;
 	}
-	$staat       = homburg_wc_occasion_staat( $product );
+	$staat       = homburg_wc_outlet_staat( $product );
 	$toelichting = (string) $product->get_meta( HOMBURG_WC_STAAT_TOELICHTING );
-	$beschikbaar = homburg_wc_occasion_beschikbaar( $product );
+	$beschikbaar = homburg_wc_outlet_beschikbaar( $product );
 	?>
-	<div class="hdp-wc-occasion">
-		<span class="hdp-wc-occasion-label"><?php echo esc_html( homburg_wc_tekst( 'occasion_label', 'Occasion' ) ); ?></span>
+	<div class="hdp-wc-outlet">
+		<span class="hdp-wc-outlet-label"><?php echo esc_html( homburg_wc_tekst( 'outlet_label', 'Outlet' ) ); ?></span>
 		<?php if ( $staat ) : ?>
-			<p class="hdp-wc-occasion-staat">
-				<strong><?php echo esc_html( homburg_wc_tekst( 'occasion_staat', 'Staat' ) ); ?>:</strong>
+			<p class="hdp-wc-outlet-staat">
+				<strong><?php echo esc_html( homburg_wc_tekst( 'outlet_staat', 'Staat' ) ); ?>:</strong>
 				<?php echo esc_html( $staat ); ?><?php echo $toelichting ? ' — ' . esc_html( $toelichting ) : ''; ?>
 			</p>
 		<?php endif; ?>
 		<?php if ( $beschikbaar ) : ?>
-			<p class="hdp-wc-occasion-voorraad"><?php echo esc_html( $beschikbaar ); ?> · <?php echo esc_html( homburg_wc_tekst( 'occasion_op_is_op', 'Op = op' ) ); ?></p>
+			<p class="hdp-wc-outlet-voorraad"><?php echo esc_html( $beschikbaar ); ?> · <?php echo esc_html( homburg_wc_tekst( 'outlet_op_is_op', 'Op = op' ) ); ?></p>
 		<?php endif; ?>
 	</div>
 	<?php
 }
 
-add_filter( 'woocommerce_quantity_input_max', 'homburg_wc_occasion_max_aantal', 10, 2 );
+add_filter( 'woocommerce_quantity_input_max', 'homburg_wc_outlet_max_aantal', 10, 2 );
 /** Niet meer in de winkelwagen kunnen zetten dan er is. */
-function homburg_wc_occasion_max_aantal( $max, $product ) {
-	if ( $product && homburg_wc_is_occasion( $product ) && $product->get_manage_stock() ) {
+function homburg_wc_outlet_max_aantal( $max, $product ) {
+	if ( $product && homburg_wc_is_outlet( $product ) && $product->get_manage_stock() ) {
 		return max( 1, (int) $product->get_stock_quantity() );
 	}
 	return $max;
 }
 
 /**
- * Nieuwe occasions voor "Nieuw voor jou" op de startpagina (zie
+ * Nieuwe outletproducten voor "Nieuw voor jou" op de startpagina (zie
  * HDP_Portal_Render). Zelfde venster als bij documenten.
  *
  * @param int $sinds Tijdstempel (UTC) van het laatste wegklikken; 0 = nooit.
  * @param int $dagen Hoe lang iets als nieuw geldt.
  * @return array<int, array{titel: string, sub: string, url: string, tijd: int}>
  */
-function homburg_wc_nieuwe_occasions( $sinds, $dagen ) {
+function homburg_wc_nieuwe_outlet( $sinds, $dagen ) {
 	$grens = max( (int) $sinds, time() - (int) $dagen * DAY_IN_SECONDS );
 	$lijst = array();
 
-	foreach ( homburg_wc_occasion_ids( 'instock' ) as $id ) {
+	foreach ( homburg_wc_outlet_ids( 'instock' ) as $id ) {
 		$tijd = (int) get_post_time( 'U', true, $id );
 		if ( $tijd <= $grens ) {
 			continue;
@@ -348,7 +361,7 @@ function homburg_wc_nieuwe_occasions( $sinds, $dagen ) {
 		}
 		$lijst[] = array(
 			'titel' => $product->get_name(),
-			'sub'   => implode( ' · ', array_filter( array( homburg_wc_tekst( 'occasion_label', 'Occasion' ), homburg_wc_occasion_beschikbaar( $product ) ) ) ),
+			'sub'   => implode( ' · ', array_filter( array( homburg_wc_tekst( 'outlet_label', 'Outlet' ), homburg_wc_outlet_beschikbaar( $product ) ) ) ),
 			'url'   => get_permalink( $id ),
 			'tijd'  => $tijd,
 		);
@@ -359,15 +372,15 @@ function homburg_wc_nieuwe_occasions( $sinds, $dagen ) {
 
 /* --- Frans ---------------------------------------------------------------- */
 
-add_filter( 'get_term', 'homburg_wc_occasions_categorie_vertalen', 10, 2 );
+add_filter( 'get_term', 'homburg_wc_outlet_categorie_vertalen', 10, 2 );
 /** De categorie is een vaste term; naam en uitleg staan in de teksten van het portaal. */
-function homburg_wc_occasions_categorie_vertalen( $term, $taxonomie ) {
-	if ( is_admin() || 'product_cat' !== $taxonomie || ! is_object( $term ) || HOMBURG_WC_OCCASIONS !== $term->slug ) {
+function homburg_wc_outlet_categorie_vertalen( $term, $taxonomie ) {
+	if ( is_admin() || 'product_cat' !== $taxonomie || ! is_object( $term ) || HOMBURG_WC_OUTLET !== $term->slug ) {
 		return $term;
 	}
 	if ( class_exists( 'HDP_I18N' ) && HDP_I18N::is_frans() ) {
-		$term->name        = HDP_I18N::t( 'occasion_categorie' );
-		$term->description = HDP_I18N::t( 'occasion_categorie_uitleg' );
+		$term->name        = HDP_I18N::t( 'outlet_categorie' );
+		$term->description = HDP_I18N::t( 'outlet_categorie_uitleg' );
 	}
 	return $term;
 }

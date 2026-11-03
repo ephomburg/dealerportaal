@@ -170,7 +170,7 @@ class HDP_Zoeken {
 
 		$items = array();
 		foreach ( $termen as $merk ) {
-			if ( 'occasions' === $merk->slug || ! self::past( $term, array( $merk->name ) ) ) {
+			if ( 'outlet' === $merk->slug || ! self::past( $term, array( $merk->name ) ) ) {
 				continue;
 			}
 			$items[] = self::item(
@@ -198,7 +198,7 @@ class HDP_Zoeken {
 			$prijs   = '' === $product->get_price()
 				? HDP_I18N::t( 'wc_prijs_op_aanvraag' )
 				: html_entity_decode( wp_strip_all_tags( wc_price( wc_get_price_to_display( $product ) ) ), ENT_QUOTES, 'UTF-8' );
-			$soort   = function_exists( 'homburg_wc_is_occasion' ) && homburg_wc_is_occasion( $product ) ? HDP_I18N::t( 'occasion_label' ) . ' · ' : '';
+			$soort   = function_exists( 'homburg_wc_is_outlet' ) && homburg_wc_is_outlet( $product ) ? HDP_I18N::t( 'outlet_label' ) . ' · ' : '';
 			$items[] = self::item(
 				$product->get_name(),
 				$soort . trim( $product->get_sku() . ' · ' . $prijs, ' ·' ),

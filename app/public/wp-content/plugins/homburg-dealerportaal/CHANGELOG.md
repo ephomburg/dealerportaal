@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.89.0
+
+- "Occasions & restpartijen" heet nu **Outlet** (thema 1.40.0, `includes/woocommerce/outlet.php`): de categorie, het label, het menu en de zoekbalk, in het Nederlands en Frans. De bestaande categorie wordt vanzelf hernoemd en houdt haar producten; het adres wordt `/product-category/outlet/`. Outletproducten blijven handmatig in WooCommerce beheerd, niet via PowerAll.
+
 ## 1.88.0
 
 - Nieuw onderdeel "Mijn merken" in het accountmenu (thema 1.39.0, `includes/woocommerce/mijn-merken.php`): de dealer ziet voor welke merken hij toegang heeft, met logo als dat is ingesteld, en bij wie hij terechtkan als er iets niet klopt. Zonder eigen merkenlijst staat er dat hij alle merken ziet. Alleen lezen; de rechten stelt Homburg in bij het gebruikersprofiel.

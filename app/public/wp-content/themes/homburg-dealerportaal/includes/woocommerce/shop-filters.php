@@ -153,17 +153,17 @@ function homburg_wc_shop_werkbalk_open() {
 		return;
 	}
 
-	// Occasions is een eigen onderdeel en geen merk: niet in het filter, en
-	// op de occasionspagina zelf geen filter (de aantallen zouden over de
+	// De outlet is een eigen onderdeel en geen merk: niet in het filter, en
+	// op de outletpagina zelf geen filter (de aantallen zouden over de
 	// hele winkel gaan).
-	$occasions      = function_exists( 'homburg_wc_in_occasions' ) ? get_term_by( 'slug', HOMBURG_WC_OCCASIONS, 'product_cat' ) : null;
-	$merken         = function_exists( 'homburg_wc_in_occasions' ) && homburg_wc_in_occasions() ? array() : get_terms(
+	$outlet      = function_exists( 'homburg_wc_in_outlet' ) ? get_term_by( 'slug', HOMBURG_WC_OUTLET, 'product_cat' ) : null;
+	$merken         = function_exists( 'homburg_wc_in_outlet' ) && homburg_wc_in_outlet() ? array() : get_terms(
 		array(
 			'taxonomy'   => 'product_cat',
 			'parent'     => 0,
 			'hide_empty' => true,
 			'orderby'    => 'name',
-			'exclude'    => $occasions ? array( $occasions->term_id ) : array(),
+			'exclude'    => $outlet ? array( $outlet->term_id ) : array(),
 		)
 	);
 	$actieve_merken = homburg_wc_actieve_merken();

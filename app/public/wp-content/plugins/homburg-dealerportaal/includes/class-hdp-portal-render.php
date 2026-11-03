@@ -409,7 +409,7 @@ class HDP_Portal_Render {
 
 	/**
 	 * Alles wat nieuw is voor deze dealer: documenten en, als het thema ze
-	 * aanbiedt, nieuwe occasions. Nieuwste eerst.
+	 * aanbiedt, nieuwe outletproducten. Nieuwste eerst.
 	 *
 	 * @return array<int, array{titel: string, sub: string, url: string, icoon: string, tijd: int}>
 	 */
@@ -428,10 +428,10 @@ class HDP_Portal_Render {
 			);
 		}
 
-		if ( function_exists( 'homburg_wc_nieuwe_occasions' ) ) {
+		if ( function_exists( 'homburg_wc_nieuwe_outlet' ) ) {
 			$sinds = (int) get_user_meta( get_current_user_id(), self::META_NIEUW_WEG, true );
-			foreach ( homburg_wc_nieuwe_occasions( $sinds, HDP_Downloads_CPT::NIEUW_DAGEN ) as $occasion ) {
-				$regels[] = $occasion + array( 'icoon' => 'occasion' );
+			foreach ( homburg_wc_nieuwe_outlet( $sinds, HDP_Downloads_CPT::NIEUW_DAGEN ) as $outlet ) {
+				$regels[] = $outlet + array( 'icoon' => 'outlet' );
 			}
 		}
 

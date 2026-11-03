@@ -84,11 +84,11 @@ add_filter( 'woocommerce_product_get_stock_status', 'homburg_wc_forceer_instock'
  * dit houdt dat gedrag stabiel, ook als een import per ongeluk een
  * afwijkende status meegeeft.
  *
- * Niet bij occasions: daar is de voorraad juist echt (op = op), zie
- * occasions.php.
+ * Niet bij de outlet: daar is de voorraad juist echt (op = op), zie
+ * outlet.php.
  */
 function homburg_wc_forceer_instock( $status, $product = null ) {
-	if ( $product && function_exists( 'homburg_wc_is_occasion' ) && homburg_wc_is_occasion( $product ) ) {
+	if ( $product && function_exists( 'homburg_wc_is_outlet' ) && homburg_wc_is_outlet( $product ) ) {
 		return $status;
 	}
 	return 'instock';
