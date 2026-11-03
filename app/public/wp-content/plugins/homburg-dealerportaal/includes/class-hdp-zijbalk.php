@@ -39,6 +39,7 @@ class HDP_Zijbalk {
 		'bestellen'    => 'bestellen',
 		'outlet'     => 'bestellen',
 		'garantie'     => 'service',
+		'training'     => 'service',
 		'sleutel'      => 'service',
 		'machine'      => 'service',
 		'technisch'    => 'service',

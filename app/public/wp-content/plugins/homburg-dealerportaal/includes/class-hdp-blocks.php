@@ -51,6 +51,7 @@ class HDP_Blocks {
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/garantie' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/zijbalk' );
 		register_block_type( HDP_PLUGIN_DIR . 'blocks/nieuw-voor-jou' );
+		register_block_type( HDP_PLUGIN_DIR . 'blocks/trainingen' );
 	}
 
 	public static function enqueue_assets() {
@@ -66,6 +67,7 @@ class HDP_Blocks {
 			|| has_block( 'homburg/bestelgeschiedenis-pagina', $post )
 			|| has_block( 'homburg/merken-tegel', $post )
 			|| has_block( 'homburg/garantie-pagina', $post )
+			|| has_block( 'homburg/trainingen-pagina', $post )
 			|| has_block( 'homburg/zijbalk', $post )
 		);
 

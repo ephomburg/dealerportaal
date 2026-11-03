@@ -1,0 +1,47 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "homburg/trainingen-pagina",
+	"title": "Trainingen",
+	"category": "widgets",
+	"icon": "welcome-learn-more",
+	"description": "De trainingen voor ingelogde, goedgekeurde dealers: het overzicht, de uitleg per training en het aanmeldformulier.",
+	"textdomain": "homburg-dealerportaal",
+	"attributes": {
+		"heroAfbeelding": {
+			"type": "string",
+			"default": "https://www.homburg-belgium.com/wp-content/uploads/2023/09/Homburg-Holland-precisielandbouw-man-in-veld.jpg"
+		},
+		"titel": {
+			"type": "string",
+			"default": "Trainingen"
+		},
+		"titelFr": {
+			"type": "string",
+			"default": "Formations"
+		},
+		"omschrijving": {
+			"type": "string",
+			"default": "Bekijk de komende trainingen van Homburg en meld je aan."
+		},
+		"omschrijvingFr": {
+			"type": "string",
+			"default": "Découvrez les prochaines formations de Homburg et inscrivez-vous."
+		},
+		"loginIntro": {
+			"type": "string",
+			"default": "Log in met je dealeraccount om de trainingen te bekijken en je aan te melden."
+		},
+		"loginIntroFr": {
+			"type": "string",
+			"default": "Connectez-vous avec votre compte concessionnaire pour voir les formations et vous inscrire."
+		}
+	},
+	"supports": {
+		"html": false,
+		"multiple": false,
+		"reusable": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

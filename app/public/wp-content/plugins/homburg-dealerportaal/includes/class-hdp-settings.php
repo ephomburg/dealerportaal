@@ -44,6 +44,7 @@ class HDP_Settings {
 		add_settings_field( 'contact_telefoon', 'Telefoonnummer', array( __CLASS__, 'field_contact_telefoon' ), 'hdp-instellingen', 'hdp_contact' );
 		add_settings_field( 'garantie_email', 'E-mailadres garantie', array( __CLASS__, 'field_garantie_email' ), 'hdp-instellingen', 'hdp_contact' );
 		add_settings_field( 'garantie_telefoon', 'Telefoonnummer garantie', array( __CLASS__, 'field_garantie_telefoon' ), 'hdp-instellingen', 'hdp_contact' );
+		add_settings_field( 'training_email', 'E-mailadres trainingen', array( __CLASS__, 'field_training_email' ), 'hdp-instellingen', 'hdp_contact' );
 
 		add_settings_section( 'hdp_merklogos', "Merklogo's", array( __CLASS__, 'sectie_merklogos_intro' ), 'hdp-instellingen' );
 		foreach ( HDP_Merken::lijst() as $hdp_merk ) {
@@ -84,6 +85,7 @@ class HDP_Settings {
 			'contact_telefoon' => isset( $input['contact_telefoon'] ) ? sanitize_text_field( $input['contact_telefoon'] ) : '',
 			'garantie_email'   => isset( $input['garantie_email'] ) ? sanitize_email( $input['garantie_email'] ) : '',
 			'garantie_telefoon' => isset( $input['garantie_telefoon'] ) ? sanitize_text_field( $input['garantie_telefoon'] ) : '',
+			'training_email'   => isset( $input['training_email'] ) ? sanitize_email( $input['training_email'] ) : '',
 			'merk_logos'       => $merk_logos,
 			'bestellen_aan'    => empty( $input['bestellen_aan'] ) ? '' : '1',
 		);
@@ -128,6 +130,14 @@ class HDP_Settings {
 			'<input type="email" name="%s[garantie_email]" value="%s" class="regular-text" placeholder="service@homburg-holland.com">',
 			esc_attr( self::OPTION ),
 			esc_attr( self::get( 'garantie_email' ) )
+		);
+	}
+
+	public static function field_training_email() {
+		printf(
+			'<input type="email" name="%s[training_email]" value="%s" class="regular-text"><p class="description">Krijgt bericht bij elke aanmelding voor een training. Leeg = het algemene e-mailadres hierboven.</p>',
+			esc_attr( self::OPTION ),
+			esc_attr( self::get( 'training_email' ) )
 		);
 	}
 

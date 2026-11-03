@@ -435,6 +435,11 @@ class HDP_Portal_Render {
 			}
 		}
 
+		$sinds = (int) get_user_meta( get_current_user_id(), self::META_NIEUW_WEG, true );
+		foreach ( HDP_Trainingen::nieuwe( $sinds, HDP_Downloads_CPT::NIEUW_DAGEN ) as $training ) {
+			$regels[] = $training + array( 'icoon' => 'training' );
+		}
+
 		usort(
 			$regels,
 			static function ( $a, $b ) {

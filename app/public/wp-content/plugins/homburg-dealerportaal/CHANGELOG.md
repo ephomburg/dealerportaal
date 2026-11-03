@@ -8,6 +8,11 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.90.0
+
+- Nieuw: **Trainingen** (`HDP_Trainingen`, `HDP_Trainingen_Render`, blok `homburg/trainingen-pagina`, pagina `/trainingen/`). Homburg plaatst een training in wp-admin met datum, locatie, kosten, plaatsen, sluitdatum, merken, Franse tekst en per training de eigen invulvelden. Dealers zien de komende trainingen, lezen de uitleg en melden deelnemers aan; een nieuwe training staat ook in "Nieuw voor jou".
+- Aanmeldingen staan in de eigen tabel `wp_hdp_training_aanmeldingen`, met een kopie van vraag en antwoord. De deelnemer krijgt een bevestiging in zijn taal (de dealer in cc), het team een Nederlandse mail op de nieuwe instelling "E-mailadres trainingen". Overzicht, annuleren en CSV onder Trainingen > Aanmeldingen.
+
 ## 1.89.1
 
 - Het onderdeel **Outlet** staat nu altijd in het menu, ook als er niets te koop is. Een lege outlet toont "Er staat op dit moment niets in de outlet." in plaats van de standaardtekst over een selectie (thema 1.40.1).
