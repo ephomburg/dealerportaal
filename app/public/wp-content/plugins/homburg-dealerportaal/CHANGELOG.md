@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.92.1
+
+- Trainingen: de tijd vul je in met twee tijdvelden (begintijd en eindtijd) in plaats van vrije tekst, zodat die altijd als "09:00 - 16:00" verschijnt. Een eerder opgeslagen tijd zoals "0900 - 1600" wordt ook zo getoond.
+
 ## 1.92.0
 
 - Trainingen: na het aanmelden staat er een knop "In Outlook zetten", en de bevestigingsmail krijgt dezelfde afspraak als bijlage (`.ics`, opent ook in andere agenda's). Eén dag met duidelijke tijden wordt een afspraak met die tijden, meer dagen of een onduidelijke tijd een afspraak van hele dagen.

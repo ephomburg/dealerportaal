@@ -74,6 +74,7 @@ class HDP_Trainingen {
 		add_filter( 'manage_' . self::POST_TYPE . '_posts_columns', array( __CLASS__, 'kolommen' ) );
 		add_action( 'manage_' . self::POST_TYPE . '_posts_custom_column', array( __CLASS__, 'kolom_inhoud' ), 10, 2 );
 		add_action( 'admin_menu', array( __CLASS__, 'registreer_menu' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'meld_tijdfout' ) );
 		add_action( 'admin_post_hdp_training_csv', array( __CLASS__, 'exporteer_csv' ) );
 		add_action( 'admin_post_hdp_training_annuleer', array( __CLASS__, 'verwerk_annuleren' ) );
 	}
@@ -523,7 +524,7 @@ class HDP_Trainingen {
 		}
 		$eind   = (string) get_post_meta( $training_id, self::META_EINDDATUM, true );
 		$eind   = $eind && $eind > $datum ? $eind : $datum;
-		$tijd   = (string) get_post_meta( $training_id, self::META_TIJD, true );
+		$tijd   = self::tijd( $training_id );
 		$tijden = $eind === $datum ? self::tijden( $tijd ) : null;
 
 		if ( $tijden ) {
@@ -708,7 +709,7 @@ class HDP_Trainingen {
 	public static function feiten( $training_id ) {
 		$feiten = array(
 			HDP_I18N::t( 'training_feit_datum' )   => self::datumtekst( $training_id ),
-			HDP_I18N::t( 'training_feit_tijd' )    => (string) get_post_meta( $training_id, self::META_TIJD, true ),
+			HDP_I18N::t( 'training_feit_tijd' )    => self::tijd( $training_id ),
 			HDP_I18N::t( 'training_feit_locatie' ) => (string) get_post_meta( $training_id, self::META_LOCATIE, true ),
 			HDP_I18N::t( 'training_feit_kosten' )  => (string) get_post_meta( $training_id, self::META_KOSTEN, true ),
 		);
@@ -733,13 +734,15 @@ class HDP_Trainingen {
 		$invoer = array(
 			array( 'hdp_training_datum', 'Datum', 'date', self::META_DATUM, 'Leeg = "datum volgt".' ),
 			array( 'hdp_training_einddatum', 'Einddatum', 'date', self::META_EINDDATUM, 'Alleen bij meer dagen.' ),
-			array( 'hdp_training_tijd', 'Tijd', 'text', self::META_TIJD, 'Bijv. 09:00 - 16:00' ),
 			array( 'hdp_training_locatie', 'Locatie', 'text', self::META_LOCATIE, '' ),
 			array( 'hdp_training_kosten', 'Kosten', 'text', self::META_KOSTEN, 'Bijv. € 95 excl. btw, of "Gratis". Leeg = niet tonen.' ),
 			array( 'hdp_training_plaatsen', 'Maximaal aantal plaatsen', 'number', self::META_PLAATSEN, 'Leeg = geen maximum.' ),
 			array( 'hdp_training_sluit', 'Aanmelden kan tot en met', 'date', self::META_SLUIT, 'Leeg = tot de training voorbij is.' ),
 		);
 		foreach ( $invoer as $regel ) {
+			if ( 'hdp_training_locatie' === $regel[0] ) {
+				self::render_tijdvelden( $post );
+			}
 			printf(
 				'<p><label for="%1$s"><strong>%2$s</strong></label><br><input type="%3$s" id="%1$s" name="%1$s" class="widefat" value="%4$s"%5$s>%6$s</p>',
 				esc_attr( $regel[0] ),
@@ -760,6 +763,53 @@ class HDP_Trainingen {
 				checked( in_array( $merk, $gekozen, true ), true, false ),
 				esc_html( $merk )
 			);
+		}
+	}
+
+	/** Begin en eind als echte tijdvelden, zodat de notatie overal hetzelfde is. */
+	private static function render_tijdvelden( $post ) {
+		$tijden = self::tijden( get_post_meta( $post->ID, self::META_TIJD, true ) );
+		foreach ( array( 'Begintijd', 'Eindtijd' ) as $i => $label ) {
+			$naam = 0 === $i ? 'hdp_training_begintijd' : 'hdp_training_eindtijd';
+			printf(
+				'<p><label for="%1$s"><strong>%2$s</strong></label><br><input type="time" id="%1$s" name="%1$s" class="widefat" value="%3$s"></p>',
+				esc_attr( $naam ),
+				esc_html( $label ),
+				esc_attr( $tijden ? $tijden[ $i ] : '' )
+			);
+		}
+	}
+
+	/**
+	 * Maakt de tijd van de training uit het formulier.
+	 *
+	 * @return string|null "09:00 - 16:00"; leeg als allebei leeg zijn; null als het niet klopt.
+	 */
+	public static function tijd_uit_formulier( $begin, $eind ) {
+		$begin = trim( (string) $begin );
+		$eind  = trim( (string) $eind );
+		if ( '' === $begin && '' === $eind ) {
+			return '';
+		}
+		$patroon = '/^([01]\d|2[0-3]):[0-5]\d$/';
+		if ( ! preg_match( $patroon, $begin ) || ! preg_match( $patroon, $eind ) || $begin >= $eind ) {
+			return null;
+		}
+		return $begin . ' - ' . $eind;
+	}
+
+	/** Eerder opgeslagen tijden ("0900 - 1600") ook in de vaste notatie tonen. */
+	public static function tijd( $training_id ) {
+		$tekst  = (string) get_post_meta( $training_id, self::META_TIJD, true );
+		$tijden = self::tijden( $tekst );
+		return $tijden ? $tijden[0] . ' - ' . $tijden[1] : $tekst;
+	}
+
+	public static function meld_tijdfout() {
+		$sleutel = 'hdp_training_tijdfout_' . get_current_user_id();
+		if ( get_transient( $sleutel ) ) {
+			delete_transient( $sleutel );
+			echo '<div class="notice notice-error"><p><strong>De tijd is niet opgeslagen.</strong> Vul zowel een begintijd als een eindtijd in, met de eindtijd na de begintijd. De rest van de training is wel opgeslagen.</p></div>';
 		}
 	}
 
@@ -895,13 +945,22 @@ class HDP_Trainingen {
 			update_post_meta( $post_id, $meta, preg_match( '/^\d{4}-\d{2}-\d{2}$/', $datum ) ? $datum : '' );
 		}
 		foreach ( array(
-			'hdp_training_tijd'    => self::META_TIJD,
 			'hdp_training_locatie' => self::META_LOCATIE,
 			'hdp_training_kosten'  => self::META_KOSTEN,
 			'hdp_training_titel_fr' => self::META_TITEL_FR,
 		) as $veld => $meta ) {
 			update_post_meta( $post_id, $meta, isset( $_POST[ $veld ] ) ? sanitize_text_field( wp_unslash( $_POST[ $veld ] ) ) : '' );
 		}
+		$tijd = self::tijd_uit_formulier(
+			isset( $_POST['hdp_training_begintijd'] ) ? sanitize_text_field( wp_unslash( $_POST['hdp_training_begintijd'] ) ) : '',
+			isset( $_POST['hdp_training_eindtijd'] ) ? sanitize_text_field( wp_unslash( $_POST['hdp_training_eindtijd'] ) ) : ''
+		);
+		if ( null === $tijd ) {
+			set_transient( 'hdp_training_tijdfout_' . get_current_user_id(), 1, MINUTE_IN_SECONDS );
+		} else {
+			update_post_meta( $post_id, self::META_TIJD, $tijd );
+		}
+
 		update_post_meta( $post_id, self::META_PLAATSEN, isset( $_POST['hdp_training_plaatsen'] ) ? absint( $_POST['hdp_training_plaatsen'] ) : 0 );
 		update_post_meta( $post_id, self::META_TEKST_FR, isset( $_POST['hdp_training_tekst_fr'] ) ? wp_kses_post( wp_unslash( $_POST['hdp_training_tekst_fr'] ) ) : '' );
 		update_post_meta(

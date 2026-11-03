@@ -209,7 +209,7 @@ class HDP_Trainingen_Render {
 	/** Het donkere paneel: datum, locatie, kosten, plaatsen en de weg naar het formulier. */
 	private static function render_feiten( $id, $stand, $eigen ) {
 		$datum   = (string) get_post_meta( $id, HDP_Trainingen::META_DATUM, true );
-		$tijd    = (string) get_post_meta( $id, HDP_Trainingen::META_TIJD, true );
+		$tijd    = HDP_Trainingen::tijd( $id );
 		$locatie = (string) get_post_meta( $id, HDP_Trainingen::META_LOCATIE, true );
 		$kosten  = (string) get_post_meta( $id, HDP_Trainingen::META_KOSTEN, true );
 		?>

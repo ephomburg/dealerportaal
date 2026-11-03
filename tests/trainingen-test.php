@@ -432,6 +432,24 @@ class Trainingen_Test extends WP_UnitTestCase {
 		unset( $_GET['training'] );
 	}
 
+	public function test_tijd_uit_formulier_kan_alleen_in_de_vaste_notatie() {
+		$this->assertSame( '09:00 - 16:00', HDP_Trainingen::tijd_uit_formulier( '09:00', '16:00' ) );
+		$this->assertSame( '', HDP_Trainingen::tijd_uit_formulier( '', '' ) );
+		$this->assertNull( HDP_Trainingen::tijd_uit_formulier( '09:00', '' ) );
+		$this->assertNull( HDP_Trainingen::tijd_uit_formulier( '', '16:00' ) );
+		$this->assertNull( HDP_Trainingen::tijd_uit_formulier( '16:00', '09:00' ) );
+		$this->assertNull( HDP_Trainingen::tijd_uit_formulier( '0900', '1600' ) );
+		$this->assertNull( HDP_Trainingen::tijd_uit_formulier( '25:00', '26:00' ) );
+	}
+
+	public function test_oude_tijd_wordt_netjes_getoond() {
+		$training = $this->maak_training( array( HDP_Trainingen::META_TIJD => '0900 - 1600' ) );
+		$this->assertSame( '09:00 - 16:00', HDP_Trainingen::tijd( $training ) );
+
+		update_post_meta( $training, HDP_Trainingen::META_TIJD, 'hele dag' );
+		$this->assertSame( 'hele dag', HDP_Trainingen::tijd( $training ) );
+	}
+
 	public function test_concept_is_niet_te_zien() {
 		$training = $this->maak_training();
 		wp_update_post( array( 'ID' => $training, 'post_status' => 'draft' ) );
