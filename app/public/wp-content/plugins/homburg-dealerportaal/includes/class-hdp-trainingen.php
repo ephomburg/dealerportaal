@@ -62,6 +62,9 @@ class HDP_Trainingen {
 	/** Wie de aanmeldingen mag inzien: de medewerkers van Homburg, geen dealers. */
 	const CAP_BEHEER = 'edit_others_posts';
 
+	/** In de URL: geef de training als agendabestand. */
+	const AGENDA_VELD = 'agenda';
+
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register_post_type' ) );
 		// Zelfherstellend, zoals bij HDP_Gebruik: een deploy activeert de plugin niet opnieuw.
@@ -480,6 +483,123 @@ class HDP_Trainingen {
 		return '';
 	}
 
+	/* === Agenda ========================================================= */
+
+	/**
+	 * Leest begin en eind uit de vrije tijdtekst: "09:00 - 16:30", "9.00-17.00",
+	 * "0900 – 1600".
+	 *
+	 * @return array{0: string, 1: string}|null Twee keer "UU:MM", of null als dat er niet duidelijk staat.
+	 */
+	public static function tijden( $tekst ) {
+		if ( 2 !== preg_match_all( '/\b(\d{1,2})(?:[:.hu]?(\d{2}))?\b/', (string) $tekst, $delen, PREG_SET_ORDER ) ) {
+			return null;
+		}
+		$tijden = array();
+		foreach ( $delen as $deel ) {
+			$uur     = (int) $deel[1];
+			$minuut  = isset( $deel[2] ) ? (int) $deel[2] : 0;
+			if ( $uur > 23 || $minuut > 59 ) {
+				return null;
+			}
+			$tijden[] = sprintf( '%02d:%02d', $uur, $minuut );
+		}
+		return $tijden[0] < $tijden[1] ? $tijden : null;
+	}
+
+	/**
+	 * De training als agenda-afspraak (.ics); dat opent in Outlook en in andere agenda's.
+	 *
+	 * Eén dag met duidelijke tijden wordt een afspraak met die tijden. Meer dagen
+	 * of geen duidelijke tijd wordt een afspraak van hele dagen: een afspraak van
+	 * maandag 9 uur tot vrijdag 17 uur zou ook de nachten bezetten.
+	 *
+	 * @return string Leeg zolang de datum nog niet vaststaat.
+	 */
+	public static function agenda_bestand( $training_id ) {
+		$datum = (string) get_post_meta( $training_id, self::META_DATUM, true );
+		if ( ! $datum ) {
+			return '';
+		}
+		$eind   = (string) get_post_meta( $training_id, self::META_EINDDATUM, true );
+		$eind   = $eind && $eind > $datum ? $eind : $datum;
+		$tijd   = (string) get_post_meta( $training_id, self::META_TIJD, true );
+		$tijden = $eind === $datum ? self::tijden( $tijd ) : null;
+
+		if ( $tijden ) {
+			// In UTC: dan rekent elke agenda het zelf om, ook over zomer- en wintertijd heen.
+			$utc     = new DateTimeZone( 'UTC' );
+			$start   = new DateTimeImmutable( $datum . ' ' . $tijden[0], wp_timezone() );
+			$einde   = new DateTimeImmutable( $datum . ' ' . $tijden[1], wp_timezone() );
+			$momenten = array(
+				'DTSTART:' . $start->setTimezone( $utc )->format( 'Ymd\THis\Z' ),
+				'DTEND:' . $einde->setTimezone( $utc )->format( 'Ymd\THis\Z' ),
+			);
+		} else {
+			// Bij hele dagen is de einddatum de dag ná de laatste dag.
+			$momenten = array(
+				'DTSTART;VALUE=DATE:' . gmdate( 'Ymd', strtotime( $datum . ' UTC' ) ),
+				'DTEND;VALUE=DATE:' . gmdate( 'Ymd', strtotime( $eind . ' UTC' ) + DAY_IN_SECONDS ),
+			);
+		}
+
+		$uitleg = array();
+		if ( $tijd && ! $tijden ) {
+			$uitleg[] = $tijd;
+		}
+		$uitleg[] = html_entity_decode( wp_strip_all_tags( HDP_I18N::kies( get_post_field( 'post_content', $training_id ), get_post_meta( $training_id, self::META_TEKST_FR, true ) ) ), ENT_QUOTES, 'UTF-8' );
+		$uitleg[] = self::url( $training_id );
+
+		$regels = array_merge(
+			array(
+				'BEGIN:VCALENDAR',
+				'VERSION:2.0',
+				'PRODID:-//Homburg//Dealerportaal//NL',
+				'CALSCALE:GREGORIAN',
+				'METHOD:PUBLISH',
+				'BEGIN:VEVENT',
+				'UID:training-' . (int) $training_id . '@' . wp_parse_url( home_url(), PHP_URL_HOST ),
+				'DTSTAMP:' . gmdate( 'Ymd\THis\Z' ),
+			),
+			$momenten,
+			array(
+				'SUMMARY:' . self::agenda_tekst( self::titel( $training_id ) ),
+				'LOCATION:' . self::agenda_tekst( (string) get_post_meta( $training_id, self::META_LOCATIE, true ) ),
+				'DESCRIPTION:' . self::agenda_tekst( implode( "\n\n", array_filter( array_map( 'trim', $uitleg ) ) ) ),
+				'TRANSP:OPAQUE',
+				'END:VEVENT',
+				'END:VCALENDAR',
+			)
+		);
+
+		return implode( "\r\n", array_map( array( __CLASS__, 'agenda_vouw' ), $regels ) ) . "\r\n";
+	}
+
+	/** Tekens die in een agendabestand een eigen betekenis hebben. */
+	private static function agenda_tekst( $tekst ) {
+		$tekst = str_replace( array( "\r\n", "\r" ), "\n", (string) $tekst );
+		return str_replace( array( '\\', ';', ',', "\n" ), array( '\\\\', '\\;', '\\,', '\\n' ), $tekst );
+	}
+
+	/** Het formaat staat regels tot 75 bytes toe; langer gaat verder op een regel met een spatie vooraan. */
+	private static function agenda_vouw( $regel ) {
+		$uit    = array();
+		$huidig = '';
+		foreach ( preg_split( '//u', $regel, -1, PREG_SPLIT_NO_EMPTY ) as $teken ) {
+			if ( strlen( $huidig ) + strlen( $teken ) > 74 ) {
+				$uit[]  = $huidig;
+				$huidig = ' ';
+			}
+			$huidig .= $teken;
+		}
+		$uit[] = $huidig;
+		return implode( "\r\n", $uit );
+	}
+
+	public static function agenda_url( $training_id ) {
+		return add_query_arg( self::AGENDA_VELD, 1, self::url( $training_id ) );
+	}
+
 	/* === Mail =========================================================== */
 
 	/** De bevestiging aan de deelnemer, in de taal waarin hij zich aanmeldde. */
@@ -495,6 +615,11 @@ class HDP_Trainingen {
 			$regels[] = $label . ': ' . $waarde;
 		}
 		$regels[] = '';
+		$agenda = self::agenda_bijlage( $id );
+		if ( $agenda ) {
+			$regels[] = HDP_I18N::t( 'training_mail_agenda' );
+			$regels[] = '';
+		}
 		$regels[] = HDP_I18N::t( 'training_mail_vragen' ) . ' ' . self::contactregel();
 		$regels[] = '';
 		$regels[] = HDP_I18N::t( 'training_mail_groet' );
@@ -508,11 +633,26 @@ class HDP_Trainingen {
 			$rij['deelnemer_email'],
 			sprintf( HDP_I18N::t( 'training_mail_onderwerp' ), self::titel( $id ) ),
 			implode( "\n", $regels ),
-			$headers
+			$headers,
+			$agenda ? array( $agenda ) : array()
 		);
+		if ( $agenda ) {
+			wp_delete_file( $agenda );
+		}
 		if ( ! $gelukt ) {
 			HDP_Log::schrijf( 'Bevestiging trainingsaanmelding niet verstuurd (aanmelding ' . $rij['id'] . ').', 'WAARSCHUWING' );
 		}
+	}
+
+	/** @return string Pad naar een tijdelijk .ics-bestand, of leeg als dat er niet is. */
+	private static function agenda_bijlage( $training_id ) {
+		$inhoud = self::agenda_bestand( $training_id );
+		$map    = get_temp_dir();
+		if ( ! $inhoud ) {
+			return '';
+		}
+		$pad = $map . wp_unique_filename( $map, sanitize_title( self::titel( $training_id ) ) . '.ics' );
+		return false === file_put_contents( $pad, $inhoud ) ? '' : $pad; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- tijdelijk bestand.
 	}
 
 	/** Het bericht aan het team: altijd in het Nederlands. */

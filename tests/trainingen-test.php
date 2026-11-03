@@ -326,6 +326,112 @@ class Trainingen_Test extends WP_UnitTestCase {
 		$this->assertStringNotContainsString( 'hdp-training-stoelen', $html );
 	}
 
+	public function test_tijden_uit_vrije_tekst() {
+		$this->assertSame( array( '09:00', '16:30' ), HDP_Trainingen::tijden( '09:00 - 16:30' ) );
+		$this->assertSame( array( '09:00', '16:00' ), HDP_Trainingen::tijden( '0900 – 1600' ) );
+		$this->assertSame( array( '09:00', '17:00' ), HDP_Trainingen::tijden( '9-17 uur' ) );
+		$this->assertSame( array( '09:30', '12:15' ), HDP_Trainingen::tijden( '9.30 tot 12.15' ) );
+		$this->assertNull( HDP_Trainingen::tijden( 'hele dag' ) );
+		$this->assertNull( HDP_Trainingen::tijden( '09:00' ) );
+		$this->assertNull( HDP_Trainingen::tijden( '17:00 - 09:00' ) );
+		$this->assertNull( HDP_Trainingen::tijden( '25:00 - 26:00' ) );
+	}
+
+	private function ontvouw( $ics ) {
+		return str_replace( "\r\n ", '', $ics );
+	}
+
+	public function test_agenda_met_tijden_in_utc_en_veilige_tekst() {
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+		$training = $this->maak_training(
+			array(
+				HDP_Trainingen::META_DATUM   => '2030-12-13',
+				HDP_Trainingen::META_TIJD    => '09:00 - 16:30',
+				HDP_Trainingen::META_LOCATIE => 'Stiens, Friesland',
+			)
+		);
+		wp_update_post( array( 'ID' => $training, 'post_content' => str_repeat( 'Lange uitleg; met tekens, ', 12 ) ) );
+
+		$ics = HDP_Trainingen::agenda_bestand( $training );
+
+		$this->assertStringStartsWith( "BEGIN:VCALENDAR\r\n", $ics );
+		$this->assertStringEndsWith( "END:VCALENDAR\r\n", $ics );
+		$this->assertStringContainsString( 'DTSTART:20301213T080000Z', $ics );
+		$this->assertStringContainsString( 'DTEND:20301213T153000Z', $ics );
+		$this->assertStringContainsString( 'LOCATION:Stiens\, Friesland', $this->ontvouw( $ics ) );
+		$this->assertStringContainsString( 'Lange uitleg\; met tekens\,', $this->ontvouw( $ics ) );
+		foreach ( explode( "\r\n", $ics ) as $regel ) {
+			$this->assertLessThanOrEqual( 75, strlen( $regel ) );
+		}
+	}
+
+	public function test_agenda_meer_dagen_of_onduidelijke_tijd_wordt_hele_dagen() {
+		$training = $this->maak_training(
+			array(
+				HDP_Trainingen::META_DATUM     => '2030-11-19',
+				HDP_Trainingen::META_EINDDATUM => '2030-11-26',
+				HDP_Trainingen::META_TIJD      => '09:00 - 16:00',
+			)
+		);
+		$ics      = HDP_Trainingen::agenda_bestand( $training );
+		$this->assertStringContainsString( 'DTSTART;VALUE=DATE:20301119', $ics );
+		$this->assertStringContainsString( 'DTEND;VALUE=DATE:20301127', $ics );
+		$this->assertStringContainsString( '09:00 - 16:00', $this->ontvouw( $ics ) );
+
+		$training = $this->maak_training(
+			array(
+				HDP_Trainingen::META_DATUM => '2030-11-19',
+				HDP_Trainingen::META_TIJD  => 'in overleg',
+			)
+		);
+		$this->assertStringContainsString( 'DTEND;VALUE=DATE:20301120', HDP_Trainingen::agenda_bestand( $training ) );
+	}
+
+	public function test_zonder_datum_geen_agenda() {
+		$training = $this->maak_training();
+		delete_post_meta( $training, HDP_Trainingen::META_DATUM );
+		$this->assertSame( '', HDP_Trainingen::agenda_bestand( $training ) );
+	}
+
+	public function test_bevestiging_heeft_agendabijlage_en_ruimt_die_op() {
+		$training = $this->maak_training( array( HDP_Trainingen::META_DATUM => '2030-12-13' ) );
+		$inhoud   = '';
+		$pad      = '';
+		add_filter(
+			'pre_wp_mail',
+			static function ( $niets, $mail ) use ( &$inhoud, &$pad ) {
+				if ( ! empty( $mail['attachments'] ) ) {
+					$pad    = $mail['attachments'][0];
+					$inhoud = file_get_contents( $pad );
+				}
+				return $niets;
+			},
+			5,
+			2
+		);
+
+		HDP_Trainingen::meld_aan( $training, array( 'naam' => 'Piet', 'email' => 'piet@dealer.test' ) );
+
+		$this->assertStringEndsWith( '.ics', $pad );
+		$this->assertStringContainsString( 'BEGIN:VEVENT', $inhoud );
+		$this->assertFileDoesNotExist( $pad );
+		$this->assertStringContainsString( HDP_I18N::t( 'training_mail_agenda' ), $this->mails[0]['message'] );
+		$this->assertEmpty( $this->mails[1]['attachments'] );
+	}
+
+	public function test_agendaknop_alleen_na_aanmelden_en_met_datum() {
+		$training         = $this->maak_training();
+		$_GET['training'] = $training;
+		$this->assertStringNotContainsString( 'hdp-training-agenda', HDP_Trainingen_Render::render_pagina( array() ) );
+
+		HDP_Trainingen::meld_aan( $training, array( 'naam' => 'Piet', 'email' => 'piet@dealer.test' ) );
+		$this->assertStringContainsString( 'hdp-training-agenda', HDP_Trainingen_Render::render_pagina( array() ) );
+
+		delete_post_meta( $training, HDP_Trainingen::META_DATUM );
+		$this->assertStringNotContainsString( 'hdp-training-agenda', HDP_Trainingen_Render::render_pagina( array() ) );
+		unset( $_GET['training'] );
+	}
+
 	public function test_concept_is_niet_te_zien() {
 		$training = $this->maak_training();
 		wp_update_post( array( 'ID' => $training, 'post_status' => 'draft' ) );

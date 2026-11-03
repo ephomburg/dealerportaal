@@ -34,6 +34,8 @@ class HDP_Trainingen_Render {
 	 * zodat verversen niet opnieuw aanmeldt.
 	 */
 	public static function verwerk() {
+		self::geef_agenda();
+
 		if ( empty( $_POST[ self::ACTIE_VELD ] ) ) {
 			return;
 		}
@@ -55,6 +57,28 @@ class HDP_Trainingen_Render {
 		}
 
 		wp_safe_redirect( add_query_arg( 'aangemeld', 1, HDP_Trainingen::url( $training_id ) ) . '#aanmelden' );
+		exit;
+	}
+
+	/** Het agendabestand van een training, voor wie die training mag zien. */
+	private static function geef_agenda() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- alleen lezen; mag_zien() controleert.
+		if ( empty( $_GET[ HDP_Trainingen::AGENDA_VELD ] ) || empty( $_GET['training'] ) ) {
+			return;
+		}
+		$training_id = absint( $_GET['training'] );
+		// phpcs:enable
+		if ( ! is_user_logged_in() || ! HDP_Roles::mag_portaal_zien( get_current_user_id() ) || ! HDP_Trainingen::mag_zien( $training_id ) ) {
+			return;
+		}
+		$inhoud = HDP_Trainingen::agenda_bestand( $training_id );
+		if ( ! $inhoud ) {
+			return;
+		}
+		nocache_headers();
+		header( 'Content-Type: text/calendar; charset=utf-8' );
+		header( 'Content-Disposition: attachment; filename="' . sanitize_title( HDP_Trainingen::titel( $training_id ) ) . '.ics"' );
+		echo $inhoud; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- agendabestand, geen HTML.
 		exit;
 	}
 
@@ -238,10 +262,25 @@ class HDP_Trainingen_Render {
 							<li><?php echo esc_html( $rij['deelnemer_naam'] ); ?></li>
 						<?php endforeach; ?>
 					</ul>
+					<?php self::render_agendaknop( $id, 'hdp-training-agenda' ); ?>
 				</div>
 			<?php endif; ?>
 		</aside>
 		<?php
+	}
+
+	/** Alleen als de datum vaststaat: daarvoor valt er nog niets in te plannen. */
+	private static function render_agendaknop( $id, $klasse ) {
+		if ( ! get_post_meta( $id, HDP_Trainingen::META_DATUM, true ) ) {
+			return;
+		}
+		printf(
+			'<a class="%1$s" href="%2$s">%3$s<span>%4$s</span></a>',
+			esc_attr( $klasse ),
+			esc_url( HDP_Trainingen::agenda_url( $id ) ),
+			HDP_Icons::svg_icoon( 'agenda' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- vaste opmaak.
+			esc_html( HDP_I18N::t( 'training_in_outlook' ) )
+		);
 	}
 
 	/** Hoeveel plaatsen er nog zijn, met een balkje. Alleen als er een maximum is en de training nog komt. */

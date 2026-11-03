@@ -4035,6 +4035,22 @@ body.hdp-app-layout .hdp-downloads {
 .hdp-training-feiten .hdp-training-naar-formulier:focus-visible { outline: 3px solid var(--wp--preset--color--wit); outline-offset: 2px; }
 .hdp-training-eigen h2 { margin: 0 0 0.4rem; color: inherit; font-size: 0.9rem; font-weight: 700; }
 .hdp-training-eigen ul { margin: 0; padding-left: 1.1rem; font-size: 0.9rem; }
+.hdp-training-agenda {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	margin-top: 0.9rem;
+	padding: 0.65rem 1rem;
+	border: 1px solid #6a6d73;
+	border-radius: 8px;
+	color: var(--wp--preset--color--wit);
+	font-size: 0.9rem;
+	font-weight: 700;
+	text-decoration: none;
+}
+.hdp-training-agenda:hover { border-color: var(--wp--preset--color--wit); color: var(--wp--preset--color--wit); }
+.hdp-training-agenda svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .hdp-training-aanmelden { scroll-margin-top: 110px; }
 .hdp-training-aanmelden:empty { display: none; }
 .hdp-training-aanmelden .hdp-garantie-formulier { margin-top: 0; padding: 2rem 2.5rem 2.25rem; border: 1px solid var(--wp--preset--color--rand); border-radius: 14px; box-shadow: none; }

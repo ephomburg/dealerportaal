@@ -428,6 +428,8 @@ class HDP_I18N {
 			'training_mail_aanhef'     => array( 'nl' => 'Beste %s,', 'fr' => 'Bonjour %s,' ),
 			'training_mail_ontvangen'  => array( 'nl' => 'We hebben je aanmelding ontvangen voor de training "%s".', 'fr' => 'Nous avons bien reçu votre inscription à la formation « %s ».' ),
 			'training_mail_vragen'     => array( 'nl' => 'Vragen, of kun je toch niet? Neem contact met ons op:', 'fr' => 'Des questions, ou un empêchement ? Contactez-nous :' ),
+			'training_in_outlook'      => array( 'nl' => 'In Outlook zetten', 'fr' => 'Ajouter à Outlook' ),
+			'training_mail_agenda'     => array( 'nl' => 'Open de bijlage om de training in je agenda te zetten, bijvoorbeeld in Outlook.', 'fr' => 'Ouvrez la pièce jointe pour ajouter la formation à votre agenda, par exemple dans Outlook.' ),
 			'training_mail_groet'      => array( 'nl' => 'Met vriendelijke groet, Homburg', 'fr' => 'Cordialement, Homburg' ),
 			// Zoekbalk in de header (HDP_Zoeken).
 			'zoeken_label'          => array( 'nl' => 'Zoeken in het portaal', 'fr' => 'Rechercher dans le portail' ),

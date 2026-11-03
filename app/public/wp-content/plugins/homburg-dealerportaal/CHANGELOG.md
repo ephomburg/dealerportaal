@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.92.0
+
+- Trainingen: na het aanmelden staat er een knop "In Outlook zetten", en de bevestigingsmail krijgt dezelfde afspraak als bijlage (`.ics`, opent ook in andere agenda's). Eén dag met duidelijke tijden wordt een afspraak met die tijden, meer dagen of een onduidelijke tijd een afspraak van hele dagen.
+
 ## 1.91.1
 
 - Trainingen: het pijltje bij "Terug naar de trainingen" verscheen als een vreemd teken.
