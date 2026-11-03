@@ -3888,9 +3888,39 @@ body.hdp-app-layout .hdp-downloads {
 }
 
 /* Contact onderaan de filterkolom bij garantie. */
-.hdp-rail-contact a {
-	display: block;
-	margin-top: 0.3rem;
-	font-size: 0.85rem;
-	overflow-wrap: anywhere;
+.hdp-rail-contact .hdp-rail-contact-regel {
+	display: flex;
+	align-items: center;
+	gap: 0.55rem;
+	min-height: 44px;
+	padding: 0.3rem 0;
+	color: var(--wp--preset--color--donkergrijs);
+	font-size: 0.78rem;
+	font-weight: 600;
+	line-height: 1.3;
+	text-decoration: none;
+	transition: color 0.12s;
+}
+.hdp-rail-contact .hdp-rail-contact-regel:hover,
+.hdp-rail-contact .hdp-rail-contact-regel:focus-visible {
+	color: var(--wp--preset--color--homburg-rood);
+}
+.hdp-rail-contact-regel span { min-width: 0; }
+.hdp-rail-contact-domein { white-space: nowrap; }
+.hdp-rail-contact-icoon {
+	flex: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
+	color: var(--wp--preset--color--homburg-rood);
+}
+.hdp-rail-contact-icoon svg {
+	width: 15px;
+	height: 15px;
+	stroke: currentColor;
 }

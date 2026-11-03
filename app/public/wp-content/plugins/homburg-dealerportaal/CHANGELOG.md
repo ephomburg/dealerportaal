@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.87.1
+
+- Garantiepagina: het contactblok in de filterkolom heeft nu iconen en rustige, donkere tekst in plaats van rode, onderstreepte links. Het e-mailadres breekt alleen af voor de @.
+
 ## 1.87.0
 
 - Aparte contactgegevens voor garantie in Instellingen > Dealerportaal; ze staan onderaan de filterkolom op de garantiepagina.

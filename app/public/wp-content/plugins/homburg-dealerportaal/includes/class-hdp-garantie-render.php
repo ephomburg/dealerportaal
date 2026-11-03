@@ -247,10 +247,17 @@ class HDP_Garantie_Render {
 		<div class="hdp-rail-groep hdp-rail-contact">
 			<p class="hdp-rail-kop"><?php echo esc_html( HDP_I18N::t( 'garantie_rail_contact' ) ); ?></p>
 			<?php if ( $telefoon ) : ?>
-				<a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $telefoon ) ); ?>"><?php echo esc_html( $telefoon ); ?></a>
+				<a class="hdp-rail-contact-regel" href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $telefoon ) ); ?>">
+					<?php HDP_Icons::render_icoon( 'tel', 'hdp-rail-contact-icoon' ); ?>
+					<span><?php echo esc_html( $telefoon ); ?></span>
+				</a>
 			<?php endif; ?>
 			<?php if ( $email ) : ?>
-				<a href="mailto:<?php echo esc_attr( $email ); ?>"><?php echo esc_html( $email ); ?></a>
+				<a class="hdp-rail-contact-regel" href="mailto:<?php echo esc_attr( $email ); ?>">
+					<?php HDP_Icons::render_icoon( 'mail', 'hdp-rail-contact-icoon' ); ?>
+					<?php // Mag alleen voor de @ afbreken, niet midden in de domeinnaam. ?>
+					<span><?php echo preg_replace( '/@(.*)$/', '<wbr><span class="hdp-rail-contact-domein">@$1</span>', esc_html( $email ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- hierboven al ge-escaped. ?></span>
+				</a>
 			<?php endif; ?>
 		</div>
 		<?php
