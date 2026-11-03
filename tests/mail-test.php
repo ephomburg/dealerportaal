@@ -41,6 +41,36 @@ class Mail_Test extends WP_UnitTestCase {
 		$this->assertStringNotContainsString( HDP_Mail::ANTWOORD_ADRES, $mailer->get_sent()->header );
 	}
 
+	private function webshopmail( $id ) {
+		if ( ! class_exists( 'WooCommerce' ) ) {
+			$this->markTestSkipped( 'WooCommerce is niet geladen.' );
+		}
+		foreach ( WC()->mailer()->get_emails() as $mail ) {
+			if ( $id === $mail->id ) {
+				return $mail;
+			}
+		}
+		$this->fail( 'Webshopmail niet gevonden: ' . $id );
+	}
+
+	public function test_webshopmail_staat_klaar_voor_info_maar_blijft_nu_op_het_eigen_domein() {
+		$mail = $this->webshopmail( 'customer_processing_order' );
+
+		$this->assertStringStartsWith( 'noreply@', $mail->get_from_address() );
+		$this->assertSame( 'Homburg', $mail->get_from_name() );
+		$this->assertStringContainsString( 'Reply-to: Homburg <' . HDP_Mail::WEBSHOP_ADRES . '>', $mail->get_headers() );
+		$this->assertStringNotContainsString( 'noreply@', $mail->get_headers() );
+
+		update_option( HDP_Settings::OPTION, array( 'webshop_via_info' => '1' ) );
+		$this->assertSame( HDP_Mail::WEBSHOP_ADRES, $mail->get_from_address() );
+		$this->assertSame( 1, substr_count( strtolower( $mail->get_headers() ), 'reply-to:' ) );
+	}
+
+	public function test_teammail_over_bestelling_houdt_de_dealer_als_antwoordadres() {
+		$kop = "Content-Type: text/html\r\nReply-to: Piet <piet@dealer.test>\r\n";
+		$this->assertSame( $kop, HDP_Mail::webshop_kop( $kop, 'new_order' ) );
+	}
+
 	public function test_www_hoort_niet_in_het_adres() {
 		$filter = static function () {
 			return 'https://www.voorbeeld.test';

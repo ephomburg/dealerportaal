@@ -37,6 +37,7 @@ class HDP_Settings {
 		add_settings_field( 'configurator_url', 'Productconfigurator-URL', array( __CLASS__, 'field_configurator_url' ), 'hdp-instellingen', 'hdp_urls' );
 
 		add_settings_section( 'hdp_webshop', 'Webshop', '__return_false', 'hdp-instellingen' );
+		add_settings_field( 'webshop_via_info', 'Webshopmails vanaf info@', array( __CLASS__, 'field_webshop_via_info' ), 'hdp-instellingen', 'hdp_webshop' );
 		add_settings_field( 'bestellen_aan', 'Bestellen in de webshop', array( __CLASS__, 'field_bestellen_aan' ), 'hdp-instellingen', 'hdp_webshop' );
 
 		add_settings_section( 'hdp_contact', 'Contactgegevens', array( __CLASS__, 'sectie_contact_intro' ), 'hdp-instellingen' );
@@ -88,6 +89,7 @@ class HDP_Settings {
 			'training_email'   => isset( $input['training_email'] ) ? sanitize_email( $input['training_email'] ) : '',
 			'merk_logos'       => $merk_logos,
 			'bestellen_aan'    => empty( $input['bestellen_aan'] ) ? '' : '1',
+			'webshop_via_info' => empty( $input['webshop_via_info'] ) ? '' : '1',
 		);
 	}
 
@@ -122,6 +124,15 @@ class HDP_Settings {
 			'<label><input type="checkbox" name="%s[bestellen_aan]" value="1" %s> Dealers kunnen bestellen en afrekenen</label><p class="description">Aan: betalen "Op rekening", "Levering volgens afspraak" in Nederland en België, en het afleveradres bij afrekenen worden vanzelf ingesteld. Uit: afrekenen is niet mogelijk; de catalogus blijft zichtbaar.</p>',
 			esc_attr( self::OPTION ),
 			checked( self::get( 'bestellen_aan' ), '1', false )
+		);
+	}
+
+	public static function field_webshop_via_info() {
+		printf(
+			'<label><input type="checkbox" name="%1$s[webshop_via_info]" value="1" %2$s> Webshopmails versturen vanaf %3$s</label><p class="description">Laat dit uit tot deze website namens homburg-holland.com mag mailen, anders weigeren ontvangers de mail. Zolang dit uit staat, komen webshopmails van Homburg op het adres van deze site. Antwoorden gaan altijd naar %3$s.</p>',
+			esc_attr( self::OPTION ),
+			checked( self::get( 'webshop_via_info' ), '1', false ),
+			esc_html( HDP_Mail::WEBSHOP_ADRES )
 		);
 	}
 

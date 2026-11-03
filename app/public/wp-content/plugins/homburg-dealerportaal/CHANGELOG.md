@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.94.0
+
+- Webshopmails komen niet meer van `ep@homburg-holland.com`, dat ontvangers kunnen weigeren. Ze komen nu van Homburg op het adres van de site, en antwoorden gaan naar `info@homburg-holland.com` (`HDP_Mail`). De overstap staat klaar: Instellingen > Dealerportaal, "Webshopmails vanaf info@". Pas aanzetten als deze server namens homburg-holland.com mag mailen.
+
 ## 1.93.0
 
 - Portaalmails komen niet meer van "WordPress": de afzender is nu "Homburg" (`noreply@` op het domein van de site) en antwoorden gaan naar `marketing@homburg-holland.com` (`HDP_Mail`). Geen afzender op homburg-holland.com zelf: dat domein laat mail van deze server weigeren. Mails met een eigen afzender of antwoordadres, zoals van WooCommerce en de teammail over een training, blijven zoals ze zijn.
