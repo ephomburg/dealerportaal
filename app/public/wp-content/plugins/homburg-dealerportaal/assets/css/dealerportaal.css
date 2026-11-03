@@ -1115,6 +1115,9 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 .hdp-download-info > .hdp-download-meta { margin-top: 0.2rem; font-size: 0.74rem; letter-spacing: 0.01em; }
 /* Bekijken, downloaden en (bij meerdere formaten) een knop per formaat. */
 .hdp-download-knoppen { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end; flex-shrink: 0; }
+/* De omlijnde knop is door zijn rand iets hoger; de rode rekt mee, en de tekst
+   bleef dan bovenin staan. */
+.hdp-download-knoppen .hdp-btn { display: inline-flex; align-items: center; justify-content: center; }
 
 /* --- Contentgalerij -------------------------------------------------- */
 /* Content is beeldmateriaal: kaarten met een voorbeeld in een raster, in

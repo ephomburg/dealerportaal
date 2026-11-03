@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.87.2
+
+- Documentpagina's: de tekst in de knop "Downloaden" stond te hoog, doordat de knop meerekte met de iets hogere knop "Bekijken". Alle knoppen in die rij centreren hun tekst nu.
+
 ## 1.87.1
 
 - Garantiepagina: het contactblok in de filterkolom heeft nu iconen en rustige, donkere tekst in plaats van rode, onderstreepte links. Het e-mailadres breekt alleen af voor de @.
