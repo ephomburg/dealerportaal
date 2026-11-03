@@ -75,7 +75,9 @@ class HDP_Blocks {
 		// bezoeker de header ziet — die toont dan het instellingen-paneel
 		// (checkbox/overlay-opmaak komt uit dit bestand), ongeacht op welke
 		// pagina (dus ook winkel/productpagina's e.d.).
-		if ( ! $heeft_portaal_blok && ! is_user_logged_in() ) {
+		// Deze twee zijn ook uitgelogd te zien en gebruiken dezelfde opmaak; de
+		// privacyverklaring staat bovendien in twee talen op de pagina.
+		if ( ! $heeft_portaal_blok && ! is_user_logged_in() && ! is_privacy_policy() && ! is_404() ) {
 			return;
 		}
 

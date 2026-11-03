@@ -142,8 +142,8 @@ p.no-comments {
 	margin-bottom: 1.2rem;
 	color: var(--wp--preset--color--grijs-tekst);
 	text-decoration: none;
-	font-weight: 700;
-	font-size: 0.82rem;
+	font-weight: 600;
+	font-size: 0.85rem;
 }
 .hdp-terug-naar-winkel svg { width: 15px; height: 15px; }
 .hdp-terug-naar-winkel:hover { color: var(--wp--preset--color--homburg-rood); }
@@ -1540,6 +1540,7 @@ body.woocommerce-account .woocommerce {
 .woocommerce-MyAccount-navigation {
 	box-sizing: border-box;
 	flex: 0 0 240px;
+	align-self: flex-start;
 	float: none;
 	width: auto;
 	background: var(--wp--preset--color--wit);
@@ -1572,7 +1573,7 @@ body.woocommerce-account .woocommerce {
 
 @media (max-width: 782px) {
 	body.woocommerce-account .woocommerce { flex-direction: column; }
-	.woocommerce-MyAccount-navigation { flex-basis: auto; width: 100%; }
+	.woocommerce-MyAccount-navigation { flex-basis: auto; align-self: stretch; width: 100%; }
 }
 
 /* "Mijn favorieten" gaat uitsluitend over favoriete webshopproducten —
@@ -1940,3 +1941,8 @@ body.woocommerce-page table.shop_table td { padding: 0.8rem 1rem; border-top: 1p
 .hdp-mijn-trainingen-namen .is-geannuleerd { color: var(--wp--preset--color--grijs-tekst); }
 .hdp-mijn-trainingen-namen span { margin-left: 0.35rem; font-size: 0.78rem; font-weight: 700; }
 .hdp-mijn-trainingen-agenda { display: inline-block; margin-top: 0.6rem; font-size: 0.85rem; font-weight: 700; color: var(--wp--preset--color--homburg-rood); }
+
+/* Lege winkelwagen: de tekst staat in de pagina zelf, in beide talen. */
+.wp-block-woocommerce-empty-cart-block { padding: 2.5rem 1rem; }
+.wp-block-woocommerce-empty-cart-block .wc-block-cart__empty-cart__title { margin: 0 0 0.6rem; font-size: 1.35rem; font-weight: 800; }
+.wp-block-woocommerce-empty-cart-block p { margin: 0 0 1.2rem; }

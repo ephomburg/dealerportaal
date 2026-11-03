@@ -8,6 +8,11 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.96.0
+
+- Afwerking na een rondgang (thema 1.42.0). De lege winkelwagen is een nette Nederlandse en Franse tekst met een knop naar de webshop, in plaats van Engels met een huilend poppetje. Mijn favorieten toont de titel nog één keer; Accountdetails noemt geen beoordelingen meer; de adresknoppen heten "Factuuradres toevoegen" enz.
+- Het logo is op alle pagina's even groot (`.woocommerce-page img` won het op webshop- en accountpagina's), zodat het niet meer verspringt en de zoektekst niet wordt afgekapt. De privacypagina en "pagina niet gevonden" hebben dezelfde opzet als de rest, met het menu links voor wie is ingelogd. Alle terug-links hebben hetzelfde pijltje, en het accountmenu is niet langer dan wat erin staat.
+
 ## 1.95.0
 
 - Nieuw onderdeel "Mijn trainingen" in het accountmenu (thema 1.41.0, `includes/woocommerce/mijn-trainingen.php`): de dealer ziet wie van zijn bedrijf is aangemeld, verdeeld over komende en eerdere trainingen. Geannuleerde aanmeldingen staan erbij, een training die al is verwijderd houdt haar titel, en komende trainingen kunnen in Outlook.

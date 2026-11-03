@@ -56,20 +56,12 @@ if ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) {
 				<?php if ( $hdp_adres ) : ?>
 					<?php echo HDP_Icons::svg_icoon( 'bewerken' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
 					<?php
-					printf(
-						/* translators: %s: Address title */
-						esc_html__( 'Edit %s', 'woocommerce' ),
-						esc_html( $hdp_titel )
-					);
+					echo esc_html( homburg_wc_tekst( 'wc_adres_bewerken_' . $hdp_naam, 'billing' === $hdp_naam ? 'Factuuradres bewerken' : 'Verzendadres bewerken' ) );
 					?>
 				<?php else : ?>
 					<?php echo HDP_Icons::svg_icoon( 'toevoegen' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
 					<?php
-					printf(
-						/* translators: %s: Address title */
-						esc_html__( 'Add %s', 'woocommerce' ),
-						esc_html( $hdp_titel )
-					);
+					echo esc_html( homburg_wc_tekst( 'wc_adres_toevoegen_' . $hdp_naam, 'billing' === $hdp_naam ? 'Factuuradres toevoegen' : 'Verzendadres toevoegen' ) );
 					?>
 				<?php endif; ?>
 			</a>

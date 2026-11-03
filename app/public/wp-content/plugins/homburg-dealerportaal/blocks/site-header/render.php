@@ -13,7 +13,7 @@ $link_icoon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 				class="hdp-logo"
 				src="<?php echo esc_url( HDP_PLUGIN_URL . 'assets/img/Logo-HOMBURG_WIT-768x102.png' ); ?>"
 				srcset="<?php echo esc_url( HDP_PLUGIN_URL . 'assets/img/Logo-HOMBURG_WIT-768x102.png' ); ?> 768w, <?php echo esc_url( HDP_PLUGIN_URL . 'assets/img/Logo-HOMBURG_WIT-1536x204.png' ); ?> 1536w"
-				sizes="150px"
+				sizes="200px"
 				alt="Homburg"
 			>
 			<span class="hdp-woordmerk-tekst">

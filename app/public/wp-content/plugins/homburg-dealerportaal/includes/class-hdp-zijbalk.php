@@ -72,7 +72,7 @@ class HDP_Zijbalk {
 			return false;
 		}
 
-		if ( is_front_page() ) {
+		if ( is_front_page() || is_404() ) {
 			return true;
 		}
 

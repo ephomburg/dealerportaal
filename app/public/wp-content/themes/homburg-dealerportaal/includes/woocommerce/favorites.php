@@ -218,7 +218,6 @@ function homburg_wc_favorieten_inhoud() {
 	?>
 	<div class="hdp-favorieten-pagina">
 		<?php echo homburg_wc_terug_naar_winkel_html(); // phpcs:ignore WordPress.Security.EscapeOutput -- escapet intern. ?>
-		<h1><?php esc_html_e( 'Mijn favorieten', 'homburg-dealerportaal-theme' ); ?></h1>
 		<?php if ( ! $ids ) : ?>
 			<?php
 			echo HDP_Icons::render_lege_status( // phpcs:ignore WordPress.Security.EscapeOutput -- render_lege_status() escaped elk veld al zelf.

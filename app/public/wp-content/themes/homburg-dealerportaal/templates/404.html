@@ -1,15 +1,25 @@
 <!-- wp:template-part {"slug":"header","tagName":"header"} /-->
 
-<!-- wp:group {"tagName":"main","style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"type":"constrained"}} -->
-<main class="wp-block-group" style="padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:heading {"level":1} -->
-<h1 class="wp-block-heading">Pagina niet gevonden</h1>
-<!-- /wp:heading -->
+<!-- wp:group {"tagName":"div","className":"hdp-app","layout":{"type":"default"}} -->
+<div class="wp-block-group hdp-app">
+	<!-- wp:template-part {"slug":"zijbalk","tagName":"div","className":"hdp-app-zijbalk"} /-->
 
-<!-- wp:paragraph -->
-<p>Deze pagina bestaat niet (meer). Ga terug naar het <a href="/">dealerportaal</a>, of zoek hieronder verder.</p>
-<!-- /wp:paragraph -->
+	<!-- wp:group {"tagName":"main","className":"hdp-app-inhoud","layout":{"type":"default"}} -->
+	<main class="wp-block-group hdp-app-inhoud">
+		<!-- wp:group {"className":"hdp-tekstpagina","layout":{"type":"default"}} -->
+		<div class="wp-block-group hdp-tekstpagina"><!-- wp:heading {"level":1} -->
+		<h1 class="wp-block-heading">Pagina niet gevonden</h1>
+		<!-- /wp:heading -->
 
-<!-- wp:search {"label":"Zoeken","showLabel":false,"buttonText":"Zoeken","buttonPosition":"button-inside"} /--></main>
+		<!-- wp:paragraph -->
+		<p>Deze pagina bestaat niet (meer). Ga terug naar het <a href="/">dealerportaal</a>, of zoek hieronder verder.</p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:search {"label":"Zoeken","showLabel":false,"buttonText":"Zoeken","buttonPosition":"button-inside"} /--></div>
+		<!-- /wp:group -->
+	</main>
+	<!-- /wp:group -->
+</div>
 <!-- /wp:group -->
 
 <!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

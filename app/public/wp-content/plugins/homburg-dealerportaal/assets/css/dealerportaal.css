@@ -456,12 +456,23 @@ body.hdp-login-actief {
 .hdp-welkom-zonder-hero { padding-top: 2.8rem; margin-top: 0; }
 .hdp-welkom-inner { padding: 0 15%; }
 .hdp-terug-boven {
-	display: inline-block;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
 	margin-bottom: 0.9rem;
 	color: var(--wp--preset--color--grijs-tekst);
 	font-size: 0.85rem;
 	font-weight: 600;
 	text-decoration: none;
+}
+.hdp-terug-boven::before {
+	content: "";
+	flex: none;
+	width: 15px;
+	height: 15px;
+	background: currentColor;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='19' y1='12' x2='5' y2='12'/%3E%3Cpolyline points='12 19 5 12 12 5'/%3E%3C/svg%3E") center / contain no-repeat;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='19' y1='12' x2='5' y2='12'/%3E%3Cpolyline points='12 19 5 12 12 5'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 .hdp-terug-boven:hover { color: var(--wp--preset--color--homburg-rood); }
 .hdp-welkom h1 { font-size: 1.6rem; font-weight: 700; }
@@ -4067,4 +4078,20 @@ body.hdp-app-layout .hdp-downloads {
 	.hdp-training-uitleg { padding: 1.5rem 1.4rem 1.6rem; }
 	.hdp-training-aanmelden .hdp-garantie-formulier { padding: 1.5rem 1.4rem; }
 	.hdp-training-lijst { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ==========================================================================
+   TEKSTPAGINA'S (privacyverklaring, pagina niet gevonden)
+   ========================================================================== */
+.hdp-tekstpagina { box-sizing: border-box; width: 100%; max-width: var(--wp--style--global--content-size, 70%); margin: 0 auto; padding: 0 0 2rem; }
+body.hdp-app-layout .hdp-tekstpagina { max-width: none; margin: 0; padding: 0 0 2rem; }
+.hdp-tekstpagina h1 { margin: 0 0 1.1rem; font-size: 1.6rem; font-weight: 800; }
+.hdp-tekstpagina > p { max-width: 65ch; margin: 0 0 1rem; }
+.hdp-tekstpagina .wp-block-search { max-width: 520px; margin-top: 1.5rem; }
+.hdp-tekstpagina .wp-block-search__inside-wrapper { padding: 4px; background: var(--wp--preset--color--wit); border: 2px solid var(--wp--preset--color--rand); border-radius: 8px; }
+.hdp-tekstpagina .wp-block-search__input { border: 0; background: transparent; font: inherit; }
+.hdp-tekstpagina .wp-block-search__button { border-radius: 6px; font-weight: 700; }
+@media (max-width: 782px) {
+	.hdp-tekstpagina { max-width: none; padding-inline: 1rem; }
+	body.hdp-app-layout .hdp-tekstpagina { padding-inline: 0; }
 }

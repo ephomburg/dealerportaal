@@ -89,6 +89,16 @@ function homburg_wc_terug_naar_winkel_knop() {
 	echo homburg_wc_terug_naar_winkel_html(); // phpcs:ignore WordPress.Security.EscapeOutput -- escapet intern.
 }
 
+add_filter( 'gettext_woocommerce', 'homburg_wc_zonder_beoordelingen', 10, 2 );
+/** Bij de weergavenaam noemt WooCommerce "beoordelingen"; die bestaan in het portaal niet. */
+function homburg_wc_zonder_beoordelingen( $vertaling, $origineel ) {
+	if ( 'This will be how your name will be displayed in the account section and in reviews' === $origineel ) {
+		// phpcs:ignore WordPress.WP.I18n.TextDomainMismatch -- bestaande tekst van WooCommerce.
+		return __( 'This will be how your name will be displayed in the account section', 'woocommerce' );
+	}
+	return $vertaling;
+}
+
 function homburg_wc_terug_naar_winkel_html() {
 	return sprintf(
 		'<a class="hdp-terug-naar-winkel" href="%1$s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>%2$s</a>',

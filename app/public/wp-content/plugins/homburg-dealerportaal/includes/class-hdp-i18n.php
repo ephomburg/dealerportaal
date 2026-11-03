@@ -384,6 +384,10 @@ class HDP_I18N {
 			'outlet_nog_een'           => array( 'nl' => 'Nog 1 beschikbaar', 'fr' => 'Encore 1 disponible' ),
 			'outlet_nog_meer'          => array( 'nl' => 'Nog %d beschikbaar', 'fr' => 'Encore %d disponibles' ),
 			'outlet_op_is_op'          => array( 'nl' => 'Op = op', 'fr' => 'Jusqu’à épuisement du stock' ),
+			'wc_adres_toevoegen_billing'  => array( 'nl' => 'Factuuradres toevoegen', 'fr' => 'Ajouter l’adresse de facturation' ),
+			'wc_adres_toevoegen_shipping' => array( 'nl' => 'Verzendadres toevoegen', 'fr' => 'Ajouter l’adresse de livraison' ),
+			'wc_adres_bewerken_billing'   => array( 'nl' => 'Factuuradres bewerken', 'fr' => 'Modifier l’adresse de facturation' ),
+			'wc_adres_bewerken_shipping'  => array( 'nl' => 'Verzendadres bewerken', 'fr' => 'Modifier l’adresse de livraison' ),
 			// Trainingen (HDP_Trainingen).
 			'training_titel'           => array( 'nl' => 'Trainingen', 'fr' => 'Formations' ),
 			'training_intro'           => array( 'nl' => 'Bekijk de komende trainingen van Homburg en meld je aan.', 'fr' => 'Découvrez les prochaines formations de Homburg et inscrivez-vous.' ),

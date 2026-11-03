@@ -59,6 +59,15 @@ class Zijbalk_Test extends WP_UnitTestCase {
 		update_option( 'page_on_front', $this->pagina_id );
 	}
 
+	public function test_pagina_niet_gevonden_heeft_het_zijmenu() {
+		$this->go_to( '/?p=99999999' );
+		$this->assertTrue( is_404() );
+		$this->assertTrue( HDP_Zijbalk::gebruikt_zijmenu() );
+
+		wp_set_current_user( 0 );
+		$this->assertFalse( HDP_Zijbalk::gebruikt_zijmenu() );
+	}
+
 	private function titels() {
 		return array_map(
 			static function ( $onderdeel ) {
