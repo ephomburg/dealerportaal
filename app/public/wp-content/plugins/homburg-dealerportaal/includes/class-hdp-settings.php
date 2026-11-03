@@ -42,6 +42,8 @@ class HDP_Settings {
 		add_settings_section( 'hdp_contact', 'Contactgegevens', array( __CLASS__, 'sectie_contact_intro' ), 'hdp-instellingen' );
 		add_settings_field( 'contact_email', 'E-mailadres', array( __CLASS__, 'field_contact_email' ), 'hdp-instellingen', 'hdp_contact' );
 		add_settings_field( 'contact_telefoon', 'Telefoonnummer', array( __CLASS__, 'field_contact_telefoon' ), 'hdp-instellingen', 'hdp_contact' );
+		add_settings_field( 'garantie_email', 'E-mailadres garantie', array( __CLASS__, 'field_garantie_email' ), 'hdp-instellingen', 'hdp_contact' );
+		add_settings_field( 'garantie_telefoon', 'Telefoonnummer garantie', array( __CLASS__, 'field_garantie_telefoon' ), 'hdp-instellingen', 'hdp_contact' );
 
 		add_settings_section( 'hdp_merklogos', "Merklogo's", array( __CLASS__, 'sectie_merklogos_intro' ), 'hdp-instellingen' );
 		foreach ( HDP_Merken::lijst() as $hdp_merk ) {
@@ -80,6 +82,8 @@ class HDP_Settings {
 			'configurator_url' => isset( $input['configurator_url'] ) ? esc_url_raw( $input['configurator_url'] ) : '',
 			'contact_email'    => isset( $input['contact_email'] ) ? sanitize_email( $input['contact_email'] ) : '',
 			'contact_telefoon' => isset( $input['contact_telefoon'] ) ? sanitize_text_field( $input['contact_telefoon'] ) : '',
+			'garantie_email'   => isset( $input['garantie_email'] ) ? sanitize_email( $input['garantie_email'] ) : '',
+			'garantie_telefoon' => isset( $input['garantie_telefoon'] ) ? sanitize_text_field( $input['garantie_telefoon'] ) : '',
 			'merk_logos'       => $merk_logos,
 			'bestellen_aan'    => empty( $input['bestellen_aan'] ) ? '' : '1',
 		);
@@ -119,9 +123,25 @@ class HDP_Settings {
 		);
 	}
 
+	public static function field_garantie_email() {
+		printf(
+			'<input type="email" name="%s[garantie_email]" value="%s" class="regular-text" placeholder="service@homburg-holland.com">',
+			esc_attr( self::OPTION ),
+			esc_attr( self::get( 'garantie_email' ) )
+		);
+	}
+
+	public static function field_garantie_telefoon() {
+		printf(
+			'<input type="text" name="%s[garantie_telefoon]" value="%s" class="regular-text" placeholder="+31 (0)58 257 15 55">',
+			esc_attr( self::OPTION ),
+			esc_attr( self::get( 'garantie_telefoon' ) )
+		);
+	}
+
 	public static function field_contact_email() {
 		printf(
-			'<input type="email" name="%s[contact_email]" value="%s" class="regular-text" placeholder="verkoop@homburg-holland.com">',
+			'<input type="email" name="%s[contact_email]" value="%s" class="regular-text" placeholder="info@homburg-holland.com">',
 			esc_attr( self::OPTION ),
 			esc_attr( self::get( 'contact_email' ) )
 		);
@@ -129,7 +149,7 @@ class HDP_Settings {
 
 	public static function field_contact_telefoon() {
 		printf(
-			'<input type="text" name="%s[contact_telefoon]" value="%s" class="regular-text" placeholder="+31 (0)512 36 55 55">',
+			'<input type="text" name="%s[contact_telefoon]" value="%s" class="regular-text" placeholder="+31 (0)58 257 15 55">',
 			esc_attr( self::OPTION ),
 			esc_attr( self::get( 'contact_telefoon' ) )
 		);

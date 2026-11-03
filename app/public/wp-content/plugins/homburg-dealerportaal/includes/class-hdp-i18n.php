@@ -182,7 +182,32 @@ class HDP_I18N {
 		exit;
 	}
 
+	/**
+	 * Tijdelijk Nederlands, ongeacht de keuze van de bezoeker: voor mails aan
+	 * het eigen team. Een Franstalige dealer die bestelt, stuurt anders ook
+	 * Homburg een Franse mail. Hoort bij een switch_to_locale(); die regelt
+	 * WordPress en WooCommerce, dit de teksten van het portaal zelf.
+	 */
+	public static function alleen_nederlands( $aan ) {
+		self::$alleen_nederlands = (bool) $aan;
+	}
+
+	public static function is_alleen_nederlands() {
+		return self::$alleen_nederlands;
+	}
+
+	private static $alleen_nederlands = false;
+
+	/** Een tekst in een vaste taal, los van de keuze van de bezoeker. */
+	public static function t_in( $sleutel, $taal ) {
+		$teksten = self::teksten();
+		return isset( $teksten[ $sleutel ][ $taal ] ) ? $teksten[ $sleutel ][ $taal ] : $sleutel;
+	}
+
 	public static function huidige_taal() {
+		if ( self::$alleen_nederlands ) {
+			return 'nl';
+		}
 		$taal = isset( $_COOKIE[ self::COOKIE ] ) ? sanitize_key( wp_unslash( $_COOKIE[ self::COOKIE ] ) ) : '';
 		return in_array( $taal, self::TALEN, true ) ? $taal : 'nl';
 	}
@@ -358,6 +383,9 @@ class HDP_I18N {
 			'zoeken_label'          => array( 'nl' => 'Zoeken in het portaal', 'fr' => 'Rechercher dans le portail' ),
 			'zoeken_placeholder'    => array( 'nl' => 'Zoek artikel, claim, bestelling of document…', 'fr' => 'Rechercher dans le portail…' ),
 			'zoeken_groep_paginas'      => array( 'nl' => 'Onderdelen', 'fr' => 'Rubriques' ),
+			'zoeken_groep_merken'       => array( 'nl' => 'Merken', 'fr' => 'Marques' ),
+			'zoeken_aantal_artikelen'   => array( 'nl' => '%d artikelen', 'fr' => '%d articles' ),
+			'garantie_rail_contact'     => array( 'nl' => 'Vragen over garantie?', 'fr' => 'Une question sur la garantie ?' ),
 			'zoeken_groep_artikelen'    => array( 'nl' => 'Artikelen', 'fr' => 'Articles' ),
 			'zoeken_groep_bestellingen' => array( 'nl' => 'Bestellingen', 'fr' => 'Commandes' ),
 			'zoeken_groep_claims'       => array( 'nl' => 'Garantieclaims', 'fr' => 'Réclamations de garantie' ),

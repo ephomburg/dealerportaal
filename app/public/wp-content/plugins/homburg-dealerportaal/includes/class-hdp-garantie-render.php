@@ -229,7 +229,30 @@ class HDP_Garantie_Render {
 					<span class="hdp-rail-aantal"><?php echo esc_html( (string) count( $machines ) ); ?></span>
 				</a>
 			</div>
+
+			<?php self::render_rail_contact(); ?>
 		</aside>
+		<?php
+	}
+
+	/** Bij wie je terechtkunt met een garantievraag; stil als dat niet is ingesteld. */
+	private static function render_rail_contact() {
+		$email    = HDP_Settings::get( 'garantie_email' );
+		$telefoon = HDP_Settings::get( 'garantie_telefoon' );
+
+		if ( ! $email && ! $telefoon ) {
+			return;
+		}
+		?>
+		<div class="hdp-rail-groep hdp-rail-contact">
+			<p class="hdp-rail-kop"><?php echo esc_html( HDP_I18N::t( 'garantie_rail_contact' ) ); ?></p>
+			<?php if ( $telefoon ) : ?>
+				<a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $telefoon ) ); ?>"><?php echo esc_html( $telefoon ); ?></a>
+			<?php endif; ?>
+			<?php if ( $email ) : ?>
+				<a href="mailto:<?php echo esc_attr( $email ); ?>"><?php echo esc_html( $email ); ?></a>
+			<?php endif; ?>
+		</div>
 		<?php
 	}
 
@@ -624,6 +647,7 @@ class HDP_Garantie_Render {
 		// browser en moet ze dus kunnen vinden — maar wat boven deze grens
 		// uitkomt staat ingeklapt tot iemand erom vraagt.
 		$inklappen = count( $machines ) > self::MACHINES_ZICHTBAAR;
+		$gezocht   = isset( $_GET['serienummer'] ) ? sanitize_text_field( wp_unslash( $_GET['serienummer'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- alleen een weergavekeuze.
 		?>
 		<div class="hdp-garantie-kop">
 			<h2>
@@ -637,7 +661,12 @@ class HDP_Garantie_Render {
 		<?php else : ?>
 			<div class="hdp-machines<?php echo $inklappen ? ' hdp-machines-ingeklapt' : ''; ?>" id="hdp-machines">
 				<?php foreach ( $machines as $nummer => $machine ) : ?>
-					<?php $verborgen = $inklappen && $nummer >= self::MACHINES_ZICHTBAAR; ?>
+					<?php
+					// Vanuit de zoekbalk: deze machine in beeld en opgelicht, ook
+					// als hij anders onder "toon meer" zou vallen.
+					$gekozen   = '' !== $gezocht && $gezocht === (string) $machine['serienummer'];
+					$verborgen = $inklappen && $nummer >= self::MACHINES_ZICHTBAAR && ! $gekozen;
+					?>
 					<?php
 					$stand  = HDP_Garantie::garantiestand( $machine );
 					$lopend = count(
@@ -658,7 +687,8 @@ class HDP_Garantie_Render {
 						$balk .= ' hdp-machine-balk-bijna';
 					}
 					?>
-					<article class="hdp-machine<?php echo $verborgen ? ' hdp-machine-verborgen' : ''; ?>"
+					<article class="hdp-machine<?php echo $verborgen ? ' hdp-machine-verborgen' : ''; ?><?php echo $gekozen ? ' hdp-machine-gekozen' : ''; ?>"
+						<?php echo $gekozen ? 'id="hdp-machine-gekozen"' : ''; ?>
 						data-zoek="<?php echo esc_attr( self::zoektekst( array( $machine['machine'], $machine['serienummer'], $machine['merk'], $machine['klant'] ) ) ); ?>">
 						<?php HDP_Icons::render_icoon( 'machine', 'hdp-machine-icoon' ); ?>
 						<div class="hdp-machine-info">

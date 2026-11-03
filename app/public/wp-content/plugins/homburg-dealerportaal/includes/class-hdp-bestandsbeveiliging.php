@@ -458,6 +458,17 @@ class HDP_Bestandsbeveiliging {
 			return true;
 		}
 
+		// Een afbeelding die elders op de site staat, blijft staan: verplaatsen
+		// haalt hem daar weg (zo verdween het logo uit de header). De download
+		// werkt gewoon; het eigen endpoint levert hem vanaf de oude plek uit.
+		if ( self::wordt_elders_gebruikt( $attachment_id ) ) {
+			HDP_Log::schrijf(
+				sprintf( 'Bestandsbeveiliging: bijlage %d niet verplaatst, de afbeelding wordt elders op de site gebruikt.', $attachment_id ),
+				'INFO'
+			);
+			return false;
+		}
+
 		$huidig_pad = get_attached_file( $attachment_id );
 		if ( ! $huidig_pad || ! file_exists( $huidig_pad ) ) {
 			return false;
@@ -487,6 +498,80 @@ class HDP_Bestandsbeveiliging {
 		update_post_meta( $attachment_id, self::META, 1 );
 
 		return true;
+	}
+
+	/**
+	 * Staat deze afbeelding ergens op de site: als site-icoon, logo, merklogo,
+	 * productfoto, categoriefoto, of met zijn adres in een pagina of blok?
+	 *
+	 * Alleen afbeeldingen. Een PDF of Excel wordt altijd beveiligd, ook als
+	 * er ergens een link naartoe staat: daar gaat het juist om vertrouwelijke
+	 * bestanden, en een link werkt via het eigen endpoint toch wel.
+	 */
+	public static function wordt_elders_gebruikt( $attachment_id ) {
+		global $wpdb;
+		$attachment_id = (int) $attachment_id;
+
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			return false;
+		}
+
+		$vast = array_merge(
+			array( get_option( 'site_icon' ), get_option( 'site_logo' ), get_theme_mod( 'custom_logo' ) ),
+			array_values( (array) HDP_Settings::get( 'merk_logos' ) )
+		);
+		if ( in_array( $attachment_id, array_map( 'intval', $vast ), true ) ) {
+			return true;
+		}
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.SlowDBQuery -- eenmalig per bestand bij het beveiligen, geen paginalaad.
+		$als_foto = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT 1 FROM {$wpdb->postmeta} m INNER JOIN {$wpdb->posts} p ON p.ID = m.post_id
+				WHERE m.meta_key = '_thumbnail_id' AND m.meta_value = %d AND p.post_type NOT IN ('revision', 'attachment') LIMIT 1",
+				$attachment_id
+			)
+		);
+		if ( $als_foto ) {
+			return true;
+		}
+
+		$in_galerij = $wpdb->get_col( "SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_product_image_gallery' AND meta_value <> ''" );
+		foreach ( $in_galerij as $lijst ) {
+			if ( in_array( $attachment_id, array_map( 'intval', explode( ',', $lijst ) ), true ) ) {
+				return true;
+			}
+		}
+
+		$als_categoriefoto = $wpdb->get_var(
+			$wpdb->prepare( "SELECT 1 FROM {$wpdb->termmeta} WHERE meta_key = 'thumbnail_id' AND meta_value = %d LIMIT 1", $attachment_id )
+		);
+		if ( $als_categoriefoto ) {
+			return true;
+		}
+
+		$pad = get_attached_file( $attachment_id );
+		if ( ! $pad ) {
+			return false;
+		}
+
+		// De bestandsnaam met een schuine streep ervoor, en direct daarna de
+		// extensie of een maat (naam-768x102.png). Dus niet "logo" in
+		// "logo-prijzen.png".
+		$naam = $wpdb->esc_like( '/' . pathinfo( $pad, PATHINFO_FILENAME ) );
+		$in_pagina = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT 1 FROM {$wpdb->posts}
+				WHERE post_type NOT IN ('revision', 'attachment', 'shop_order', %s) AND post_status NOT IN ('trash', 'auto-draft')
+				AND ( post_content LIKE %s OR post_content REGEXP %s ) LIMIT 1",
+				HDP_Downloads_CPT::POST_TYPE,
+				'%' . $naam . '.%',
+				preg_quote( '/' . pathinfo( $pad, PATHINFO_FILENAME ), '/' ) . '-[0-9]+x[0-9]+\\.'
+			)
+		);
+		// phpcs:enable
+
+		return (bool) $in_pagina;
 	}
 
 	/**

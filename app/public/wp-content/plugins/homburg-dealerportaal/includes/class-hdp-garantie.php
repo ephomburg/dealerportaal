@@ -328,6 +328,7 @@ class HDP_Garantie {
 	/** Weggooien wat we onthouden hadden; na elke wijziging. */
 	private static function vergeet_buffer() {
 		self::$gebufferd = array();
+		HDP_Zoeken::vergeet_garantiegegevens();
 	}
 
 	/** Het accountnummer waarop gefilterd wordt; '' als er niemand (geldig) is ingelogd. */

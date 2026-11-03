@@ -84,7 +84,38 @@ function homburg_wc_zoek_product_ids( $term, $limit = -1 ) {
 		)
 	);
 
-	$gevonden = array_unique( array_merge( $titel_ids, array_map( 'intval', $sku_ids ) ) );
+	// Ook op merk of categorie: wie "hardi" zoekt, bedoelt het merk Hardi en
+	// niet alleen de drie artikelen met dat woord in de naam. Achteraan, dus
+	// eerst wat echt in de naam of het nummer staat.
+	$merk_ids = array();
+	$termen   = get_terms(
+		array(
+			'taxonomy'   => array_values( array_filter( array( 'product_cat', 'product_brand' ), 'taxonomy_exists' ) ),
+			'name__like' => $term,
+			'hide_empty' => true,
+			'fields'     => 'ids',
+		)
+	);
+	if ( ! is_wp_error( $termen ) && $termen ) {
+		$per_taxonomie = array( 'relation' => 'OR' );
+		foreach ( array_filter( array( 'product_cat', 'product_brand' ), 'taxonomy_exists' ) as $taxonomie ) {
+			$per_taxonomie[] = array(
+				'taxonomy' => $taxonomie,
+				'field'    => 'term_id',
+				'terms'    => $termen,
+			);
+		}
+		$merk_ids = get_posts(
+			array(
+				'post_type'      => 'product',
+				'posts_per_page' => $limit,
+				'fields'         => 'ids',
+				'tax_query'      => $per_taxonomie, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- alleen bij zoeken.
+			)
+		);
+	}
+
+	$gevonden = array_values( array_unique( array_merge( $titel_ids, array_map( 'intval', $sku_ids ), $merk_ids ) ) );
 
 	return $limit > 0 ? array_slice( $gevonden, 0, $limit ) : $gevonden;
 }

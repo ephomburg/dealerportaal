@@ -23,6 +23,9 @@ class HDP_Zoeken {
 	/** Korter dan dit geeft vooral ruis. */
 	const MIN_LENGTE = 2;
 
+	/** Zo lang (seconden) blijven claims en machines bewaard; gelijk aan de teller in het menu. */
+	const GARANTIE_CACHE = 120;
+
 	public static function init() {
 		add_action( 'wp_ajax_hdp_portaal_zoeken', array( __CLASS__, 'ajax' ) );
 	}
@@ -63,6 +66,7 @@ class HDP_Zoeken {
 
 		$groepen = array(
 			array( 'sleutel' => 'paginas', 'titel' => HDP_I18N::t( 'zoeken_groep_paginas' ), 'items' => self::paginas( $term ) ),
+			array( 'sleutel' => 'merken', 'titel' => HDP_I18N::t( 'zoeken_groep_merken' ), 'items' => self::merken( $term ) ),
 			array( 'sleutel' => 'artikelen', 'titel' => HDP_I18N::t( 'zoeken_groep_artikelen' ), 'items' => self::artikelen( $term ) ),
 			array( 'sleutel' => 'bestellingen', 'titel' => HDP_I18N::t( 'zoeken_groep_bestellingen' ), 'items' => self::bestellingen( $term ) ),
 			array( 'sleutel' => 'claims', 'titel' => HDP_I18N::t( 'zoeken_groep_claims' ), 'items' => self::claims( $term ) ),
@@ -147,7 +151,38 @@ class HDP_Zoeken {
 		return array_slice( $items, 0, self::PER_GROEP );
 	}
 
-	/** Titel of artikelnummer; dezelfde zoeklogica als de winkelpagina. */
+	/** Een merk in één klik: de winkel gefilterd op dat merk (de hoofdcategorieën). */
+	private static function merken( $term ) {
+		if ( ! function_exists( 'wc_get_page_permalink' ) ) {
+			return array();
+		}
+
+		$termen = get_terms(
+			array(
+				'taxonomy'   => 'product_cat',
+				'parent'     => 0,
+				'hide_empty' => true,
+			)
+		);
+		if ( is_wp_error( $termen ) ) {
+			return array();
+		}
+
+		$items = array();
+		foreach ( $termen as $merk ) {
+			if ( 'occasions' === $merk->slug || ! self::past( $term, array( $merk->name ) ) ) {
+				continue;
+			}
+			$items[] = self::item(
+				$merk->name,
+				sprintf( HDP_I18N::t( 'zoeken_aantal_artikelen' ), (int) $merk->count ),
+				add_query_arg( 'merk', array( $merk->slug ), wc_get_page_permalink( 'shop' ) )
+			);
+		}
+		return array_slice( $items, 0, self::PER_GROEP );
+	}
+
+	/** Titel, artikelnummer of merk; dezelfde zoeklogica als de winkelpagina. */
 	private static function artikelen( $term ) {
 		if ( ! function_exists( 'homburg_wc_zoek_product_ids' ) ) {
 			return array();
@@ -176,40 +211,32 @@ class HDP_Zoeken {
 		return $items;
 	}
 
-	/** Eigen bestellingen: op ordernummer, eigen referentie of een artikel erin. */
+	/**
+	 * Eigen bestellingen: op ordernummer, eigen referentie of een artikel erin.
+	 *
+	 * Ook oude bestellingen. Alles elke letter opnieuw inlezen is te traag,
+	 * dus de doorzoekbare tekst wordt per dealer bewaard; een nieuwe bestelling
+	 * geeft vanzelf een nieuwe sleutel. Alleen de treffers worden echt geladen.
+	 */
 	private static function bestellingen( $term ) {
 		if ( ! function_exists( 'wc_get_orders' ) ) {
 			return array();
 		}
 
-		$orders = wc_get_orders(
-			array(
-				'customer_id' => get_current_user_id(),
-				'limit'       => 100,
-				'orderby'     => 'date',
-				'order'       => 'DESC',
-			)
-		);
-
 		$items = array();
-		foreach ( $orders as $order ) {
-			$referentie = function_exists( 'homburg_wc_referentie' ) ? homburg_wc_referentie( $order ) : '';
-			$velden     = array( $order->get_order_number(), $referentie );
-			foreach ( $order->get_items() as $regel ) {
-				$velden[] = $regel->get_name();
-				$product  = is_callable( array( $regel, 'get_product' ) ) ? $regel->get_product() : null;
-				if ( $product ) {
-					$velden[] = $product->get_sku();
-				}
+		foreach ( self::bestel_index() as $id => $tekst ) {
+			if ( ! self::past( $term, array( $tekst ) ) ) {
+				continue;
 			}
-
-			if ( ! self::past( $term, $velden ) ) {
+			$order = wc_get_order( $id );
+			if ( ! $order ) {
 				continue;
 			}
 
-			$datum   = $order->get_date_created() ? HDP_I18N::datum( 'j F Y', $order->get_date_created()->getOffsetTimestamp() ) : '';
-			$sub     = array_filter( array( $datum, wc_get_order_status_name( $order->get_status() ), $referentie ? sprintf( HDP_I18N::t( 'bestel_referentie' ), $referentie ) : '' ) );
-			$items[] = self::item(
+			$referentie = function_exists( 'homburg_wc_referentie' ) ? homburg_wc_referentie( $order ) : '';
+			$datum      = $order->get_date_created() ? HDP_I18N::datum( 'j F Y', $order->get_date_created()->getOffsetTimestamp() ) : '';
+			$sub        = array_filter( array( $datum, wc_get_order_status_name( $order->get_status() ), $referentie ? sprintf( HDP_I18N::t( 'bestel_referentie' ), $referentie ) : '' ) );
+			$items[]    = self::item(
 				sprintf( HDP_I18N::t( 'zoeken_bestelling' ), $order->get_order_number() ),
 				implode( ' · ', $sub ),
 				$order->get_view_order_url()
@@ -221,19 +248,91 @@ class HDP_Zoeken {
 		return $items;
 	}
 
-	/** Eigen claims: op claimnummer, serienummer, machine, factuurnummer of referentie. */
-	private static function claims( $term ) {
+	/**
+	 * Per bestelling van deze dealer de tekst om in te zoeken, nieuwste eerst.
+	 *
+	 * @return array<int, string>
+	 */
+	private static function bestel_index() {
+		$user_id = get_current_user_id();
+		$ids     = wc_get_orders(
+			array(
+				'customer_id' => $user_id,
+				'limit'       => -1,
+				'orderby'     => 'date',
+				'order'       => 'DESC',
+				'return'      => 'ids',
+			)
+		);
+		if ( ! $ids ) {
+			return array();
+		}
+
+		$sleutel = 'hdp_zoek_best_' . $user_id . '_' . md5( implode( ',', $ids ) );
+		$index   = get_transient( $sleutel );
+		if ( is_array( $index ) ) {
+			return $index;
+		}
+
+		$index = array();
+		foreach ( $ids as $id ) {
+			$order = wc_get_order( $id );
+			if ( ! $order ) {
+				continue;
+			}
+			$velden = array( $order->get_order_number(), function_exists( 'homburg_wc_referentie' ) ? homburg_wc_referentie( $order ) : '' );
+			foreach ( $order->get_items() as $regel ) {
+				$velden[] = $regel->get_name();
+				$product  = is_callable( array( $regel, 'get_product' ) ) ? $regel->get_product() : null;
+				if ( $product ) {
+					$velden[] = $product->get_sku();
+				}
+			}
+			$index[ $id ] = implode( ' | ', array_filter( $velden ) );
+		}
+
+		set_transient( $sleutel, $index, HOUR_IN_SECONDS );
+		return $index;
+	}
+
+	/**
+	 * Claims of machines van de externe database, kort bewaard: de zoekbalk
+	 * vraagt bij elke letter, en dat waren elke keer twee ronden naar buiten.
+	 * Een storing wordt niet bewaard.
+	 *
+	 * @param string $soort 'claims' of 'machines'.
+	 * @return array
+	 */
+	private static function garantiegegevens( $soort ) {
 		if ( ! HDP_Garantie::beschikbaar() ) {
 			return array();
 		}
 
-		$claims = HDP_Garantie::claims();
-		if ( is_wp_error( $claims ) ) {
+		$sleutel = 'hdp_zoek_' . $soort . '_' . get_current_user_id();
+		$lijst   = get_transient( $sleutel );
+		if ( is_array( $lijst ) ) {
+			return $lijst;
+		}
+
+		$lijst = 'claims' === $soort ? HDP_Garantie::claims() : HDP_Garantie::machines();
+		if ( is_wp_error( $lijst ) ) {
 			return array();
 		}
 
+		set_transient( $sleutel, $lijst, self::GARANTIE_CACHE );
+		return $lijst;
+	}
+
+	/** Na een nieuwe claim of machine: de volgende zoekopdracht vindt hem meteen. */
+	public static function vergeet_garantiegegevens() {
+		delete_transient( 'hdp_zoek_claims_' . get_current_user_id() );
+		delete_transient( 'hdp_zoek_machines_' . get_current_user_id() );
+	}
+
+	/** Eigen claims: op claimnummer, serienummer, machine, factuurnummer of referentie. */
+	private static function claims( $term ) {
 		$items = array();
-		foreach ( $claims as $claim ) {
+		foreach ( self::garantiegegevens( 'claims' ) as $claim ) {
 			$velden = array( $claim['nummer'], $claim['serienummer'], $claim['machine'], $claim['merk'], $claim['factuurnummer'], $claim['klantreferentie'] );
 			if ( ! self::past( $term, $velden ) ) {
 				continue;
@@ -252,24 +351,21 @@ class HDP_Zoeken {
 
 	/** Eigen machines: op serienummer, type, merk of eindklant. */
 	private static function machines( $term ) {
-		if ( ! HDP_Garantie::beschikbaar() ) {
-			return array();
-		}
-
-		$machines = HDP_Garantie::machines();
-		if ( is_wp_error( $machines ) ) {
-			return array();
-		}
-
 		$items = array();
-		foreach ( $machines as $machine ) {
+		foreach ( self::garantiegegevens( 'machines' ) as $machine ) {
 			if ( ! self::past( $term, array( $machine['serienummer'], $machine['machine'], $machine['merk'], $machine['klant'] ) ) ) {
 				continue;
 			}
 			$items[] = self::item(
 				HDP_Garantie::machinenaam( $machine['machine'], $machine['serienummer'] ),
 				trim( $machine['merk'] . ( $machine['klant'] ? ' · ' . $machine['klant'] : '' ), ' ·' ),
-				add_query_arg( 'toon', 'machines', home_url( '/garantie/' ) )
+				add_query_arg(
+					array(
+						'toon'        => 'machines',
+						'serienummer' => $machine['serienummer'],
+					),
+					home_url( '/garantie/' )
+				) . '#hdp-machine-gekozen'
 			);
 			if ( count( $items ) >= self::PER_GROEP ) {
 				break;

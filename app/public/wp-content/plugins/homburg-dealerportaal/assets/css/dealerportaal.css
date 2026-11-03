@@ -3879,3 +3879,18 @@ body.hdp-app-layout .hdp-downloads {
 	padding-left: 0;
 	padding-right: 0;
 }
+
+/* De machine waar de zoekbalk naartoe stuurde (zie render_machines). */
+.hdp-machine-gekozen {
+	outline: 2px solid var(--wp--preset--color--homburg-rood);
+	outline-offset: 2px;
+	scroll-margin-top: calc(var(--hdp-header-hoogte, 0px) + 3rem);
+}
+
+/* Contact onderaan de filterkolom bij garantie. */
+.hdp-rail-contact a {
+	display: block;
+	margin-top: 0.3rem;
+	font-size: 0.85rem;
+	overflow-wrap: anywhere;
+}

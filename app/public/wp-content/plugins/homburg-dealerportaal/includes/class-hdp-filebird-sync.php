@@ -177,7 +177,7 @@ class HDP_FileBird_Sync {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- tabel van FileBird.
 			$bestanden = $wpdb->get_col( $wpdb->prepare( "SELECT attachment_id FROM {$koppelen} WHERE folder_id = %d", (int) $map->id ) );
 			foreach ( $bestanden as $bestand ) {
-				if ( self::vind_download_voor_attachment( (int) $bestand ) ) {
+				if ( self::vind_download_voor_attachment( (int) $bestand ) || self::is_extra_formaat( (int) $bestand ) ) {
 					continue;
 				}
 				self::synchroniseer( (int) $bestand, (int) $map->id );
@@ -233,6 +233,12 @@ class HDP_FileBird_Sync {
 
 	private static function synchroniseer( $attachment_id, $folder_id ) {
 		if ( ! $attachment_id || 'attachment' !== get_post_type( $attachment_id ) ) {
+			return;
+		}
+
+		// Hoort al als extra formaat bij een download (de Excel naast de PDF):
+		// geen eigen regel op de pagina.
+		if ( self::is_extra_formaat( $attachment_id ) ) {
 			return;
 		}
 
@@ -299,6 +305,21 @@ class HDP_FileBird_Sync {
 		update_post_meta( $download_id, '_hdp_merk', $merk );
 		update_post_meta( $download_id, '_hdp_regios', $regio );
 		update_post_meta( $download_id, self::BRON_META, 1 );
+	}
+
+	/** Staat dit bestand als extra formaat bij een download? */
+	public static function is_extra_formaat( $attachment_id ) {
+		$posts = get_posts(
+			array(
+				'post_type'      => HDP_Downloads_CPT::POST_TYPE,
+				'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'trash' ),
+				'meta_key'       => HDP_Downloads_CPT::META_EXTRA, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- kleine, beheerste dataset (dealerdownloads).
+				'meta_value'     => (int) $attachment_id, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'fields'         => 'ids',
+				'posts_per_page' => 1,
+			)
+		);
+		return (bool) $posts;
 	}
 
 	private static function vind_download_voor_attachment( $attachment_id ) {

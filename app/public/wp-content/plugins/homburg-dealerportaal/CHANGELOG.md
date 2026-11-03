@@ -8,6 +8,14 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.87.0
+
+- Aparte contactgegevens voor garantie in Instellingen > Dealerportaal; ze staan onderaan de filterkolom op de garantiepagina.
+- Zoekbalk: nieuwe groep "Merken" (naar de winkel, gefilterd op dat merk), en zoeken in de winkel vindt ook artikelen op merk of categorie. Een gevonden machine wordt direct getoond en opgelicht, ook als hij anders ingeklapt zou zijn. Claims en machines worden 2 minuten bewaard en vergeten na een eigen wijziging, in plaats van bij elke letter opgehaald. Alle bestellingen zijn doorzoekbaar via een bewaarde index, niet meer alleen de laatste 100.
+- FileBird: een bestand dat al als extra formaat bij een download staat, krijgt geen eigen regel.
+- Bestandsbeveiliging: een afbeelding die elders op de site staat (site-icoon, logo, merklogo, productfoto, categoriefoto, of met zijn adres in een pagina) wordt niet meer verplaatst, zodat hij daar blijft werken. De download werkt gewoon. PDF's en andere documenten worden altijd beveiligd.
+- Mails aan het eigen team (nieuwe, geannuleerde en mislukte bestelling, voorraad) zijn altijd Nederlands, ook als een Franstalige dealer de bestelling plaatst (thema 1.38.0).
+
 ## 1.86.0
 
 - Frans compleet in webshop en account (thema 1.37.0). De voorkant schakelt bij FR over op `fr_FR`, zodat winkelwagen, afrekenen, accountmenu, adresvelden en meldingen de officiële vertalingen van WordPress en WooCommerce gebruiken (`HDP_I18N::frontend_locale`). Alleen als die taalbestanden op de server staan: ze gaan niet mee met een deploy, en anders blijft het Nederlands in plaats van Engels. wp-admin blijft in de eigen taal.

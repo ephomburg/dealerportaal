@@ -345,3 +345,94 @@ function homburg_wc_bestelinstellingen_toepassen() {
 
 	return $gedaan;
 }
+
+/* --- Mails aan het eigen team: altijd Nederlands -------------------------- */
+
+foreach ( array( 'new_order', 'cancelled_order', 'failed_order' ) as $homburg_wc_team_mail ) {
+	add_filter( 'woocommerce_email_recipient_' . $homburg_wc_team_mail, 'homburg_wc_teammail_begin', 10, 3 );
+}
+add_action( 'woocommerce_email_sent', 'homburg_wc_teammail_einde' );
+
+/**
+ * WooCommerce vraagt de ontvanger op vlak voordat onderwerp en inhoud worden
+ * opgebouwd, en stuurt dit soort mails in de taal van de bezoeker. Dat is dan
+ * de Franstalige dealer die bestelt. Hier eerst terug naar Nederlands.
+ */
+function homburg_wc_teammail_begin( $ontvanger, $object = null, $mail = null ) {
+	if ( $mail && $mail->is_enabled() && ! $mail->is_customer_email() ) {
+		homburg_wc_nederlands_aan();
+	}
+	return $ontvanger;
+}
+
+function homburg_wc_teammail_einde() {
+	homburg_wc_nederlands_uit();
+}
+
+function homburg_wc_nederlands_aan() {
+	if ( ! class_exists( 'HDP_I18N' ) || ! HDP_I18N::is_frans() ) {
+		return;
+	}
+	HDP_I18N::alleen_nederlands( true );
+	switch_to_locale( 'nl_NL' );
+}
+
+function homburg_wc_nederlands_uit() {
+	if ( class_exists( 'HDP_I18N' ) && HDP_I18N::is_alleen_nederlands() ) {
+		HDP_I18N::alleen_nederlands( false );
+		restore_previous_locale();
+	}
+}
+
+// De voorraadmails zijn geen WC_Email; die hangen rechtstreeks aan deze acties.
+foreach ( array( 'woocommerce_low_stock', 'woocommerce_no_stock', 'woocommerce_product_on_backorder' ) as $homburg_wc_voorraad_mail ) {
+	add_action( $homburg_wc_voorraad_mail, 'homburg_wc_nederlands_aan', 1, 0 );
+	add_action( $homburg_wc_voorraad_mail, 'homburg_wc_nederlands_uit', 99, 0 );
+}
+
+add_filter( 'woocommerce_get_order_item_totals', 'homburg_wc_teammail_totalen' );
+/**
+ * Betaalmethode en verzending staan in de taal van het bestelmoment op de
+ * bestelling. In een mail aan het team toch de Nederlandse naam.
+ */
+function homburg_wc_teammail_totalen( $regels ) {
+	if ( ! class_exists( 'HDP_I18N' ) || ! HDP_I18N::is_alleen_nederlands() ) {
+		return $regels;
+	}
+	$namen = array();
+	foreach ( array( 'wc_levering_afspraak', 'wc_op_rekening' ) as $sleutel ) {
+		$namen[ HDP_I18N::t_in( $sleutel, 'fr' ) ] = HDP_I18N::t_in( $sleutel, 'nl' );
+	}
+	foreach ( $regels as $sleutel => $regel ) {
+		$regels[ $sleutel ]['value'] = strtr( (string) $regel['value'], $namen );
+		if ( isset( $regel['meta'] ) ) {
+			$regels[ $sleutel ]['meta'] = strtr( (string) $regel['meta'], $namen );
+		}
+	}
+	return $regels;
+}
+
+foreach ( array( 'new_order', 'cancelled_order', 'failed_order' ) as $homburg_wc_team_mail ) {
+	add_filter( 'woocommerce_email_additional_content_' . $homburg_wc_team_mail, 'homburg_wc_teammail_slottekst', 10, 3 );
+}
+/**
+ * De standaard-slottekst ("Bravo pour cette vente !") ligt al vast in de taal
+ * van de bezoeker als de mail wordt aangemaakt. Tenzij er zelf een tekst is
+ * ingesteld: hier opnieuw ophalen, nu in het Nederlands.
+ */
+function homburg_wc_teammail_slottekst( $tekst, $object = null, $mail = null ) {
+	if ( ! $mail || ! class_exists( 'HDP_I18N' ) || ! HDP_I18N::is_alleen_nederlands() ) {
+		return $tekst;
+	}
+	$opgeslagen = get_option( 'woocommerce_' . $mail->id . '_settings', array() );
+	return empty( $opgeslagen['additional_content'] ) ? $mail->format_string( $mail->get_default_additional_content() ) : $tekst;
+}
+
+add_filter( 'woocommerce_mail_content', 'homburg_wc_teammail_veldnaam' );
+/** Het label van het referentieveld ligt vast in de taal waarin het veld is aangemaakt. */
+function homburg_wc_teammail_veldnaam( $inhoud ) {
+	if ( ! class_exists( 'HDP_I18N' ) || ! HDP_I18N::is_alleen_nederlands() ) {
+		return $inhoud;
+	}
+	return str_replace( HDP_I18N::t_in( 'wc_referentie', 'fr' ), HDP_I18N::t_in( 'wc_referentie', 'nl' ), $inhoud );
+}
