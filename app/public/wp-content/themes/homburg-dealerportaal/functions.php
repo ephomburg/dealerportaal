@@ -55,3 +55,4 @@ require_once get_theme_file_path( 'includes/woocommerce/favorites.php' );
 require_once get_theme_file_path( 'includes/woocommerce/bestellen.php' );
 require_once get_theme_file_path( 'includes/woocommerce/outlet.php' );
 require_once get_theme_file_path( 'includes/woocommerce/mijn-merken.php' );
+require_once get_theme_file_path( 'includes/woocommerce/mijn-trainingen.php' );

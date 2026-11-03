@@ -1917,3 +1917,26 @@ body.woocommerce-page table.shop_table td { padding: 0.8rem 1rem; border-top: 1p
 }
 .hdp-mijn-merken img { display: block; max-width: 100%; max-height: 40px; width: auto; object-fit: contain; }
 .hdp-mijn-merken-contact { margin: 0; font-size: 0.88rem; color: var(--wp--preset--color--grijs-tekst); }
+
+/* ==========================================================================
+   MIJN TRAININGEN (zie includes/woocommerce/mijn-trainingen.php)
+   ========================================================================== */
+.hdp-mijn-trainingen-leeg { margin: 0 0 1rem; }
+.hdp-mijn-trainingen-kop { margin: 0 0 0.7rem; font-size: 1.05rem; font-weight: 700; }
+.hdp-mijn-trainingen ~ .hdp-mijn-trainingen-kop { margin-top: 1.6rem; }
+.hdp-mijn-trainingen { display: grid; gap: 0.75rem; margin: 0; padding: 0; list-style: none; }
+.hdp-mijn-trainingen > li {
+	margin: 0;
+	padding: 1rem 1.15rem;
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: var(--hdp-wc-radius);
+}
+.hdp-mijn-trainingen h3 { margin: 0 0 0.25rem; font-size: 1rem; font-weight: 700; }
+.hdp-mijn-trainingen h3 a { color: inherit; text-decoration: none; }
+.hdp-mijn-trainingen h3 a:hover { color: var(--wp--preset--color--homburg-rood); }
+.hdp-mijn-trainingen-feiten { margin: 0 0 0.55rem; font-size: 0.85rem; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-mijn-trainingen-namen { margin: 0; padding-left: 1.1rem; font-size: 0.9rem; }
+.hdp-mijn-trainingen-namen .is-geannuleerd { color: var(--wp--preset--color--grijs-tekst); }
+.hdp-mijn-trainingen-namen span { margin-left: 0.35rem; font-size: 0.78rem; font-weight: 700; }
+.hdp-mijn-trainingen-agenda { display: inline-block; margin-top: 0.6rem; font-size: 0.85rem; font-weight: 700; color: var(--wp--preset--color--homburg-rood); }

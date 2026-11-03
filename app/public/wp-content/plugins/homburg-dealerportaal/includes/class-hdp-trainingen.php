@@ -352,6 +352,60 @@ class HDP_Trainingen {
 		);
 	}
 
+	/**
+	 * Alle aanmeldingen van één dealer, per training, ook de geannuleerde: anders
+	 * ziet hij nergens dat een aanmelding is vervallen.
+	 *
+	 * @return array{komend: array, eerder: array} Per training: id, titel, zichtbaar, rijen.
+	 *               Komend de eerstvolgende eerst, eerder de laatste eerst.
+	 */
+	public static function overzicht_dealer( $user_id = 0 ) {
+		global $wpdb;
+		$user_id = $user_id ? (int) $user_id : get_current_user_id();
+		$tabel   = self::tabel();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery -- eigen tabel.
+		$rijen = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$tabel} WHERE user_id = %d ORDER BY aangemaakt ASC, id ASC", $user_id ), ARRAY_A );
+
+		$per_training = array();
+		foreach ( array_map( array( __CLASS__, 'pak_uit' ), $rijen ? $rijen : array() ) as $rij ) {
+			$id = (int) $rij['training_id'];
+			if ( ! isset( $per_training[ $id ] ) ) {
+				// Een verwijderde training staat er nog met de titel van destijds.
+				$bestaat             = self::POST_TYPE === get_post_type( $id );
+				$per_training[ $id ] = array(
+					'id'        => $id,
+					'titel'     => $bestaat ? self::titel( $id ) : html_entity_decode( $rij['training_titel'], ENT_QUOTES, 'UTF-8' ),
+					'zichtbaar' => self::mag_zien( $id, $user_id ),
+					'datum'     => $bestaat ? (string) get_post_meta( $id, self::META_DATUM, true ) : '',
+					'rijen'     => array(),
+				);
+			}
+			$per_training[ $id ]['rijen'][] = $rij;
+		}
+
+		$overzicht = array(
+			'komend' => array(),
+			'eerder' => array(),
+		);
+		foreach ( $per_training as $training ) {
+			$groep                 = $training['zichtbaar'] && ! self::is_voorbij( $training['id'] ) ? 'komend' : 'eerder';
+			$overzicht[ $groep ][] = $training;
+		}
+		usort(
+			$overzicht['komend'],
+			static function ( $a, $b ) {
+				return strcmp( $a['datum'] ? $a['datum'] : '9999', $b['datum'] ? $b['datum'] : '9999' );
+			}
+		);
+		usort(
+			$overzicht['eerder'],
+			static function ( $a, $b ) {
+				return strcmp( $b['datum'], $a['datum'] );
+			}
+		);
+		return $overzicht;
+	}
+
 	private static function pak_uit( $rij ) {
 		$antwoorden        = json_decode( (string) $rij['antwoorden'], true );
 		$rij['antwoorden'] = is_array( $antwoorden ) ? $antwoorden : array();

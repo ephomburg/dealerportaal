@@ -450,6 +450,74 @@ class Trainingen_Test extends WP_UnitTestCase {
 		$this->assertSame( 'hele dag', HDP_Trainingen::tijd( $training ) );
 	}
 
+	public function test_overzicht_dealer_verdeelt_en_laat_alleen_eigen_aanmeldingen_zien() {
+		$gisteren = gmdate( 'Y-m-d', time() - 2 * DAY_IN_SECONDS );
+		$later    = $this->maak_training( array( HDP_Trainingen::META_DATUM => '2099-05-01' ) );
+		$eerder   = $this->maak_training( array( HDP_Trainingen::META_DATUM => '2099-01-01' ) );
+		$voorbij  = $this->maak_training();
+		$weg      = $this->maak_training();
+		$piet     = array( 'naam' => 'Piet', 'email' => 'piet@dealer.test' );
+
+		$eerste = HDP_Trainingen::meld_aan( $later, $piet );
+		HDP_Trainingen::meld_aan( $later, array( 'naam' => 'Kees', 'email' => 'kees@dealer.test' ) );
+		HDP_Trainingen::meld_aan( $eerder, $piet );
+		HDP_Trainingen::meld_aan( $voorbij, $piet );
+		HDP_Trainingen::meld_aan( $weg, $piet );
+		HDP_Trainingen::annuleer( $eerste );
+		update_post_meta( $voorbij, HDP_Trainingen::META_DATUM, $gisteren );
+		wp_delete_post( $weg, true );
+
+		$ander = self::factory()->user->create( array( 'role' => 'dealer' ) );
+		update_user_meta( $ander, 'hdp_goedgekeurd', '1' );
+		HDP_Trainingen::meld_aan( $later, array( 'naam' => 'Vreemde', 'email' => 'vreemde@dealer.test' ), $ander );
+
+		$overzicht = HDP_Trainingen::overzicht_dealer( $this->dealer );
+
+		$this->assertSame( array( $eerder, $later ), wp_list_pluck( $overzicht['komend'], 'id' ) );
+		$namen = wp_list_pluck( $overzicht['komend'][1]['rijen'], 'deelnemer_naam' );
+		$this->assertSame( array( 'Piet', 'Kees' ), $namen, 'Een geannuleerde aanmelding blijft zichtbaar; die van een andere dealer niet.' );
+		$this->assertSame( HDP_Trainingen::STATUS_GEANNULEERD, $overzicht['komend'][1]['rijen'][0]['status'] );
+
+		$this->assertSame( array( $voorbij, $weg ), wp_list_pluck( $overzicht['eerder'], 'id' ) );
+		$this->assertSame( 'Service Väderstad', $overzicht['eerder'][1]['titel'], 'Een verwijderde training houdt haar titel.' );
+		$this->assertFalse( $overzicht['eerder'][1]['zichtbaar'] );
+		$this->assertSame( array( 'komend' => array(), 'eerder' => array() ), HDP_Trainingen::overzicht_dealer( self::factory()->user->create() ) );
+	}
+
+	public function test_mijn_trainingen_in_het_account() {
+		if ( ! class_exists( 'WooCommerce' ) ) {
+			$this->markTestSkipped( 'WooCommerce is niet geladen.' );
+		}
+		$map = dirname( __DIR__ ) . '/app/public/wp-content/themes/homburg-dealerportaal/includes/woocommerce/';
+		require_once $map . 'bestellen.php';
+		require_once $map . 'mijn-trainingen.php';
+
+		$menu = homburg_wc_mijn_trainingen_menu( array( 'mijn-merken' => 'Mijn merken', 'customer-logout' => 'Uitloggen' ) );
+		$this->assertSame( array( 'mijn-merken', 'mijn-trainingen', 'customer-logout' ), array_keys( $menu ) );
+
+		ob_start();
+		homburg_wc_mijn_trainingen_inhoud();
+		$this->assertStringContainsString( HDP_I18N::t( 'training_mijn_leeg' ), ob_get_clean() );
+
+		$training = $this->maak_training( array( HDP_Trainingen::META_DATUM => '2099-05-01' ) );
+		$weg      = HDP_Trainingen::meld_aan( $training, array( 'naam' => 'Piet', 'email' => 'piet@dealer.test' ) );
+
+		ob_start();
+		homburg_wc_mijn_trainingen_inhoud();
+		$html = ob_get_clean();
+		$this->assertStringContainsString( 'Service Väderstad', $html );
+		$this->assertStringContainsString( 'Piet', $html );
+		$this->assertStringContainsString( 'agenda=1', $html );
+
+		// Niemand meer aangemeld: dan valt er niets meer in de agenda te zetten.
+		HDP_Trainingen::annuleer( $weg );
+		ob_start();
+		homburg_wc_mijn_trainingen_inhoud();
+		$html = ob_get_clean();
+		$this->assertStringContainsString( HDP_I18N::t( 'training_mijn_geannuleerd' ), $html );
+		$this->assertStringNotContainsString( 'agenda=1', $html );
+	}
+
 	public function test_concept_is_niet_te_zien() {
 		$training = $this->maak_training();
 		wp_update_post( array( 'ID' => $training, 'post_status' => 'draft' ) );

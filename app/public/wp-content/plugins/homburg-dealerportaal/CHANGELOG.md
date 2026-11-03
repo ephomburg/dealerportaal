@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.95.0
+
+- Nieuw onderdeel "Mijn trainingen" in het accountmenu (thema 1.41.0, `includes/woocommerce/mijn-trainingen.php`): de dealer ziet wie van zijn bedrijf is aangemeld, verdeeld over komende en eerdere trainingen. Geannuleerde aanmeldingen staan erbij, een training die al is verwijderd houdt haar titel, en komende trainingen kunnen in Outlook.
+
 ## 1.94.0
 
 - Webshopmails komen niet meer van `ep@homburg-holland.com`, dat ontvangers kunnen weigeren. Ze komen nu van Homburg op het adres van de site, en antwoorden gaan naar `info@homburg-holland.com` (`HDP_Mail`). De overstap staat klaar: Instellingen > Dealerportaal, "Webshopmails vanaf info@". Pas aanzetten als deze server namens homburg-holland.com mag mailen.
