@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.88.0
+
+- Nieuw onderdeel "Mijn merken" in het accountmenu (thema 1.39.0, `includes/woocommerce/mijn-merken.php`): de dealer ziet voor welke merken hij toegang heeft, met logo als dat is ingesteld, en bij wie hij terechtkan als er iets niet klopt. Zonder eigen merkenlijst staat er dat hij alle merken ziet. Alleen lezen; de rechten stelt Homburg in bij het gebruikersprofiel.
+
 ## 1.87.2
 
 - Documentpagina's: de tekst in de knop "Downloaden" stond te hoog, doordat de knop meerekte met de iets hogere knop "Bekijken". Alle knoppen in die rij centreren hun tekst nu.

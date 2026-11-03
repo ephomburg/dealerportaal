@@ -54,3 +54,4 @@ require_once get_theme_file_path( 'includes/woocommerce/bulk-order.php' );
 require_once get_theme_file_path( 'includes/woocommerce/favorites.php' );
 require_once get_theme_file_path( 'includes/woocommerce/bestellen.php' );
 require_once get_theme_file_path( 'includes/woocommerce/occasions.php' );
+require_once get_theme_file_path( 'includes/woocommerce/mijn-merken.php' );

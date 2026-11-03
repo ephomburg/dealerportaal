@@ -1887,3 +1887,33 @@ body.woocommerce-page table.shop_table td { padding: 0.8rem 1rem; border-top: 1p
 /* Product zonder prijs (zie setup.php). */
 .hdp-wc-op-aanvraag { font-weight: 600; font-size: 0.92em; color: var(--wp--preset--color--donkergrijs); }
 .hdp-wc-op-aanvraag-contact { margin: 0; font-size: 0.9rem; }
+
+/* ==========================================================================
+   MIJN MERKEN (zie includes/woocommerce/mijn-merken.php)
+   ========================================================================== */
+.hdp-mijn-merken-intro { margin: 0 0 1.2rem; }
+.hdp-mijn-merken {
+	list-style: none;
+	margin: 0 0 1.4rem;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+	gap: 0.75rem;
+}
+.hdp-mijn-merken li {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 72px;
+	margin: 0;
+	padding: 0.75rem;
+	background: var(--wp--preset--color--wit);
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: var(--hdp-wc-radius);
+	color: var(--wp--preset--color--donkergrijs);
+	font-size: 0.9rem;
+	font-weight: 700;
+	text-align: center;
+}
+.hdp-mijn-merken img { display: block; max-width: 100%; max-height: 40px; width: auto; object-fit: contain; }
+.hdp-mijn-merken-contact { margin: 0; font-size: 0.88rem; color: var(--wp--preset--color--grijs-tekst); }
