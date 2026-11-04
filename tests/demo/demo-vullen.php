@@ -75,18 +75,7 @@ function hdp_demo_term( $naam, $taxonomie ) {
 /* --- Webshop --------------------------------------------------------------- */
 
 $artikelen = array(
-	array( 'HARDI', 'Spuitdop ISO 110-04', 'DEMO-1001', 4.85, null ),
-	array( 'HARDI', 'Afdichtset membraanpomp', 'DEMO-1002', 64.50, null ),
-	array( 'HARDI', 'Slangklem 25 mm', 'DEMO-1003', 2.35, 1.95 ),
 	array( 'Väderstad', 'Zaaischijf 390 mm', 'DEMO-2001', 38.90, null ),
-	array( 'Väderstad', 'Lagerset zaai-element', 'DEMO-2002', 27.40, null ),
-	array( 'Väderstad', 'Schraper hardmetaal', 'DEMO-2003', 16.75, null ),
-	array( 'Bogballe', 'Strooischijf M-serie', 'DEMO-3001', 189.00, null ),
-	array( 'Bogballe', 'Roerder compleet', 'DEMO-3002', 96.00, null ),
-	array( 'Rabe', 'Ploegschaar links', 'DEMO-4001', 72.50, 64.00 ),
-	array( 'Rabe', 'Risterplaat', 'DEMO-4002', 58.20, null ),
-	array( 'Draincleaners', 'Hogedrukslang 1 inch, 10 meter', 'DEMO-5001', 214.00, null ),
-	array( 'Draincleaners', 'Spoelkop roterend', 'DEMO-5002', 129.00, null ),
 );
 $producten = array();
 foreach ( $artikelen as $a ) {
@@ -106,7 +95,29 @@ foreach ( $artikelen as $a ) {
 	wp_set_object_terms( $id, array( hdp_demo_term( $a[0], 'product_brand' ) ), 'product_brand' );
 	$producten[ $a[2] ] = $id;
 }
-update_user_meta( $dealer, '_hdp_favorieten', array( $producten['DEMO-1001'], $producten['DEMO-2001'], $producten['DEMO-3001'] ) );
+// De veldfoto van de inlogpagina als productfoto. Lukt ophalen niet, dan valt de kaart terug op de eigen plaat.
+$res = wp_remote_get( 'https://www.homburg-belgium.com/wp-content/uploads/2023/09/Homburg-Holland-precisielandbouw-man-in-veld.jpg', array( 'timeout' => 30 ) );
+if ( ! is_wp_error( $res ) && 200 === (int) wp_remote_retrieve_response_code( $res ) ) {
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+	$upload = wp_upload_bits( 'demo-zaaischijf.jpg', null, wp_remote_retrieve_body( $res ) );
+	if ( empty( $upload['error'] ) ) {
+		$foto = wp_insert_attachment(
+			array(
+				'post_mime_type' => 'image/jpeg',
+				'post_title'     => 'Zaaischijf 390 mm',
+				'post_status'    => 'inherit',
+			),
+			$upload['file'],
+			$producten['DEMO-2001']
+		);
+		update_post_meta( $foto, HDP_DEMO_META, 1 );
+		wp_update_attachment_metadata( $foto, wp_generate_attachment_metadata( $foto, $upload['file'] ) );
+		$met_foto = wc_get_product( $producten['DEMO-2001'] );
+		$met_foto->set_image_id( $foto );
+		$met_foto->save();
+	}
+}
+update_user_meta( $dealer, '_hdp_favorieten', array( $producten['DEMO-2001'] ) );
 echo 'webshop: ' . count( $producten ) . " artikelen\n";
 
 /* --- Outlet ---------------------------------------------------------------- */
@@ -139,10 +150,10 @@ echo 'outlet: ' . count( $outlet ) . " artikelen\n";
 /* --- Bestellingen ---------------------------------------------------------- */
 
 $bestellingen = array(
-	array( 'processing', 1, 'Onderhoud spuit klant Jansen', array( 'DEMO-1001' => 8, 'DEMO-1002' => 1 ) ),
-	array( 'processing', 3, 'Voorraad werkplaats', array( 'DEMO-2001' => 4, 'DEMO-2003' => 6 ) ),
-	array( 'completed', 18, 'Seizoensbeurt strooier', array( 'DEMO-3001' => 2, 'DEMO-3002' => 1 ) ),
-	array( 'completed', 45, 'Spoedbestelling ploeg', array( 'DEMO-4001' => 2 ) ),
+	array( 'processing', 1, 'Onderhoud klant Jansen', array( 'DEMO-2001' => 8 ) ),
+	array( 'processing', 3, 'Voorraad werkplaats', array( 'DEMO-2001' => 4 ) ),
+	array( 'completed', 18, 'Seizoensbeurt zaaimachine', array( 'DEMO-2001' => 12 ) ),
+	array( 'completed', 45, 'Spoedbestelling', array( 'DEMO-2001' => 2 ) ),
 );
 foreach ( $bestellingen as $b ) {
 	$o = wc_create_order(
