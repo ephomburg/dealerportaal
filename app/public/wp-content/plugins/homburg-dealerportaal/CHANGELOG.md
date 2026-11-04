@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.96.2
+
+- Garantie: berichten in een claim stonden in een smal kolommetje naast de naam, op een blauwe achtergrond, en lange woorden vielen weg. De opmaak van de berichten op de startpagina werkte erop door, omdat beide `.hdp-bericht` heten; die opmaak geldt nu alleen nog op de startpagina.
+
 ## 1.96.1
 
 - Het menu links toont geen witte schuifbalk meer als het niet in beeld past: het blijft scrollbaar, met een smalle balk in de kleur van het menu die alleen bij aanwijzen verschijnt.
