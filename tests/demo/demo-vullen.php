@@ -589,6 +589,44 @@ if ( $presentator && HDP_Supabase::beschikbaar( HDP_Supabase::APP ) ) {
 	echo "garantie: overgeslagen, geen verbinding\n";
 }
 
+/* --- Alles op het account van de presentator ------------------------------- */
+// Bestellingen, favorieten en aanmeldingen zijn alleen zichtbaar voor de eigen dealer.
+
+$van  = get_user_by( 'login', 'hdp-test-demo' );
+$naar = get_user_by( 'email', 'ep@homburg-holland.com' );
+if ( $van && $naar ) {
+	global $wpdb;
+	$orders = wc_get_orders(
+		array(
+			'limit'       => -1,
+			'status'      => array_keys( wc_get_order_statuses() ),
+			'customer_id' => $van->ID,
+			'meta_key'    => '_hdp_demo',
+			'meta_value'  => 1,
+		)
+	);
+	foreach ( $orders as $o ) {
+		$o->set_customer_id( $naar->ID );
+		$o->save();
+	}
+	$eigen = get_user_meta( $naar->ID, '_hdp_favorieten', true );
+	$demo  = get_user_meta( $van->ID, '_hdp_favorieten', true );
+	update_user_meta( $naar->ID, '_hdp_favorieten', array_values( array_unique( array_merge( is_array( $eigen ) ? $eigen : array(), is_array( $demo ) ? $demo : array() ) ) ) );
+	delete_user_meta( $van->ID, '_hdp_favorieten' );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- eigen tabel.
+	$aanmeldingen = $wpdb->update(
+		HDP_Trainingen::tabel(),
+		array(
+			'user_id'        => $naar->ID,
+			'dealer_naam'    => $naar->display_name ? $naar->display_name : $naar->user_login,
+			'dealer_bedrijf' => (string) get_user_meta( $naar->ID, 'billing_company', true ),
+			'dealer_email'   => $naar->user_email,
+		),
+		array( 'user_id' => $van->ID )
+	);
+	echo 'verhuisd: ' . count( $orders ) . ' bestellingen, ' . (int) $aanmeldingen . " aanmeldingen\n";
+}
+
 global $wpdb;
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_hdp\\_%' OR option_name LIKE '\\_transient\\_timeout\\_hdp\\_%'" );
 wc_delete_product_transients();
