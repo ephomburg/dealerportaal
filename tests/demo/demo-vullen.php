@@ -440,8 +440,11 @@ echo 'content: ' . count( $content ) . "\n";
 
 /* --- Garantie -------------------------------------------------------------- */
 // Staat in de administratie van de Homburg App, dus ook daar zichtbaar tot het opruimen.
+// Op het account van de presentator (ep@): claims zijn alleen zichtbaar voor de eigen dealer.
 
-if ( HDP_Supabase::beschikbaar( HDP_Supabase::APP ) ) {
+$presentator = get_user_by( 'email', 'ep@homburg-holland.com' );
+if ( $presentator && HDP_Supabase::beschikbaar( HDP_Supabase::APP ) ) {
+	wp_set_current_user( $presentator->ID );
 	$a      = HDP_Supabase::APP;
 	$stop   = static function ( $uitkomst, $wat ) {
 		if ( is_wp_error( $uitkomst ) ) {
@@ -519,7 +522,7 @@ if ( HDP_Supabase::beschikbaar( HDP_Supabase::APP ) ) {
 			'stappen' => array(
 				array( 'status' => 'in_behandeling', 'wie' => $service, 'afzender' => 'homburg', 'tekst' => 'Bedankt, we hebben je claim in behandeling genomen.', 'dagen' => 8 ),
 				array( 'status' => 'bij_fabrikant', 'wie' => $service, 'afzender' => 'homburg', 'tekst' => 'Doorgestuurd naar de fabrikant. De reactietermijn is doorgaans twee weken.', 'dagen' => 6 ),
-				array( 'wie' => 'Demo Dealer', 'afzender' => 'dealer', 'tekst' => 'De klant vraagt ernaar. Is er al iets bekend?', 'dagen' => 2 ),
+				array( 'wie' => $presentator->display_name, 'afzender' => 'dealer', 'tekst' => 'De klant vraagt ernaar. Is er al iets bekend?', 'dagen' => 2 ),
 				array( 'wie' => $service, 'afzender' => 'homburg', 'tekst' => 'Nog niets terug. We hebben vandaag gerappelleerd en komen er snel op terug.', 'dagen' => 1 ),
 			),
 		),

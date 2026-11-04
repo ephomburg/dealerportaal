@@ -12,7 +12,7 @@ const HDP_DEMO_MAIL  = 'marketing+hdp-demo@homburg-holland.com';
 global $wpdb;
 require_once ABSPATH . 'wp-admin/includes/user.php';
 
-/* --- Garantie: alleen de rijen van het demo-account ------------------------ */
+/* --- Garantie: alleen de voorbeeldmachines en hun claims -------------------- */
 
 if ( HDP_Supabase::beschikbaar( HDP_Supabase::APP ) ) {
 	$a     = HDP_Supabase::APP;
@@ -34,16 +34,24 @@ if ( HDP_Supabase::beschikbaar( HDP_Supabase::APP ) ) {
 		}
 		echo "$tabel: " . count( (array) $rij ) . " weg\n";
 	};
-	$op_mail = 'dealer_email=eq.' . rawurlencode( HDP_DEMO_MAIL );
-	$claims  = HDP_Supabase::selecteer( $a, 'claims', array( 'select' => 'id', 'dealer_email' => 'eq.' . HDP_DEMO_MAIL ) );
-	if ( is_wp_error( $claims ) ) {
-		exit( 'GESTOPT: ' . $claims->get_error_message() . "\n" );
+	// Alleen de voorbeeldmachines (serienummer DEMO-...) en wat daaraan hangt.
+	$machines = HDP_Supabase::selecteer( $a, 'machines', array( 'select' => 'id', 'serienummer' => 'like.DEMO-*' ) );
+	if ( is_wp_error( $machines ) ) {
+		exit( 'GESTOPT: ' . $machines->get_error_message() . "\n" );
 	}
-	if ( $claims ) {
-		$weg( 'verloop', 'claim_id=in.(' . implode( ',', wp_list_pluck( $claims, 'id' ) ) . ')' );
-		$weg( 'claims', $op_mail );
+	if ( $machines ) {
+		$machine_ids = implode( ',', wp_list_pluck( $machines, 'id' ) );
+		$claims      = HDP_Supabase::selecteer( $a, 'claims', array( 'select' => 'id', 'machine_id' => 'in.(' . $machine_ids . ')' ) );
+		if ( is_wp_error( $claims ) ) {
+			exit( 'GESTOPT: ' . $claims->get_error_message() . "\n" );
+		}
+		if ( $claims ) {
+			$claim_ids = implode( ',', wp_list_pluck( $claims, 'id' ) );
+			$weg( 'verloop', 'claim_id=in.(' . $claim_ids . ')' );
+			$weg( 'claims', 'id=in.(' . $claim_ids . ')' );
+		}
+		$weg( 'machines', 'id=in.(' . $machine_ids . ')' );
 	}
-	$weg( 'machines', $op_mail );
 }
 
 /* --- Webshop --------------------------------------------------------------- */
