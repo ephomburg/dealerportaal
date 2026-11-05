@@ -8,6 +8,11 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.97.0
+
+- Nieuw: **beoordelingen van trainingen** (`HDP_Training_Reviews`). De dag na een training krijgt elke deelnemer een mail met een persoonlijke link (zonder inloggen, in de eigen taal), en na een week één herinnering. Hij geeft een cijfer van 1 tot 10, eventueel met een reactie.
+- Bij een nieuwe training kies je "Vervolg op". Vanaf 3 cijfers staan het gemiddelde, de verdeling en de goedgekeurde reacties van die eerdere training erbij. Onder Trainingen > Beoordelingen keur je reacties goed; het team krijgt een mail bij elke nieuwe reactie. Onder Trainingen > Aanmeldingen zet je iemand op "Niet aanwezig", die krijgt dan geen mail.
+
 ## 1.96.2
 
 - Garantie: berichten in een claim stonden in een smal kolommetje naast de naam, op een blauwe achtergrond, en lange woorden vielen weg. De opmaak van de berichten op de startpagina werkte erop door, omdat beide `.hdp-bericht` heten; die opmaak geldt nu alleen nog op de startpagina.

@@ -4101,3 +4101,56 @@ body.hdp-app-layout .hdp-tekstpagina { max-width: none; margin: 0; padding: 0 0 
 	.hdp-tekstpagina { max-width: none; padding-inline: 1rem; }
 	body.hdp-app-layout .hdp-tekstpagina { padding-inline: 0; }
 }
+
+/* ==========================================================================
+   BEOORDELINGEN VAN TRAININGEN (zie HDP_Training_Reviews)
+   ========================================================================== */
+.hdp-training-vervolg { display: inline-block; margin: 0 0 1rem; padding: 0.2rem 0.65rem; background: var(--wp--preset--color--grijs-licht); border-radius: 6px; font-size: 0.8rem; font-weight: 600; }
+.hdp-training-oordeel { display: flex; gap: 0.75rem; align-items: center; padding-top: 1.1rem; border-top: 1px solid #3f4248; }
+.hdp-training-oordeel b { font-size: 1.9rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.hdp-training-oordeel span { color: #c9ccd2; font-size: 0.82rem; line-height: 1.35; }
+
+.hdp-training-reviews { padding: 1.9rem 2.5rem 2.1rem; background: var(--wp--preset--color--wit); border: 1px solid var(--wp--preset--color--rand); border-radius: 14px; }
+.hdp-training-reviews h2 { margin: 0 0 0.25rem; font-size: 1.12rem; font-weight: 800; text-wrap: balance; }
+.hdp-training-reviews-uitleg { margin: 0 0 1.4rem; color: var(--wp--preset--color--grijs-tekst); font-size: 0.9rem; }
+.hdp-training-reviews-raster { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 2rem; align-items: start; }
+.hdp-training-reviews-raster.is-zonder-reacties { grid-template-columns: minmax(0, 340px); }
+.hdp-training-reviews-cijfer { display: flex; gap: 0.75rem; align-items: baseline; margin: 0 0 0.9rem; }
+.hdp-training-reviews-cijfer b { font-size: 3rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.hdp-training-reviews-cijfer span { color: var(--wp--preset--color--grijs-tekst); font-size: 0.85rem; }
+.hdp-training-verdeling { display: grid; gap: 0.45rem; margin: 0; padding: 0; list-style: none; }
+.hdp-training-verdeling li { display: grid; grid-template-columns: 62px minmax(0, 1fr) 22px; gap: 0.5rem; align-items: center; margin: 0; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.hdp-training-verdeling i { display: block; height: 8px; overflow: hidden; border-radius: 4px; background: var(--wp--preset--color--rand); }
+.hdp-training-verdeling u { display: block; height: 100%; background: var(--wp--preset--color--homburg-rood); }
+.hdp-training-verdeling em { color: var(--wp--preset--color--grijs-tekst); font-style: normal; text-align: right; }
+.hdp-training-reacties { display: grid; gap: 0.75rem; margin: 0; padding: 0; list-style: none; }
+.hdp-training-reacties li { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 0.75rem; margin: 0; padding: 0.9rem 1rem; background: var(--wp--preset--color--grijs-licht); border-radius: 10px; }
+.hdp-training-reacties b { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; background: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--wit); font-weight: 800; font-variant-numeric: tabular-nums; }
+.hdp-training-reacties p { margin: 0 0 0.25rem; font-size: 0.93rem; white-space: pre-line; overflow-wrap: anywhere; }
+.hdp-training-reacties small { color: var(--wp--preset--color--grijs-tekst); font-size: 0.8rem; }
+
+.hdp-training-beoordeel { max-width: 720px; margin: 0 auto; padding-top: 2rem; }
+.hdp-training-review-formulier { margin-top: 0; padding: 2rem 2.25rem 2.25rem; border: 1px solid var(--wp--preset--color--rand); border-radius: 14px; box-shadow: none; }
+.hdp-training-review-formulier h1 { margin: 0 0 1.5rem; font-size: 1.4rem; font-weight: 800; line-height: 1.25; text-wrap: balance; }
+.hdp-training-cijfers { margin: 0 0 1.25rem; padding: 0; border: 0; }
+.hdp-training-cijfers legend { margin-bottom: 0.6rem; padding: 0; font-size: 0.95rem; font-weight: 700; }
+.hdp-training-cijfers > div { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 0.35rem; }
+.hdp-training-cijfers label { position: relative; display: block; margin: 0; cursor: pointer; }
+.hdp-training-cijfers input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.hdp-training-cijfers label span { display: grid; place-items: center; min-height: 48px; background: var(--wp--preset--color--wit); border: 2px solid var(--wp--preset--color--rand); border-radius: 8px; font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.hdp-training-cijfers label:hover span { border-color: var(--wp--preset--color--homburg-rood); }
+.hdp-training-cijfers input:checked + span { background: var(--wp--preset--color--homburg-rood); border-color: var(--wp--preset--color--homburg-rood); color: var(--wp--preset--color--wit); }
+.hdp-training-cijfers input:focus-visible + span { outline: 3px solid var(--wp--preset--color--donkergrijs); outline-offset: 2px; }
+.hdp-training-schaal { display: flex; justify-content: space-between; margin: 0.35rem 0 0; color: var(--wp--preset--color--grijs-tekst); font-size: 0.78rem; }
+.hdp-training-review-formulier textarea { display: block; box-sizing: border-box; width: 100%; padding: 0.7rem 0.8rem; border: 2px solid var(--wp--preset--color--rand); border-radius: 8px; font: inherit; resize: vertical; }
+.hdp-training-review-formulier .hdp-training-vinkje { margin: 0.25rem 0 1.25rem; font-size: 0.88rem; }
+.hdp-training-review-formulier .hdp-training-vinkje input { width: auto; margin-top: 0.25rem; }
+@media (max-width: 1180px) {
+	.hdp-training-reviews-raster, .hdp-training-reviews-raster.is-zonder-reacties { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 782px) {
+	.hdp-training-reviews { padding: 1.4rem; }
+	.hdp-training-review-formulier { padding: 1.5rem 1.25rem; }
+	.hdp-training-cijfers > div { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+	.hdp-training-beoordeel { padding-inline: 1rem; }
+}

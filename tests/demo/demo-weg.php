@@ -91,6 +91,7 @@ foreach ( $posts as $post ) {
 	} else {
 		if ( HDP_Trainingen::POST_TYPE === $post->post_type ) {
 			$wpdb->delete( HDP_Trainingen::tabel(), array( 'training_id' => $post->ID ) );
+			$wpdb->delete( HDP_Training_Reviews::tabel(), array( 'training_id' => $post->ID ) );
 		}
 		wp_delete_post( $post->ID, true );
 	}

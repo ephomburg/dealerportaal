@@ -30,7 +30,7 @@ class HDP_Trainingen {
 	const POST_TYPE = 'hdp_training';
 	const TABEL     = 'hdp_training_aanmeldingen';
 	const DB_OPTIE  = 'hdp_trainingen_db_versie';
-	const DB_VERSIE = '1';
+	const DB_VERSIE = '2';
 
 	const META_DATUM     = '_hdp_training_datum';
 	const META_EINDDATUM = '_hdp_training_einddatum';
@@ -43,6 +43,7 @@ class HDP_Trainingen {
 	const META_TITEL_FR  = '_hdp_training_titel_fr';
 	const META_TEKST_FR  = '_hdp_training_tekst_fr';
 	const META_VELDEN    = '_hdp_training_velden';
+	const META_VERVOLG_OP = '_hdp_training_vervolg_op';
 
 	const STATUS_AANGEMELD  = 'aangemeld';
 	const STATUS_GEANNULEERD = 'geannuleerd';
@@ -120,6 +121,24 @@ class HDP_Trainingen {
 
 		$tabel   = self::tabel();
 		$charset = $wpdb->get_charset_collate();
+		$reviews = HDP_Training_Reviews::tabel();
+		dbDelta(
+			"CREATE TABLE {$reviews} (
+				id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+				aanmelding_id bigint(20) unsigned NOT NULL,
+				training_id bigint(20) unsigned NOT NULL,
+				cijfer tinyint(3) unsigned NOT NULL,
+				reactie text NOT NULL,
+				mag_tonen tinyint(1) NOT NULL DEFAULT 0,
+				zichtbaar tinyint(1) NOT NULL DEFAULT 0,
+				publieke_naam varchar(255) NOT NULL DEFAULT '',
+				taal varchar(5) NOT NULL DEFAULT 'nl',
+				aangemaakt datetime NOT NULL,
+				PRIMARY KEY  (id),
+				UNIQUE KEY aanmelding (aanmelding_id),
+				KEY training (training_id)
+			) {$charset};"
+		);
 		dbDelta(
 			"CREATE TABLE {$tabel} (
 				id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -134,6 +153,9 @@ class HDP_Trainingen {
 				antwoorden longtext NOT NULL,
 				taal varchar(5) NOT NULL DEFAULT 'nl',
 				status varchar(20) NOT NULL DEFAULT 'aangemeld',
+				aanwezig tinyint(1) NOT NULL DEFAULT 1,
+				review_uitnodiging datetime DEFAULT NULL,
+				review_herinnering datetime DEFAULT NULL,
 				aangemaakt datetime NOT NULL,
 				PRIMARY KEY  (id),
 				KEY training_status (training_id,status),
@@ -406,7 +428,7 @@ class HDP_Trainingen {
 		return $overzicht;
 	}
 
-	private static function pak_uit( $rij ) {
+	public static function pak_uit( $rij ) {
 		$antwoorden        = json_decode( (string) $rij['antwoorden'], true );
 		$rij['antwoorden'] = is_array( $antwoorden ) ? $antwoorden : array();
 		return $rij;
@@ -808,6 +830,20 @@ class HDP_Trainingen {
 			);
 		}
 
+		$vervolg_op = (int) get_post_meta( $post->ID, self::META_VERVOLG_OP, true );
+		echo '<p><label for="hdp_training_vervolg_op"><strong>Vervolg op</strong></label><br><select id="hdp_training_vervolg_op" name="hdp_training_vervolg_op" class="widefat"><option value="0">Geen</option>';
+		foreach ( get_posts(
+			array(
+				'post_type'      => self::POST_TYPE,
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'exclude'        => array( $post->ID ),
+			)
+		) as $andere ) {
+			printf( '<option value="%1$d" %2$s>%3$s</option>', (int) $andere->ID, selected( $vervolg_op, $andere->ID, false ), esc_html( self::nl_titel( $andere->ID ) ) );
+		}
+		echo '</select><span class="description">De beoordelingen van die training komen hier dan vanzelf bij te staan.</span></p>';
+
 		$gekozen = HDP_Merken::naar_array( get_post_meta( $post->ID, self::META_MERKEN, true ) );
 		echo '<p><strong>Merken</strong><br><span class="description">Niets aanvinken = alle dealers zien deze training.</span></p>';
 		foreach ( HDP_Merken::lijst() as $merk ) {
@@ -1016,6 +1052,8 @@ class HDP_Trainingen {
 		}
 
 		update_post_meta( $post_id, self::META_PLAATSEN, isset( $_POST['hdp_training_plaatsen'] ) ? absint( $_POST['hdp_training_plaatsen'] ) : 0 );
+		$vervolg_op = isset( $_POST['hdp_training_vervolg_op'] ) ? absint( $_POST['hdp_training_vervolg_op'] ) : 0;
+		update_post_meta( $post_id, self::META_VERVOLG_OP, $vervolg_op && $vervolg_op !== (int) $post_id && self::POST_TYPE === get_post_type( $vervolg_op ) ? $vervolg_op : 0 );
 		update_post_meta( $post_id, self::META_TEKST_FR, isset( $_POST['hdp_training_tekst_fr'] ) ? wp_kses_post( wp_unslash( $_POST['hdp_training_tekst_fr'] ) ) : '' );
 		update_post_meta(
 			$post_id,
@@ -1100,7 +1138,7 @@ class HDP_Trainingen {
 		}
 	}
 
-	private static function beheer_url( $training_id = 0 ) {
+	public static function beheer_url( $training_id = 0 ) {
 		$url = admin_url( 'edit.php?post_type=' . self::POST_TYPE . '&page=hdp-training-aanmeldingen' );
 		return $training_id ? add_query_arg( 'training', (int) $training_id, $url ) : $url;
 	}
@@ -1219,9 +1257,18 @@ class HDP_Trainingen {
 									<td><?php echo esc_html( self::antwoord_op( $rij, $vraag_id ) ); ?></td>
 								<?php endforeach; ?>
 								<td><?php echo esc_html( self::aangemeld_op( $rij ) ); ?></td>
-								<td><?php echo esc_html( self::STATUS_GEANNULEERD === $rij['status'] ? 'Geannuleerd' : 'Aangemeld' ); ?></td>
+								<td><?php echo esc_html( self::STATUS_GEANNULEERD === $rij['status'] ? 'Geannuleerd' : ( empty( $rij['aanwezig'] ) ? 'Niet aanwezig' : 'Aangemeld' ) ); ?></td>
 								<td>
 									<?php if ( self::STATUS_AANGEMELD === $rij['status'] ) : ?>
+										<?php
+										$aanwezig = ! empty( $rij['aanwezig'] );
+										printf(
+											'<a href="%1$s" title="%2$s">%3$s</a> &middot; ',
+											esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=hdp_training_aanwezig&aanmelding=' . (int) $rij['id'] . '&training=' . $training_id . '&aan=' . ( $aanwezig ? 0 : 1 ) ), 'hdp_training_aanwezig_' . (int) $rij['id'] ) ),
+											esc_attr( 'Wie niet aanwezig was, krijgt geen vraag om een cijfer te geven.' ),
+											esc_html( $aanwezig ? 'Niet aanwezig' : 'Toch aanwezig' )
+										);
+										?>
 										<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=hdp_training_annuleer&aanmelding=' . (int) $rij['id'] . '&training=' . $training_id ), 'hdp_training_annuleer_' . (int) $rij['id'] ) ); ?>"
 											onclick="return confirm('Deze aanmelding annuleren? De plaats komt weer vrij. De deelnemer krijgt hiervan geen bericht.')">Annuleren</a>
 									<?php endif; ?>

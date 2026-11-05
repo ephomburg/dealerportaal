@@ -83,6 +83,11 @@ class HDP_Trainingen_Render {
 	}
 
 	public static function render_pagina( $a ) {
+		// De link uit de mail werkt zonder inloggen.
+		if ( HDP_Training_Reviews::is_beoordeel_verzoek() ) {
+			return HDP_Training_Reviews::render_beoordeel();
+		}
+
 		if ( ! is_user_logged_in() || ! HDP_Roles::mag_portaal_zien( get_current_user_id() ) ) {
 			ob_start();
 			HDP_Login::render_login( HDP_Login::login_foutmelding(), $a );
@@ -188,10 +193,13 @@ class HDP_Trainingen_Render {
 					<?php endif; ?>
 					<p class="hdp-training-soort"><?php echo esc_html( HDP_I18N::t( 'training_label' ) ); ?></p>
 					<h1><?php echo esc_html( HDP_Trainingen::titel( $id ) ); ?></h1>
+					<?php HDP_Training_Reviews::render_vervolg_label( $id ); ?>
 					<div class="hdp-training-tekst"><?php echo wp_kses_post( HDP_Trainingen::tekst( $id ) ); ?></div>
 				</div>
 				<?php self::render_feiten( $id, $stand, $eigen ); ?>
 			</div>
+
+			<?php HDP_Training_Reviews::render_sectie( $id ); ?>
 
 			<div class="hdp-training-aanmelden" id="aanmelden">
 				<?php
@@ -247,6 +255,8 @@ class HDP_Trainingen_Render {
 					<?php endif; ?>
 				</dl>
 			<?php endif; ?>
+
+			<?php HDP_Training_Reviews::render_oordeel_paneel( $id ); ?>
 
 			<?php self::render_plaatsen( $id, $stand ); ?>
 
