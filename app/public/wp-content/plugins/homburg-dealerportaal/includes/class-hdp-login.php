@@ -103,6 +103,12 @@ class HDP_Login {
 	}
 
 	public static function render_login( $fout, $a ) {
+		// Via de uitnodigingslink: eerst een wachtwoord kiezen.
+		if ( HDP_PowerAll_Dealers::is_welkom_verzoek() ) {
+			HDP_PowerAll_Dealers::render_welkom( $a );
+			return;
+		}
+
 		// Niet elk blok dat op dit inlogscherm kan uitkomen definieert een
 		// eigen introtekst (de downloads-, content- en garantiepagina's niet):
 		// dan hoort het scherm gewoon zonder intro te verschijnen in plaats

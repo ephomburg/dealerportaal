@@ -8,6 +8,12 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.99.0
+
+- Nieuw: **dealers uit PowerAll** (`HDP_PowerAll`, `HDP_PowerAll_Dealers`). Onder Gebruikers > Dealers uit PowerAll vul je klantnummers in. Het portaal haalt die klanten één keer per dag op (of direct met "Nu ophalen") en maakt per klant een goedgekeurd dealeraccount aan, gekoppeld aan het klantnummer. Is het e-mailadres al van een dealer, dan wordt dat account gekoppeld; hoort het bij een beheerder, dan wordt het overgeslagen. Naam, adres, telefoon en de status in PowerAll (actief, geblokkeerd voor orders, niet actief) worden elke keer bijgewerkt.
+- De dealer krijgt een tweetalige uitnodiging met een link die 14 dagen en één keer werkt. Hij kiest daar zijn wachtwoord, in de stijl van het inlogscherm, en is meteen ingelogd. Uitnodigingen gaan alleen automatisch als je dat aanzet, anders stuur je ze per dealer.
+- Uit PowerAll wordt alleen gelezen. De toegang staat in wp-config.php (`HDP_POWERALL_URL`, `HDP_POWERALL_TENANT`, `HDP_POWERALL_TOKEN`); zonder die regels gebeurt er niets.
+
 ## 1.98.0
 
 - Trainingen: onder de komende trainingen staat nu **"Eerder gegeven"**, de geweeste trainingen van de afgelopen 2 jaar, laatste eerst (ouder via "Toon oudere trainingen"). Per training de datum, plaats, het gemiddelde cijfer (vanaf 3 cijfers) en "Jullie waren erbij (n)" als iemand van het eigen bedrijf meedeed. Wie er van andere bedrijven was, blijft verborgen.

@@ -1069,6 +1069,16 @@ class HDP_I18N {
 			'btn_uitloggen'     => array( 'nl' => 'Uitloggen', 'fr' => 'Déconnexion' ),
 			'wachtwoord_vergeten' => array( 'nl' => 'Wachtwoord vergeten?', 'fr' => 'Mot de passe oublié ?' ),
 			'onthoud_mij'       => array( 'nl' => 'Onthoud mij op dit apparaat', 'fr' => 'Se souvenir de moi sur cet appareil' ),
+			'welkom_titel'      => array( 'nl' => 'Kies je wachtwoord', 'fr' => 'Choisissez votre mot de passe' ),
+			'welkom_intro'      => array(
+				'nl' => 'Welkom bij het dealerportaal van Homburg. Kies een wachtwoord voor je account (%s). Daarna ben je meteen ingelogd.',
+				'fr' => 'Bienvenue sur le portail concessionnaire Homburg. Choisissez un mot de passe pour votre compte (%s). Vous serez ensuite connecté directement.',
+			),
+			'welkom_btn'        => array( 'nl' => 'Opslaan en inloggen', 'fr' => 'Enregistrer et se connecter' ),
+			'welkom_verlopen'   => array(
+				'nl' => 'Deze link is verlopen of al gebruikt. Vraag hieronder een nieuwe link aan, of neem contact op met Homburg.',
+				'fr' => 'Ce lien a expiré ou a déjà été utilisé. Demandez un nouveau lien ci-dessous ou contactez Homburg.',
+			),
 
 			// Accountinstellingen
 			'btn_instellingen'  => array( 'nl' => 'Instellingen', 'fr' => 'Paramètres' ),
