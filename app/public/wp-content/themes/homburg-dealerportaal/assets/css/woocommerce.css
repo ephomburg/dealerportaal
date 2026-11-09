@@ -146,6 +146,7 @@ p.no-comments {
 	font-size: 0.85rem;
 }
 .hdp-terug-naar-winkel svg { width: 15px; height: 15px; }
+.hdp-wc-paginakop { margin: 0 0 1.25rem; font-size: clamp(1.5rem, 2.4vw, 1.9rem); font-weight: 800; }
 .hdp-terug-naar-winkel:hover { color: var(--wp--preset--color--homburg-rood); }
 
 .woocommerce-pagination {

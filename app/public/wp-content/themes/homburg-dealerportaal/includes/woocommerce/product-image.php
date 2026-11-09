@@ -41,7 +41,11 @@ add_filter( 'woocommerce_placeholder_img_src', 'homburg_wc_placeholder_src' );
  */
 function homburg_wc_blauwdruk_plaat( $product, $extra_class = '' ) {
 	$categorieen = get_the_terms( $product->get_id(), 'product_cat' );
-	$categorie   = ( $categorieen && ! is_wp_error( $categorieen ) ) ? $categorieen[0]->name : __( 'Onderdeel', 'homburg-dealerportaal-theme' );
+	// "Outlet" staat al als label op de kaart; op de tekening zou het dubbel staan.
+	$categorieen = ( $categorieen && ! is_wp_error( $categorieen ) )
+		? array_values( array_filter( $categorieen, static function ( $term ) { return ! defined( 'HOMBURG_WC_OUTLET' ) || HOMBURG_WC_OUTLET !== $term->slug; } ) )
+		: array();
+	$categorie   = $categorieen ? $categorieen[0]->name : __( 'Onderdeel', 'homburg-dealerportaal-theme' );
 	$label       = $product->get_sku() ? $product->get_sku() : $product->get_name();
 
 	printf(

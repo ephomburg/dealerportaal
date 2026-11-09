@@ -245,6 +245,25 @@ function homburg_wc_uitverkochte_outlet_weg( $query ) {
 	}
 }
 
+add_action( 'pre_get_posts', 'homburg_wc_outlet_niet_in_webshop', 99 );
+/**
+ * De outlet heeft een eigen plek in het menu. In de gewone webshop staan die
+ * artikelen daarom niet, ook niet bij zoeken binnen de webshop.
+ */
+function homburg_wc_outlet_niet_in_webshop( $query ) {
+	if ( is_admin() || ! $query->is_main_query() || ! is_shop() || is_product_category( HOMBURG_WC_OUTLET ) ) {
+		return;
+	}
+	$tax_query   = (array) $query->get( 'tax_query' );
+	$tax_query[] = array(
+		'taxonomy' => 'product_cat',
+		'field'    => 'slug',
+		'terms'    => HOMBURG_WC_OUTLET,
+		'operator' => 'NOT IN',
+	);
+	$query->set( 'tax_query', $tax_query );
+}
+
 add_filter( 'woocommerce_product_is_visible', 'homburg_wc_uitverkochte_outlet_onzichtbaar', 10, 2 );
 /** Ook niet bij gerelateerde producten, in favorieten of in de zoekbalk. */
 function homburg_wc_uitverkochte_outlet_onzichtbaar( $zichtbaar, $product_id ) {

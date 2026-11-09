@@ -115,9 +115,50 @@ add_filter( 'the_content', 'homburg_wc_terug_naar_winkel_bij_blokken' );
  */
 function homburg_wc_terug_naar_winkel_bij_blokken( $content ) {
 	if ( ( is_cart() || is_checkout() ) && is_main_query() && in_the_loop() ) {
-		return homburg_wc_terug_naar_winkel_html() . $content;
+		// De winkelwagen had geen paginakop; het WooCommerce-blok zelf heeft er geen.
+		$kop = is_cart() ? '<h1 class="hdp-wc-paginakop">' . esc_html( get_the_title( wc_get_page_id( 'cart' ) ) ) . '</h1>' : '';
+		return homburg_wc_terug_naar_winkel_html() . $kop . $content;
 	}
 	return $content;
+}
+
+add_action( 'template_redirect', 'homburg_wc_oude_adressen', 1 );
+/**
+ * De webshop had Engelse adressen (/shop/, /cart/, /my-account/ ...). Wie
+ * zo'n oud adres nog heeft, bijvoorbeeld als bladwijzer of in een mail, komt
+ * op het nieuwe Nederlandse adres uit, met de rest van het pad erachter.
+ */
+function homburg_wc_oude_adressen() {
+	if ( ! is_404() ) {
+		return;
+	}
+	$pad    = (string) wp_parse_url( isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '', PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	$query  = (string) wp_parse_url( isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '', PHP_URL_QUERY ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	$oud    = array(
+		'/shop/'             => wc_get_page_id( 'shop' ),
+		'/cart/'             => wc_get_page_id( 'cart' ),
+		'/checkout/'         => wc_get_page_id( 'checkout' ),
+		'/my-account/'       => wc_get_page_id( 'myaccount' ),
+		'/product-category/' => 'categorie',
+	);
+	foreach ( $oud as $begin => $doel ) {
+		if ( 0 !== strpos( trailingslashit( $pad ), $begin ) ) {
+			continue;
+		}
+		$rest = substr( trailingslashit( $pad ), strlen( $begin ) );
+		if ( 'categorie' === $doel ) {
+			$instellingen = (array) get_option( 'woocommerce_permalinks', array() );
+			$categorie    = trim( (string) ( $instellingen['category_base'] ?? '' ), '/' );
+			$basis        = home_url( '/' . ( '' !== $categorie ? $categorie : 'product-category' ) . '/' );
+		} else {
+			$basis = get_permalink( $doel );
+		}
+		if ( ! $basis || trailingslashit( $basis ) === trailingslashit( home_url( $begin ) ) ) {
+			return;
+		}
+		wp_safe_redirect( trailingslashit( $basis ) . $rest . ( '' !== $query ? '?' . $query : '' ), 301 );
+		exit;
+	}
 }
 
 add_filter( 'woocommerce_output_related_products_args', 'homburg_wc_gerelateerd_args' );
