@@ -24,6 +24,7 @@ class HDP_Merken {
 			'Escarda',
 			'Garford',
 			'HARDI',
+			'Homburg',
 			'Novaxi',
 			'PerPlant',
 			'Rabe',

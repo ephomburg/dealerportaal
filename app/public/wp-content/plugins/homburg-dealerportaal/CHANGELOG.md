@@ -8,6 +8,12 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.100.0
+
+- Webshop per merk (`HDP_Webshop_Merken`): een dealer ziet alleen de artikelen van de merken die bij zijn bedrijf zijn aangevinkt, plus Diversen en de outlet. Andere merken zijn nergens te zien, niet te vinden met zoeken, geven via een directe link "niet gevonden" en zijn niet te bestellen (ook niet via snel bestellen). Zonder aangevinkte merken ziet een dealer in de webshop alleen Diversen en de outlet; bij downloads blijft dat "alles". Medewerkers van Homburg zien alles.
+- Collega's met hetzelfde klantnummer delen hun merken: wijzig je ze bij één, dan wijzigen ze bij allemaal.
+- "Homburg" staat nu in de merkenlijst, zodat je het per dealer kunt aanvinken.
+
 ## 1.99.0
 
 - Nieuw: **dealers uit PowerAll** (`HDP_PowerAll`, `HDP_PowerAll_Dealers`). Onder Gebruikers > Dealers uit PowerAll vul je klantnummers in. Het portaal haalt die klanten één keer per dag op (of direct met "Nu ophalen") en maakt per klant een goedgekeurd dealeraccount aan, gekoppeld aan het klantnummer. Is het e-mailadres al van een dealer, dan wordt dat account gekoppeld; hoort het bij een beheerder, dan wordt het overgeslagen. Naam, adres, telefoon en de status in PowerAll (actief, geblokkeerd voor orders, niet actief) worden elke keer bijgewerkt.
