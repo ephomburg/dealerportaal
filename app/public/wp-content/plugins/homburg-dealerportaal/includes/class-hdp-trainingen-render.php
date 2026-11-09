@@ -133,6 +133,64 @@ class HDP_Trainingen_Render {
 			<?php endif; ?>
 		</section>
 		<?php
+		self::render_eerder();
+	}
+
+	/** "Eerder gegeven": de geweeste trainingen, laatste eerst. Niets als er geen zijn. */
+	private static function render_eerder() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- alleen een weergavekeuze.
+		$alles   = isset( $_GET['eerder'] ) && 'alle' === sanitize_key( wp_unslash( $_GET['eerder'] ) );
+		$alle    = HDP_Trainingen::eerdere( 0, true );
+		$tonen   = $alles ? $alle : HDP_Trainingen::eerdere();
+		$ouderen = count( $alle ) - count( $tonen );
+		if ( ! $alle ) {
+			return;
+		}
+		?>
+		<section class="hdp-trainingen hdp-training-eerder" id="eerder">
+			<h2><?php echo esc_html( HDP_I18N::t( 'training_eerder_titel' ) ); ?></h2>
+			<?php if ( $tonen ) : ?>
+				<ul class="hdp-training-eerder-lijst">
+					<?php foreach ( $tonen as $id ) : ?>
+						<?php self::render_eerder_regel( $id ); ?>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+			<?php if ( $ouderen > 0 ) : ?>
+				<a class="hdp-training-eerder-meer" href="<?php echo esc_url( add_query_arg( 'eerder', 'alle', HDP_Trainingen::url() ) . '#eerder' ); ?>"><?php echo esc_html( HDP_I18N::t( 'training_eerder_meer' ) ); ?></a>
+			<?php endif; ?>
+		</section>
+		<?php
+	}
+
+	private static function render_eerder_regel( $id ) {
+		$dag     = HDP_Trainingen::laatste_dag( $id );
+		$begin   = (string) get_post_meta( $id, HDP_Trainingen::META_DATUM, true );
+		$locatie = (string) get_post_meta( $id, HDP_Trainingen::META_LOCATIE, true );
+		$erbij   = count( HDP_Trainingen::deden_mee( $id ) );
+		$oordeel = HDP_Training_Reviews::stand( $id );
+		?>
+		<li>
+			<a class="hdp-training-eerder-link" href="<?php echo esc_url( HDP_Trainingen::url( $id ) ); ?>">
+				<time class="hdp-training-eerder-datum" datetime="<?php echo esc_attr( $begin ? $begin : $dag ); ?>"><?php echo esc_html( HDP_I18N::datum( 'j M Y', strtotime( $begin ? $begin : $dag ) ) ); ?></time>
+				<span class="hdp-training-eerder-naam">
+					<strong><?php echo esc_html( HDP_Trainingen::titel( $id ) ); ?></strong>
+					<?php if ( $locatie ) : ?>
+						<small><?php echo esc_html( $locatie ); ?></small>
+					<?php endif; ?>
+				</span>
+				<span class="hdp-training-eerder-extra">
+					<?php if ( $erbij ) : ?>
+						<span class="hdp-training-label hdp-training-label-aangemeld"><?php echo esc_html( sprintf( HDP_I18N::t( 'training_eerder_erbij' ), $erbij ) ); ?></span>
+					<?php endif; ?>
+					<?php if ( $oordeel['aantal'] >= HDP_Training_Reviews::MIN_CIJFERS ) : ?>
+						<span class="hdp-training-eerder-cijfer"><b><?php echo esc_html( HDP_Training_Reviews::cijfer_tekst( $oordeel['gemiddelde'] ) ); ?></b> <?php echo esc_html( sprintf( HDP_I18N::t( 'training_review_aantal' ), $oordeel['aantal'] ) ); ?></span>
+					<?php endif; ?>
+				</span>
+				<span class="hdp-training-eerder-pijl" aria-hidden="true">&rarr;</span>
+			</a>
+		</li>
+		<?php
 	}
 
 	private static function render_kaart( $id ) {
@@ -194,6 +252,9 @@ class HDP_Trainingen_Render {
 					<p class="hdp-training-soort"><?php echo esc_html( HDP_I18N::t( 'training_label' ) ); ?></p>
 					<h1><?php echo esc_html( HDP_Trainingen::titel( $id ) ); ?></h1>
 					<?php HDP_Training_Reviews::render_vervolg_label( $id ); ?>
+					<?php if ( 'voorbij' === $stand && get_post_meta( $id, HDP_Trainingen::META_DATUM, true ) ) : ?>
+						<p class="hdp-training-gegeven"><?php echo esc_html( sprintf( HDP_I18N::t( 'training_gegeven_op' ), HDP_Trainingen::datumtekst( $id ) ) ); ?></p>
+					<?php endif; ?>
 					<div class="hdp-training-tekst"><?php echo wp_kses_post( HDP_Trainingen::tekst( $id ) ); ?></div>
 				</div>
 				<?php self::render_feiten( $id, $stand, $eigen ); ?>
@@ -205,7 +266,7 @@ class HDP_Trainingen_Render {
 				<?php
 				if ( 'open' === $stand ) {
 					self::render_formulier( $id, $eigen, $net_aangemeld );
-				} elseif ( ! $eigen ) {
+				} elseif ( ! $eigen && 'voorbij' !== $stand ) {
 					echo '<p class="hdp-training-melding">' . esc_html( HDP_I18N::t( 'training_stand_' . $stand . '_uitleg' ) ) . '</p>';
 				}
 				?>
@@ -264,18 +325,49 @@ class HDP_Trainingen_Render {
 				<a class="hdp-btn hdp-training-naar-formulier" href="#aanmelden"><?php echo esc_html( HDP_I18N::t( $eigen ? 'training_nog_iemand' : 'training_aanmelden' ) ); ?></a>
 			<?php endif; ?>
 
+			<?php
+			if ( 'voorbij' === $stand ) {
+				self::render_volgende( $id );
+				// Bij een geweeste training telt wie er echt was, niet wie zich ooit aanmeldde.
+				$eigen = HDP_Trainingen::deden_mee( $id );
+			}
+			?>
+
 			<?php if ( $eigen ) : ?>
 				<div class="hdp-training-eigen">
-					<h2><?php echo esc_html( HDP_I18N::t( 'training_jouw_aanmeldingen' ) ); ?></h2>
+					<h2><?php echo esc_html( HDP_I18N::t( 'voorbij' === $stand ? 'training_deden_mee' : 'training_jouw_aanmeldingen' ) ); ?></h2>
 					<ul>
 						<?php foreach ( $eigen as $rij ) : ?>
 							<li><?php echo esc_html( $rij['deelnemer_naam'] ); ?></li>
 						<?php endforeach; ?>
 					</ul>
-					<?php self::render_agendaknop( $id, 'hdp-training-agenda' ); ?>
+					<?php
+					if ( 'voorbij' !== $stand ) {
+						self::render_agendaknop( $id, 'hdp-training-agenda' );
+					}
+					?>
 				</div>
 			<?php endif; ?>
 		</aside>
+		<?php
+	}
+
+	/** Bij een geweeste training: de weg naar de nieuwe editie of het vervolg, als dat gepland is. */
+	private static function render_volgende( $id ) {
+		$volgende = HDP_Trainingen::volgende_van( $id );
+		if ( ! $volgende ) {
+			return;
+		}
+		$zelfde = mb_strtolower( trim( HDP_Trainingen::titel( $volgende ) ) ) === mb_strtolower( trim( HDP_Trainingen::titel( $id ) ) );
+		$datum  = HDP_Trainingen::datumtekst( $volgende );
+		?>
+		<div class="hdp-training-volgende">
+			<p>
+				<span><?php echo esc_html( HDP_I18N::t( $zelfde ? 'training_volgende_editie' : 'training_volgende_vervolg' ) ); ?></span>
+				<strong><?php echo esc_html( $zelfde ? ( $datum ? $datum : HDP_I18N::t( 'training_datum_volgt' ) ) : HDP_Trainingen::titel( $volgende ) ); ?></strong>
+			</p>
+			<a class="hdp-btn" href="<?php echo esc_url( HDP_Trainingen::url( $volgende ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'training_volgende_knop' ) ); ?></a>
+		</div>
 		<?php
 	}
 

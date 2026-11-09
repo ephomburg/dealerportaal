@@ -36,7 +36,9 @@
 
 <!-- wp:homburg/merken-tegel {"titel":"Draincleaners","linkTekst":"Naar onderdelen","linkTekstFr":"Vers les pièces","url":"https://www.homburg-holland.com/nl/downloads","kleur":"donker"} /-->
 
-<!-- wp:homburg/merken-tegel {"titel":"HARDI \u0026 Rabe","linkTekst":"Naar onderdelen","linkTekstFr":"Vers les pièces","url":"https://www.agroparts.com","kleur":"rood"} /-->
+<!-- wp:homburg/merken-tegel {"titel":"HARDI","linkTekst":"Naar onderdelen","linkTekstFr":"Vers les pièces","url":"https://www.agroparts.com","kleur":"rood"} /-->
+
+<!-- wp:homburg/merken-tegel {"titel":"Rabe","linkTekst":"Naar onderdelen","linkTekstFr":"Vers les pièces","url":"https://www.agroparts.com","kleur":"rood"} /-->
 
 <!-- wp:homburg/merken-tegel {"titel":"Oudere Rabe-machines","linkTekst":"Rabe Ersatzteilportal","linkTekstFr":"Rabe Ersatzteilportal","url":"https://rabe-ersatzteile.de/","kleur":"donker"} /--></div>
 <!-- /wp:group --></div>

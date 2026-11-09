@@ -8,6 +8,12 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.98.0
+
+- Trainingen: onder de komende trainingen staat nu **"Eerder gegeven"**, de geweeste trainingen van de afgelopen 2 jaar, laatste eerst (ouder via "Toon oudere trainingen"). Per training de datum, plaats, het gemiddelde cijfer (vanaf 3 cijfers) en "Jullie waren erbij (n)" als iemand van het eigen bedrijf meedeed. Wie er van andere bedrijven was, blijft verborgen.
+- Een geweeste training toont "Gegeven op …", de eigen cijfers en reacties, wie er van het eigen bedrijf meedeed (zonder afgemelden en afwezigen), en een knop naar de volgende editie (zelfde titel) of het vervolg als dat gepland is. Geen aanmeldformulier en geen Outlook-knop meer.
+- Merkentegels: "HARDI & Rabe" is gesplitst in een tegel HARDI en een tegel Rabe (allebei agroparts.com), naast "Oudere Rabe-machines".
+
 ## 1.97.0
 
 - Nieuw: **beoordelingen van trainingen** (`HDP_Training_Reviews`). De dag na een training krijgt elke deelnemer een mail met een persoonlijke link (zonder inloggen, in de eigen taal), en na een week één herinnering. Hij geeft een cijfer van 1 tot 10, eventueel met een reactie.

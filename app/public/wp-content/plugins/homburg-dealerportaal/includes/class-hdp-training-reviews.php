@@ -448,17 +448,27 @@ class HDP_Training_Reviews {
 
 	/* === Bij de vervolgtraining ========================================= */
 
+	/**
+	 * Van welke training de cijfers bij deze pagina horen: bij een geweeste
+	 * training die van zichzelf, anders die van de training waarop hij volgt.
+	 *
+	 * @return int 0 als er niets te tonen is.
+	 */
+	public static function bron( $training_id ) {
+		return HDP_Trainingen::is_voorbij( $training_id ) ? (int) $training_id : self::vorige_training( $training_id );
+	}
+
 	/** Het gemiddelde in het donkere paneel. Niets zolang er te weinig cijfers zijn. */
 	public static function render_oordeel_paneel( $training_id ) {
-		$vorige = self::vorige_training( $training_id );
-		$stand  = $vorige ? self::stand( $vorige ) : null;
+		$bron  = self::bron( $training_id );
+		$stand = $bron ? self::stand( $bron ) : null;
 		if ( ! $stand || $stand['aantal'] < self::MIN_CIJFERS ) {
 			return;
 		}
 		?>
 		<div class="hdp-training-oordeel">
 			<b><?php echo esc_html( self::cijfer_tekst( $stand['gemiddelde'] ) ); ?></b>
-			<span><?php echo esc_html( sprintf( HDP_I18N::t( 'training_review_vorige' ), $stand['aantal'] ) ); ?></span>
+			<span><?php echo esc_html( sprintf( HDP_I18N::t( $bron === (int) $training_id ? 'training_review_eigen' : 'training_review_vorige' ), $stand['aantal'] ) ); ?></span>
 		</div>
 		<?php
 	}
@@ -472,16 +482,17 @@ class HDP_Training_Reviews {
 
 	/** Het blok onder de uitleg: het gemiddelde, de verdeling en de reacties. */
 	public static function render_sectie( $training_id ) {
-		$vorige = self::vorige_training( $training_id );
-		$stand  = $vorige ? self::stand( $vorige ) : null;
+		$bron  = self::bron( $training_id );
+		$stand = $bron ? self::stand( $bron ) : null;
 		if ( ! $stand || $stand['aantal'] < self::MIN_CIJFERS ) {
 			return;
 		}
 		$grootste = max( 1, max( $stand['verdeling'] ) );
-		$reacties = self::zichtbare_reacties( $vorige );
+		$reacties = self::zichtbare_reacties( $bron );
+		$kop      = $bron === (int) $training_id ? HDP_I18N::t( 'training_review_sectie_eigen' ) : sprintf( HDP_I18N::t( 'training_review_sectie' ), HDP_Trainingen::titel( $bron ) );
 		?>
 		<section class="hdp-training-reviews">
-			<h2><?php echo esc_html( sprintf( HDP_I18N::t( 'training_review_sectie' ), HDP_Trainingen::titel( $vorige ) ) ); ?></h2>
+			<h2><?php echo esc_html( $kop ); ?></h2>
 			<p class="hdp-training-reviews-uitleg"><?php echo esc_html( HDP_I18N::t( 'training_review_sectie_uitleg' ) ); ?></p>
 			<div class="hdp-training-reviews-raster<?php echo $reacties ? '' : ' is-zonder-reacties'; ?>">
 				<div>

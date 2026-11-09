@@ -582,4 +582,162 @@ class Trainingen_Test extends WP_UnitTestCase {
 		wp_set_current_user( 0 );
 		$this->assertStringNotContainsString( 'Uitleg over de training.', do_blocks( '<!-- wp:homburg/trainingen-pagina /-->' ) );
 	}
+
+	/* === Eerder gegeven ================================================= */
+
+	private function dagen_geleden( $dagen ) {
+		return gmdate( 'Y-m-d', strtotime( current_time( 'Y-m-d' ) . ' UTC' ) - $dagen * DAY_IN_SECONDS );
+	}
+
+	/** Een geweeste training met deelnemers: eerst aanmelden, daarna de datum terugzetten. */
+	private function geweest( $dagen, $deelnemers = array(), $meta = array() ) {
+		$id = $this->maak_training( $meta );
+		foreach ( $deelnemers as $naam ) {
+			HDP_Trainingen::meld_aan( $id, array( 'naam' => $naam, 'email' => strtolower( $naam ) . '@dealer.test' ) );
+		}
+		update_post_meta( $id, HDP_Trainingen::META_DATUM, $this->dagen_geleden( $dagen ) );
+		return $id;
+	}
+
+	public function test_eerdere_laatste_eerst_en_standaard_twee_jaar_terug() {
+		$recent  = $this->geweest( 10 );
+		$ouder   = $this->geweest( 100 );
+		$oud     = $this->geweest( 800 );
+		$komend  = $this->maak_training();
+		$concept = $this->geweest( 5 );
+		wp_update_post( array( 'ID' => $concept, 'post_status' => 'draft' ) );
+		$zonder = $this->maak_training();
+		delete_post_meta( $zonder, HDP_Trainingen::META_DATUM );
+
+		$this->assertSame( array( $recent, $ouder ), HDP_Trainingen::eerdere() );
+		$this->assertSame( array( $recent, $ouder, $oud ), HDP_Trainingen::eerdere( 0, true ) );
+		$this->assertNotContains( $komend, HDP_Trainingen::eerdere( 0, true ) );
+	}
+
+	public function test_meerdaagse_training_telt_vanaf_de_laatste_dag() {
+		$loopt = $this->maak_training(
+			array(
+				HDP_Trainingen::META_DATUM     => $this->dagen_geleden( 1 ),
+				HDP_Trainingen::META_EINDDATUM => gmdate( 'Y-m-d', time() + 2 * DAY_IN_SECONDS ),
+			)
+		);
+		$this->assertNotContains( $loopt, HDP_Trainingen::eerdere() );
+	}
+
+	public function test_eerdere_volgt_de_merken_van_de_dealer() {
+		update_user_meta( $this->dealer, 'hdp_merken', 'Väderstad' );
+		$eigen  = $this->geweest( 10, array(), array( HDP_Trainingen::META_MERKEN => 'Väderstad' ) );
+		$vreemd = $this->geweest( 20, array(), array( HDP_Trainingen::META_MERKEN => 'Bogballe' ) );
+
+		$this->assertSame( array( $eigen ), HDP_Trainingen::eerdere() );
+		$this->assertNotContains( $vreemd, HDP_Trainingen::eerdere( 0, true ) );
+	}
+
+	public function test_volgende_van_eerst_nieuwe_editie_dan_vervolg() {
+		$geweest = $this->geweest( 30 );
+		$this->assertSame( 0, HDP_Trainingen::volgende_van( $geweest ) );
+
+		$vervolg = $this->maak_training( array( HDP_Trainingen::META_VERVOLG_OP => $geweest ) );
+		wp_update_post( array( 'ID' => $vervolg, 'post_title' => 'Service Väderstad deel 2' ) );
+		$this->assertSame( $vervolg, HDP_Trainingen::volgende_van( $geweest ) );
+
+		$editie = $this->maak_training( array( HDP_Trainingen::META_DATUM => '2099-01-01' ) );
+		$this->assertSame( $editie, HDP_Trainingen::volgende_van( $geweest ), 'Dezelfde training opnieuw gaat voor het vervolg.' );
+	}
+
+	public function test_deden_mee_zonder_afgemelden_en_afwezigen() {
+		global $wpdb;
+		$training = $this->maak_training();
+		$piet     = HDP_Trainingen::meld_aan( $training, array( 'naam' => 'Piet', 'email' => 'piet@dealer.test' ) );
+		$kees     = HDP_Trainingen::meld_aan( $training, array( 'naam' => 'Kees', 'email' => 'kees@dealer.test' ) );
+		HDP_Trainingen::meld_aan( $training, array( 'naam' => 'Anna', 'email' => 'anna@dealer.test' ) );
+		HDP_Trainingen::annuleer( $piet );
+		$wpdb->update( HDP_Trainingen::tabel(), array( 'aanwezig' => 0 ), array( 'id' => $kees ) );
+		update_post_meta( $training, HDP_Trainingen::META_DATUM, $this->dagen_geleden( 3 ) );
+
+		$this->assertSame( array( 'Anna' ), wp_list_pluck( HDP_Trainingen::deden_mee( $training ), 'deelnemer_naam' ) );
+	}
+
+	public function test_overzicht_toont_eerder_gegeven() {
+		$html = HDP_Trainingen_Render::render_pagina( array() );
+		$this->assertStringNotContainsString( HDP_I18N::t( 'training_eerder_titel' ), $html, 'Zonder geweeste trainingen geen leeg blok.' );
+
+		$geweest = $this->geweest( 10, array( 'Piet' ), array( HDP_Trainingen::META_LOCATIE => 'Stiens' ) );
+		$this->geweest( 800 );
+		$html = HDP_Trainingen_Render::render_pagina( array() );
+
+		$this->assertStringContainsString( HDP_I18N::t( 'training_eerder_titel' ), $html );
+		$this->assertStringContainsString( HDP_I18N::t( 'training_leeg' ), $html, 'Er staat nog steeds dat er niets gepland is.' );
+		$this->assertStringContainsString( 'Stiens', $html );
+		$this->assertStringContainsString( sprintf( HDP_I18N::t( 'training_eerder_erbij' ), 1 ), $html );
+		$this->assertStringContainsString( esc_url( HDP_Trainingen::url( $geweest ) ), $html );
+		$this->assertSame( 1, substr_count( $html, 'class="hdp-training-eerder-link"' ), 'De oude training staat er standaard niet in.' );
+		$this->assertStringContainsString( HDP_I18N::t( 'training_eerder_meer' ), $html );
+
+		$_GET['eerder'] = 'alle';
+		$html           = HDP_Trainingen_Render::render_pagina( array() );
+		unset( $_GET['eerder'] );
+		$this->assertSame( 2, substr_count( $html, 'class="hdp-training-eerder-link"' ) );
+		$this->assertStringNotContainsString( HDP_I18N::t( 'training_eerder_meer' ), $html );
+	}
+
+	public function test_andere_dealer_ziet_niet_wie_er_van_ons_was() {
+		$this->geweest( 10, array( 'Piet' ) );
+		$ander = self::factory()->user->create( array( 'role' => 'dealer' ) );
+		update_user_meta( $ander, 'hdp_goedgekeurd', '1' );
+		wp_set_current_user( $ander );
+
+		$html = HDP_Trainingen_Render::render_pagina( array() );
+		$this->assertStringContainsString( HDP_I18N::t( 'training_eerder_titel' ), $html );
+		$this->assertStringNotContainsString( 'hdp-training-label-aangemeld', $html );
+	}
+
+	public function test_detail_van_een_geweeste_training() {
+		$geweest = $this->geweest( 10, array( 'Piet' ) );
+		$editie  = $this->maak_training( array( HDP_Trainingen::META_DATUM => '2099-03-04' ) );
+
+		$_GET['training'] = $geweest;
+		$html             = HDP_Trainingen_Render::render_pagina( array() );
+		unset( $_GET['training'] );
+
+		$this->assertStringContainsString( esc_html( sprintf( HDP_I18N::t( 'training_gegeven_op' ), HDP_Trainingen::datumtekst( $geweest ) ) ), $html );
+		$this->assertStringNotContainsString( '<form', $html );
+		$this->assertStringNotContainsString( HDP_I18N::t( 'training_stand_voorbij_uitleg' ), $html );
+		$this->assertStringNotContainsString( HDP_I18N::t( 'training_in_outlook' ), $html );
+		$this->assertStringContainsString( HDP_I18N::t( 'training_deden_mee' ), $html );
+		$this->assertStringContainsString( 'Piet', $html );
+		$this->assertStringContainsString( HDP_I18N::t( 'training_volgende_editie' ), $html );
+		$this->assertStringContainsString( esc_url( HDP_Trainingen::url( $editie ) ), $html );
+	}
+
+	public function test_geweeste_training_toont_haar_eigen_cijfers() {
+		global $wpdb;
+		$geweest = $this->geweest( 10 );
+		foreach ( array( 9, 8, 7 ) as $i => $cijfer ) {
+			$wpdb->insert(
+				HDP_Training_Reviews::tabel(),
+				array(
+					'aanmelding_id' => 900 + $i,
+					'training_id'   => $geweest,
+					'cijfer'        => $cijfer,
+					'reactie'       => 0 === $i ? 'Heel leerzaam.' : '',
+					'mag_tonen'     => 1,
+					'zichtbaar'     => 1,
+					'publieke_naam' => 'Sanne B., monteur',
+					'aangemaakt'    => current_time( 'mysql', true ),
+				)
+			);
+		}
+
+		$_GET['training'] = $geweest;
+		$html             = HDP_Trainingen_Render::render_pagina( array() );
+		unset( $_GET['training'] );
+		$this->assertStringContainsString( HDP_I18N::t( 'training_review_sectie_eigen' ), $html );
+		$this->assertStringContainsString( sprintf( HDP_I18N::t( 'training_review_eigen' ), 3 ), $html );
+		$this->assertStringContainsString( 'Heel leerzaam.', $html );
+
+		$overzicht = HDP_Trainingen_Render::render_pagina( array() );
+		$this->assertStringContainsString( 'hdp-training-eerder-cijfer', $overzicht );
+		$this->assertStringContainsString( '<b>8,0</b>', $overzicht );
+	}
 }

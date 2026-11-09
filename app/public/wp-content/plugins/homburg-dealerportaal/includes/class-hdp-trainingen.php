@@ -32,6 +32,9 @@ class HDP_Trainingen {
 	const DB_OPTIE  = 'hdp_trainingen_db_versie';
 	const DB_VERSIE = '2';
 
+	/** Hoe ver "Eerder gegeven" standaard terugkijkt; ouder via "Toon oudere trainingen". */
+	const EERDER_DAGEN = 730;
+
 	const META_DATUM     = '_hdp_training_datum';
 	const META_EINDDATUM = '_hdp_training_einddatum';
 	const META_TIJD      = '_hdp_training_tijd';
@@ -229,11 +232,80 @@ class HDP_Trainingen {
 		return ! $eigen || array_intersect( $merken, $eigen );
 	}
 
+	/** De laatste dag van de training (Y-m-d); leeg zolang de datum nog volgt. */
+	public static function laatste_dag( $training_id ) {
+		$eind = (string) get_post_meta( $training_id, self::META_EINDDATUM, true );
+		return $eind ? $eind : (string) get_post_meta( $training_id, self::META_DATUM, true );
+	}
+
 	/** Is de laatste dag van de training voorbij? Zonder datum ("datum volgt") nooit. */
 	public static function is_voorbij( $training_id ) {
-		$eind = (string) get_post_meta( $training_id, self::META_EINDDATUM, true );
-		$eind = $eind ? $eind : (string) get_post_meta( $training_id, self::META_DATUM, true );
+		$eind = self::laatste_dag( $training_id );
 		return $eind && $eind < current_time( 'Y-m-d' );
+	}
+
+	/**
+	 * De geweeste trainingen die deze dealer mag zien, laatste eerst.
+	 *
+	 * @param int  $user_id 0 = de huidige gebruiker.
+	 * @param bool $alles   Ook die van langer dan EERDER_DAGEN geleden.
+	 * @return int[]
+	 */
+	public static function eerdere( $user_id = 0, $alles = false ) {
+		$grens = gmdate( 'Y-m-d', strtotime( current_time( 'Y-m-d' ) . ' UTC' ) - self::EERDER_DAGEN * DAY_IN_SECONDS );
+		$ids   = get_posts(
+			array(
+				'post_type'      => self::POST_TYPE,
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			)
+		);
+		$ids   = array_values(
+			array_filter(
+				$ids,
+				static function ( $id ) use ( $user_id, $alles, $grens ) {
+					return self::is_voorbij( $id ) && self::mag_zien( $id, $user_id ) && ( $alles || self::laatste_dag( $id ) >= $grens );
+				}
+			)
+		);
+		usort(
+			$ids,
+			static function ( $a, $b ) {
+				return strcmp( self::laatste_dag( $b ), self::laatste_dag( $a ) );
+			}
+		);
+		return $ids;
+	}
+
+	/**
+	 * Een komende training die op deze geweeste aansluit: eerst een nieuwe editie
+	 * (dezelfde titel), anders een vervolg ("Vervolg op"). 0 als er geen is.
+	 */
+	public static function volgende_van( $training_id, $user_id = 0 ) {
+		$titel   = mb_strtolower( trim( self::titel( $training_id ) ) );
+		$vervolg = 0;
+		foreach ( self::komende( $user_id ) as $id ) {
+			if ( mb_strtolower( trim( self::titel( $id ) ) ) === $titel ) {
+				return $id;
+			}
+			if ( ! $vervolg && (int) get_post_meta( $id, self::META_VERVOLG_OP, true ) === (int) $training_id ) {
+				$vervolg = $id;
+			}
+		}
+		return $vervolg;
+	}
+
+	/** De mensen van deze dealer die bij een geweeste training waren (niet afgemeld, niet afwezig). */
+	public static function deden_mee( $training_id, $user_id = 0 ) {
+		return array_values(
+			array_filter(
+				self::van_dealer( $training_id, $user_id ),
+				static function ( $rij ) {
+					return ! isset( $rij['aanwezig'] ) || '0' !== (string) $rij['aanwezig'];
+				}
+			)
+		);
 	}
 
 	/** Hoeveel plaatsen er nog zijn; null als er geen maximum is. */
