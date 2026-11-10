@@ -171,6 +171,7 @@ class Downloads_Versies_Test extends WP_UnitTestCase {
 
 	/** Zoeken gebeurt in titel, omschrijving en merk — niet alleen de titel. */
 	public function test_zoektekst_bevat_omschrijving_en_merk() {
+		update_user_meta( $this->dealer_id, 'hdp_merken', 'Bogballe' );
 		$id = $this->download( 'Prijslijst 2026', $this->bijlage() );
 		wp_update_post(
 			array(

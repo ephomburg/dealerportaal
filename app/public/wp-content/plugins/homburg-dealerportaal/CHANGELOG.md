@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.109.0 (thema 1.44.3)
+
+- Gewijzigd: een dealer **zonder merken** ziet nu overal alleen het algemene, niet meer alles. Downloads en content met een merk, trainingen met een merk en berichten met een merk zijn voor hem verborgen (ook via de directe link); Algemeen en zonder merk blijven zichtbaar. Zo is het gelijk aan de webshop (alleen Diversen en de outlet). "Mijn merken" legt het uit. Een beheerder ziet nog steeds alles.
+
 ## 1.108.0
 
 - Nieuw: **Gebruikers > Merken per dealer** (`HDP_Merken_Overzicht`). Alle dealers onder elkaar met per merk een vinkje, zoeken op bedrijf, e-mail of klantnummer, een merk in één klik voor alle zichtbare dealers aan of uit (kop aanklikken), en één keer opslaan. Alleen de gewijzigde rijen worden verstuurd. Collega's staan er niet in (die volgen hun hoofdaccount); een dealer zonder merken krijgt een waarschuwing.

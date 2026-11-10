@@ -86,11 +86,13 @@ class Berichten_Test extends WP_UnitTestCase {
 	 * ingesteld, dan ziet hij alles. Anders krijgt een net aangemaakt
 	 * account stilletjes niets te zien.
 	 */
-	public function test_dealer_zonder_ingestelde_merken_ziet_alles() {
+	/** Zonder merken alleen het algemene, net als in de webshop en bij downloads. */
+	public function test_dealer_zonder_ingestelde_merken_ziet_alleen_algemene_berichten() {
 		$this->maak_bericht( 'Väderstad levertijden', 'Väderstad' );
+		$this->maak_bericht( 'Kerstsluiting', '' );
 		delete_user_meta( $this->dealer_id, 'hdp_merken' );
 
-		$this->assertSame( array( 'Väderstad levertijden' ), $this->titels( $this->dealer_id ) );
+		$this->assertSame( array( 'Kerstsluiting' ), $this->titels( $this->dealer_id ) );
 	}
 
 	/* --- Einddatum ----------------------------------------------------- */

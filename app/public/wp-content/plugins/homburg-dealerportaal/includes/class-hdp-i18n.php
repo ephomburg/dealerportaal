@@ -117,7 +117,7 @@ class HDP_I18N {
 			'Mijn favorieten'               => 'Mes favoris',
 			'Mijn merken'                   => 'Mes marques',
 			'Je hebt toegang tot de documenten van deze merken. Algemene documenten zie je altijd.' => 'Vous avez accès aux documents de ces marques. Les documents généraux restent toujours visibles.',
-			'Je hebt toegang tot de documenten van alle merken.' => 'Vous avez accès aux documents de toutes les marques.',
+			'Er zijn nog geen merken aan je account gekoppeld. Je ziet daarom alleen de algemene documenten en trainingen. Neem contact op met Homburg om je merken te laten toevoegen.' => 'Aucune marque n\'est encore liée à votre compte. Vous ne voyez donc que les documents et formations généraux. Contactez Homburg pour faire ajouter vos marques.',
 			'Klopt dit niet, of wil je een merk erbij? Neem contact op:' => 'Une erreur, ou besoin d’une marque supplémentaire ? Contactez-nous :',
 			'Minder'                        => 'Moins',
 			'Naar de winkelwagen'           => 'Voir le panier',

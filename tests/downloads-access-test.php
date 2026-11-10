@@ -159,10 +159,12 @@ class Downloads_Access_Test extends WP_UnitTestCase {
 		$this->assertTrue( HDP_Downloads_CPT::mag_merk_zien( $this->download_met_bestand_id ) );
 	}
 
-	public function test_dealer_zonder_ingestelde_merken_mag_alles_zien() {
+	public function test_dealer_zonder_ingestelde_merken_ziet_geen_merkbestanden() {
 		update_post_meta( $this->download_met_bestand_id, '_hdp_merk', 'HARDI' );
 		wp_set_current_user( $this->goedgekeurde_dealer_id );
+		$this->assertFalse( HDP_Downloads_CPT::mag_merk_zien( $this->download_met_bestand_id ) );
 
-		$this->assertTrue( HDP_Downloads_CPT::mag_merk_zien( $this->download_met_bestand_id ) );
+		update_post_meta( $this->download_met_bestand_id, '_hdp_merk', HDP_Downloads_CPT::MERK_ALGEMEEN );
+		$this->assertTrue( HDP_Downloads_CPT::mag_merk_zien( $this->download_met_bestand_id ), 'Algemeen blijft voor iedereen.' );
 	}
 }

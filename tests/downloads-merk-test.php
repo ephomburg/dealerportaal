@@ -48,14 +48,14 @@ class Downloads_Merk_Test extends WP_UnitTestCase {
 		return $id;
 	}
 
-	public function test_dealer_zonder_merken_ziet_alles() {
+	public function test_dealer_zonder_merken_ziet_alleen_algemene_downloads() {
 		$this->maak_download( 'HARDI-prijslijst', 'HARDI' );
-		$this->maak_download( 'Vaderstad-prijslijst', 'Vaderstad' );
+		$this->maak_download( 'Algemene voorwaarden', HDP_Downloads_CPT::MERK_ALGEMEEN );
 
 		$html = HDP_Downloads_Render::render_downloads_pagina( $this->attributen );
 
-		$this->assertStringContainsString( 'HARDI-prijslijst', $html );
-		$this->assertStringContainsString( 'Vaderstad-prijslijst', $html );
+		$this->assertStringNotContainsString( 'HARDI-prijslijst', $html );
+		$this->assertStringContainsString( 'Algemene voorwaarden', $html );
 	}
 
 	public function test_dealer_met_merken_ziet_alleen_geautoriseerde_merken() {

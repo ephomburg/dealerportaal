@@ -192,11 +192,8 @@ class HDP_Downloads_CPT {
 		if ( HDP_Roles::is_superbeheerder( $user_id ) ) {
 			return true;
 		}
+		// Een dealer zonder merken ziet alleen het algemene, net als in de webshop.
 		$toegestaan = HDP_Merken::naar_array( get_user_meta( $user_id, 'hdp_merken', true ) );
-
-		if ( ! $toegestaan ) {
-			return true;
-		}
 
 		return in_array( $merk, $toegestaan, true );
 	}

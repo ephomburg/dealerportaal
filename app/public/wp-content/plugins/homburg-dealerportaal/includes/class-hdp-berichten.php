@@ -250,9 +250,9 @@ class HDP_Berichten {
 	 * Mag deze dealer dit bericht zien?
 	 *
 	 * Dezelfde regels als bij downloads, zodat "merk" overal hetzelfde
-	 * betekent: zonder merk is het voor iedereen, en een dealer bij wie nog
-	 * geen merken zijn ingesteld ziet alles — die mag niet per ongeluk
-	 * niets meer te zien krijgen.
+	 * betekent: zonder merk is het voor iedereen; met merken alleen voor
+	 * dealers met zo'n merk. Een dealer zonder merken ziet alleen het algemene.
+	 * Een beheerder ziet alles.
 	 */
 	public static function mag_zien( $post_id, $user_id = 0 ) {
 		$merken = HDP_Merken::naar_array( get_post_meta( $post_id, self::META_MERKEN, true ) );
@@ -261,11 +261,10 @@ class HDP_Berichten {
 		}
 
 		$user_id    = $user_id ? (int) $user_id : get_current_user_id();
-		$toegestaan = HDP_Merken::naar_array( get_user_meta( $user_id, 'hdp_merken', true ) );
-
-		if ( ! $toegestaan ) {
+		if ( HDP_Roles::is_superbeheerder( $user_id ) ) {
 			return true;
 		}
+		$toegestaan = HDP_Merken::naar_array( get_user_meta( $user_id, 'hdp_merken', true ) );
 
 		return (bool) array_intersect( $merken, $toegestaan );
 	}

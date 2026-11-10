@@ -162,7 +162,7 @@ class HDP_Merken_Overzicht {
 											<input type="checkbox" class="hdp-merk-vak" data-kolom="<?php echo esc_attr( $i ); ?>" value="<?php echo esc_attr( $merk ); ?>" aria-label="<?php echo esc_attr( self::naam( $dealer ) . ': ' . $merk ); ?>" <?php checked( in_array( $merk, $gekozen, true ) ); ?>>
 										</td>
 									<?php endforeach; ?>
-									<td class="hdp-merk-let-op" style="color:#996800;min-width:180px"><?php echo $gekozen ? '' : esc_html( 'Geen merken: ziet in de webshop alleen Diversen en de outlet' ); ?></td>
+									<td class="hdp-merk-let-op" style="color:#996800;min-width:180px"><?php echo $gekozen ? '' : esc_html( 'Geen merken: ziet alleen het algemene (Diversen, outlet, algemene documenten en trainingen)' ); ?></td>
 								</tr>
 							<?php endforeach; ?>
 						</tbody>
@@ -192,7 +192,7 @@ class HDP_Merken_Overzicht {
 					veld.value = merken.join( ', ' );
 					veld.disabled = false;
 					rij.classList.add( 'hdp-gewijzigd' );
-					rij.querySelector( '.hdp-merk-let-op' ).textContent = merken.length ? '' : 'Geen merken: ziet in de webshop alleen Diversen en de outlet';
+					rij.querySelector( '.hdp-merk-let-op' ).textContent = merken.length ? '' : 'Geen merken: ziet alleen het algemene (Diversen, outlet, algemene documenten en trainingen)';
 					var n = form.querySelectorAll( 'tr.hdp-gewijzigd' ).length;
 					gewijzigd.textContent = n + ' dealer(s) gewijzigd, nog niet opgeslagen';
 				}

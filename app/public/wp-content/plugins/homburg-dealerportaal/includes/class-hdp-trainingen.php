@@ -222,8 +222,9 @@ class HDP_Trainingen {
 	}
 
 	/**
-	 * Mag deze gebruiker de training zien? Zelfde regel als bij berichten: zonder
-	 * merk voor iedereen, en een dealer zonder merkenlijst ziet alles.
+	 * Mag deze gebruiker de training zien? Zelfde regel als bij downloads: zonder
+	 * merk voor iedereen; een training met merken alleen voor dealers met zo'n
+	 * merk (een dealer zonder merken ziet alleen de trainingen voor iedereen).
 	 */
 	public static function mag_zien( $training_id, $user_id = 0 ) {
 		if ( self::POST_TYPE !== get_post_type( $training_id ) || 'publish' !== get_post_status( $training_id ) ) {
@@ -238,7 +239,7 @@ class HDP_Trainingen {
 			return true;
 		}
 		$eigen   = HDP_Merken::naar_array( get_user_meta( $user_id, 'hdp_merken', true ) );
-		return ! $eigen || array_intersect( $merken, $eigen );
+		return (bool) array_intersect( $merken, $eigen );
 	}
 
 	/** De laatste dag van de training (Y-m-d); leeg zolang de datum nog volgt. */

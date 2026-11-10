@@ -83,6 +83,7 @@ class Nieuw_Markering_Test extends WP_UnitTestCase {
 	 * iets klaarstaat, laat de dealer klikken om te zien wát het is.
 	 */
 	public function test_de_melding_noemt_de_bestanden_zelf() {
+		update_user_meta( $this->dealer_id, 'hdp_merken', 'Väderstad' );
 		$this->maak_download( 'Prijslijst Väderstad 2027', 1, 'Väderstad' );
 
 		$html = $this->melding();
