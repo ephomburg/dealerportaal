@@ -386,6 +386,12 @@ class HDP_Downloads_Render {
 		$meta = implode( ' · ', array_filter( array_merge( $formaten, array( HDP_I18N::datum( 'j M Y', (int) get_post_time( 'U', false, $download ) ) ) ) ) );
 
 		$bekijkbaar = $hoofd && HDP_Downloads_CPT::is_bekijkbaar( get_post_mime_type( $hoofd ) );
+		// Eigen voorbeeldafbeelding, een foto, of pagina 1 van de PDF; 0 = een icoon met het type.
+		$bron      = HDP_Downloads_CPT::voorbeeld_bron( $download->ID );
+		$openen    = HDP_Downloads_CPT::download_url( $download->ID, 0, $bekijkbaar ? 'bekijken' : '' );
+		$voorbeeld = HDP_Downloads_CPT::download_url( $download->ID, 0, 'voorbeeld' );
+		// Lukt het plaatje toch niet, dan blijft het icoon staan in plaats van een kapot beeld.
+		$bij_fout = "this.parentNode.classList.add('is-leeg');this.remove();";
 
 		ob_start();
 		?>
@@ -397,15 +403,20 @@ class HDP_Downloads_Render {
 			data-datum="<?php echo esc_attr( get_post_time( 'U', true, $download ) ); ?>"
 			data-nieuw="<?php echo $nieuw ? '1' : '0'; ?>">
 			<?php if ( $galerij ) : ?>
-				<a class="hdp-content-beeld" href="<?php echo esc_url( HDP_Downloads_CPT::download_url( $download->ID, 0, $bekijkbaar ? 'bekijken' : '' ) ); ?>" <?php echo $bekijkbaar ? 'target="_blank" rel="noopener"' : ''; ?> tabindex="-1" aria-hidden="true">
-					<?php if ( $hoofd && HDP_Downloads_CPT::is_afbeelding( $hoofd ) ) : ?>
-						<img src="<?php echo esc_url( HDP_Downloads_CPT::download_url( $download->ID, 0, 'voorbeeld' ) ); ?>" alt="" loading="lazy">
-					<?php else : ?>
-						<span class="hdp-content-beeld-type"><?php echo esc_html( HDP_Downloads_CPT::type_label( $download->ID ) ); ?></span>
+				<a class="hdp-content-beeld" href="<?php echo esc_url( $openen ); ?>" <?php echo $bekijkbaar ? 'target="_blank" rel="noopener"' : ''; ?> tabindex="-1" aria-hidden="true">
+					<?php if ( $bron ) : ?>
+						<img src="<?php echo esc_url( $voorbeeld ); ?>" alt="" loading="lazy" onerror="<?php echo esc_attr( $bij_fout ); ?>">
 					<?php endif; ?>
+					<span class="hdp-content-beeld-type"><?php echo esc_html( HDP_Downloads_CPT::type_label( $download->ID ) ); ?></span>
 				</a>
 			<?php else : ?>
-				<span class="hdp-download-type"><?php echo esc_html( HDP_Downloads_CPT::type_label( $download->ID ) ); ?></span>
+				<a class="hdp-download-voorbeeld<?php echo $bron ? '' : ' is-leeg'; ?>" href="<?php echo esc_url( $openen ); ?>" <?php echo $bekijkbaar ? 'target="_blank" rel="noopener"' : ''; ?> tabindex="-1" aria-hidden="true">
+					<?php if ( $bron ) : ?>
+						<img src="<?php echo esc_url( $voorbeeld ); ?>" alt="" loading="lazy" width="56" height="74" onerror="<?php echo esc_attr( $bij_fout ); ?>">
+					<?php endif; ?>
+					<svg class="hdp-download-voorbeeld-icoon" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+					<span class="hdp-download-type"><?php echo esc_html( HDP_Downloads_CPT::type_label( $download->ID ) ); ?></span>
+				</a>
 			<?php endif; ?>
 			<span class="hdp-download-info">
 				<strong>

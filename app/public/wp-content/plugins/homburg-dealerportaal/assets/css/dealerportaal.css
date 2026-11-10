@@ -1113,6 +1113,57 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	min-width: 46px;
 	text-align: center;
 }
+/* Voorbeeld vooraan in de lijst: pagina 1 van de PDF, de foto of een eigen
+   afbeelding. Zonder voorbeeld (Excel, tekst, of als het plaatje niet lukt)
+   een documenticoon met het type, even groot, zodat de titels netjes onder
+   elkaar blijven staan. */
+.hdp-download-voorbeeld {
+	position: relative;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 56px;
+	height: 74px;
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: 6px;
+	background: var(--wp--preset--color--grijs-licht);
+	overflow: hidden;
+	text-decoration: none;
+	transition: box-shadow 0.15s, transform 0.15s;
+}
+.hdp-download-voorbeeld:hover { box-shadow: var(--hdp-schaduw); transform: translateY(-1px); }
+.hdp-download-voorbeeld img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: top center;
+	background: var(--wp--preset--color--wit);
+}
+.hdp-download-voorbeeld-icoon {
+	width: 26px;
+	height: 26px;
+	margin-bottom: 16px;
+	stroke: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-download-voorbeeld img ~ .hdp-download-voorbeeld-icoon { display: none; }
+.hdp-download-voorbeeld .hdp-download-type {
+	position: absolute;
+	left: 50%;
+	bottom: 6px;
+	transform: translateX(-50%);
+	min-width: 0;
+	padding: 0.12rem 0.32rem;
+	font-size: 0.56rem;
+	border-radius: 3px;
+}
+/* Op een plaatje: klein in de hoek, zodat de pagina zelf zichtbaar blijft. */
+.hdp-download-voorbeeld img ~ .hdp-download-type { left: 4px; bottom: 4px; transform: none; opacity: 0.92; }
+.hdp-content-beeld { position: relative; }
+.hdp-content-beeld img { position: absolute; inset: 0; }
+.hdp-content-beeld img + .hdp-content-beeld-type { display: none; }
 .hdp-download-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .hdp-download-info strong { font-size: 0.95rem; font-weight: 600; }
 /* Alleen de omschrijvingsregel direct onder de titel. Zonder het ">" raakte

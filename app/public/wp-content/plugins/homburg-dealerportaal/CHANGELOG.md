@@ -8,6 +8,11 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.104.0
+
+- Nieuw: **voorbeeld bij downloads**. Vooraan elke download staat een kleine afbeelding: pagina 1 van de PDF (gemaakt met Ghostscript op de server, want Imagick ontbreekt daar), de foto zelf, of een eigen voorbeeldafbeelding die je bij de download kiest ("Eigen voorbeeldafbeelding"). Excel, tekst en andere bestanden krijgen een documenticoon met het type. Ook de contentgalerij toont nu PDF-voorbeelden.
+- De voorbeelden staan in de afgeschermde map en gaan via dezelfde toegangscontrole als het bestand: alleen wie het document mag zien, ziet het voorbeeld. Ze worden gemaakt bij het opslaan van een download (of bij de eerste keer opvragen) en daarna bewaard; een PDF die niet lukt, wordt niet bij elk bezoek opnieuw geprobeerd.
+
 ## 1.103.1 (thema 1.44.2)
 
 - Fix: de paginering onderaan de webshop viel uit elkaar (hoog rood blokje bij pagina 1, dunne cijfers, dubbel pijltje). WooCommerce 11.2 zet eigen regels met een langere selector; onze regels staan nu met dezelfde keten erbij. Op een telefoon is de balk kleiner en gaat hij zo nodig over twee regels.

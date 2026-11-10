@@ -226,6 +226,101 @@ class Downloads_Versies_Test extends WP_UnitTestCase {
 		$this->assertSame( HDP_Downloads_CPT::VOORBEELD_BREEDTE, getimagesize( $pad )[0] );
 	}
 
+	/* --- Voorbeeld van pagina 1 ------------------------------------------ */
+
+	private $omzettingen = 0;
+
+	/** Bootst Ghostscript na: een staande "pagina" als JPG. */
+	public function nep_ghostscript( $niets, $pdf, $jpg ) {
+		$this->omzettingen++;
+		$beeld = imagecreatetruecolor( 794, 1123 );
+		imagejpeg( $beeld, $jpg );
+		imagedestroy( $beeld );
+		return true;
+	}
+
+	private function pdf() {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD ontbreekt in deze testomgeving.' );
+		}
+		return $this->bijlage( 'pdf', "%PDF-1.4\n%%EOF" );
+	}
+
+	public function test_pdf_krijgt_een_afgeschermd_voorbeeld_van_pagina_1() {
+		add_filter( 'hdp_kan_pdf_voorbeeld', '__return_true' );
+		add_filter( 'hdp_pdf_eerste_pagina', array( $this, 'nep_ghostscript' ), 10, 3 );
+		$pdf = $this->pdf();
+		$id  = $this->download( 'Handleiding Tempo', $pdf );
+
+		$this->assertSame( $pdf, HDP_Downloads_CPT::voorbeeld_bron( $id ) );
+		$pad = HDP_Downloads_CPT::voorbeeld_pad( $pdf );
+		$this->assertFileExists( $pad );
+		$this->assertStringContainsString( HDP_Bestandsbeveiliging::MAP . '/voorbeelden', wp_normalize_path( $pad ) );
+		$maat = getimagesize( $pad );
+		$this->assertSame( HDP_Downloads_CPT::VOORBEELD_BREEDTE, $maat[0] );
+		$this->assertGreaterThan( $maat[0], $maat[1], 'Een staande pagina blijft staand.' );
+
+		HDP_Downloads_CPT::voorbeeld_pad( $pdf );
+		$this->assertSame( 1, $this->omzettingen, 'Eén keer maken, daarna bewaard.' );
+
+		$html = HDP_Downloads_Render::render_downloads_pagina( $this->attributen );
+		$this->assertMatchesRegularExpression( '/hdp-download-voorbeeld"[^>]*>\s*<img src="[^"]*modus=voorbeeld/', $html );
+
+		remove_filter( 'hdp_kan_pdf_voorbeeld', '__return_true' );
+		remove_filter( 'hdp_pdf_eerste_pagina', array( $this, 'nep_ghostscript' ), 10 );
+	}
+
+	public function test_mislukte_pdf_wordt_niet_bij_elk_bezoek_opnieuw_geprobeerd() {
+		add_filter( 'hdp_kan_pdf_voorbeeld', '__return_true' );
+		$pogingen = 0;
+		$mislukt  = static function () use ( &$pogingen ) {
+			$pogingen++;
+			return false;
+		};
+		add_filter( 'hdp_pdf_eerste_pagina', $mislukt );
+		$pdf = $this->pdf();
+
+		$this->assertSame( '', HDP_Downloads_CPT::voorbeeld_pad( $pdf ) );
+		$this->assertSame( '', HDP_Downloads_CPT::voorbeeld_pad( $pdf ) );
+		$this->assertSame( 1, $pogingen );
+
+		remove_filter( 'hdp_kan_pdf_voorbeeld', '__return_true' );
+		remove_filter( 'hdp_pdf_eerste_pagina', $mislukt );
+	}
+
+	public function test_zonder_voorbeeld_een_icoon_met_het_type() {
+		add_filter( 'hdp_kan_pdf_voorbeeld', '__return_false' );
+		$this->download( 'Prijslijst', $this->pdf() );
+		$this->download( 'Onderdelen', $this->bijlage( 'csv', 'a;b' ) );
+
+		$html = HDP_Downloads_Render::render_downloads_pagina( $this->attributen );
+
+		$this->assertSame( 2, substr_count( $html, 'hdp-download-voorbeeld is-leeg' ) );
+		$this->assertStringNotContainsString( 'modus=voorbeeld', $html );
+		$this->assertMatchesRegularExpression( '/hdp-download-type">PDF</', $html );
+		$this->assertMatchesRegularExpression( '/hdp-download-type">CSV</', $html );
+		remove_filter( 'hdp_kan_pdf_voorbeeld', '__return_false' );
+	}
+
+	public function test_eigen_voorbeeldafbeelding_gaat_voor() {
+		$eigen = $this->foto();
+		$id    = $this->download( 'Prijslijst', $this->bijlage( 'csv', 'a;b' ) );
+		set_post_thumbnail( $id, $eigen );
+
+		$this->assertSame( $eigen, HDP_Downloads_CPT::voorbeeld_bron( $id ) );
+		$this->assertTrue( post_type_supports( HDP_Downloads_CPT::POST_TYPE, 'thumbnail' ) );
+	}
+
+	public function test_geen_voorbeeld_van_een_download_van_een_ander_merk() {
+		update_user_meta( $this->dealer_id, 'hdp_merken', 'Bogballe' );
+		$id = $this->download( 'HARDI-prijslijst', $this->foto() );
+		update_post_meta( $id, '_hdp_merk', 'HARDI' );
+
+		$this->expectException( WPDieException::class );
+		$this->expectExceptionCode( 403 );
+		HDP_Downloads_CPT::resolve_download( $id, 0, false );
+	}
+
 	/** De zip bevat alleen wat deze dealer ook los mag zien. */
 	public function test_zip_bevat_alleen_wat_de_dealer_mag_zien() {
 		if ( ! class_exists( 'ZipArchive' ) ) {

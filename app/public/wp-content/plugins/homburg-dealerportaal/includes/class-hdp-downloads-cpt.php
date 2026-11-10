@@ -69,6 +69,7 @@ class HDP_Downloads_CPT {
 		add_action( 'init', array( __CLASS__, 'register_post_type' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_box' ) );
 		add_action( 'save_post_' . self::POST_TYPE, array( __CLASS__, 'save_meta_box' ) );
+		add_action( 'save_post_' . self::POST_TYPE, array( __CLASS__, 'maak_voorbeeld_bij_opslaan' ), 20 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_assets' ) );
 		add_filter( 'query_vars', array( __CLASS__, 'register_query_var' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'handle_download' ) );
@@ -87,12 +88,17 @@ class HDP_Downloads_CPT {
 					'singular_name' => 'Download',
 					'add_new_item'  => 'Nieuwe download toevoegen',
 					'edit_item'     => 'Download bewerken',
+					'featured_image'        => 'Eigen voorbeeldafbeelding',
+					'set_featured_image'    => 'Kies een eigen voorbeeldafbeelding',
+					'remove_featured_image' => 'Eigen voorbeeldafbeelding weghalen',
+					'use_featured_image'    => 'Als voorbeeld gebruiken',
 				),
 				'public'          => false,
 				'show_ui'         => true,
 				'show_in_menu'    => true,
 				'menu_icon'       => 'dashicons-download',
-				'supports'        => array( 'title', 'editor' ),
+				// "thumbnail": een eigen voorbeeldafbeelding, die voorgaat op het automatische voorbeeld.
+				'supports'        => array( 'title', 'editor', 'thumbnail' ),
 				'capability_type' => 'post',
 				'map_meta_cap'    => true,
 			)
@@ -357,7 +363,8 @@ class HDP_Downloads_CPT {
 		$bestand = self::resolve_download( absint( $download_id ), $attachment_id, 'voorbeeld' !== $modus );
 
 		if ( 'voorbeeld' === $modus ) {
-			$voorbeeld = self::voorbeeld_pad( $bestand['attachment_id'] );
+			// Zonder keuze het voorbeeld van de download: de eigen afbeelding, anders het bestand zelf.
+			$voorbeeld = self::voorbeeld_pad( $attachment_id ? $bestand['attachment_id'] : self::voorbeeld_bron( $bestand['post_id'] ) );
 			if ( ! $voorbeeld ) {
 				status_header( 404 );
 				exit;
@@ -498,7 +505,8 @@ class HDP_Downloads_CPT {
 	 * @return string Pad naar het plaatje, of '' als dat niet lukt.
 	 */
 	public static function voorbeeld_pad( $attachment_id ) {
-		if ( ! self::is_afbeelding( $attachment_id ) ) {
+		$pdf = self::is_pdf( $attachment_id );
+		if ( ! $attachment_id || ( ! $pdf && ! self::is_afbeelding( $attachment_id ) ) ) {
 			return '';
 		}
 
@@ -515,20 +523,153 @@ class HDP_Downloads_CPT {
 		if ( file_exists( $doel ) && filemtime( $doel ) >= filemtime( $bron ) ) {
 			return $doel;
 		}
+		// Lukte het eerder niet (bijv. een beveiligde PDF), dan niet bij elk bezoek opnieuw proberen.
+		$mislukt = $doel . '.mislukt';
+		if ( file_exists( $mislukt ) && filemtime( $mislukt ) >= filemtime( $bron ) ) {
+			return '';
+		}
 
 		if ( ! wp_mkdir_p( $map ) ) {
 			return '';
 		}
 
+		// Een PDF: eerst de eerste pagina als plaatje, daarna verkleinen zoals een foto.
+		$tijdelijk = '';
+		if ( $pdf ) {
+			$tijdelijk = $doel . '.' . wp_generate_password( 6, false ) . '.tmp.jpg';
+			if ( ! self::pdf_eerste_pagina( $bron, $tijdelijk ) ) {
+				wp_delete_file( $tijdelijk );
+				touch( $mislukt );
+				return '';
+			}
+			$bron = $tijdelijk;
+		}
+
 		$editor = wp_get_image_editor( $bron );
 		if ( is_wp_error( $editor ) ) {
+			wp_delete_file( $tijdelijk );
 			return '';
 		}
-		$editor->resize( self::VOORBEELD_BREEDTE, self::VOORBEELD_BREEDTE, false );
+		// Een staande pagina wordt even breed als een foto; hoger mag, de kaart snijdt bij.
+		$editor->resize( self::VOORBEELD_BREEDTE, $pdf ? 0 : self::VOORBEELD_BREEDTE, false );
 		$editor->set_quality( 78 );
-		$opgeslagen = $editor->save( $doel, 'image/jpeg' );
+		// Eerst naast het doel en dan in één keer erover: twee bezoekers tegelijk krijgen nooit een half plaatje.
+		$klaar      = $doel . '.' . wp_generate_password( 6, false ) . '.jpg';
+		$opgeslagen = $editor->save( $klaar, 'image/jpeg' );
+		wp_delete_file( $tijdelijk );
+		if ( is_wp_error( $opgeslagen ) || ! @rename( $opgeslagen['path'], $doel ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors -- bij een fout geen voorbeeld, geen melding.
+			wp_delete_file( is_wp_error( $opgeslagen ) ? $klaar : $opgeslagen['path'] );
+			return file_exists( $doel ) ? $doel : '';
+		}
+		return $doel;
+	}
 
-		return is_wp_error( $opgeslagen ) ? '' : $doel;
+	/** Is dit een PDF? */
+	public static function is_pdf( $attachment_id ) {
+		return $attachment_id && 'application/pdf' === get_post_mime_type( $attachment_id );
+	}
+
+	/**
+	 * Het programma dat de eerste pagina van een PDF omzet: Ghostscript.
+	 * WordPress gebruikt daarvoor zelf Imagick, maar dat staat niet op de
+	 * server; Ghostscript wel. Op een andere plek: HDP_GHOSTSCRIPT in wp-config.
+	 *
+	 * @return string Het pad, of '' als het er niet is.
+	 */
+	public static function ghostscript() {
+		$kandidaten = defined( 'HDP_GHOSTSCRIPT' ) ? array( (string) HDP_GHOSTSCRIPT ) : array( '/usr/bin/gs', '/usr/local/bin/gs', '/opt/homebrew/bin/gs' );
+		foreach ( $kandidaten as $pad ) {
+			if ( '' !== $pad && @is_executable( $pad ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors -- open_basedir kan een melding geven.
+				return $pad;
+			}
+		}
+		return '';
+	}
+
+	/** Kan deze server van een PDF een voorbeeld maken? */
+	public static function kan_pdf_voorbeeld() {
+		return (bool) apply_filters( 'hdp_kan_pdf_voorbeeld', '' !== self::ghostscript() && function_exists( 'exec' ) );
+	}
+
+	/**
+	 * Zet de eerste pagina van een PDF om in een JPG.
+	 *
+	 * -dSAFER: Ghostscript mag geen andere bestanden lezen of schrijven dan
+	 * deze twee. De PDF's komen alleen van Homburg zelf (dealers kunnen niets
+	 * uploaden), en een vastgelopen bestand wordt na 30 seconden gestopt.
+	 */
+	public static function pdf_eerste_pagina( $pdf, $jpg ) {
+		$gemaakt = apply_filters( 'hdp_pdf_eerste_pagina', null, $pdf, $jpg );
+		if ( null !== $gemaakt ) {
+			return (bool) $gemaakt && file_exists( $jpg );
+		}
+		$gs = self::ghostscript();
+		if ( '' === $gs || ! function_exists( 'exec' ) ) {
+			return false;
+		}
+		$opdracht = escapeshellarg( $gs ) . ' -q -dSAFER -dBATCH -dNOPAUSE -dFirstPage=1 -dLastPage=1 -sDEVICE=jpeg -dJPEGQ=85 -r96 -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -sOutputFile=' . escapeshellarg( $jpg ) . ' ' . escapeshellarg( $pdf ) . ' 2>&1';
+		if ( '\\' !== DIRECTORY_SEPARATOR && @is_executable( '/usr/bin/timeout' ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors
+			$opdracht = '/usr/bin/timeout 30 ' . $opdracht;
+		}
+		$uitvoer = array();
+		$code    = 1;
+		exec( $opdracht, $uitvoer, $code ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_exec -- Ghostscript, met vaste opties en geschoonde paden.
+		if ( 0 !== $code || ! file_exists( $jpg ) || ! filesize( $jpg ) ) {
+			HDP_Log::schrijf( 'Geen voorbeeld van ' . wp_basename( $pdf ) . ' (Ghostscript ' . $code . '): ' . mb_substr( implode( ' ', $uitvoer ), 0, 300 ), 'WAARSCHUWING' );
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Waar het voorbeeld van een download van gemaakt wordt: de eigen
+	 * voorbeeldafbeelding, anders het eerste bestand dat een beeld of
+	 * (als de server dat kan) een PDF is.
+	 *
+	 * @return int Bijlage-ID, 0 = geen voorbeeld (dan een icoon met het type).
+	 */
+	public static function voorbeeld_bron( $post_id ) {
+		$eigen = (int) get_post_thumbnail_id( $post_id );
+		if ( $eigen && self::is_afbeelding( $eigen ) ) {
+			return $eigen;
+		}
+		foreach ( self::bestanden( $post_id ) as $attachment_id ) {
+			if ( self::is_afbeelding( $attachment_id ) ) {
+				return $attachment_id;
+			}
+			if ( self::is_pdf( $attachment_id ) && ( self::kan_pdf_voorbeeld() || self::voorbeeld_bestaat( $attachment_id ) ) ) {
+				return $attachment_id;
+			}
+		}
+		return 0;
+	}
+
+	/** Staat er al een voorbeeld klaar? Dan kan hij ook zonder Ghostscript getoond worden. */
+	private static function voorbeeld_bestaat( $attachment_id ) {
+		$uploads = wp_upload_dir();
+		return file_exists( trailingslashit( $uploads['basedir'] ) . HDP_Bestandsbeveiliging::MAP . '/voorbeelden/' . (int) $attachment_id . '-' . self::VOORBEELD_BREEDTE . '.jpg' );
+	}
+
+	/** Na het opslaan van een download meteen het voorbeeld maken. */
+	public static function maak_voorbeeld_bij_opslaan( $post_id ) {
+		if ( wp_is_post_revision( $post_id ) || ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || 'publish' !== get_post_status( $post_id ) ) {
+			return;
+		}
+		self::voorbeeld_pad( self::voorbeeld_bron( $post_id ) );
+	}
+
+	/**
+	 * Voor alle gepubliceerde downloads het voorbeeld maken (eenmalig na de
+	 * update, voor de bestanden die er al stonden).
+	 *
+	 * @return array{gemaakt: int, geen: int} Hoeveel met en zonder voorbeeld.
+	 */
+	public static function maak_alle_voorbeelden() {
+		$telling = array( 'gemaakt' => 0, 'geen' => 0 );
+		foreach ( get_posts( array( 'post_type' => self::POST_TYPE, 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids' ) ) as $post_id ) {
+			$telling[ self::voorbeeld_pad( self::voorbeeld_bron( $post_id ) ) ? 'gemaakt' : 'geen' ]++;
+		}
+		return $telling;
 	}
 
 	/**
