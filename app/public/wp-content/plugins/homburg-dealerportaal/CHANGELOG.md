@@ -8,6 +8,11 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.106.0
+
+- Nieuw: **kleinordertoeslag** (`HDP_Kleinordertoeslag`). Een bestelling onder € 75 netto (artikelen excl. btw, na korting) krijgt automatisch € 12,50 toeslag, als aparte regel "Kleinordertoeslag (onder € 75)" in de winkelwagen, bij afrekenen, in de mails en in de order. Vanaf € 75 verdwijnt hij vanzelf.
+- De toeslag gaat mee naar PowerAll als het artikel KLEIN ORDER TOESLAG (in een proef goedgekeurd). Aan/uit, grens, bedrag en artikel staan onder WooCommerce > PowerAll.
+
 ## 1.105.0
 
 - Nieuw: **collega's** (`HDP_Collegas`). Het hoofdaccount van een dealer (bijv. info@) geeft onder Mijn account > Collega's maximaal 5 collega's een eigen inlog. Een collega krijgt een mail met een link om zelf een wachtwoord te kiezen (14 dagen, één keer).

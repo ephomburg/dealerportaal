@@ -292,6 +292,18 @@ class HDP_PowerAll_Orders {
 		if ( ! $regels ) {
 			return new WP_Error( 'hdp_pa_leeg', 'De bestelling heeft geen artikelen.' );
 		}
+		// De kleinordertoeslag als het toeslagartikel, met het bedrag uit de webshop.
+		foreach ( $order->get_fees() as $fee ) {
+			if ( class_exists( 'HDP_Kleinordertoeslag' ) && HDP_Kleinordertoeslag::is_toeslag( $fee ) ) {
+				$regels[] = array(
+					'ProductCode'        => HDP_Kleinordertoeslag::artikel(),
+					'QuantityOrdered'    => 1,
+					'Description'        => mb_substr( $fee->get_name(), 0, 1024 ),
+					'GrossPrice'         => round( (float) $fee->get_total(), 2 ),
+					'DiscountPercentage' => 0,
+				);
+			}
+		}
 
 		// "Jouw referentie" bij afrekenen (zie homburg_wc_referentie() in het thema).
 		$referentie = (string) $order->get_meta( '_wc_other/homburg/referentie' );
@@ -523,6 +535,10 @@ class HDP_PowerAll_Orders {
 					'modus'           => in_array( $modus, array( 'uit', 'proef', 'aan' ), true ) ? $modus : 'proef',
 					'verzamelartikel' => isset( $_POST['verzamelartikel'] ) ? sanitize_text_field( wp_unslash( $_POST['verzamelartikel'] ) ) : '',
 					'trainingsartikel' => isset( $_POST['trainingsartikel'] ) ? sanitize_text_field( wp_unslash( $_POST['trainingsartikel'] ) ) : '',
+					'toeslag'          => empty( $_POST['toeslag'] ) ? 'uit' : 'aan',
+					'toeslag_grens'    => isset( $_POST['toeslag_grens'] ) ? str_replace( ',', '.', sanitize_text_field( wp_unslash( $_POST['toeslag_grens'] ) ) ) : '',
+					'toeslag_bedrag'   => isset( $_POST['toeslag_bedrag'] ) ? str_replace( ',', '.', sanitize_text_field( wp_unslash( $_POST['toeslag_bedrag'] ) ) ) : '',
+					'toeslag_artikel'  => isset( $_POST['toeslag_artikel'] ) ? sanitize_text_field( wp_unslash( $_POST['toeslag_artikel'] ) ) : '',
 					'nummering'       => isset( $_POST['nummering'] ) && 'powerall' === sanitize_key( wp_unslash( $_POST['nummering'] ) ) ? 'powerall' : 'portaal',
 				),
 				false
@@ -618,6 +634,18 @@ class HDP_PowerAll_Orders {
 						<td>
 							<input id="hdp-pa-verzamel" name="verzamelartikel" type="text" class="regular-text code" value="<?php echo esc_attr( self::verzamelartikel() ); ?>">
 							<p class="description">Het artikelnummer in PowerAll voor regels die zelf niet in PowerAll staan, zoals de outlet. De omschrijving en prijs komen dan uit de webshop. Zolang dit leeg is en PowerAll op "Aan" staat, kan de outlet niet besteld worden.</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">Kleinordertoeslag</th>
+						<td>
+							<label><input type="checkbox" name="toeslag" value="1" <?php checked( HDP_Kleinordertoeslag::aan() ); ?>> Aan</label>
+							<p>
+								Onder € <input name="toeslag_grens" type="number" min="0" step="0.01" class="small-text" value="<?php echo esc_attr( HDP_Kleinordertoeslag::grens() ); ?>"> netto (artikelen excl. btw, na korting)
+								een toeslag van € <input name="toeslag_bedrag" type="number" min="0" step="0.01" class="small-text" value="<?php echo esc_attr( number_format( HDP_Kleinordertoeslag::bedrag(), 2, '.', '' ) ); ?>">,
+								als PowerAll-artikel <input name="toeslag_artikel" type="text" class="regular-text code" style="width:14em" value="<?php echo esc_attr( HDP_Kleinordertoeslag::artikel() ); ?>">
+							</p>
+							<p class="description">De dealer ziet de toeslag als aparte regel in de winkelwagen en bij afrekenen. In PowerAll staat hij als dit artikel op de order.</p>
 						</td>
 					</tr>
 					<tr>

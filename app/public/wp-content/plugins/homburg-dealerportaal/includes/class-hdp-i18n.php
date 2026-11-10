@@ -1217,6 +1217,7 @@ class HDP_I18N {
 				'nl' => 'Ingediend door %1$s (%2$s).',
 				'fr' => 'Introduit par %1$s (%2$s).',
 			),
+			'kleinordertoeslag' => array( 'nl' => 'Kleinordertoeslag (onder %s)', 'fr' => 'Supplément petite commande (moins de %s)' ),
 			'pa_geen_klantnummer' => array(
 				'nl' => 'Bestellen op rekening kan zodra je account aan je klantnummer bij Homburg is gekoppeld. Neem contact op met Homburg, dan regelen we dat.',
 				'fr' => 'La commande sur compte sera possible dès que votre compte sera lié à votre numéro de client chez Homburg. Contactez Homburg, nous nous en occupons.',

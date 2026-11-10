@@ -211,6 +211,75 @@ class PowerAll_Webshop_Test extends WP_UnitTestCase {
 		return $order;
 	}
 
+	/* === Kleinordertoeslag ============================================== */
+
+	/** Een winkelwagen met dit nettobedrag, opnieuw berekend. */
+	private function winkelwagen( $prijs, $aantal = 1 ) {
+		if ( ! function_exists( 'wc_load_cart' ) ) {
+			$this->markTestSkipped( 'WooCommerce-winkelwagen niet beschikbaar.' );
+		}
+		wc_load_cart();
+		WC()->cart->empty_cart();
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Onderdeel' );
+		$product->set_regular_price( (string) $prijs );
+		$product->save();
+		WC()->cart->add_to_cart( $product->get_id(), $aantal );
+		WC()->cart->calculate_totals();
+		return WC()->cart;
+	}
+
+	private function toeslag_in( WC_Cart $cart ) {
+		foreach ( $cart->get_fees() as $fee ) {
+			if ( HDP_Kleinordertoeslag::FEE_ID === $fee->id ) {
+				return (float) $fee->amount;
+			}
+		}
+		return 0.0;
+	}
+
+	public function test_kleinordertoeslag_onder_75_netto() {
+		$this->assertSame( 12.5, $this->toeslag_in( $this->winkelwagen( '74.99' ) ) );
+		$this->assertSame( 12.5, $this->toeslag_in( $this->winkelwagen( '10', 3 ) ), 'Het totaal telt, niet de regel.' );
+		$this->assertSame( 0.0, $this->toeslag_in( $this->winkelwagen( '75' ) ), 'Precies 75 is geen kleine order.' );
+		$this->assertSame( 0.0, $this->toeslag_in( $this->winkelwagen( '40', 2 ) ) );
+		$this->assertStringContainsString( '€ 75', HDP_Kleinordertoeslag::naam() );
+		WC()->cart->empty_cart();
+	}
+
+	public function test_kleinordertoeslag_uit_of_andere_grens() {
+		update_option( HDP_PowerAll_Orders::OPTION, array( 'toeslag' => 'uit' ) );
+		$this->assertSame( 0.0, $this->toeslag_in( $this->winkelwagen( '20' ) ) );
+
+		update_option( HDP_PowerAll_Orders::OPTION, array( 'toeslag' => 'aan', 'toeslag_grens' => '100', 'toeslag_bedrag' => '15' ) );
+		$this->assertSame( 15.0, $this->toeslag_in( $this->winkelwagen( '80' ) ) );
+		WC()->cart->empty_cart();
+	}
+
+	public function test_kleinordertoeslag_gaat_als_artikel_naar_powerall() {
+		$order = $this->bestelling();
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_name( HDP_Kleinordertoeslag::naam() );
+		$fee->set_total( '12.50' );
+		$fee->add_meta_data( HDP_Kleinordertoeslag::META, '1', true );
+		$order->add_item( $fee );
+		// Een andere kostenregel gaat niet als toeslag mee.
+		$ander = new WC_Order_Item_Fee();
+		$ander->set_name( 'Iets anders' );
+		$ander->set_total( '5' );
+		$order->add_item( $ander );
+		$order->calculate_totals();
+		$order->save();
+
+		HDP_PowerAll_Orders::verstuur( $order->get_id() );
+		$regels = $this->verzoeken_naar( 'sales-orders/simulate' )[0][2]['Lines'];
+
+		$this->assertCount( 2, $regels );
+		$this->assertSame( 'KLEIN ORDER TOESLAG', $regels[1]['ProductCode'] );
+		$this->assertEquals( 12.5, $regels[1]['GrossPrice'] );
+		$this->assertSame( 0, $regels[1]['DiscountPercentage'] );
+	}
+
 	public function test_proef_maakt_niets_aan_in_powerall() {
 		$order = $this->bestelling();
 		$this->assertSame( 'proef', HDP_PowerAll_Orders::modus(), 'Standaard alleen proef.' );
