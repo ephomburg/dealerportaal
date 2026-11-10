@@ -57,15 +57,15 @@ function homburg_wc_mijn_merken_menu( $items ) {
 add_action( 'woocommerce_account_mijn-merken_endpoint', 'homburg_wc_mijn_merken_inhoud' );
 function homburg_wc_mijn_merken_inhoud() {
 	$eigen = HDP_Merken::naar_array( get_user_meta( get_current_user_id(), 'hdp_merken', true ) );
-	// Geen eigen lijst betekent geen beperking: zie HDP_Downloads_CPT::mag_merk_zien().
-	$merken = $eigen ? $eigen : HDP_Merken::lijst();
+	// Geen eigen merken: alleen de algemene documenten (zie HDP_Downloads_CPT::mag_merk_zien()).
+	$merken = $eigen;
 	?>
 	<p class="hdp-mijn-merken-intro">
 		<?php
 		if ( $eigen ) {
 			esc_html_e( 'Je hebt toegang tot de documenten van deze merken. Algemene documenten zie je altijd.', 'homburg-dealerportaal-theme' );
 		} else {
-			esc_html_e( 'Je hebt toegang tot de documenten van alle merken.', 'homburg-dealerportaal-theme' );
+			esc_html_e( 'Er zijn nog geen merken aan je account gekoppeld. Je ziet daarom alleen de algemene documenten en trainingen. Neem contact op met Homburg om je merken te laten toevoegen.', 'homburg-dealerportaal-theme' );
 		}
 		?>
 	</p>
