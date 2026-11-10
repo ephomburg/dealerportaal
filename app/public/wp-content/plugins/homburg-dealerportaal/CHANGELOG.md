@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.108.0
+
+- Nieuw: **Gebruikers > Merken per dealer** (`HDP_Merken_Overzicht`). Alle dealers onder elkaar met per merk een vinkje, zoeken op bedrijf, e-mail of klantnummer, een merk in één klik voor alle zichtbare dealers aan of uit (kop aanklikken), en één keer opslaan. Alleen de gewijzigde rijen worden verstuurd. Collega's staan er niet in (die volgen hun hoofdaccount); een dealer zonder merken krijgt een waarschuwing.
+
 ## 1.107.1
 
 - Opgeruimd: `HDP_Herbestellen` (oud "opnieuw bestellen"-blok, al lang nergens meer aangeroepen; opnieuw bestellen zit in het thema) met zijn test, 18 teksten van een eerdere opzet van de garantiepagina, en een verouderde opmerking ("indienformulieren nog ontwerp").
