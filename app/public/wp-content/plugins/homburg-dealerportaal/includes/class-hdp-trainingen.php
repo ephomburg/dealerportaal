@@ -30,7 +30,7 @@ class HDP_Trainingen {
 	const POST_TYPE = 'hdp_training';
 	const TABEL     = 'hdp_training_aanmeldingen';
 	const DB_OPTIE  = 'hdp_trainingen_db_versie';
-	const DB_VERSIE = '2';
+	const DB_VERSIE = '3';
 
 	/** Hoe ver "Eerder gegeven" standaard terugkijkt; ouder via "Toon oudere trainingen". */
 	const EERDER_DAGEN = 730;
@@ -159,6 +159,12 @@ class HDP_Trainingen {
 				aanwezig tinyint(1) NOT NULL DEFAULT 1,
 				review_uitnodiging datetime DEFAULT NULL,
 				review_herinnering datetime DEFAULT NULL,
+				prijs decimal(10,2) NOT NULL DEFAULT 0,
+				pa_status varchar(20) NOT NULL DEFAULT '',
+				pa_tr bigint(20) unsigned NOT NULL DEFAULT 0,
+				pa_nummer varchar(20) NOT NULL DEFAULT '',
+				pa_fout text,
+				pa_pogingen tinyint(3) unsigned NOT NULL DEFAULT 0,
 				aangemaakt datetime NOT NULL,
 				PRIMARY KEY  (id),
 				KEY training_status (training_id,status),
@@ -583,8 +589,11 @@ class HDP_Trainingen {
 		$rij['id']         = (int) $wpdb->insert_id;
 		$rij['antwoorden'] = $antwoorden;
 
+		// Een betaalde training: meteen een order in PowerAll, zodat de factuur er vóór de training is.
+		$factuur = HDP_Training_PowerAll::na_aanmelding( $rij );
+
 		self::mail_bevestiging( $rij );
-		self::mail_team( $rij );
+		self::mail_team( $rij, $factuur );
 
 		return $rij['id'];
 	}
@@ -805,7 +814,7 @@ class HDP_Trainingen {
 	}
 
 	/** Het bericht aan het team: altijd in het Nederlands. */
-	private static function mail_team( $rij ) {
+	private static function mail_team( $rij, $factuur = '' ) {
 		$aan = self::team_email();
 		if ( ! $aan ) {
 			return;
@@ -825,6 +834,10 @@ class HDP_Trainingen {
 			$regels[] = $antwoord['label'] . ': ' . ( '' !== $antwoord['waarde'] ? $antwoord['waarde'] : '-' );
 		}
 		$regels[] = '';
+		$kosten   = HDP_Training_PowerAll::regel_voor_team( $rij, $factuur );
+		if ( '' !== $kosten ) {
+			$regels[] = $kosten;
+		}
 		$over     = self::plaatsen_over( $id );
 		$regels[] = 'Aangemeld tot nu toe: ' . self::aantal_aangemeld( $id ) . ( null === $over ? '' : ' (nog ' . $over . ' plaats(en) vrij)' );
 		$regels[] = 'Alle aanmeldingen: ' . admin_url( 'edit.php?post_type=' . self::POST_TYPE . '&page=hdp-training-aanmeldingen&training=' . $id );
@@ -859,7 +872,8 @@ class HDP_Trainingen {
 			HDP_I18N::t( 'training_feit_datum' )   => self::datumtekst( $training_id ),
 			HDP_I18N::t( 'training_feit_tijd' )    => self::tijd( $training_id ),
 			HDP_I18N::t( 'training_feit_locatie' ) => (string) get_post_meta( $training_id, self::META_LOCATIE, true ),
-			HDP_I18N::t( 'training_feit_kosten' )  => (string) get_post_meta( $training_id, self::META_KOSTEN, true ),
+			// De vrije tekst gaat voor; anders de prijs voor de factuur.
+			HDP_I18N::t( 'training_feit_kosten' )  => '' !== (string) get_post_meta( $training_id, self::META_KOSTEN, true ) ? (string) get_post_meta( $training_id, self::META_KOSTEN, true ) : HDP_Training_PowerAll::prijstekst( $training_id ),
 		);
 		return array_filter(
 			$feiten,
@@ -883,7 +897,8 @@ class HDP_Trainingen {
 			array( 'hdp_training_datum', 'Datum', 'date', self::META_DATUM, 'Leeg = "datum volgt".' ),
 			array( 'hdp_training_einddatum', 'Einddatum', 'date', self::META_EINDDATUM, 'Alleen bij meer dagen.' ),
 			array( 'hdp_training_locatie', 'Locatie', 'text', self::META_LOCATIE, '' ),
-			array( 'hdp_training_kosten', 'Kosten', 'text', self::META_KOSTEN, 'Bijv. € 95 excl. btw, of "Gratis". Leeg = niet tonen.' ),
+			array( 'hdp_training_kosten', 'Kosten', 'text', self::META_KOSTEN, 'Bijv. € 95 excl. btw, of "Gratis". Leeg = de prijs hieronder tonen, of niets.' ),
+			array( 'hdp_training_prijs', 'Prijs per persoon voor de factuur (€, excl. btw)', 'bedrag', HDP_Training_PowerAll::META_PRIJS, 'Bij elke aanmelding gaat er meteen een order met dit bedrag naar PowerAll, op het klantnummer van de dealer. Leeg of 0 = gratis, er gaat niets naar PowerAll.' ),
 			array( 'hdp_training_plaatsen', 'Maximaal aantal plaatsen', 'number', self::META_PLAATSEN, 'Leeg = geen maximum.' ),
 			array( 'hdp_training_sluit', 'Aanmelden kan tot en met', 'date', self::META_SLUIT, 'Leeg = tot de training voorbij is.' ),
 		);
@@ -895,9 +910,9 @@ class HDP_Trainingen {
 				'<p><label for="%1$s"><strong>%2$s</strong></label><br><input type="%3$s" id="%1$s" name="%1$s" class="widefat" value="%4$s"%5$s>%6$s</p>',
 				esc_attr( $regel[0] ),
 				esc_html( $regel[1] ),
-				esc_attr( $regel[2] ),
+				esc_attr( 'bedrag' === $regel[2] ? 'number' : $regel[2] ),
 				esc_attr( get_post_meta( $post->ID, $regel[3], true ) ),
-				'number' === $regel[2] ? ' min="1"' : '',
+				'number' === $regel[2] ? ' min="1"' : ( 'bedrag' === $regel[2] ? ' min="0" step="0.01"' : '' ),
 				$regel[4] ? '<span class="description">' . esc_html( $regel[4] ) . '</span>' : ''
 			);
 		}
@@ -1123,6 +1138,8 @@ class HDP_Trainingen {
 			update_post_meta( $post_id, self::META_TIJD, $tijd );
 		}
 
+		$prijs = isset( $_POST['hdp_training_prijs'] ) ? trim( str_replace( ',', '.', sanitize_text_field( wp_unslash( $_POST['hdp_training_prijs'] ) ) ) ) : '';
+		update_post_meta( $post_id, HDP_Training_PowerAll::META_PRIJS, is_numeric( $prijs ) && (float) $prijs > 0 ? number_format( round( (float) $prijs, 2 ), 2, '.', '' ) : '' );
 		update_post_meta( $post_id, self::META_PLAATSEN, isset( $_POST['hdp_training_plaatsen'] ) ? absint( $_POST['hdp_training_plaatsen'] ) : 0 );
 		$vervolg_op = isset( $_POST['hdp_training_vervolg_op'] ) ? absint( $_POST['hdp_training_vervolg_op'] ) : 0;
 		update_post_meta( $post_id, self::META_VERVOLG_OP, $vervolg_op && $vervolg_op !== (int) $post_id && self::POST_TYPE === get_post_type( $vervolg_op ) ? $vervolg_op : 0 );
@@ -1276,6 +1293,13 @@ class HDP_Trainingen {
 		?>
 		<div class="wrap">
 			<h1>Aanmeldingen voor trainingen</h1>
+			<?php
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- alleen een melding.
+			$pa_nummer = isset( $_GET['hdp_pa_geannuleerd'] ) ? sanitize_text_field( wp_unslash( $_GET['hdp_pa_geannuleerd'] ) ) : '';
+			if ( '' !== $pa_nummer ) :
+				?>
+				<div class="notice notice-warning"><p><strong>Geannuleerd. Let op:</strong> de order voor deze aanmelding staat al in PowerAll (ordernummer <?php echo esc_html( $pa_nummer ); ?>). Het portaal kan die daar niet weghalen: verwijder of crediteer hem in PowerAll.</p></div>
+			<?php endif; ?>
 			<?php if ( ! $trainingen ) : ?>
 				<p>Er zijn nog geen trainingen geplaatst.</p>
 			</div>
@@ -1302,7 +1326,8 @@ class HDP_Trainingen {
 				<p>Nog niemand aangemeld.</p>
 				<?php
 			else :
-				$plaatsen = (int) get_post_meta( $training_id, self::META_PLAATSEN, true );
+				$plaatsen    = (int) get_post_meta( $training_id, self::META_PLAATSEN, true );
+				$met_factuur = HDP_Training_PowerAll::prijs( $training_id ) > 0 || array_filter( wp_list_pluck( $rijen, 'pa_status' ) );
 				?>
 				<p><strong><?php echo esc_html( self::aantal_aangemeld( $training_id ) . ( $plaatsen ? ' van ' . $plaatsen : '' ) ); ?></strong> aangemeld.</p>
 				<table class="widefat striped">
@@ -1316,6 +1341,9 @@ class HDP_Trainingen {
 							<?php endforeach; ?>
 							<th>Aangemeld op</th>
 							<th>Status</th>
+							<?php if ( $met_factuur ) : ?>
+								<th>Factuur (PowerAll)</th>
+							<?php endif; ?>
 							<th></th>
 						</tr>
 					</thead>
@@ -1330,6 +1358,14 @@ class HDP_Trainingen {
 								<?php endforeach; ?>
 								<td><?php echo esc_html( self::aangemeld_op( $rij ) ); ?></td>
 								<td><?php echo esc_html( self::STATUS_GEANNULEERD === $rij['status'] ? 'Geannuleerd' : ( empty( $rij['aanwezig'] ) ? 'Niet aanwezig' : 'Aangemeld' ) ); ?></td>
+								<?php if ( $met_factuur ) : ?>
+									<td<?php echo 'fout' === $rij['pa_status'] ? ' style="color:#b32d2e"' : ''; ?>>
+										<?php echo esc_html( HDP_Training_PowerAll::statustekst( $rij ) ); ?>
+										<?php if ( 'fout' === $rij['pa_status'] && self::STATUS_AANGEMELD === $rij['status'] ) : ?>
+											<br><a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=' . HDP_Training_PowerAll::ACTIE_OPNIEUW . '&aanmelding=' . (int) $rij['id'] . '&training=' . $training_id ), HDP_Training_PowerAll::ACTIE_OPNIEUW . '_' . (int) $rij['id'] ) ); ?>">Opnieuw versturen</a>
+										<?php endif; ?>
+									</td>
+								<?php endif; ?>
 								<td>
 									<?php if ( self::STATUS_AANGEMELD === $rij['status'] ) : ?>
 										<?php
@@ -1342,7 +1378,7 @@ class HDP_Trainingen {
 										);
 										?>
 										<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=hdp_training_annuleer&aanmelding=' . (int) $rij['id'] . '&training=' . $training_id ), 'hdp_training_annuleer_' . (int) $rij['id'] ) ); ?>"
-											onclick="return confirm('Deze aanmelding annuleren? De plaats komt weer vrij. De deelnemer krijgt hiervan geen bericht.')">Annuleren</a>
+											onclick="return confirm(<?php echo esc_attr( wp_json_encode( 'Deze aanmelding annuleren? De plaats komt weer vrij. De deelnemer krijgt hiervan geen bericht.' . ( 'verstuurd' === $rij['pa_status'] ? ' De order staat al in PowerAll (' . $rij['pa_nummer'] . '): verwijder of crediteer hem daar met de hand.' : '' ) ) ); ?>)">Annuleren</a>
 									<?php endif; ?>
 								</td>
 							</tr>
@@ -1361,8 +1397,13 @@ class HDP_Trainingen {
 		if ( ! current_user_can( self::CAP_BEHEER ) ) {
 			wp_die( 'Geen toegang.' );
 		}
+		$rij = HDP_Training_PowerAll::aanmelding( $id );
 		self::annuleer( $id );
-		wp_safe_redirect( self::beheer_url( $training_id ) );
+		$url = self::beheer_url( $training_id );
+		if ( $rij && 'verstuurd' === $rij['pa_status'] ) {
+			$url = add_query_arg( 'hdp_pa_geannuleerd', rawurlencode( (string) $rij['pa_nummer'] ), $url );
+		}
+		wp_safe_redirect( $url );
 		exit;
 	}
 
@@ -1398,7 +1439,7 @@ class HDP_Trainingen {
 		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename="aanmeldingen-' . sanitize_title( self::nl_titel( $training_id ) ) . '.csv"' );
 
-		$regels = array( array_merge( array( 'Deelnemer', 'E-mail', 'Dealer', 'E-mail dealer' ), array_values( $vragen ), array( 'Aangemeld op', 'Status' ) ) );
+		$regels = array( array_merge( array( 'Deelnemer', 'E-mail', 'Dealer', 'E-mail dealer' ), array_values( $vragen ), array( 'Aangemeld op', 'Status', 'Factuur (PowerAll)' ) ) );
 		foreach ( $rijen as $rij ) {
 			$antwoorden = array();
 			foreach ( array_keys( $vragen ) as $vraag_id ) {
@@ -1407,7 +1448,7 @@ class HDP_Trainingen {
 			$regels[] = array_merge(
 				array( $rij['deelnemer_naam'], $rij['deelnemer_email'], self::bedrijf_van( $rij ), $rij['dealer_email'] ),
 				$antwoorden,
-				array( self::aangemeld_op( $rij ), self::STATUS_GEANNULEERD === $rij['status'] ? 'Geannuleerd' : 'Aangemeld' )
+				array( self::aangemeld_op( $rij ), self::STATUS_GEANNULEERD === $rij['status'] ? 'Geannuleerd' : 'Aangemeld', HDP_Training_PowerAll::statustekst( $rij ) )
 			);
 		}
 

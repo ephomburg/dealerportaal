@@ -8,6 +8,12 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.103.0
+
+- Nieuw: **trainingen naar PowerAll** (`HDP_Training_PowerAll`). Een training krijgt een "Prijs per persoon voor de factuur". Elke aanmelding wordt dan meteen een order in PowerAll op het klantnummer van de dealer (één per deelnemer, via het trainingsartikel onder WooCommerce > PowerAll), zodat de factuur er vóór de training is. Eigen reeks TR1, TR2, ... (in PowerAll 91000001 en verder), dezelfde stand uit/proef/aan als de webshop, elk uur een nieuwe poging bij een storing, nooit dubbel.
+- Zonder klantnummer of trainingsartikel gaat er niets en staat in de teammail en in het aanmeldoverzicht dat er met de hand gefactureerd moet worden. Het aanmeldoverzicht en de CSV hebben een kolom "Factuur (PowerAll)" met "Opnieuw versturen". Bij annuleren van een aanmelding die al in PowerAll staat, waarschuwt het portaal dat die order daar met de hand weg moet.
+- De dealer ziet de prijs bij de training ("€ 95,00 excl. btw per persoon") als er geen eigen kostentekst is ingevuld.
+
 ## 1.102.1
 
 - Fix: de mails bij een nieuwe bestelling (aan Homburg en aan de dealer) toonden het interne nummer (#9157) in plaats van het webshopnummer (WS1). Het nummer wordt nu gezet op de bestelling die de mails ook gebruiken.

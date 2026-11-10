@@ -123,17 +123,22 @@ class HDP_PowerAll_Orders {
 
 	/** Het volgende webshopnummer, in één stap in de database opgehoogd: twee bestellingen tegelijk krijgen nooit hetzelfde. */
 	public static function volgende_ws() {
+		return self::teller( self::OPTION_TELLER );
+	}
+
+	/** Hoogt de teller in deze optie op en geeft het nieuwe nummer (1, 2, ...). Ook voor de trainingen (TR1, TR2, ...). */
+	public static function teller( $optie ) {
 		global $wpdb;
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery -- bewust rechtstreeks: ophogen en uitlezen in één stap.
-		$ophogen = $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = LAST_INSERT_ID( CAST( option_value AS UNSIGNED ) + 1 ) WHERE option_name = %s", self::OPTION_TELLER );
+		$ophogen = $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = LAST_INSERT_ID( CAST( option_value AS UNSIGNED ) + 1 ) WHERE option_name = %s", $optie );
 		if ( ! $wpdb->query( $ophogen ) ) {
 			// De eerste keer: de teller bestaat nog niet.
-			$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, '0', 'no')", self::OPTION_TELLER ) );
+			$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, '0', 'no')", $optie ) );
 			$wpdb->query( $ophogen );
 		}
 		$nummer = (int) $wpdb->get_var( 'SELECT LAST_INSERT_ID()' );
 		// phpcs:enable
-		wp_cache_delete( self::OPTION_TELLER, 'options' );
+		wp_cache_delete( $optie, 'options' );
 		return $nummer;
 	}
 
@@ -225,6 +230,11 @@ class HDP_PowerAll_Orders {
 	/** Het PowerAll-artikel voor regels die zelf niet in PowerAll staan, zoals de outlet. */
 	public static function verzamelartikel() {
 		return trim( (string) ( self::instellingen()['verzamelartikel'] ?? '' ) );
+	}
+
+	/** Het PowerAll-artikel voor een trainingsaanmelding (zie HDP_Training_PowerAll). */
+	public static function trainingsartikel() {
+		return trim( (string) ( self::instellingen()['trainingsartikel'] ?? '' ) );
 	}
 
 	/* --- Versturen ------------------------------------------------------ */
@@ -512,6 +522,7 @@ class HDP_PowerAll_Orders {
 				array(
 					'modus'           => in_array( $modus, array( 'uit', 'proef', 'aan' ), true ) ? $modus : 'proef',
 					'verzamelartikel' => isset( $_POST['verzamelartikel'] ) ? sanitize_text_field( wp_unslash( $_POST['verzamelartikel'] ) ) : '',
+					'trainingsartikel' => isset( $_POST['trainingsartikel'] ) ? sanitize_text_field( wp_unslash( $_POST['trainingsartikel'] ) ) : '',
 					'nummering'       => isset( $_POST['nummering'] ) && 'powerall' === sanitize_key( wp_unslash( $_POST['nummering'] ) ) ? 'powerall' : 'portaal',
 				),
 				false
@@ -607,6 +618,13 @@ class HDP_PowerAll_Orders {
 						<td>
 							<input id="hdp-pa-verzamel" name="verzamelartikel" type="text" class="regular-text code" value="<?php echo esc_attr( self::verzamelartikel() ); ?>">
 							<p class="description">Het artikelnummer in PowerAll voor regels die zelf niet in PowerAll staan, zoals de outlet. De omschrijving en prijs komen dan uit de webshop. Zolang dit leeg is en PowerAll op "Aan" staat, kan de outlet niet besteld worden.</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="hdp-pa-training">Trainingsartikel</label></th>
+						<td>
+							<input id="hdp-pa-training" name="trainingsartikel" type="text" class="regular-text code" value="<?php echo esc_attr( self::trainingsartikel() ); ?>">
+							<p class="description">Het artikelnummer in PowerAll voor trainingen (een dienst, zonder voorraad). Elke aanmelding voor een training met een prijs wordt meteen een order op het klantnummer van de dealer: één regel per deelnemer, met de training, de datum en de naam erbij. In het portaal heet die order TR1, TR2, ...<?php echo 'portaal' === self::nummering() ? ' In PowerAll is dat ordernummer ' . esc_html( HDP_Training_PowerAll::TR_BASIS + 1 ) . ' en verder.' : ''; ?> Zolang dit leeg is, gaat er niets naar PowerAll en staat bij de aanmelding dat hij met de hand gefactureerd moet worden.</p>
 						</td>
 					</tr>
 				</table>

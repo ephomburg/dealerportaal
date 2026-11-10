@@ -414,6 +414,7 @@ class HDP_I18N {
 			'training_feit_tijd'       => array( 'nl' => 'Tijd', 'fr' => 'Heure' ),
 			'training_feit_locatie'    => array( 'nl' => 'Locatie', 'fr' => 'Lieu' ),
 			'training_feit_kosten'     => array( 'nl' => 'Kosten', 'fr' => 'Coût' ),
+			'training_prijs_pp'        => array( 'nl' => '%s excl. btw per persoon', 'fr' => '%s HTVA par personne' ),
 			'training_plaatsen_over'   => array( 'nl' => 'Nog %d plaatsen vrij', 'fr' => 'Encore %d places libres' ),
 			'training_plaats_over'     => array( 'nl' => 'Nog 1 plaats vrij', 'fr' => 'Encore 1 place libre' ),
 			'training_plaatsen_bezet'  => array( 'nl' => '%1$d van %2$d bezet', 'fr' => '%1$d sur %2$d occupées' ),
