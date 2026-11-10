@@ -8,6 +8,12 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.102.0
+
+- Nieuw: **webshopnummer** (WS1, WS2, ...). Elke bestelling die binnenkomt krijgt het, de dealer ziet het overal (bestellingen, bevestiging, mails) en kan erop zoeken; in WooCommerce > Bestellingen ook. In PowerAll is het referentie 1.
+- PowerAll-ordernummer: het portaal nummert zelf (WS1 = 90000001, een reeks die PowerAll niet gebruikt), omschakelbaar naar "PowerAll nummert zelf" onder WooCommerce > PowerAll. Een nieuwe poging na een fout gebruikt hetzelfde nummer, zodat een order nooit dubbel in PowerAll komt.
+- Bij PowerAll "Aan": alleen een dealer met een klantnummer kan op rekening bestellen (anders een uitleg bij winkelwagen en afrekenen), en artikelen die niet uit PowerAll komen (de outlet) zijn pas te bestellen als er een verzamelartikel is ingesteld.
+
 ## 1.101.1 (thema 1.44.1)
 
 - Fix: **Mijn account** (bestellingen, adressen, accountdetails) toonde sinds de Nederlandse adressen (1.99.0) een kale donkere pagina zonder werkvlak en zijmenu. WordPress zocht het sjabloon op het adres (/my-account/) en vond het niet meer bij /mijn-account/. Het thema koppelt de sjablonen voor account, winkelwagen en afrekenen nu aan de pagina zelf (`homburg_wc_sjabloon_per_pagina`).

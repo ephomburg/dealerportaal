@@ -35,6 +35,7 @@ class PowerAll_Webshop_Test extends WP_UnitTestCase {
 		HDP_Roles::activate();
 		delete_option( HDP_PowerAll_Artikelen::OPTION );
 		delete_option( HDP_PowerAll_Orders::OPTION );
+		delete_option( HDP_PowerAll_Orders::OPTION_TELLER );
 		$this->verzoeken = array();
 		$this->storing   = false;
 		$this->artikelen = array(
@@ -236,8 +237,95 @@ class PowerAll_Webshop_Test extends WP_UnitTestCase {
 
 		$echt = $this->verzoeken_naar( 'sales-orders' );
 		$this->assertCount( 1, $echt );
-		$this->assertArrayNotHasKey( 'EntryNumber', $echt[0][2], 'PowerAll nummert zelf.' );
+		$this->assertSame( 90000001, $echt[0][2]['EntryNumber'], 'Het portaal nummert: WS1 = 90000001.' );
+		$this->assertSame( 'WS1', $echt[0][2]['Reference1'] );
 		$this->assertSame( '2026001', wc_get_order( $order->get_id() )->get_meta( HDP_PowerAll_Orders::META_NUMMER ) );
+	}
+
+	/* === Webshopnummer (WS1, WS2, ...) =================================== */
+
+	public function test_powerall_nummert_zelf_als_dat_is_gekozen() {
+		update_option( HDP_PowerAll_Orders::OPTION, array( 'modus' => 'aan', 'nummering' => 'powerall' ) );
+		$order = $this->bestelling();
+		$order->set_status( 'processing' );
+		$order->save();
+
+		HDP_PowerAll_Orders::verstuur( $order->get_id() );
+		$echt = $this->verzoeken_naar( 'sales-orders' );
+		$this->assertArrayNotHasKey( 'EntryNumber', $echt[0][2], 'PowerAll nummert zelf.' );
+		$this->assertSame( 'WS1', $echt[0][2]['Reference1'], 'De referentie blijft het webshopnummer.' );
+	}
+
+	public function test_binnenkomende_bestelling_krijgt_ws_nummer_en_dat_is_terug_te_vinden() {
+		$eerste = $this->bestelling();
+		$eerste->set_status( 'processing' );
+		$eerste->save();
+		$tweede = $this->bestelling();
+		$tweede->set_status( 'on-hold' );
+		$tweede->save();
+
+		$this->assertSame( 'WS1', wc_get_order( $eerste->get_id() )->get_order_number() );
+		$this->assertSame( 'WS2', wc_get_order( $tweede->get_id() )->get_order_number() );
+		$this->assertSame( $tweede->get_id(), HDP_PowerAll_Orders::order_bij_ws( 'ws 2' ) );
+		$this->assertSame( $eerste->get_id(), HDP_PowerAll_Orders::order_bij_ws( 'WS1' ) );
+		$this->assertSame( 0, HDP_PowerAll_Orders::order_bij_ws( 'WS99' ) );
+		$this->assertSame( 0, HDP_PowerAll_Orders::order_bij_ws( '1' ) );
+
+		// Nog een keer de status zetten geeft geen nieuw nummer.
+		$eerste->set_status( 'on-hold' );
+		$eerste->save();
+		$eerste->set_status( 'processing' );
+		$eerste->save();
+		$this->assertSame( 'WS1', wc_get_order( $eerste->get_id() )->get_order_number() );
+		$this->assertSame( 3, HDP_PowerAll_Orders::volgende_ws() );
+	}
+
+	public function test_nieuwe_poging_gebruikt_hetzelfde_ordernummer() {
+		update_option( HDP_PowerAll_Orders::OPTION, array( 'modus' => 'aan' ) );
+		$order = $this->bestelling();
+		$order->set_status( 'processing' );
+		$order->save();
+
+		$this->storing = true;
+		$this->assertSame( 'fout', HDP_PowerAll_Orders::verstuur( $order->get_id() ) );
+		$this->storing = false;
+		$this->assertSame( 'verstuurd', HDP_PowerAll_Orders::verstuur( $order->get_id() ) );
+
+		$nummers = wp_list_pluck( wp_list_pluck( $this->verzoeken_naar( 'sales-orders' ), 2 ), 'EntryNumber' );
+		$this->assertSame( array( 90000001, 90000001 ), $nummers );
+	}
+
+	public function test_bij_aan_alleen_op_rekening_met_klantnummer() {
+		$zonder = self::factory()->user->create( array( 'role' => 'dealer' ) );
+		update_user_meta( $zonder, 'hdp_goedgekeurd', '1' );
+		$methodes = array( 'cheque' => new stdClass() );
+
+		wp_set_current_user( $zonder );
+		$this->assertArrayHasKey( 'cheque', HDP_PowerAll_Orders::op_rekening_alleen_met_klantnummer( $methodes ), 'Bij proef verandert er niets.' );
+
+		update_option( HDP_PowerAll_Orders::OPTION, array( 'modus' => 'aan' ) );
+		$this->assertArrayNotHasKey( 'cheque', HDP_PowerAll_Orders::op_rekening_alleen_met_klantnummer( $methodes ) );
+
+		wp_set_current_user( $this->dealer );
+		$this->assertArrayHasKey( 'cheque', HDP_PowerAll_Orders::op_rekening_alleen_met_klantnummer( $methodes ) );
+	}
+
+	public function test_outlet_pas_bestelbaar_met_verzamelartikel() {
+		HDP_PowerAll_Artikelen::ronde_nu();
+		$uit_powerall = wc_get_product( wc_get_product_id_by_sku( 'VD-100' ) );
+		$outlet       = new WC_Product_Simple();
+		$outlet->set_name( 'Outletpomp' );
+		$outlet->set_regular_price( '10' );
+		$outlet->save();
+
+		$this->assertTrue( HDP_PowerAll_Orders::buiten_powerall_bestelbaar( true, $outlet ), 'Bij proef verandert er niets.' );
+
+		update_option( HDP_PowerAll_Orders::OPTION, array( 'modus' => 'aan' ) );
+		$this->assertFalse( HDP_PowerAll_Orders::buiten_powerall_bestelbaar( true, $outlet ) );
+		$this->assertTrue( HDP_PowerAll_Orders::buiten_powerall_bestelbaar( true, $uit_powerall ) );
+
+		update_option( HDP_PowerAll_Orders::OPTION, array( 'modus' => 'aan', 'verzamelartikel' => 'OUTLET' ) );
+		$this->assertTrue( HDP_PowerAll_Orders::buiten_powerall_bestelbaar( true, $outlet ) );
 	}
 
 	public function test_uit_verstuurt_niets() {

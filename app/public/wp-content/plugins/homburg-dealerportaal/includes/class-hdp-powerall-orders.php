@@ -43,7 +43,24 @@ class HDP_PowerAll_Orders {
 	/** Alleen bij een proef: PowerAll wil een nummer zolang het zelf niet nummert, en een proef slaat niets op. */
 	const PROEF_NUMMER = 99999999;
 
+	/**
+	 * Webshopnummer: elke bestelling krijgt WS1, WS2, ... Dat ziet de dealer,
+	 * en het is referentie 1 in PowerAll. Zolang het portaal zelf nummert, is
+	 * het ordernummer in PowerAll WS_BASIS + dat nummer (WS1 = 90000001), een
+	 * reeks die PowerAll zelf nooit gebruikt.
+	 */
+	const META_WS       = '_hdp_ws';
+	const OPTION_TELLER = 'hdp_ws_teller';
+	const WS_BASIS      = 90000000;
+
 	public static function init() {
+		add_action( 'woocommerce_order_status_processing', array( __CLASS__, 'geef_ws_nummer' ), 5 );
+		add_action( 'woocommerce_order_status_on-hold', array( __CLASS__, 'geef_ws_nummer' ), 5 );
+		add_filter( 'woocommerce_order_number', array( __CLASS__, 'ordernummer' ), 10, 2 );
+		add_filter( 'woocommerce_shop_order_search_results', array( __CLASS__, 'zoek_ws_in_beheer' ), 10, 2 );
+		add_filter( 'woocommerce_available_payment_gateways', array( __CLASS__, 'op_rekening_alleen_met_klantnummer' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'melding_zonder_klantnummer' ) );
+		add_filter( 'woocommerce_is_purchasable', array( __CLASS__, 'buiten_powerall_bestelbaar' ), 20, 2 );
 		add_action( 'woocommerce_order_status_processing', array( __CLASS__, 'plan_versturen' ) );
 		add_action( self::HOOK, array( __CLASS__, 'verstuur' ) );
 		add_action( self::HOOK_HERHAAL, array( __CLASS__, 'herhaal' ) );
@@ -95,6 +112,110 @@ class HDP_PowerAll_Orders {
 	public static function modus() {
 		$modus = (string) ( self::instellingen()['modus'] ?? 'proef' );
 		return in_array( $modus, array( 'uit', 'proef', 'aan' ), true ) ? $modus : 'proef';
+	}
+
+	/** 'portaal' (het portaal geeft het ordernummer, 90000001 en verder) of 'powerall' (PowerAll nummert zelf). */
+	public static function nummering() {
+		return 'powerall' === ( self::instellingen()['nummering'] ?? 'portaal' ) ? 'powerall' : 'portaal';
+	}
+
+	/* --- Webshopnummer (WS1, WS2, ...) ---------------------------------- */
+
+	/** Het volgende webshopnummer, in één stap in de database opgehoogd: twee bestellingen tegelijk krijgen nooit hetzelfde. */
+	public static function volgende_ws() {
+		global $wpdb;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery -- bewust rechtstreeks: ophogen en uitlezen in één stap.
+		$ophogen = $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = LAST_INSERT_ID( CAST( option_value AS UNSIGNED ) + 1 ) WHERE option_name = %s", self::OPTION_TELLER );
+		if ( ! $wpdb->query( $ophogen ) ) {
+			// De eerste keer: de teller bestaat nog niet.
+			$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, '0', 'no')", self::OPTION_TELLER ) );
+			$wpdb->query( $ophogen );
+		}
+		$nummer = (int) $wpdb->get_var( 'SELECT LAST_INSERT_ID()' );
+		// phpcs:enable
+		wp_cache_delete( self::OPTION_TELLER, 'options' );
+		return $nummer;
+	}
+
+	/** Het webshopnummer van deze bestelling (zonder "WS"); 0 als hij er (nog) geen heeft. */
+	public static function ws( WC_Order $order ) {
+		return (int) $order->get_meta( self::META_WS );
+	}
+
+	/** Een bestelling die binnenkomt krijgt een webshopnummer, vóór de bevestigingsmails. */
+	public static function geef_ws_nummer( $order_id ) {
+		$order = wc_get_order( $order_id );
+		if ( ! $order || self::ws( $order ) ) {
+			return;
+		}
+		$order->update_meta_data( self::META_WS, self::volgende_ws() );
+		$order->save();
+	}
+
+	/** Overal (portaal, mails, beheer) WS12 in plaats van het interne nummer. */
+	public static function ordernummer( $nummer, $order ) {
+		$ws = $order instanceof WC_Order ? self::ws( $order ) : 0;
+		return $ws ? 'WS' . $ws : $nummer;
+	}
+
+	/** Het ID van de bestelling bij "WS12" (of "ws 12"); 0 als die er niet is. */
+	public static function order_bij_ws( $tekst ) {
+		if ( ! preg_match( '/^\s*ws\s*-?\s*(\d+)\s*$/i', (string) $tekst, $m ) ) {
+			return 0;
+		}
+		$hpos = class_exists( '\Automattic\WooCommerce\Utilities\OrderUtil' ) && \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
+		if ( $hpos ) {
+			$ids = wc_get_orders( array( 'limit' => 1, 'return' => 'ids', 'meta_query' => array( array( 'key' => self::META_WS, 'value' => (int) $m[1] ) ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		} else {
+			$ids = get_posts( array( 'post_type' => 'shop_order', 'post_status' => 'any', 'meta_key' => self::META_WS, 'meta_value' => (int) $m[1], 'fields' => 'ids', 'numberposts' => 1 ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		}
+		$id    = $ids ? (int) $ids[0] : 0;
+		$order = $id ? wc_get_order( $id ) : null;
+		return $order && self::ws( $order ) === (int) $m[1] ? $id : 0;
+	}
+
+	/** Zoeken op WS12 in WooCommerce > Bestellingen. */
+	public static function zoek_ws_in_beheer( $ids, $term ) {
+		$id = self::order_bij_ws( $term );
+		return $id ? array_values( array_unique( array_merge( (array) $ids, array( $id ) ) ) ) : $ids;
+	}
+
+	/* --- Wie kan bestellen ---------------------------------------------- */
+
+	/**
+	 * Staat PowerAll op "Aan", dan kan alleen een dealer met een klantnummer
+	 * op rekening bestellen: anders kan zijn bestelling nergens heen.
+	 */
+	public static function mag_op_rekening( $user_id = 0 ) {
+		return 'aan' !== self::modus() || (bool) HDP_PowerAll_Prijzen::relatie( $user_id );
+	}
+
+	public static function op_rekening_alleen_met_klantnummer( $methodes ) {
+		if ( is_array( $methodes ) && isset( $methodes['cheque'] ) && ! self::mag_op_rekening() ) {
+			unset( $methodes['cheque'] );
+		}
+		return $methodes;
+	}
+
+	public static function melding_zonder_klantnummer() {
+		if ( ! is_user_logged_in() || ! function_exists( 'is_checkout' ) || ! ( is_checkout() || is_cart() ) || self::mag_op_rekening() ) {
+			return;
+		}
+		if ( ! wc_has_notice( HDP_I18N::t( 'pa_geen_klantnummer' ), 'notice' ) ) {
+			wc_add_notice( HDP_I18N::t( 'pa_geen_klantnummer' ), 'notice' );
+		}
+	}
+
+	/**
+	 * Een artikel dat niet uit PowerAll komt (de outlet) kan pas besteld worden
+	 * als er een verzamelartikel is; anders weigert PowerAll de order.
+	 */
+	public static function buiten_powerall_bestelbaar( $mag, $product ) {
+		if ( ! $mag || 'aan' !== self::modus() || '' !== self::verzamelartikel() || ! $product instanceof WC_Product ) {
+			return $mag;
+		}
+		$basis = $product->get_parent_id() ? wc_get_product( $product->get_parent_id() ) : $product;
+		return $basis && $basis->get_meta( HDP_PowerAll_Artikelen::META_BRON ) ? $mag : false;
 	}
 
 	/** Het PowerAll-artikel voor regels die zelf niet in PowerAll staan, zoals de outlet. */
@@ -167,7 +288,7 @@ class HDP_PowerAll_Orders {
 
 		$order_body = array(
 			'RelationId'   => (string) $relatie,
-			'Reference1'   => mb_substr( 'Portaal ' . $order->get_order_number(), 0, 40 ),
+			'Reference1'   => mb_substr( self::ws( $order ) ? 'WS' . self::ws( $order ) : 'Portaal ' . $order->get_order_number(), 0, 40 ),
 			'Reference2'   => mb_substr( $referentie, 0, 40 ),
 			'EmailAddress' => mb_substr( (string) $order->get_billing_email(), 0, 75 ),
 			'Phone'        => mb_substr( (string) $order->get_billing_phone(), 0, 20 ),
@@ -234,6 +355,17 @@ class HDP_PowerAll_Orders {
 			$order->save();
 			$order->add_order_note( 'PowerAll (proef): de order is goedgekeurd, totaal ' . wc_price( (float) ( $antwoord['TotalNetPriceExVat'] ?? 0 ) ) . ' excl. btw. Er is niets aangemaakt in PowerAll.' );
 			return 'proef';
+		}
+
+		// Het ordernummer in PowerAll. Bij een nieuwe poging hetzelfde nummer: staat
+		// de order er toch al, dan weigert PowerAll hem in plaats van hem dubbel te maken.
+		if ( 'portaal' === self::nummering() ) {
+			if ( ! self::ws( $order ) ) {
+				self::geef_ws_nummer( $order->get_id() );
+				$order = wc_get_order( $order->get_id() );
+			}
+			$body['EntryNumber'] = self::WS_BASIS + self::ws( $order );
+			$body['Reference1']  = 'WS' . self::ws( $order );
 		}
 
 		// Echt versturen. Eerst vastleggen dat we bezig zijn, zodat een tweede poging tegelijk niets doet.
@@ -376,6 +508,7 @@ class HDP_PowerAll_Orders {
 				array(
 					'modus'           => in_array( $modus, array( 'uit', 'proef', 'aan' ), true ) ? $modus : 'proef',
 					'verzamelartikel' => isset( $_POST['verzamelartikel'] ) ? sanitize_text_field( wp_unslash( $_POST['verzamelartikel'] ) ) : '',
+					'nummering'       => isset( $_POST['nummering'] ) && 'powerall' === sanitize_key( wp_unslash( $_POST['nummering'] ) ) ? 'powerall' : 'portaal',
 				),
 				false
 			);
@@ -451,14 +584,25 @@ class HDP_PowerAll_Orders {
 								<label><input type="radio" name="modus" value="proef" <?php checked( 'proef', $modus ); ?>> Proef: PowerAll controleert en rekent de order, maar maakt hem niet aan</label><br>
 								<label><input type="radio" name="modus" value="aan" <?php checked( 'aan', $modus ); ?>> <strong>Aan: elke bestelling wordt een echte order in PowerAll</strong></label>
 							</fieldset>
-							<p class="description">De uitkomst staat als notitie bij de bestelling. Voor "Aan" moet in PowerAll bij de verkooporderinstellingen een startnummer voor API-orders staan; anders weigert PowerAll de order.</p>
+							<p class="description">De uitkomst staat als notitie bij de bestelling. Bij "Aan" kan alleen een dealer met een klantnummer in PowerAll op rekening bestellen.</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">Ordernummer in PowerAll</th>
+						<td>
+							<?php $volgende = (int) get_option( self::OPTION_TELLER, 0 ) + 1; ?>
+							<fieldset>
+								<label><input type="radio" name="nummering" value="portaal" <?php checked( 'portaal', self::nummering() ); ?>> Het portaal nummert: WS1 wordt ordernummer 90000001, WS2 wordt 90000002, enzovoort</label><br>
+								<label><input type="radio" name="nummering" value="powerall" <?php checked( 'powerall', self::nummering() ); ?>> PowerAll nummert zelf, in de gewone reeks (stel eerst in PowerAll het startnummer voor API-orders in)</label>
+							</fieldset>
+							<p class="description">Elke bestelling krijgt in het portaal een webshopnummer (WS1, WS2, ...). Dat staat in PowerAll altijd als referentie 1. Het volgende is <strong>WS<?php echo esc_html( $volgende ); ?></strong><?php echo 'portaal' === self::nummering() ? esc_html( ', ordernummer ' . ( self::WS_BASIS + $volgende ) ) : ''; ?>.</p>
 						</td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="hdp-pa-verzamel">Verzamelartikel</label></th>
 						<td>
 							<input id="hdp-pa-verzamel" name="verzamelartikel" type="text" class="regular-text code" value="<?php echo esc_attr( self::verzamelartikel() ); ?>">
-							<p class="description">Het artikelnummer in PowerAll voor regels die zelf niet in PowerAll staan, zoals de outlet. De omschrijving en prijs komen dan uit de webshop.</p>
+							<p class="description">Het artikelnummer in PowerAll voor regels die zelf niet in PowerAll staan, zoals de outlet. De omschrijving en prijs komen dan uit de webshop. Zolang dit leeg is en PowerAll op "Aan" staat, kan de outlet niet besteld worden.</p>
 						</td>
 					</tr>
 				</table>

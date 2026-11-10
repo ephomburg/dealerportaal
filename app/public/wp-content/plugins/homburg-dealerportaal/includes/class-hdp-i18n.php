@@ -1088,6 +1088,10 @@ class HDP_I18N {
 			'wachtwoord_vergeten' => array( 'nl' => 'Wachtwoord vergeten?', 'fr' => 'Mot de passe oublié ?' ),
 			'onthoud_mij'       => array( 'nl' => 'Onthoud mij op dit apparaat', 'fr' => 'Se souvenir de moi sur cet appareil' ),
 			'pa_ordernummer'    => array( 'nl' => 'Ordernummer bij Homburg: %s', 'fr' => 'Numéro de commande chez Homburg : %s' ),
+			'pa_geen_klantnummer' => array(
+				'nl' => 'Bestellen op rekening kan zodra je account aan je klantnummer bij Homburg is gekoppeld. Neem contact op met Homburg, dan regelen we dat.',
+				'fr' => 'La commande sur compte sera possible dès que votre compte sera lié à votre numéro de client chez Homburg. Contactez Homburg, nous nous en occupons.',
+			),
 			'welkom_titel'      => array( 'nl' => 'Kies je wachtwoord', 'fr' => 'Choisissez votre mot de passe' ),
 			'welkom_intro'      => array(
 				'nl' => 'Welkom bij het dealerportaal van Homburg. Kies een wachtwoord voor je account (%s). Daarna ben je meteen ingelogd.',

@@ -144,7 +144,11 @@ class HDP_Bestelgeschiedenis_Render {
 			// 's'. Combineert in beide gevallen correct met de
 			// customer_id-restrictie hierboven (WP_Query AND'ed de args),
 			// dus een dealer kan zo nooit andermans ordernummer raden.
-			if ( ctype_digit( $zoekterm ) ) {
+			$ws_id = class_exists( 'HDP_PowerAll_Orders' ) ? HDP_PowerAll_Orders::order_bij_ws( $zoekterm ) : 0;
+			if ( $ws_id ) {
+				// Webshopnummer (WS12): de klant-restrictie hierboven blijft gelden.
+				$query_args['post__in'] = array( $ws_id );
+			} elseif ( ctype_digit( $zoekterm ) ) {
 				$query_args['post__in'] = array( (int) $zoekterm );
 			} else {
 				$query_args['s'] = $zoekterm;

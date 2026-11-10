@@ -199,7 +199,7 @@ class Bestelgeschiedenis_Test extends WP_UnitTestCase {
 		$_GET['hdp_bs'] = 'on-hold';
 		$html            = $this->render();
 
-		$this->assertStringContainsString( '#' . $in_behandeling->get_order_number(), $html );
+		$this->assertStringContainsString( '#' . wc_get_order( $in_behandeling->get_id() )->get_order_number(), $html );
 		$this->assertStringNotContainsString( '#' . $afgerond->get_order_number(), $html );
 	}
 
