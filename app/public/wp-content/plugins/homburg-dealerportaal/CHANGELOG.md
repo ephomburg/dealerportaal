@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.107.0
+
+- Nieuw: **superbeheerder** (`HDP_Roles::is_superbeheerder()`). Een beheerder van Homburg (zoals ep@) ziet en mag alles in het portaal: alle merken in webshop, downloads en trainingen (ook als er bij het account merken staan), bestellen op rekening zonder klantnummer, de outlet zonder verzamelartikel, en collega's beheren. Een bestelling van een beheerder zonder klantnummer blijft in WooCommerce en gaat niet naar PowerAll; dat staat er dan duidelijk bij.
+
 ## 1.106.0
 
 - Nieuw: **kleinordertoeslag** (`HDP_Kleinordertoeslag`). Een bestelling onder € 75 netto (artikelen excl. btw, na korting) krijgt automatisch € 12,50 toeslag, als aparte regel "Kleinordertoeslag (onder € 75)" in de winkelwagen, bij afrekenen, in de mails en in de order. Vanaf € 75 verdwijnt hij vanzelf.

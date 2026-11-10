@@ -189,6 +189,9 @@ class HDP_Downloads_CPT {
 		}
 
 		$user_id    = $user_id ? (int) $user_id : get_current_user_id();
+		if ( HDP_Roles::is_superbeheerder( $user_id ) ) {
+			return true;
+		}
 		$toegestaan = HDP_Merken::naar_array( get_user_meta( $user_id, 'hdp_merken', true ) );
 
 		if ( ! $toegestaan ) {

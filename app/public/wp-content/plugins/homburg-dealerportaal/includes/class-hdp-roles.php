@@ -93,6 +93,17 @@ class HDP_Roles {
 	 * als dealer goed te keuren; die goedkeuringseis geldt alleen voor
 	 * echte dealeraccounts.
 	 */
+	/**
+	 * Een beheerder van Homburg (bijv. ep@) is superbeheerder: hij ziet en mag
+	 * alles in het portaal. Geen merkbeperking (webshop, downloads,
+	 * trainingen), bestellen op rekening ook zonder klantnummer, de outlet,
+	 * en collega's beheren.
+	 */
+	public static function is_superbeheerder( $user_id = 0 ) {
+		$user_id = $user_id ? (int) $user_id : get_current_user_id();
+		return $user_id && user_can( $user_id, 'manage_options' );
+	}
+
 	public static function mag_portaal_zien( $user_id ) {
 		if ( ! user_can( $user_id, self::CAP ) ) {
 			return false;

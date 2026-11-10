@@ -196,7 +196,7 @@ class HDP_PowerAll_Orders {
 	 * op rekening bestellen: anders kan zijn bestelling nergens heen.
 	 */
 	public static function mag_op_rekening( $user_id = 0 ) {
-		return 'aan' !== self::modus() || (bool) HDP_PowerAll_Prijzen::relatie( $user_id );
+		return 'aan' !== self::modus() || (bool) HDP_PowerAll_Prijzen::relatie( $user_id ) || HDP_Roles::is_superbeheerder( $user_id );
 	}
 
 	public static function op_rekening_alleen_met_klantnummer( $methodes ) {
@@ -220,7 +220,7 @@ class HDP_PowerAll_Orders {
 	 * als er een verzamelartikel is; anders weigert PowerAll de order.
 	 */
 	public static function buiten_powerall_bestelbaar( $mag, $product ) {
-		if ( ! $mag || 'aan' !== self::modus() || '' !== self::verzamelartikel() || ! $product instanceof WC_Product ) {
+		if ( ! $mag || 'aan' !== self::modus() || '' !== self::verzamelartikel() || ! $product instanceof WC_Product || HDP_Roles::is_superbeheerder() ) {
 			return $mag;
 		}
 		$basis = $product->get_parent_id() ? wc_get_product( $product->get_parent_id() ) : $product;
@@ -258,6 +258,9 @@ class HDP_PowerAll_Orders {
 	public static function bouw( WC_Order $order ) {
 		$relatie = HDP_PowerAll_Prijzen::relatie( $order->get_customer_id() );
 		if ( ! $relatie ) {
+			if ( HDP_Roles::is_superbeheerder( $order->get_customer_id() ) ) {
+				return new WP_Error( 'hdp_pa_geen_klant', 'Besteld door een beheerder zonder klantnummer: deze bestelling gaat niet naar PowerAll.' );
+			}
 			return new WP_Error( 'hdp_pa_geen_klant', 'Deze dealer is niet aan een klantnummer in PowerAll gekoppeld.' );
 		}
 

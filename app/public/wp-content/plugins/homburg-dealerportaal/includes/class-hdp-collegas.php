@@ -167,6 +167,9 @@ class HDP_Collegas {
 	public static function mag_beheren( $user_id = 0 ) {
 		$user_id = $user_id ? (int) $user_id : get_current_user_id();
 		$user    = $user_id ? get_userdata( $user_id ) : null;
+		if ( $user && HDP_Roles::is_superbeheerder( $user_id ) ) {
+			return true;
+		}
 		return $user
 			&& in_array( HDP_Roles::ROLE, (array) $user->roles, true )
 			&& ! self::is_collega( $user_id )

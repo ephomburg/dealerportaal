@@ -234,6 +234,9 @@ class HDP_Trainingen {
 			return true;
 		}
 		$user_id = $user_id ? (int) $user_id : get_current_user_id();
+		if ( HDP_Roles::is_superbeheerder( $user_id ) ) {
+			return true;
+		}
 		$eigen   = HDP_Merken::naar_array( get_user_meta( $user_id, 'hdp_merken', true ) );
 		return ! $eigen || array_intersect( $merken, $eigen );
 	}
