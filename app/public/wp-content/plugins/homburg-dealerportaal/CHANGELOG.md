@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.101.1 (thema 1.44.1)
+
+- Fix: **Mijn account** (bestellingen, adressen, accountdetails) toonde sinds de Nederlandse adressen (1.99.0) een kale donkere pagina zonder werkvlak en zijmenu. WordPress zocht het sjabloon op het adres (/my-account/) en vond het niet meer bij /mijn-account/. Het thema koppelt de sjablonen voor account, winkelwagen en afrekenen nu aan de pagina zelf (`homburg_wc_sjabloon_per_pagina`).
+
 ## 1.101.0
 
 - Nieuw: **"Zo werkt het dealerportaal"** (`HDP_Uitleg`), een korte uitleg bovenaan de startpagina met vijf stappen (webshop, downloads, garantie, trainingen, mijn account), in het Nederlands en Frans. Hij staat er tot de dealer op "Begrepen" klikt en is terug te halen via het accountmenu ("Uitleg over het portaal"). Garantie staat er alleen als die koppeling er is; "bestellen op rekening" pas als bestellen aanstaat.

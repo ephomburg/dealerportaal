@@ -161,6 +161,35 @@ function homburg_wc_oude_adressen() {
 	}
 }
 
+add_filter( 'page_template_hierarchy', 'homburg_wc_sjabloon_per_pagina' );
+/**
+ * De winkelpagina's hebben eigen sjablonen (page-my-account.html enz.).
+ * WordPress zoekt die op aan de hand van het adres van de pagina; sinds de
+ * adressen Nederlands zijn (/mijn-account/ i.p.v. /my-account/) vond hij
+ * het accountsjabloon niet meer en viel hij terug op een kale pagina zonder
+ * werkvlak en zijmenu. Daarom hier op de pagina zelf, los van het adres.
+ *
+ * @param string[] $sjablonen Sjablonen die WordPress probeert, op volgorde.
+ * @return string[]
+ */
+function homburg_wc_sjabloon_per_pagina( $sjablonen ) {
+	if ( ! function_exists( 'wc_get_page_id' ) ) {
+		return $sjablonen;
+	}
+	$id    = get_queried_object_id();
+	$vaste = array(
+		'myaccount' => 'page-my-account.php',
+		'cart'      => 'page-cart.php',
+		'checkout'  => 'page-checkout.php',
+	);
+	foreach ( $vaste as $pagina => $sjabloon ) {
+		if ( $id && wc_get_page_id( $pagina ) === $id && ! in_array( $sjabloon, $sjablonen, true ) ) {
+			array_unshift( $sjablonen, $sjabloon );
+		}
+	}
+	return $sjablonen;
+}
+
 add_filter( 'woocommerce_output_related_products_args', 'homburg_wc_gerelateerd_args' );
 /**
  * Gerelateerde producten: drie stuks in drie kolommen, zodat de rij
