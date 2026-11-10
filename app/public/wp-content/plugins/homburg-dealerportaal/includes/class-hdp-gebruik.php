@@ -31,12 +31,20 @@ class HDP_Gebruik {
 	/** Zonder bezoek in zoveel dagen staat een dealer op de bellijst. */
 	const STIL_DAGEN = 30;
 
+	/** Dezelfde zoekterm in de webshop telt binnen deze tijd maar één keer (filters aanklikken, terugbladeren). */
+	const WEBSHOPZOEK_PAUZE = 30 * MINUTE_IN_SECONDS;
+
+	const EXPORT_ACTIE = 'hdp_gebruik_export';
+
 	public static function init() {
 		// Zelfherstellend: een deploy (rsync) activeert de plugin niet
 		// opnieuw, dus de tabel hier aanmaken zodra de versie niet klopt.
 		add_action( 'init', array( __CLASS__, 'controleer_tabel' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'noteer_bezoek' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'noteer_webshopzoek' ), 20 );
 		add_action( 'admin_menu', array( __CLASS__, 'registreer_menu' ) );
+		add_action( 'admin_post_' . self::EXPORT_ACTIE, array( __CLASS__, 'exporteer' ) );
+		add_action( 'edit_user_profile', array( __CLASS__, 'render_profiel' ), 20 );
 		add_action( 'hdp_gebruik_opruimen', array( __CLASS__, 'ruim_op' ) );
 		if ( ! wp_next_scheduled( 'hdp_gebruik_opruimen' ) ) {
 			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'hdp_gebruik_opruimen' );
@@ -209,6 +217,43 @@ class HDP_Gebruik {
 		self::noteer( 'zoek', $term, (int) $treffers, $user_id );
 	}
 
+	/**
+	 * Een zoekopdracht in de webshop zelf (het zoekveld boven de artikelen),
+	 * met het aantal artikelen dat de dealer te zien kreeg. Nul betekent:
+	 * het artikel ontbreekt, heet anders, of hoort bij een merk dat deze
+	 * dealer niet voert.
+	 */
+	public static function noteer_webshopzoek() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- alleen lezen.
+		if ( empty( $_GET['zoek'] ) || ! is_user_logged_in() || wp_doing_ajax() || ! function_exists( 'is_shop' ) ) {
+			return;
+		}
+		if ( ! ( is_shop() || is_product_taxonomy() ) || get_query_var( 'paged' ) > 1 ) {
+			return;
+		}
+		$term = mb_strtolower( trim( sanitize_text_field( wp_unslash( $_GET['zoek'] ) ) ) );
+		// phpcs:enable
+		$user_id = get_current_user_id();
+		if ( '' === $term || ! self::telt_mee( $user_id ) ) {
+			return;
+		}
+
+		global $wpdb, $wp_query;
+		$tabel = self::tabel();
+		$al    = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- eigen tabel.
+			$wpdb->prepare(
+				"SELECT id FROM {$tabel} WHERE user_id = %d AND soort = 'webshopzoek' AND sleutel = %s AND tijd >= %s LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$user_id,
+				mb_substr( $term, 0, 191 ),
+				gmdate( 'Y-m-d H:i:s', time() - self::WEBSHOPZOEK_PAUZE )
+			)
+		);
+		if ( $al ) {
+			return;
+		}
+		self::noteer( 'webshopzoek', $term, (int) $wp_query->found_posts, $user_id );
+	}
+
 	public static function ruim_op() {
 		global $wpdb;
 		$tabel = self::tabel();
@@ -257,6 +302,8 @@ class HDP_Gebruik {
 			'zoekopdrachten'  => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$tabel} WHERE soort = 'zoek' AND tijd >= %s", $vanaf ) ),
 			'zonder_treffer'  => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$tabel} WHERE soort = 'zoek' AND aantal = 0 AND tijd >= %s", $vanaf ) ),
 			'downloads'       => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$tabel} WHERE soort = 'download' AND tijd >= %s", $vanaf ) ),
+			'webshopzoek'     => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$tabel} WHERE soort = 'webshopzoek' AND tijd >= %s", $vanaf ) ),
+			'webshop_niets'   => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$tabel} WHERE soort = 'webshopzoek' AND aantal = 0 AND tijd >= %s", $vanaf ) ),
 		);
 		// phpcs:enable
 
@@ -329,20 +376,264 @@ class HDP_Gebruik {
 	/**
 	 * Zoektermen, vaakst eerst.
 	 *
-	 * @param bool $zonder_treffer Alleen de termen die niets opleverden.
+	 * @param bool   $zonder_treffer Alleen de termen die niets opleverden.
+	 * @param string $soort          'zoek' (de zoekbalk) of 'webshopzoek' (het zoekveld in de webshop).
 	 */
-	public static function zoektermen( $dagen, $zonder_treffer = false, $limiet = 20 ) {
+	public static function zoektermen( $dagen, $zonder_treffer = false, $limiet = 20, $soort = 'zoek' ) {
 		global $wpdb;
 		$tabel = self::tabel();
 		$extra = $zonder_treffer ? ' AND aantal = 0' : '';
 
 		return $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prepare(
-				"SELECT sleutel AS term, COUNT(*) AS keer, COUNT(DISTINCT user_id) AS dealers, MAX(tijd) AS laatst FROM {$tabel} WHERE soort = 'zoek'{$extra} AND tijd >= %s GROUP BY sleutel ORDER BY keer DESC, laatst DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $extra is een vaste string.
+				"SELECT sleutel AS term, COUNT(*) AS keer, COUNT(DISTINCT user_id) AS dealers, MAX(tijd) AS laatst FROM {$tabel} WHERE soort = %s{$extra} AND tijd >= %s GROUP BY sleutel ORDER BY keer DESC, laatst DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $extra is een vaste string.
+				$soort,
 				self::vanaf( $dagen ),
 				$limiet
 			)
 		);
+	}
+
+	/**
+	 * Hoe ver de dealers uit PowerAll zijn: uitgenodigd, wachtwoord gekozen,
+	 * al eens geweest. Plus wie er nog achteraan moet.
+	 *
+	 * @return array{totaal: int, niet: int, uitgenodigd: int, verlopen: int, gekozen: int, geweest: int, nalopen: array}
+	 */
+	public static function uitrol() {
+		$stand = array( 'totaal' => 0, 'niet' => 0, 'uitgenodigd' => 0, 'verlopen' => 0, 'gekozen' => 0, 'geweest' => 0, 'nalopen' => array() );
+		if ( ! class_exists( 'HDP_PowerAll_Dealers' ) ) {
+			return $stand;
+		}
+		$gebruikers = get_users(
+			array(
+				'meta_key'     => HDP_PowerAll_Dealers::META_RELATIE, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- beheerscherm.
+				'meta_compare' => 'EXISTS',
+			)
+		);
+		foreach ( $gebruikers as $gebruiker ) {
+			if ( self::is_testaccount( $gebruiker->ID ) ) {
+				continue;
+			}
+			$status = HDP_PowerAll_Dealers::accountstatus( $gebruiker->ID );
+			++$stand['totaal'];
+			++$stand[ $status['code'] ];
+			if ( self::laatst_actief( $gebruiker->ID ) ) {
+				++$stand['geweest'];
+			}
+			if ( in_array( $status['code'], array( 'uitgenodigd', 'verlopen' ), true ) ) {
+				$stand['nalopen'][] = array(
+					'id'      => $gebruiker->ID,
+					'naam'    => $gebruiker->display_name,
+					'email'   => $gebruiker->user_email,
+					'relatie' => (string) get_user_meta( $gebruiker->ID, HDP_PowerAll_Dealers::META_RELATIE, true ),
+					'status'  => $status,
+				);
+			}
+		}
+		return $stand;
+	}
+
+	/**
+	 * Aanmeldingen per training in de periode, met het gemiddelde cijfer.
+	 *
+	 * @return array<int, array{id: int, titel: string, aanmeldingen: int, bedrijven: int, cijfers: int, gemiddeld: float}>
+	 */
+	public static function trainingen( $dagen ) {
+		if ( ! class_exists( 'HDP_Trainingen' ) ) {
+			return array();
+		}
+		global $wpdb;
+		$tabel   = HDP_Trainingen::tabel();
+		$reviews = HDP_Training_Reviews::tabel();
+		$vanaf   = self::vanaf( $dagen );
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- eigen tabellen, beheerscherm.
+		$aanmeldingen = $wpdb->get_results( $wpdb->prepare( "SELECT training_id, training_titel, user_id FROM {$tabel} WHERE status = %s AND aangemaakt >= %s", HDP_Trainingen::STATUS_AANGEMELD, $vanaf ) );
+		$cijfers      = $wpdb->get_results( $wpdb->prepare( "SELECT r.training_id, r.cijfer, a.user_id FROM {$reviews} r LEFT JOIN {$tabel} a ON a.id = r.aanmelding_id WHERE r.aangemaakt >= %s", $vanaf ) );
+		// phpcs:enable
+
+		$lijst = array();
+		$rij   = static function ( $id, $titel ) use ( &$lijst ) {
+			if ( ! isset( $lijst[ $id ] ) ) {
+				$huidig       = get_the_title( $id );
+				$lijst[ $id ] = array( 'id' => $id, 'titel' => $huidig ? $huidig : $titel, 'aanmeldingen' => 0, 'bedrijven' => array(), 'cijfers' => array() );
+			}
+		};
+		foreach ( $aanmeldingen as $a ) {
+			if ( $a->user_id && self::is_testaccount( (int) $a->user_id ) ) {
+				continue;
+			}
+			$rij( (int) $a->training_id, (string) $a->training_titel );
+			++$lijst[ (int) $a->training_id ]['aanmeldingen'];
+			$lijst[ (int) $a->training_id ]['bedrijven'][ (int) $a->user_id ] = true;
+		}
+		foreach ( $cijfers as $c ) {
+			if ( $c->user_id && self::is_testaccount( (int) $c->user_id ) ) {
+				continue;
+			}
+			$rij( (int) $c->training_id, '' );
+			$lijst[ (int) $c->training_id ]['cijfers'][] = (int) $c->cijfer;
+		}
+		foreach ( $lijst as &$training ) {
+			$training['bedrijven'] = count( $training['bedrijven'] );
+			$training['gemiddeld'] = $training['cijfers'] ? array_sum( $training['cijfers'] ) / count( $training['cijfers'] ) : 0.0;
+			$training['cijfers']   = count( $training['cijfers'] );
+		}
+		unset( $training );
+
+		usort(
+			$lijst,
+			static function ( $a, $b ) {
+				return $b['aanmeldingen'] <=> $a['aanmeldingen'];
+			}
+		);
+		return $lijst;
+	}
+
+	/** Bestellingen die niet in PowerAll zijn aangekomen. Die moeten met de hand worden ingevoerd of opnieuw verstuurd. */
+	public static function powerall_fouten() {
+		if ( ! class_exists( 'HDP_PowerAll_Orders' ) || ! function_exists( 'wc_get_orders' ) ) {
+			return array();
+		}
+		return HDP_PowerAll_Orders::met_status( 'fout', 50 );
+	}
+
+	/**
+	 * Alles van één dealer bij elkaar, voor zijn profiel en de export.
+	 *
+	 * @return array{laatst: int, bezoeken: int, downloads: int, zoeken: int, webshopzoek: int, termen: array, bestellingen: int, omzet: float, trainingen: int}
+	 */
+	public static function per_dealer( $user_id, $dagen ) {
+		global $wpdb;
+		$tabel = self::tabel();
+		$vanaf = self::vanaf( $dagen );
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- eigen tabel.
+		$tellingen = $wpdb->get_results( $wpdb->prepare( "SELECT soort, COUNT(*) AS aantal FROM {$tabel} WHERE user_id = %d AND tijd >= %s GROUP BY soort", $user_id, $vanaf ), OBJECT_K );
+		$termen    = $wpdb->get_col( $wpdb->prepare( "SELECT sleutel FROM {$tabel} WHERE user_id = %d AND soort IN ('zoek','webshopzoek') AND tijd >= %s GROUP BY sleutel ORDER BY COUNT(*) DESC, MAX(tijd) DESC LIMIT 8", $user_id, $vanaf ) );
+		// phpcs:enable
+
+		$aantal = static function ( $soort ) use ( $tellingen ) {
+			return isset( $tellingen[ $soort ] ) ? (int) $tellingen[ $soort ]->aantal : 0;
+		};
+
+		$bestellingen = 0;
+		$omzet        = 0.0;
+		if ( function_exists( 'wc_get_orders' ) ) {
+			foreach ( wc_get_orders( array( 'customer_id' => (int) $user_id, 'limit' => -1, 'status' => array( 'wc-processing', 'wc-completed', 'wc-on-hold' ), 'date_created' => '>=' . ( time() - (int) $dagen * DAY_IN_SECONDS ) ) ) as $order ) {
+				++$bestellingen;
+				$omzet += (float) $order->get_total() - (float) $order->get_total_tax();
+			}
+		}
+
+		$trainingen = 0;
+		if ( class_exists( 'HDP_Trainingen' ) ) {
+			$ttabel     = HDP_Trainingen::tabel();
+			$trainingen = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$ttabel} WHERE user_id = %d AND status = %s AND aangemaakt >= %s", $user_id, HDP_Trainingen::STATUS_AANGEMELD, $vanaf ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		}
+
+		return array(
+			'laatst'       => self::laatst_actief( $user_id ),
+			'bezoeken'     => $aantal( 'bezoek' ),
+			'downloads'    => $aantal( 'download' ),
+			'zoeken'       => $aantal( 'zoek' ),
+			'webshopzoek'  => $aantal( 'webshopzoek' ),
+			'termen'       => $termen,
+			'bestellingen' => $bestellingen,
+			'omzet'        => $omzet,
+			'trainingen'   => $trainingen,
+		);
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Export naar Excel
+	 * ------------------------------------------------------------------- */
+
+	public static function export_url( $dagen ) {
+		return wp_nonce_url( add_query_arg( array( 'action' => self::EXPORT_ACTIE, 'periode' => (int) $dagen ), admin_url( 'admin-post.php' ) ), self::EXPORT_ACTIE );
+	}
+
+	/** De rijen van de export: één per dealer. */
+	public static function export_rijen( $dagen ) {
+		$rijen = array(
+			array( 'Bedrijf', 'Naam', 'E-mailadres', 'Telefoon', 'Klantnummer PowerAll', 'Merken', 'Account', 'Laatst geweest', 'Bezoekdagen', 'Documenten geopend', 'Zoekopdrachten', 'Bestellingen', 'Omzet excl. btw', 'Trainingaanmeldingen' ),
+		);
+		foreach ( self::dealers() as $dealer ) {
+			$cijfers = self::per_dealer( $dealer->ID, $dagen );
+			$relatie = class_exists( 'HDP_PowerAll_Dealers' ) ? (string) get_user_meta( $dealer->ID, HDP_PowerAll_Dealers::META_RELATIE, true ) : '';
+			$rijen[] = array(
+				(string) get_user_meta( $dealer->ID, 'billing_company', true ),
+				$dealer->display_name,
+				$dealer->user_email,
+				(string) get_user_meta( $dealer->ID, 'billing_phone', true ),
+				$relatie,
+				(string) get_user_meta( $dealer->ID, 'hdp_merken', true ),
+				$relatie ? HDP_PowerAll_Dealers::accountstatus( $dealer->ID )['tekst'] : 'Zelf aangemeld',
+				$cijfers['laatst'] ? wp_date( 'd-m-Y', $cijfers['laatst'] ) : 'Nog nooit',
+				$cijfers['bezoeken'],
+				$cijfers['downloads'],
+				$cijfers['zoeken'] + $cijfers['webshopzoek'],
+				$cijfers['bestellingen'],
+				number_format( $cijfers['omzet'], 2, ',', '' ),
+				$cijfers['trainingen'],
+			);
+		}
+		return $rijen;
+	}
+
+	/** Een CSV die Excel meteen goed opent: puntkomma's en een BOM voor de accenten. */
+	public static function exporteer() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Geen toegang.' );
+		}
+		check_admin_referer( self::EXPORT_ACTIE );
+		$dagen = isset( $_GET['periode'] ) ? (int) $_GET['periode'] : 30;
+		if ( ! isset( self::PERIODES[ $dagen ] ) ) {
+			$dagen = 30;
+		}
+
+		nocache_headers();
+		header( 'Content-Type: text/csv; charset=utf-8' );
+		header( 'Content-Disposition: attachment; filename="portaalgebruik-' . wp_date( 'Y-m-d' ) . '-' . $dagen . '-dagen.csv"' );
+		$uit = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		fwrite( $uit, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+		foreach ( self::export_rijen( $dagen ) as $rij ) {
+			fputcsv( $uit, array_map( array( __CLASS__, 'veilige_cel' ), $rij ), ';' );
+		}
+		fclose( $uit ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		exit;
+	}
+
+	/** Een cel die met =, +, - of @ begint zou Excel als formule uitvoeren. */
+	public static function veilige_cel( $waarde ) {
+		if ( is_string( $waarde ) && '' !== $waarde && in_array( $waarde[0], array( '=', '+', '-', '@', "\t", "\r" ), true ) ) {
+			return "'" . $waarde;
+		}
+		return $waarde;
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Op het profiel van een dealer
+	 * ------------------------------------------------------------------- */
+
+	public static function render_profiel( $user ) {
+		if ( ! current_user_can( 'manage_options' ) || ! HDP_Roles::mag_portaal_zien( $user->ID ) || user_can( $user->ID, 'manage_options' ) ) {
+			return;
+		}
+		$c = self::per_dealer( $user->ID, 90 );
+		$j = self::per_dealer( $user->ID, 365 );
+		?>
+		<h2 id="hdp-portaalgebruik">Portaalgebruik</h2>
+		<table class="form-table" role="presentation">
+			<tr><th>Laatst geweest</th><td><?php echo esc_html( $c['laatst'] ? wp_date( 'j F Y', $c['laatst'] ) : 'Nog nooit (sinds de meting)' ); ?><?php echo self::is_testaccount( $user->ID ) ? ' <em>(testaccount: telt niet mee in de cijfers)</em>' : ''; ?></td></tr>
+			<tr><th>Laatste 3 maanden</th><td><?php echo esc_html( sprintf( '%d bezoekdagen · %d documenten geopend · %d zoekopdrachten · %d trainingaanmeldingen', $c['bezoeken'], $c['downloads'], $c['zoeken'] + $c['webshopzoek'], $c['trainingen'] ) ); ?></td></tr>
+			<tr><th>Webshop, laatste 12 maanden</th><td><?php echo esc_html( sprintf( '%d bestellingen', $j['bestellingen'] ) ); ?><?php echo function_exists( 'wc_price' ) ? ', ' . wp_kses_post( wc_price( $j['omzet'] ) ) . ' excl. btw' : ''; ?></td></tr>
+			<?php if ( $c['termen'] ) : ?>
+				<tr><th>Zocht naar</th><td><?php echo esc_html( implode( ', ', $c['termen'] ) ); ?></td></tr>
+			<?php endif; ?>
+		</table>
+		<?php
 	}
 
 	/** Downloads in de periode, vaakst eerst. */
@@ -464,6 +755,10 @@ class HDP_Gebruik {
 		$downloads  = self::top_downloads( $dagen );
 		$ongebruikt = self::ongebruikte_downloads( $dagen );
 		$webshop    = self::webshop_per_dealer( $dagen );
+		$shop_niets = self::zoektermen( $dagen, true, 20, 'webshopzoek' );
+		$uitrol     = self::uitrol();
+		$trainingen = self::trainingen( $dagen );
+		$pa_fouten  = self::powerall_fouten();
 		?>
 		<div class="wrap hdp-gebruik">
 			<style>
@@ -483,6 +778,10 @@ class HDP_Gebruik {
 				.hdp-gebruik .hdp-g-week i { display: block; height: 12px; border-radius: 0 3px 3px 0; background: #c41214; }
 				.hdp-gebruik .hdp-g-week b { text-align: right; font-weight: 600; }
 				.hdp-gebruik .hdp-g-leeg { color: #50575e; font-style: italic; }
+				.hdp-gebruik .hdp-g-trechter { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin: 8px 0 12px; }
+				.hdp-gebruik .hdp-g-trechter div { background: #f6f7f7; border-radius: 4px; padding: 8px 10px; }
+				.hdp-gebruik .hdp-g-trechter strong { display: block; font-size: 20px; }
+				.hdp-gebruik .hdp-g-trechter span { font-size: 12px; color: #50575e; }
 			</style>
 
 			<h1>Portaalgebruik</h1>
@@ -493,16 +792,62 @@ class HDP_Gebruik {
 					<?php endforeach; ?>
 			</p>
 			<p class="description">Alleen goedgekeurde dealers tellen mee; beheerders en testaccounts (aan te vinken in het gebruikersprofiel) niet. Alles staat in de eigen database; gegevens ouder dan <?php echo (int) self::STERMIJN_DAGEN; ?> dagen worden automatisch verwijderd.</p>
+			<p><a class="button" href="<?php echo esc_url( self::export_url( $dagen ) ); ?>">Alle dealers downloaden voor Excel</a> <span class="description">Eén regel per dealer, met de cijfers over de gekozen periode.</span></p>
+
+			<?php if ( $pa_fouten ) : ?>
+				<div class="notice notice-error inline">
+					<?php if ( 'aan' === HDP_PowerAll_Orders::modus() ) : ?>
+						<p><strong><?php echo esc_html( count( $pa_fouten ) . ( 1 === count( $pa_fouten ) ? ' bestelling is' : ' bestellingen zijn' ) ); ?> niet in PowerAll aangekomen.</strong> Voer ze met de hand in PowerAll in, of open de bestelling en kies bij Bestelacties "Opnieuw naar PowerAll versturen".</p>
+					<?php else : ?>
+						<p><strong>Bij <?php echo esc_html( count( $pa_fouten ) . ( 1 === count( $pa_fouten ) ? ' bestelling' : ' bestellingen' ) ); ?> ging de proef met PowerAll mis.</strong> Er gaat nu nog niets echt naar PowerAll, maar zo zou het straks ook misgaan.</p>
+					<?php endif; ?>
+					<ul style="margin-top:0">
+						<?php foreach ( array_slice( $pa_fouten, 0, 10 ) as $order ) : ?>
+							<li><a href="<?php echo esc_url( $order->get_edit_order_url() ); ?>">Bestelling <?php echo esc_html( $order->get_order_number() ); ?></a> — <?php echo esc_html( $order->get_billing_company() ? $order->get_billing_company() : $order->get_formatted_billing_full_name() ); ?>: <?php echo esc_html( (string) $order->get_meta( HDP_PowerAll_Orders::META_FOUT ) ); ?></li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+			<?php endif; ?>
 
 			<div class="hdp-g-tegels">
 				<div class="hdp-g-tegel"><strong><?php echo (int) $cijfers['actieve_dealers']; ?> <small>/ <?php echo (int) $cijfers['dealers']; ?></small></strong><span>dealers actief geweest</span></div>
 				<div class="hdp-g-tegel"><strong><?php echo (int) $cijfers['bezoeken']; ?></strong><span>bezoekdagen</span></div>
 				<div class="hdp-g-tegel"><strong><?php echo (int) $cijfers['zoekopdrachten']; ?></strong><span>zoekopdrachten, waarvan <?php echo (int) $cijfers['zonder_treffer']; ?> zonder resultaat</span></div>
 				<div class="hdp-g-tegel"><strong><?php echo (int) $cijfers['downloads']; ?></strong><span>documenten geopend of gedownload</span></div>
+				<div class="hdp-g-tegel"><strong><?php echo (int) $cijfers['webshopzoek']; ?></strong><span>keer gezocht in de webshop, waarvan <?php echo (int) $cijfers['webshop_niets']; ?> zonder resultaat</span></div>
+				<div class="hdp-g-tegel"><strong><?php echo (int) array_sum( wp_list_pluck( $trainingen, 'aanmeldingen' ) ); ?></strong><span>aanmeldingen voor trainingen</span></div>
 				<div class="hdp-g-tegel"><strong><?php echo (int) array_sum( wp_list_pluck( $webshop, 'aantal' ) ); ?></strong><span>bestellingen, <?php echo function_exists( 'wc_price' ) ? wp_kses_post( wc_price( array_sum( wp_list_pluck( $webshop, 'omzet' ) ) ) ) : ''; ?> excl. btw</span></div>
 			</div>
 
 			<div class="hdp-g-raster">
+				<?php if ( $uitrol['totaal'] ) : ?>
+					<section class="hdp-g-blok">
+						<h2>Uitnodigingen (dealers uit PowerAll)</h2>
+						<p class="hdp-g-uitleg">Hoe ver de dealers uit PowerAll zijn met hun account. Dit telt altijd alles, los van de gekozen periode.</p>
+						<div class="hdp-g-trechter">
+							<div><strong><?php echo (int) $uitrol['totaal']; ?></strong><span>gekoppeld</span></div>
+							<div><strong><?php echo (int) ( $uitrol['totaal'] - $uitrol['niet'] ); ?></strong><span>uitgenodigd</span></div>
+							<div><strong><?php echo (int) $uitrol['gekozen']; ?></strong><span>wachtwoord gekozen</span></div>
+							<div><strong><?php echo (int) $uitrol['geweest']; ?></strong><span>al eens in het portaal</span></div>
+						</div>
+						<?php if ( $uitrol['nalopen'] ) : ?>
+							<p class="hdp-g-uitleg">Uitgenodigd, maar nog geen wachtwoord gekozen. Een verlopen uitnodiging stuur je opnieuw via Gebruikers &gt; Dealers uit PowerAll.</p>
+							<table class="widefat striped">
+								<thead><tr><th>Dealer</th><th>Klantnummer</th><th>Stand</th></tr></thead>
+								<tbody>
+								<?php foreach ( array_slice( $uitrol['nalopen'], 0, 25 ) as $dealer ) : ?>
+									<tr>
+										<td><a href="<?php echo esc_url( get_edit_user_link( $dealer['id'] ) ); ?>"><?php echo esc_html( $dealer['naam'] ); ?></a><br><small><?php echo esc_html( $dealer['email'] ); ?></small></td>
+										<td><?php echo esc_html( $dealer['relatie'] ); ?></td>
+										<td><?php echo esc_html( $dealer['status']['tekst'] ); ?></td>
+									</tr>
+								<?php endforeach; ?>
+								</tbody>
+							</table>
+						<?php endif; ?>
+					</section>
+				<?php endif; ?>
+
 				<section class="hdp-g-blok">
 					<h2>Niet meer geweest</h2>
 					<p class="hdp-g-uitleg">Dealers die <?php echo (int) self::STIL_DAGEN; ?> dagen of langer niet in het portaal zijn geweest, langst weg bovenaan. Een lijstje om eens te bellen.</p>
@@ -551,6 +896,34 @@ class HDP_Gebruik {
 					<h2>Gezocht, niets gevonden</h2>
 					<p class="hdp-g-uitleg">Waar dealers naar zochten zonder resultaat. Vaak een artikel of document dat ontbreekt, of een andere schrijfwijze.</p>
 					<?php self::render_termen( $niets ); ?>
+				</section>
+
+				<section class="hdp-g-blok">
+					<h2>Webshop: gezocht, niets gevonden</h2>
+					<p class="hdp-g-uitleg">Zoekopdrachten in de webshop zonder één artikel als resultaat. Het artikel ontbreekt, heet anders, of hoort bij een merk dat deze dealers niet voeren.</p>
+					<?php self::render_termen( $shop_niets ); ?>
+				</section>
+
+				<section class="hdp-g-blok">
+					<h2>Trainingen</h2>
+					<p class="hdp-g-uitleg">Aanmeldingen en beoordelingen in deze periode (cijfer van 1 tot 10).</p>
+					<?php if ( $trainingen ) : ?>
+						<table class="widefat striped">
+							<thead><tr><th>Training</th><th class="num">Aanmeldingen</th><th class="num">Bedrijven</th><th class="num">Gemiddeld cijfer</th></tr></thead>
+							<tbody>
+							<?php foreach ( $trainingen as $training ) : ?>
+								<tr>
+									<td><?php echo get_post( $training['id'] ) ? '<a href="' . esc_url( (string) get_edit_post_link( $training['id'] ) ) . '">' . esc_html( $training['titel'] ) . '</a>' : esc_html( $training['titel'] ); ?></td>
+									<td class="num"><?php echo (int) $training['aanmeldingen']; ?></td>
+									<td class="num"><?php echo (int) $training['bedrijven']; ?></td>
+									<td class="num"><?php echo $training['cijfers'] ? esc_html( number_format_i18n( $training['gemiddeld'], 1 ) . ' (' . $training['cijfers'] . 'x)' ) : '—'; ?></td>
+								</tr>
+							<?php endforeach; ?>
+							</tbody>
+						</table>
+					<?php else : ?>
+						<p class="hdp-g-leeg">In deze periode geen aanmeldingen of beoordelingen.</p>
+					<?php endif; ?>
 				</section>
 
 				<section class="hdp-g-blok">

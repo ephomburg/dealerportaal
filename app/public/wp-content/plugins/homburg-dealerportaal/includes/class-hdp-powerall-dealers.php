@@ -285,6 +285,25 @@ class HDP_PowerAll_Dealers {
 	 * Uitnodiging en wachtwoord kiezen
 	 * ------------------------------------------------------------------- */
 
+	/**
+	 * Hoe ver deze dealer is met zijn account.
+	 *
+	 * @return array{code: string, tekst: string} code: 'gekozen', 'uitgenodigd', 'verlopen' of 'niet'.
+	 */
+	public static function accountstatus( $user_id ) {
+		$uitnodiging = get_user_meta( $user_id, self::META_UITNODIGING, true );
+		$gezet       = (int) get_user_meta( $user_id, self::META_WACHTWOORD, true );
+		if ( $gezet ) {
+			return array( 'code' => 'gekozen', 'tekst' => 'Wachtwoord gekozen op ' . self::datum( $gezet ) );
+		}
+		if ( is_array( $uitnodiging ) && isset( $uitnodiging['tot'], $uitnodiging['verstuurd'] ) ) {
+			return (int) $uitnodiging['tot'] < time()
+				? array( 'code' => 'verlopen', 'tekst' => 'Uitnodiging verlopen (verstuurd ' . self::datum( $uitnodiging['verstuurd'] ) . ')' )
+				: array( 'code' => 'uitgenodigd', 'tekst' => 'Uitgenodigd op ' . self::datum( $uitnodiging['verstuurd'] ) . ', link werkt tot ' . self::datum( $uitnodiging['tot'] ) );
+		}
+		return array( 'code' => 'niet', 'tekst' => 'Nog niet uitgenodigd' );
+	}
+
 	/** Stuurt de uitnodiging met een nieuwe link; een oudere link vervalt daarmee. */
 	public static function nodig_uit( WP_User $gebruiker ) {
 		$sleutel = wp_generate_password( 32, false );
@@ -592,17 +611,7 @@ class HDP_PowerAll_Dealers {
 					<tbody>
 					<?php
 					foreach ( $dealers as $dealer ) :
-						$uitnodiging = get_user_meta( $dealer->ID, self::META_UITNODIGING, true );
-						$gezet       = get_user_meta( $dealer->ID, self::META_WACHTWOORD, true );
-						if ( $gezet ) {
-							$account = 'Wachtwoord gekozen op ' . self::datum( $gezet );
-						} elseif ( is_array( $uitnodiging ) ) {
-							$account = (int) $uitnodiging['tot'] < time()
-								? 'Uitnodiging verlopen (verstuurd ' . self::datum( $uitnodiging['verstuurd'] ) . ')'
-								: 'Uitgenodigd op ' . self::datum( $uitnodiging['verstuurd'] ) . ', link werkt tot ' . self::datum( $uitnodiging['tot'] );
-						} else {
-							$account = 'Nog niet uitgenodigd';
-						}
+						$account = self::accountstatus( $dealer->ID )['tekst'];
 						$statussen = array(
 							'actief'      => 'Actief',
 							'geblokkeerd' => 'Geblokkeerd voor orders',

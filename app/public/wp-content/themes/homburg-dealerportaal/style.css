@@ -2,7 +2,7 @@
 Theme Name: Homburg Dealerportaal
 Description: Eigen blokthema voor het Homburg-dealerportaal, gebouwd op het originele HTML-ontwerp (rood/donkergrijs, Montserrat). Geen bloggerichte onderdelen; puur gericht op de dealerportaalsite.
 Author: Homburg Machinehandel BV
-Version: 1.43.0
+Version: 1.44.0
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -286,6 +286,8 @@ body.admin-bar header.wp-block-template-part { top: 32px; }
 }
 .hdp-account-menu-uitloggen svg { width: 15px; height: 15px; stroke: currentColor; flex-shrink: 0; }
 .hdp-account-menu-uitloggen:hover { background: var(--wp--preset--color--grijs-licht); }
+/* Zelfde regel als uitloggen, maar niet rood: dit is geen "weg hier"-knop. */
+.hdp-account-menu-uitleg { color: var(--wp--preset--color--donkergrijs); border-bottom: 1px solid var(--wp--preset--color--rand); }
 
 /* "Links"-menu: Homburg Holland/Belgium samengevoegd achter één rode
    knop i.p.v. twee losse — zelfde checkbox-hack/paneel-uiterlijk als het

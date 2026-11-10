@@ -8,6 +8,15 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.101.0
+
+- Nieuw: **"Zo werkt het dealerportaal"** (`HDP_Uitleg`), een korte uitleg bovenaan de startpagina met vijf stappen (webshop, downloads, garantie, trainingen, mijn account), in het Nederlands en Frans. Hij staat er tot de dealer op "Begrepen" klikt en is terug te halen via het accountmenu ("Uitleg over het portaal"). Garantie staat er alleen als die koppeling er is; "bestellen op rekening" pas als bestellen aanstaat.
+- Portaalgebruik (Dashboard > Portaalgebruik) uitgebreid: zoeken in de webshop wordt nu ook bijgehouden ("Webshop: gezocht, niets gevonden"), de stand van de uitnodigingen van dealers uit PowerAll (uitgenodigd, wachtwoord gekozen, al eens geweest, wie nog moet), aanmeldingen en gemiddelde cijfers per training, een melding als een bestelling niet in PowerAll aankwam, en een download van alle dealers voor Excel.
+- Op het profiel van een dealer in wp-admin staat nu wat hij in het portaal deed: laatst geweest, bezoeken, documenten, zoekopdrachten, bestellingen en trainingen.
+- Een bestelling die niet in PowerAll aankwam kun je opnieuw versturen via Bestelacties.
+- Veiligheid PowerAll: het uurlijkse "opnieuw proberen" pakte in de oude opslag van WooCommerce álle lopende bestellingen in plaats van alleen de mislukte (het filter werd genegeerd). Nu alleen echte fouten, en een bestelling uit de proeftijd gaat nooit alsnog echt naar PowerAll. Er is hierdoor niets misgegaan: op live staat het op proef.
+- Thema 1.44.0: opmaak van de menuregel "Uitleg over het portaal".
+
 ## 1.100.0
 
 - Webshop per merk (`HDP_Webshop_Merken`): een dealer ziet alleen de artikelen van de merken die bij zijn bedrijf zijn aangevinkt, plus Diversen en de outlet. Andere merken zijn nergens te zien, niet te vinden met zoeken, geven via een directe link "niet gevonden" en zijn niet te bestellen (ook niet via snel bestellen). Zonder aangevinkte merken ziet een dealer in de webshop alleen Diversen en de outlet; bij downloads blijft dat "alles". Medewerkers van Homburg zien alles.

@@ -52,6 +52,30 @@ class HDP_PowerAll_Orders {
 		add_action( 'admin_post_hdp_powerall_webshop', array( __CLASS__, 'verwerk_beheer' ) );
 		add_action( 'woocommerce_admin_order_data_after_order_details', array( __CLASS__, 'toon_in_beheer' ) );
 		add_action( 'woocommerce_order_details_after_order_table', array( __CLASS__, 'toon_aan_dealer' ) );
+		add_filter( 'woocommerce_order_actions', array( __CLASS__, 'bestelactie' ), 10, 2 );
+		add_action( 'woocommerce_order_action_' . self::ACTIE_OPNIEUW, array( __CLASS__, 'verstuur_opnieuw' ) );
+	}
+
+	const ACTIE_OPNIEUW = 'hdp_pa_opnieuw';
+
+	/** Bij een bestelling die niet aankwam: "Opnieuw naar PowerAll versturen" in het menu Bestelacties. */
+	public static function bestelactie( $acties, $order = null ) {
+		if ( $order instanceof WC_Order && 'fout' === (string) $order->get_meta( self::META_STATUS ) && ! $order->get_meta( self::META_ID ) && 'uit' !== self::modus() ) {
+			$acties[ self::ACTIE_OPNIEUW ] = 'aan' === self::modus()
+				? 'Opnieuw naar PowerAll versturen (kijk eerst of hij er niet al staat)'
+				: 'Proef met PowerAll opnieuw doen';
+		}
+		return $acties;
+	}
+
+	/** Met de hand opnieuw: de teller van de automatische pogingen begint opnieuw. */
+	public static function verstuur_opnieuw( $order ) {
+		if ( ! $order instanceof WC_Order || ! current_user_can( 'edit_shop_orders' ) ) {
+			return;
+		}
+		$order->update_meta_data( self::META_POGINGEN, 0 );
+		$order->save();
+		self::verstuur( $order->get_id() );
 	}
 
 	public static function plan() {
@@ -188,6 +212,11 @@ class HDP_PowerAll_Orders {
 		if ( 'uit' === $modus ) {
 			return 'overgeslagen';
 		}
+		// Een bestelling uit de proeftijd gaat nooit alsnog echt naar PowerAll,
+		// en "bezig" kan betekenen dat hij er al staat (een time-out na het versturen).
+		if ( 'aan' === $modus && in_array( $status, array( 'proef', 'bezig' ), true ) ) {
+			return 'overgeslagen';
+		}
 
 		$body = self::bouw( $order );
 		if ( is_wp_error( $body ) ) {
@@ -234,24 +263,63 @@ class HDP_PowerAll_Orders {
 		return 'fout';
 	}
 
+	/**
+	 * Bestellingen met deze PowerAll-status, nieuwste eerst.
+	 *
+	 * WooCommerce kent twee manieren om bestellingen op te slaan. In de oude
+	 * (als berichten) negeert wc_get_orders() een meta_query en geeft dan
+	 * élke bestelling terug. Daarom hier per opslagvorm, en voor de
+	 * zekerheid daarna nog eens per bestelling gecontroleerd.
+	 *
+	 * @param string   $pa_status    'fout', 'proef', ...
+	 * @param int      $limiet       Hoeveel hooguit.
+	 * @param string[] $wc_statussen Alleen deze WooCommerce-statussen (zonder "wc-"); leeg = alle.
+	 * @return WC_Order[]
+	 */
+	public static function met_status( $pa_status, $limiet = 50, $wc_statussen = array() ) {
+		$hpos = class_exists( '\Automattic\WooCommerce\Utilities\OrderUtil' ) && \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
+		if ( $hpos ) {
+			$args = array(
+				'limit'      => $limiet,
+				'orderby'    => 'date',
+				'order'      => 'DESC',
+				'meta_query' => array( array( 'key' => self::META_STATUS, 'value' => $pa_status ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
+			);
+			if ( $wc_statussen ) {
+				$args['status'] = $wc_statussen;
+			}
+			$orders = wc_get_orders( $args );
+		} else {
+			$ids    = get_posts(
+				array(
+					'post_type'      => 'shop_order',
+					'post_status'    => $wc_statussen ? array_map( static function ( $s ) { return 'wc-' . $s; }, $wc_statussen ) : array_keys( wc_get_order_statuses() ),
+					'meta_key'       => self::META_STATUS, // phpcs:ignore WordPress.DB.SlowDBQuery
+					'meta_value'     => $pa_status, // phpcs:ignore WordPress.DB.SlowDBQuery
+					'posts_per_page' => $limiet,
+					'orderby'        => 'date',
+					'order'          => 'DESC',
+					'fields'         => 'ids',
+				)
+			);
+			$orders = array_filter( array_map( 'wc_get_order', $ids ) );
+		}
+		return array_values(
+			array_filter(
+				$orders,
+				static function ( $order ) use ( $pa_status ) {
+					return $order instanceof WC_Order && (string) $order->get_meta( self::META_STATUS ) === $pa_status;
+				}
+			)
+		);
+	}
+
 	/** Elk uur: echte orders die door een storing niet aankwamen, opnieuw proberen. */
 	public static function herhaal() {
 		if ( 'aan' !== self::modus() ) {
 			return;
 		}
-		$orders = wc_get_orders(
-			array(
-				'status'     => array( 'processing' ),
-				'limit'      => 20,
-				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery
-					array(
-						'key'   => self::META_STATUS,
-						'value' => 'fout',
-					),
-				),
-			)
-		);
-		foreach ( $orders as $order ) {
+		foreach ( self::met_status( 'fout', 20, array( 'processing' ) ) as $order ) {
 			if ( (int) $order->get_meta( self::META_POGINGEN ) < self::MAX_POGINGEN ) {
 				self::verstuur( $order->get_id() );
 			}

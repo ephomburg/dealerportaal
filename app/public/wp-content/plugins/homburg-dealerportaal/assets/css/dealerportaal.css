@@ -3485,6 +3485,110 @@ body.home .hdp-info-split > .wp-block-column:nth-child(2) .hdp-info-kaart:first-
 .hdp-vandaag-tegel-aandacht .hdp-vandaag-tegel-tekst { color: var(--hdp-aanzet-tekst); }
 .hdp-vandaag-tegel-aandacht .hdp-vandaag-tegel-getal { color: var(--hdp-aanzet-accent); }
 
+/* --- Zo werkt het dealerportaal (HDP_Uitleg) ------------------------- */
+.hdp-uitleg {
+	margin: 1.8rem 0 0;
+	padding: 1.4rem 1.5rem 1.2rem;
+	border-radius: 12px;
+	background: var(--wp--preset--color--wit);
+	border-top: 4px solid var(--wp--preset--color--homburg-rood);
+	box-shadow: var(--hdp-schaduw);
+	scroll-margin-top: 120px;
+}
+.hdp-uitleg-boven { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.hdp-uitleg-eyebrow {
+	margin: 0 0 0.25rem;
+	font-size: 0.72rem;
+	font-weight: 800;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--homburg-rood);
+}
+.hdp-uitleg-kop { margin: 0 0 0.3rem; font-size: 1.25rem; }
+.hdp-uitleg-intro { margin: 0; font-size: 0.9rem; color: var(--wp--preset--color--grijs-tekst); max-width: 60ch; }
+.hdp-uitleg-form { margin: 0; }
+.hdp-uitleg-knop {
+	display: inline-block;
+	padding: 0.6rem 1.2rem;
+	border: 0;
+	border-radius: 6px;
+	background: var(--wp--preset--color--homburg-rood);
+	color: var(--wp--preset--color--wit);
+	font: inherit;
+	font-size: 0.88rem;
+	font-weight: 700;
+	text-decoration: none;
+	cursor: pointer;
+}
+.hdp-uitleg-knop:hover,
+.hdp-uitleg-knop:focus-visible { filter: brightness(0.92); color: var(--wp--preset--color--wit); }
+.hdp-uitleg-stappen {
+	list-style: none;
+	margin: 1.2rem 0 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+	gap: 0.8rem;
+	counter-reset: hdp-uitleg;
+}
+.hdp-uitleg-stappen > li { margin: 0; counter-increment: hdp-uitleg; }
+.hdp-uitleg-stap {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	height: 100%;
+	box-sizing: border-box;
+	padding: 1rem 1.05rem;
+	border-radius: 10px;
+	border: 2px solid var(--wp--preset--color--rand);
+	color: var(--wp--preset--color--donkergrijs);
+	text-decoration: none;
+	transition: border-color 0.15s, box-shadow 0.15s;
+}
+.hdp-uitleg-stap::after {
+	content: counter(hdp-uitleg);
+	position: absolute;
+	top: 0.85rem;
+	right: 1rem;
+	font-size: 0.75rem;
+	font-weight: 800;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-uitleg-stap:hover { border-color: var(--wp--preset--color--homburg-rood); box-shadow: var(--hdp-schaduw); color: var(--wp--preset--color--donkergrijs); }
+.hdp-uitleg-icoon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	border-radius: 8px;
+	background: var(--wp--preset--color--grijs-licht);
+	color: var(--wp--preset--color--homburg-rood);
+}
+.hdp-uitleg-icoon svg { width: 20px; height: 20px; stroke: currentColor; }
+.hdp-uitleg-stap strong { font-size: 0.95rem; }
+.hdp-uitleg-tekst { font-size: 0.82rem; line-height: 1.45; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-uitleg-onder {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 0.4rem 1.5rem;
+	margin-top: 1rem;
+	font-size: 0.82rem;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-uitleg-onder p { margin: 0; }
+.hdp-uitleg-vragen a { color: var(--wp--preset--color--homburg-rood); font-weight: 600; }
+/* Op de telefoon: pictogram links naast de tekst, anders worden het vijf hoge kaarten onder elkaar. */
+@media (max-width: 600px) {
+	.hdp-uitleg { padding: 1.1rem 1rem 1rem; }
+	.hdp-uitleg-stappen { gap: 0.55rem; }
+	.hdp-uitleg-stap { display: grid; grid-template-columns: 38px 1fr; column-gap: 0.8rem; row-gap: 0.15rem; padding: 0.8rem 2rem 0.8rem 0.85rem; }
+	.hdp-uitleg-icoon { grid-row: span 2; }
+	.hdp-uitleg-stap::after { top: 0.8rem; right: 0.85rem; }
+}
+
 /* --- Twee kolommen: links het nieuws, rechts merken + magazijn ------- */
 .hdp-app-inhoud .hdp-info-sectie.hdp-home { padding: 0; }
 /* WordPress' kolommenblok zet de kolommen vanaf 782px naast elkaar met

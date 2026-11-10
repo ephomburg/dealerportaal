@@ -132,6 +132,12 @@ $link_icoon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 						<?php if ( class_exists( 'HDP_Account' ) ) : ?>
 							<?php HDP_Account::render_instellingen_knop_en_paneel(); ?>
 						<?php endif; ?>
+						<?php if ( class_exists( 'HDP_Uitleg' ) ) : ?>
+							<a class="hdp-account-menu-uitloggen hdp-account-menu-uitleg" href="<?php echo esc_url( HDP_Uitleg::url() ); ?>">
+								<?php echo HDP_Icons::svg_icoon( 'uitleg' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
+								<?php echo esc_html( HDP_I18N::t( 'uitleg_menu' ) ); ?>
+							</a>
+						<?php endif; ?>
 						<a class="hdp-account-menu-uitloggen" href="<?php echo esc_url( wp_logout_url( home_url( '/dealerportaal/' ) ) ); ?>">
 							<?php echo HDP_Icons::svg_icoon( 'uitloggen' ); // phpcs:ignore WordPress.Security.EscapeOutput -- vaste, statische SVG. ?>
 							<?php echo esc_html( HDP_I18N::t( 'btn_uitloggen' ) ); ?>

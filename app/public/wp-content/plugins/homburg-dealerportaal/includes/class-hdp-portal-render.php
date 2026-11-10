@@ -91,6 +91,7 @@ class HDP_Portal_Render {
 			<?php self::render_welkomkop( $user ); ?>
 			<?php // Berichten van Homburg staan bovenaan: een mededeling die je pas tegenkomt nadat je ergens heen geklikt hebt, is te laat. ?>
 			<?php HDP_Berichten::render(); ?>
+			<?php HDP_Uitleg::render(); ?>
 			<?php self::render_vandaag(); ?>
 			<?php
 			// "Nieuw voor jou" staat sinds de nieuwe indeling als eigen blok
