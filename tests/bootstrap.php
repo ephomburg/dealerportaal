@@ -18,7 +18,7 @@ require $wp_phpunit_dir . '/includes/functions.php';
  * Laadt WooCommerce en daarna onze eigen plugin vóórdat de testsuite
  * WordPress initialiseert, zoals WordPress' eigen testsuite dat ook voor
  * plugins-onder-test verwacht. WooCommerce moet als eerste, want onze
- * plugin en de HDP_Herbestellen-tests leunen op wc_get_orders() e.d.
+ * plugin en de bestel-tests leunen op wc_get_orders() e.d.
  */
 function hdp_laad_plugin_voor_tests() {
 	$woocommerce = dirname( __DIR__ ) . '/app/public/wp-content/plugins/woocommerce/woocommerce.php';

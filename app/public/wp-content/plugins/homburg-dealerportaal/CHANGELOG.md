@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.107.1
+
+- Opgeruimd: `HDP_Herbestellen` (oud "opnieuw bestellen"-blok, al lang nergens meer aangeroepen; opnieuw bestellen zit in het thema) met zijn test, 18 teksten van een eerdere opzet van de garantiepagina, en een verouderde opmerking ("indienformulieren nog ontwerp").
+
 ## 1.107.0
 
 - Nieuw: **superbeheerder** (`HDP_Roles::is_superbeheerder()`). Een beheerder van Homburg (zoals ep@) ziet en mag alles in het portaal: alle merken in webshop, downloads en trainingen (ook als er bij het account merken staan), bestellen op rekening zonder klantnummer, de outlet zonder verzamelartikel, en collega's beheren. Een bestelling van een beheerder zonder klantnummer blijft in WooCommerce en gaat niet naar PowerAll; dat staat er dan duidelijk bij.

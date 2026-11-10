@@ -10,10 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * ordergegevens in WooCommerce's eigen "Mijn account"-omgeving (die hoeft
  * dit portaal dus niet zelf te herbouwen).
  *
- * Anders dan HDP_Herbestellen (die alleen de recentste afgeronde
- * bestellingen toont om snel opnieuw te bestellen) toont deze pagina
- * bewust élke bestelling, in elke status, zodat een dealer hier ook een
- * mislukte of geannuleerde bestelling kan terugvinden.
+ * Deze pagina toont bewust élke bestelling, in elke status, zodat een
+ * dealer hier ook een mislukte of geannuleerde bestelling kan terugvinden.
  *
  * render_bestellingen_lijst() (de lijst zelf, zonder welkomstkop) wordt
  * sinds kort ook hergebruikt door woocommerce/myaccount/orders.php in het

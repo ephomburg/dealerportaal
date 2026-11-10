@@ -14,9 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * klasse de lijsten één keer op, kijkt of er een fout terugkwam, en toont
  * dan een storingsmelding in plaats van lege lijsten. De rest van het
  * portaal — webshop, downloads — staat daar los van en werkt gewoon door.
- *
- * De indienformulieren zijn nog ontwerp: de velden staan uit. Lezen gebeurt
- * al wel echt.
  */
 class HDP_Garantie_Render {
 

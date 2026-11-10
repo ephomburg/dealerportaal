@@ -593,10 +593,6 @@ class HDP_I18N {
 				'nl' => 'Kies de machine waar het om gaat.',
 				'fr' => 'Choisissez la machine concernée.',
 			),
-			'garantie_fout_klacht'       => array(
-				'nl' => 'Beschrijf kort wat er aan de hand is.',
-				'fr' => 'Décrivez brièvement le problème.',
-			),
 			'garantie_fout_leeg_bericht' => array(
 				'nl' => 'Typ eerst een bericht.',
 				'fr' => "Saisissez d'abord un message.",
@@ -666,27 +662,10 @@ class HDP_I18N {
 				'nl' => 'Aanmelding afgewezen',
 				'fr' => 'Enregistrement refusé',
 			),
-			'garantie_voorbeeld_kop'   => array( 'nl' => 'Voorbeeldweergave.', 'fr' => 'Aperçu.' ),
-			'garantie_voorbeeld_tekst' => array(
-				'nl' => 'De claims hieronder zijn verzonnen voorbeelden om het ontwerp te laten zien. Er is nog geen koppeling met de claimadministratie.',
-				'fr' => "Les demandes ci-dessous sont des exemples fictifs destinés à illustrer la présentation. Il n'y a pas encore de lien avec l'administration des demandes.",
-			),
-			'garantie_mijn_claims'     => array( 'nl' => 'Mijn garantieclaims', 'fr' => 'Mes demandes de garantie' ),
-			'garantie_btn_nieuw'       => array( 'nl' => 'Nieuwe claim indienen', 'fr' => 'Introduire une demande' ),
-			'garantie_serienummer'     => array( 'nl' => 'Serienummer:', 'fr' => 'Numéro de série :' ),
 			'garantie_ingediend_op'    => array( 'nl' => 'Ingediend op:', 'fr' => 'Introduite le :' ),
 			'garantie_actie_nodig'     => array(
 				'nl' => 'Wij hebben aanvullende informatie van je nodig om deze claim verder te kunnen behandelen.',
 				'fr' => "Nous avons besoin d'informations complémentaires de votre part pour traiter cette demande.",
-			),
-			'garantie_nieuwe_claim'    => array( 'nl' => 'Nieuwe garantieclaim', 'fr' => 'Nouvelle demande de garantie' ),
-			'garantie_formulier_intro' => array(
-				'nl' => "Vul de gegevens van de machine en de klacht zo volledig mogelijk in. Foto's versnellen de behandeling aanzienlijk.",
-				'fr' => 'Complétez les données de la machine et de la panne aussi précisément que possible. Des photos accélèrent considérablement le traitement.',
-			),
-			'garantie_nog_niet_actief' => array(
-				'nl' => 'Dit formulier is nog niet in gebruik — het laat alleen zien welke gegevens er gevraagd gaan worden.',
-				'fr' => "Ce formulaire n'est pas encore actif — il montre uniquement quelles données seront demandées.",
 			),
 
 			// Garantie — statussen. Dezelfde sleutels als HDP_Garantie::STATUSSEN
@@ -732,10 +711,7 @@ class HDP_I18N {
 				'nl' => 'Niets gevonden. Probeer een deel van de machinenaam of het serienummer.',
 				'fr' => 'Aucun résultat. Essayez une partie du nom de la machine ou du numéro de série.',
 			),
-			'garantie_lopende_claims'      => array( 'nl' => 'Lopende claims', 'fr' => 'Demandes en cours' ),
-			'garantie_geen_lopende_claims' => array( 'nl' => 'Je hebt op dit moment geen lopende claims.', 'fr' => "Vous n'avez actuellement aucune demande en cours." ),
 			/* translators: %d is het totale aantal claims. */
-			'garantie_toon_alle_claims'    => array( 'nl' => 'Alle claims tonen (%d)', 'fr' => 'Afficher toutes les demandes (%d)' ),
 
 			'groet_ochtend'           => array( 'nl' => 'Goedemorgen', 'fr' => 'Bonjour' ),
 			'groet_middag'            => array( 'nl' => 'Goedemiddag', 'fr' => 'Bonjour' ),
@@ -903,15 +879,12 @@ class HDP_I18N {
 
 			// Garantie — ticketscherm
 			'garantie_ticket'            => array( 'nl' => 'Garantieticket', 'fr' => 'Ticket de garantie' ),
-			'garantie_route'             => array( 'nl' => 'Route', 'fr' => 'Parcours' ),
 			'garantie_gesprek'           => array( 'nl' => 'Berichten', 'fr' => 'Messages' ),
 			'garantie_gesprek_leeg'      => array( 'nl' => 'Nog geen berichten bij dit ticket.', 'fr' => 'Pas encore de messages pour ce ticket.' ),
 			'garantie_claimgegevens'     => array( 'nl' => 'Claimgegevens', 'fr' => 'Données de la demande' ),
 			'garantie_bijlagen'          => array( 'nl' => 'Bijlagen', 'fr' => 'Pièces jointes' ),
 			'garantie_geen_bijlagen'     => array( 'nl' => 'Geen bijlagen bij dit ticket.', 'fr' => 'Aucune pièce jointe pour ce ticket.' ),
-			'garantie_van_homburg'       => array( 'nl' => 'Homburg', 'fr' => 'Homburg' ),
 			'garantie_van_dealer'        => array( 'nl' => 'Jij', 'fr' => 'Vous' ),
-			'garantie_bij_status'        => array( 'nl' => 'Bij status:', 'fr' => 'Pour le statut :' ),
 			'garantie_antwoord_label'    => array( 'nl' => 'Reageren op dit ticket', 'fr' => 'Répondre à ce ticket' ),
 			'garantie_antwoord_hint'     => array(
 				'nl' => 'Stel een vraag of stuur de gevraagde informatie door.',
@@ -1076,10 +1049,6 @@ class HDP_I18N {
 
 			// Nieuw-markering
 			'badge_nieuw'       => array( 'nl' => 'Nieuw', 'fr' => 'Nouveau' ),
-			'nieuw_melding_een' => array(
-				'nl' => 'Er staat 1 nieuw document voor je klaar',
-				'fr' => 'Un nouveau document vous attend',
-			),
 			/* translators: %d is het aantal nieuwe documenten. */
 			'nieuw_melding_meer' => array(
 				'nl' => 'Er staan %d nieuwe documenten voor je klaar',
@@ -1312,8 +1281,6 @@ class HDP_I18N {
 			),
 
 			// Portaal
-			'welkom_prefix'     => array( 'nl' => 'Welkom,', 'fr' => 'Bienvenue,' ),
-			'geautoriseerd_voor' => array( 'nl' => 'Geautoriseerd voor:', 'fr' => 'Autorisé pour :' ),
 			'nog_niet_geconfigureerd' => array( 'nl' => 'Nog niet geconfigureerd', 'fr' => 'Pas encore configuré' ),
 			'herbestellen_label' => array( 'nl' => 'Snel herbestellen', 'fr' => 'Recommander rapidement' ),
 			'herbestellen_knop'  => array( 'nl' => 'Opnieuw bestellen', 'fr' => 'Commander à nouveau' ),

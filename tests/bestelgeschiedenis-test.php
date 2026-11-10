@@ -5,8 +5,7 @@
  * toont alle WooCommerce-bestellingen (elke status) van de ingelogde dealer,
  * gepagineerd, met een link naar WooCommerce's eigen orderdetailpagina.
  *
- * Zelfde opzet als Downloads_Access_Test (toegang) en Herbestellen_Test
- * (WooCommerce-orderdata), maar dan voor deze pagina.
+ * Zelfde opzet als Downloads_Access_Test (toegang), maar dan voor deze pagina.
  *
  * @group hdp-bestelgeschiedenis
  */
@@ -100,9 +99,8 @@ class Bestelgeschiedenis_Test extends WP_UnitTestCase {
 		$this->assertStringContainsString( esc_url( $order->get_view_order_url() ), $html );
 	}
 
-	public function test_toont_ook_niet_afgeronde_bestellingen_anders_dan_herbestellen() {
-		// In tegenstelling tot HDP_Herbestellen (alleen completed/processing)
-		// moet de volledige geschiedenis ook een mislukte bestelling tonen.
+	public function test_toont_ook_niet_afgeronde_bestellingen() {
+		// De volledige geschiedenis toont ook een mislukte bestelling.
 		wp_set_current_user( $this->dealer_id );
 		$order = $this->maak_bestelling( 'failed' );
 
