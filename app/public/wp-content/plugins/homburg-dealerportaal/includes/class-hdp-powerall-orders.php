@@ -54,8 +54,8 @@ class HDP_PowerAll_Orders {
 	const WS_BASIS      = 90000000;
 
 	public static function init() {
-		add_action( 'woocommerce_order_status_processing', array( __CLASS__, 'geef_ws_nummer' ), 5 );
-		add_action( 'woocommerce_order_status_on-hold', array( __CLASS__, 'geef_ws_nummer' ), 5 );
+		add_action( 'woocommerce_order_status_processing', array( __CLASS__, 'geef_ws_nummer' ), 5, 2 );
+		add_action( 'woocommerce_order_status_on-hold', array( __CLASS__, 'geef_ws_nummer' ), 5, 2 );
 		add_filter( 'woocommerce_order_number', array( __CLASS__, 'ordernummer' ), 10, 2 );
 		add_filter( 'woocommerce_shop_order_search_results', array( __CLASS__, 'zoek_ws_in_beheer' ), 10, 2 );
 		add_filter( 'woocommerce_available_payment_gateways', array( __CLASS__, 'op_rekening_alleen_met_klantnummer' ) );
@@ -142,9 +142,13 @@ class HDP_PowerAll_Orders {
 		return (int) $order->get_meta( self::META_WS );
 	}
 
-	/** Een bestelling die binnenkomt krijgt een webshopnummer, vóór de bevestigingsmails. */
-	public static function geef_ws_nummer( $order_id ) {
-		$order = wc_get_order( $order_id );
+	/**
+	 * Een bestelling die binnenkomt krijgt een webshopnummer, vóór de
+	 * bevestigingsmails. Op het object dat WooCommerce meegeeft: de mails
+	 * gebruiken datzelfde object, een verse kopie zou hen het oude nummer geven.
+	 */
+	public static function geef_ws_nummer( $order_id, $order = null ) {
+		$order = $order instanceof WC_Order ? $order : wc_get_order( $order_id );
 		if ( ! $order || self::ws( $order ) ) {
 			return;
 		}

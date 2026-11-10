@@ -280,6 +280,25 @@ class PowerAll_Webshop_Test extends WP_UnitTestCase {
 		$this->assertSame( 3, HDP_PowerAll_Orders::volgende_ws() );
 	}
 
+	public function test_mails_hebben_het_ws_nummer() {
+		WC()->mailer();
+		$in_mail = array();
+		$vang    = static function ( $onderwerp, $order ) use ( &$in_mail ) {
+			$in_mail[] = $order instanceof WC_Order ? $order->get_order_number() : '?';
+			return $onderwerp;
+		};
+		add_filter( 'woocommerce_email_subject_new_order', $vang, 10, 2 );
+		add_filter( 'woocommerce_email_subject_customer_processing_order', $vang, 10, 2 );
+
+		$order = $this->bestelling();
+		$order->update_status( 'processing' );
+
+		remove_filter( 'woocommerce_email_subject_new_order', $vang, 10 );
+		remove_filter( 'woocommerce_email_subject_customer_processing_order', $vang, 10 );
+		$this->assertNotEmpty( $in_mail, 'Er gaan mails uit.' );
+		$this->assertSame( array_fill( 0, count( $in_mail ), 'WS1' ), $in_mail );
+	}
+
 	public function test_nieuwe_poging_gebruikt_hetzelfde_ordernummer() {
 		update_option( HDP_PowerAll_Orders::OPTION, array( 'modus' => 'aan' ) );
 		$order = $this->bestelling();

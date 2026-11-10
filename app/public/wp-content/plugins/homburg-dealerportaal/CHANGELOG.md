@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.102.1
+
+- Fix: de mails bij een nieuwe bestelling (aan Homburg en aan de dealer) toonden het interne nummer (#9157) in plaats van het webshopnummer (WS1). Het nummer wordt nu gezet op de bestelling die de mails ook gebruiken.
+
 ## 1.102.0
 
 - Nieuw: **webshopnummer** (WS1, WS2, ...). Elke bestelling die binnenkomt krijgt het, de dealer ziet het overal (bestellingen, bevestiging, mails) en kan erop zoeken; in WooCommerce > Bestellingen ook. In PowerAll is het referentie 1.
