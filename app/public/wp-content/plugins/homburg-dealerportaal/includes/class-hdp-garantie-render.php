@@ -29,6 +29,13 @@ class HDP_Garantie_Render {
 			return ob_get_clean();
 		}
 
+		// Een collega zonder het recht "garantie": uitleg in plaats van de pagina.
+		if ( class_exists( 'HDP_Collegas' ) && ! HDP_Collegas::mag( get_current_user_id(), 'garantie' ) ) {
+			return '<div class="hdp-portaal alignfull"><section class="hdp-collega-geen-toegang"><p>'
+				. esc_html( sprintf( HDP_I18N::t( 'collega_geen_garantie' ), HDP_Collegas::bedrijfsnaam( HDP_Collegas::hoofd_id() ) ) )
+				. '</p></section></div>';
+		}
+
 		// Een ticket opent normaal rechts in het overzicht, zodat de lijst
 		// ernaast blijft staan. Het volledige scherm — met de route, de
 		// machinekaart en de bijlagen, die breedte nodig hebben — is een

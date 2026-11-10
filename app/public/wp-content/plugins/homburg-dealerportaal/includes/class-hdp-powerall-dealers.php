@@ -306,24 +306,7 @@ class HDP_PowerAll_Dealers {
 
 	/** Stuurt de uitnodiging met een nieuwe link; een oudere link vervalt daarmee. */
 	public static function nodig_uit( WP_User $gebruiker ) {
-		$sleutel = wp_generate_password( 32, false );
-		update_user_meta(
-			$gebruiker->ID,
-			self::META_UITNODIGING,
-			array(
-				'hash'      => self::hash( $sleutel ),
-				'tot'       => time() + self::GELDIG_DAGEN * DAY_IN_SECONDS,
-				'verstuurd' => time(),
-			)
-		);
-
-		$link    = add_query_arg(
-			array(
-				'hdp_welkom' => $gebruiker->ID,
-				'sleutel'    => $sleutel,
-			),
-			home_url( '/dealerportaal/' )
-		);
+		$link    = self::uitnodigingslink( $gebruiker );
 		$portaal = home_url( '/dealerportaal/' );
 
 		$onderwerp = 'Je account voor het Homburg-dealerportaal / Votre compte pour le portail concessionnaire Homburg';
@@ -337,6 +320,30 @@ class HDP_PowerAll_Dealers {
 		);
 
 		return (bool) wp_mail( $gebruiker->user_email, $onderwerp, $tekst );
+	}
+
+	/**
+	 * Een nieuwe link om een wachtwoord te kiezen (14 dagen, één keer); een
+	 * oudere link vervalt daarmee. Ook voor de uitnodiging van een collega.
+	 */
+	public static function uitnodigingslink( WP_User $gebruiker ) {
+		$sleutel = wp_generate_password( 32, false );
+		update_user_meta(
+			$gebruiker->ID,
+			self::META_UITNODIGING,
+			array(
+				'hash'      => self::hash( $sleutel ),
+				'tot'       => time() + self::GELDIG_DAGEN * DAY_IN_SECONDS,
+				'verstuurd' => time(),
+			)
+		);
+		return add_query_arg(
+			array(
+				'hdp_welkom' => $gebruiker->ID,
+				'sleutel'    => $sleutel,
+			),
+			home_url( '/dealerportaal/' )
+		);
 	}
 
 	private static function hash( $sleutel ) {

@@ -1089,6 +1089,134 @@ class HDP_I18N {
 			'wachtwoord_vergeten' => array( 'nl' => 'Wachtwoord vergeten?', 'fr' => 'Mot de passe oublié ?' ),
 			'onthoud_mij'       => array( 'nl' => 'Onthoud mij op dit apparaat', 'fr' => 'Se souvenir de moi sur cet appareil' ),
 			'pa_ordernummer'    => array( 'nl' => 'Ordernummer bij Homburg: %s', 'fr' => 'Numéro de commande chez Homburg : %s' ),
+			'collega_menu' => array(
+				'nl' => 'Collega\'s',
+				'fr' => 'Collègues',
+			),
+			'collega_intro' => array(
+				'nl' => 'Geef collega\'s van %s een eigen inlog. Ze werken voor het bedrijf: ze zien dezelfde merken en prijzen, en de bestellingen en garantieclaims van het bedrijf. Per collega kies je of hij mag bestellen en garantie mag doen.',
+				'fr' => 'Donnez à vos collègues de %s leur propre accès. Ils travaillent pour l\'entreprise : mêmes marques et prix, et ils voient les commandes et les demandes de garantie de l\'entreprise. Pour chaque collègue, vous choisissez s\'il peut commander et faire des demandes de garantie.',
+			),
+			'collega_leeg' => array(
+				'nl' => 'Je hebt nog geen collega\'s toegevoegd.',
+				'fr' => 'Vous n\'avez pas encore ajouté de collègues.',
+			),
+			'collega_nieuw_kop' => array(
+				'nl' => 'Collega toevoegen',
+				'fr' => 'Ajouter un collègue',
+			),
+			'collega_naam' => array(
+				'nl' => 'Naam',
+				'fr' => 'Nom',
+			),
+			'collega_email' => array(
+				'nl' => 'E-mailadres',
+				'fr' => 'Adresse e-mail',
+			),
+			'collega_mag' => array(
+				'nl' => 'Mag',
+				'fr' => 'Peut',
+			),
+			'collega_recht_bestellen' => array(
+				'nl' => 'Bestellen in de webshop',
+				'fr' => 'Commander dans la boutique',
+			),
+			'collega_recht_garantie' => array(
+				'nl' => 'Garantie: machines aanmelden en claims indienen',
+				'fr' => 'Garantie : enregistrer des machines et introduire des demandes',
+			),
+			'collega_nieuw_uitleg' => array(
+				'nl' => 'Je collega krijgt een mail met een link om zelf een wachtwoord te kiezen. De link werkt 14 dagen.',
+				'fr' => 'Votre collègue reçoit un e-mail avec un lien pour choisir son mot de passe. Le lien est valable 14 jours.',
+			),
+			'collega_toevoegen' => array(
+				'nl' => 'Toevoegen en uitnodigen',
+				'fr' => 'Ajouter et inviter',
+			),
+			'collega_opslaan' => array(
+				'nl' => 'Opslaan',
+				'fr' => 'Enregistrer',
+			),
+			'collega_opnieuw' => array(
+				'nl' => 'Uitnodiging opnieuw sturen',
+				'fr' => 'Renvoyer l\'invitation',
+			),
+			'collega_verwijderen' => array(
+				'nl' => 'Verwijderen',
+				'fr' => 'Supprimer',
+			),
+			'collega_verwijderen_zeker' => array(
+				'nl' => '%s verwijderen? Die kan dan niet meer inloggen. Eerdere bestellingen blijven bij het bedrijf.',
+				'fr' => 'Supprimer %s ? Cette personne ne pourra plus se connecter. Les commandes précédentes restent à l\'entreprise.',
+			),
+			'collega_status_actief' => array(
+				'nl' => 'Actief',
+				'fr' => 'Actif',
+			),
+			'collega_status_uitgenodigd' => array(
+				'nl' => 'Uitgenodigd, nog geen wachtwoord gekozen',
+				'fr' => 'Invité, pas encore de mot de passe',
+			),
+			'collega_status_verlopen' => array(
+				'nl' => 'Uitnodiging verlopen',
+				'fr' => 'Invitation expirée',
+			),
+			'collega_ok_toegevoegd' => array(
+				'nl' => 'Toegevoegd. Je collega krijgt nu een mail om een wachtwoord te kiezen.',
+				'fr' => 'Ajouté. Votre collègue reçoit maintenant un e-mail pour choisir son mot de passe.',
+			),
+			'collega_ok_opgeslagen' => array(
+				'nl' => 'Opgeslagen.',
+				'fr' => 'Enregistré.',
+			),
+			'collega_ok_uitgenodigd' => array(
+				'nl' => 'De uitnodiging is opnieuw verstuurd.',
+				'fr' => 'L\'invitation a été renvoyée.',
+			),
+			'collega_ok_verwijderd' => array(
+				'nl' => 'Verwijderd. Je collega kan niet meer inloggen.',
+				'fr' => 'Supprimé. Votre collègue ne peut plus se connecter.',
+			),
+			'collega_fout_naam' => array(
+				'nl' => 'Vul de naam van je collega in.',
+				'fr' => 'Indiquez le nom de votre collègue.',
+			),
+			'collega_fout_email' => array(
+				'nl' => 'Vul een geldig e-mailadres in.',
+				'fr' => 'Indiquez une adresse e-mail valide.',
+			),
+			'collega_fout_bestaat' => array(
+				'nl' => 'Er is al een account met dit e-mailadres. Neem contact op met Homburg als dit je collega is.',
+				'fr' => 'Un compte existe déjà avec cette adresse e-mail. Contactez Homburg s\'il s\'agit de votre collègue.',
+			),
+			'collega_fout_max' => array(
+				'nl' => 'Je kunt maximaal %d collega\'s toevoegen. Verwijder eerst iemand, of neem contact op met Homburg.',
+				'fr' => 'Vous pouvez ajouter au maximum %d collègues. Supprimez d\'abord quelqu\'un, ou contactez Homburg.',
+			),
+			'collega_fout_toegang' => array(
+				'nl' => 'Alleen het hoofdaccount van het bedrijf kan collega\'s beheren.',
+				'fr' => 'Seul le compte principal de l\'entreprise peut gérer les collègues.',
+			),
+			'collega_fout_mail' => array(
+				'nl' => 'De mail kon niet worden verstuurd. Probeer het later opnieuw.',
+				'fr' => 'L\'e-mail n\'a pas pu être envoyé. Réessayez plus tard.',
+			),
+			'collega_fout_algemeen' => array(
+				'nl' => 'Dat lukte niet. Probeer het opnieuw.',
+				'fr' => 'Cela n\'a pas fonctionné. Réessayez.',
+			),
+			'collega_geen_garantie' => array(
+				'nl' => 'Garantie staat voor jouw account niet aan. Vraag %s om dit aan te zetten onder Mijn account > Collega\'s.',
+				'fr' => 'La garantie n\'est pas activée pour votre compte. Demandez à %s de l\'activer dans Mon compte > Collègues.',
+			),
+			'collega_geen_bestellen' => array(
+				'nl' => 'Bestellen staat voor jouw account niet aan. Je kunt wel rondkijken en prijzen zien. Vraag %s om bestellen aan te zetten onder Mijn account > Collega\'s.',
+				'fr' => 'La commande n\'est pas activée pour votre compte. Vous pouvez parcourir la boutique et voir les prix. Demandez à %s de l\'activer dans Mon compte > Collègues.',
+			),
+			'collega_ingediend_door' => array(
+				'nl' => 'Ingediend door %1$s (%2$s).',
+				'fr' => 'Introduit par %1$s (%2$s).',
+			),
 			'pa_geen_klantnummer' => array(
 				'nl' => 'Bestellen op rekening kan zodra je account aan je klantnummer bij Homburg is gekoppeld. Neem contact op met Homburg, dan regelen we dat.',
 				'fr' => 'La commande sur compte sera possible dès que votre compte sera lié à votre numéro de client chez Homburg. Contactez Homburg, nous nous en occupons.',

@@ -338,11 +338,23 @@ class HDP_Garantie {
 		if ( ! $user_id || ! HDP_Roles::mag_portaal_zien( $user_id ) ) {
 			return '';
 		}
+		// Een collega werkt voor het bedrijf: de machines en claims van het hoofdaccount,
+		// en alleen als hij garantie mag doen.
+		if ( class_exists( 'HDP_Collegas' ) ) {
+			if ( ! HDP_Collegas::mag( $user_id, 'garantie' ) ) {
+				return '';
+			}
+			$user_id = HDP_Collegas::hoofd_id( $user_id );
+		}
 
 		return (string) $user_id;
 	}
 
+	/** Is garantie er, en (bij een collega) mag hij het doen? */
 	public static function beschikbaar() {
+		if ( is_user_logged_in() && class_exists( 'HDP_Collegas' ) && ! HDP_Collegas::mag( get_current_user_id(), 'garantie' ) ) {
+			return false;
+		}
 		return HDP_Supabase::beschikbaar( HDP_Supabase::APP );
 	}
 
@@ -1080,6 +1092,21 @@ class HDP_Garantie {
 		return $gevonden ? $totaal : '';
 	}
 
+	/**
+	 * Een claim van een collega staat op naam van het bedrijf; in de
+	 * opmerkingen staat wie hem indiende, zodat Homburg weet wie te bellen.
+	 */
+	public static function met_indiener( $opmerkingen ) {
+		$user_id = get_current_user_id();
+		if ( ! class_exists( 'HDP_Collegas' ) || ! HDP_Collegas::is_collega( $user_id ) ) {
+			return $opmerkingen;
+		}
+		$user  = wp_get_current_user();
+		$regel = sprintf( HDP_I18N::t( 'collega_ingediend_door' ), $user->display_name, $user->user_email );
+		return trim( $regel . "
+" . (string) $opmerkingen );
+	}
+
 	public static function dien_claim_in( $waarden ) {
 		$dealer = self::dealervelden();
 		if ( ! $dealer ) {
@@ -1097,7 +1124,7 @@ class HDP_Garantie {
 				'te_claimen_tijd'       => self::of_niets( isset( $waarden['te_claimen_tijd'] ) ? $waarden['te_claimen_tijd'] : '' ),
 				'factuurnummer'         => self::of_niets( isset( $waarden['factuurnummer'] ) ? $waarden['factuurnummer'] : '' ),
 				'klantreferentie'       => self::of_niets( isset( $waarden['klantreferentie'] ) ? $waarden['klantreferentie'] : '' ),
-				'opmerkingen'           => self::of_niets( isset( $waarden['opmerkingen'] ) ? $waarden['opmerkingen'] : '' ),
+				'opmerkingen'           => self::of_niets( self::met_indiener( isset( $waarden['opmerkingen'] ) ? $waarden['opmerkingen'] : '' ) ),
 				'onderdeel_retour'      => ! empty( $waarden['onderdeel_retour'] ),
 			)
 		);

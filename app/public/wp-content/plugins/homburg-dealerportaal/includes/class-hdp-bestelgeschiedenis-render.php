@@ -127,7 +127,7 @@ class HDP_Bestelgeschiedenis_Render {
 		}
 
 		$query_args = array(
-			'customer_id' => get_current_user_id(),
+			'customer'    => HDP_Collegas::klant_ids(), // Het hele bedrijf: hoofdaccount en collega's.
 			'status'      => $status_filter ? array( $status_filter ) : array_keys( $statussen ),
 			'orderby'     => 'date',
 			'order'       => 'DESC',

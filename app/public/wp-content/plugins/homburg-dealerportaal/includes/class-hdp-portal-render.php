@@ -176,7 +176,7 @@ class HDP_Portal_Render {
 		if ( function_exists( 'wc_get_orders' ) ) {
 			$lopend   = wc_get_orders(
 				array(
-					'customer_id' => get_current_user_id(),
+					'customer'    => HDP_Collegas::klant_ids(), // Het hele bedrijf: hoofdaccount en collega's.
 					'status'      => array( 'processing', 'on-hold' ),
 					'orderby'     => 'date',
 					'order'       => 'DESC',

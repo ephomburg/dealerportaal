@@ -79,7 +79,7 @@ class HDP_Herbestellen {
 	private static function recente_producten( $user_id ) {
 		$bestellingen = wc_get_orders(
 			array(
-				'customer_id' => $user_id,
+				'customer'    => HDP_Collegas::klant_ids( $user_id ), // Het hele bedrijf.
 				'limit'       => self::MAX_BESTELLINGEN,
 				'orderby'     => 'date',
 				'order'       => 'DESC',

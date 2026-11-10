@@ -8,6 +8,13 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.105.0
+
+- Nieuw: **collega's** (`HDP_Collegas`). Het hoofdaccount van een dealer (bijv. info@) geeft onder Mijn account > Collega's maximaal 5 collega's een eigen inlog. Een collega krijgt een mail met een link om zelf een wachtwoord te kiezen (14 dagen, één keer).
+- Per collega: **bestellen** en/of **garantie**. Een collega deelt de merken, het klantnummer (dus de prijzen) en de adressen van het bedrijf, en ziet de bestellingen van het hele bedrijf (en het hoofdaccount die van zijn collega's). Zonder bestelrecht: geen bestelknop, geen Snel bestellen, en een uitleg in de webshop. Zonder garantierecht: een uitleg op de garantiepagina.
+- Garantie op bedrijfsniveau: een collega ziet de machines en claims van het bedrijf; een claim die hij indient staat op naam van het bedrijf, met "Ingediend door …" in de opmerkingen.
+- Verwijderen sluit een collega meteen buiten (ook lopende sessies); zijn bestellingen blijven bij het bedrijf. Is het bedrijf zelf niet meer goedgekeurd of verwijderd, dan kunnen de collega's ook niet meer in. In wp-admin staat op het profiel bij wie iemand hoort.
+
 ## 1.104.0
 
 - Nieuw: **voorbeeld bij downloads**. Vooraan elke download staat een kleine afbeelding: pagina 1 van de PDF (gemaakt met Ghostscript op de server, want Imagick ontbreekt daar), de foto zelf, of een eigen voorbeeldafbeelding die je bij de download kiest ("Eigen voorbeeldafbeelding"). Excel, tekst en andere bestanden krijgen een documenticoon met het type. Ook de contentgalerij toont nu PDF-voorbeelden.

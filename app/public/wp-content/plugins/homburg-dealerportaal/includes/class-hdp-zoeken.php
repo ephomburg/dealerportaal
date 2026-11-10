@@ -257,7 +257,7 @@ class HDP_Zoeken {
 		$user_id = get_current_user_id();
 		$ids     = wc_get_orders(
 			array(
-				'customer_id' => $user_id,
+				'customer'    => HDP_Collegas::klant_ids( $user_id ), // Het hele bedrijf.
 				'limit'       => -1,
 				'orderby'     => 'date',
 				'order'       => 'DESC',

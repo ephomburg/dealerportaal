@@ -4361,3 +4361,101 @@ body.hdp-app-layout .hdp-tekstpagina { max-width: none; margin: 0; padding: 0 0 
 	.hdp-training-cijfers > div { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 	.hdp-training-beoordeel { padding-inline: 1rem; }
 }
+
+/* --------------------------------------------------------------------------
+   Mijn account > Collega's (HDP_Collegas): het hoofdaccount geeft collega's
+   een eigen inlog, met per collega bestellen en/of garantie.
+   -------------------------------------------------------------------------- */
+.hdp-collegas { max-width: 780px; }
+.hdp-collegas-intro { margin: 0 0 1.2rem; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-collegas-melding {
+	margin: 0 0 1.2rem;
+	padding: 0.8rem 1rem;
+	border-radius: var(--hdp-radius);
+	border: 1px solid #b9dfc6;
+	background: #eaf6ee;
+	font-weight: 600;
+}
+.hdp-collegas-melding-fout { border-color: #f2b8b8; background: #fdecec; }
+.hdp-collegas-leeg { color: var(--wp--preset--color--grijs-tekst); }
+.hdp-collegas-lijst { list-style: none; margin: 0 0 2rem; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+.hdp-collega {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 0.8rem 1.2rem;
+	padding: 1rem 1.2rem;
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: var(--hdp-radius);
+	background: var(--wp--preset--color--wit);
+}
+.hdp-collega-wie { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.hdp-collega-wie strong { font-size: 1rem; }
+.hdp-collega-wie > span { font-size: 0.85rem; color: var(--wp--preset--color--grijs-tekst); overflow-wrap: anywhere; }
+.hdp-collega-wie .hdp-collega-status {
+	align-self: flex-start;
+	margin-top: 0.3rem;
+	padding: 0.15rem 0.55rem;
+	border-radius: 999px;
+	font-size: 0.72rem;
+	font-weight: 700;
+	background: #fff4d6;
+	color: #7a5600;
+}
+.hdp-collega-wie .hdp-collega-status-actief { background: #e3f4e8; color: #1f6b3a; }
+.hdp-collega-wie .hdp-collega-status-verlopen { background: #fdecec; color: #a11a1a; }
+.hdp-collega-acties { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; }
+.hdp-collega-acties form { margin: 0; }
+.hdp-collega-link {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--wp--preset--color--donkergrijs);
+	font: inherit;
+	font-size: 0.85rem;
+	text-decoration: underline;
+	cursor: pointer;
+}
+.hdp-collega-link:hover, .hdp-collega-weg { color: var(--wp--preset--color--homburg-rood); }
+.hdp-collega-rechten {
+	grid-column: 1 / -1;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem 1.4rem;
+	margin: 0;
+	padding-top: 0.8rem;
+	border-top: 1px solid var(--wp--preset--color--rand);
+}
+.hdp-collega-recht { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; cursor: pointer; }
+.hdp-collega-recht input { width: 1.05rem; height: 1.05rem; margin: 0; accent-color: var(--wp--preset--color--homburg-rood); }
+.hdp-collega-rechten .hdp-collega-knop { margin-left: auto; }
+.hdp-collega-nieuw {
+	padding: 1.4rem 1.5rem;
+	border: 1px solid var(--wp--preset--color--rand);
+	border-radius: var(--hdp-radius);
+	background: var(--wp--preset--color--grijs-licht);
+}
+.hdp-collega-nieuw h2 { margin: 0 0 1rem; font-size: 1.25rem; }
+.hdp-collega-nieuw .form-row { margin: 0 0 0.9rem; padding: 0; }
+.hdp-collega-nieuw label { display: block; margin-bottom: 0.3rem; font-weight: 600; font-size: 0.9rem; }
+.hdp-collega-nieuw .input-text { width: 100%; background: var(--wp--preset--color--wit); }
+.hdp-collega-nieuw-rechten { display: flex; flex-direction: column; gap: 0.5rem; margin: 0.4rem 0 1rem; padding: 0; border: 0; }
+.hdp-collega-nieuw-rechten legend { margin-bottom: 0.5rem; padding: 0; font-weight: 600; font-size: 0.9rem; }
+.hdp-collega-nieuw .hdp-collega-recht { display: inline-flex; margin: 0; font-weight: 400; }
+.hdp-collega-uitleg { margin: 0 0 1rem; font-size: 0.85rem; color: var(--wp--preset--color--grijs-tekst); }
+@media (max-width: 600px) {
+	.hdp-collega { grid-template-columns: 1fr; }
+	.hdp-collega-acties { grid-column: 1; grid-row: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 1rem; }
+	.hdp-collega-rechten .hdp-collega-knop { margin-left: 0; width: 100%; }
+	.hdp-collega-nieuw { padding: 1.1rem; }
+}
+/* Garantie voor een collega die dat niet mag. */
+.hdp-collega-geen-toegang {
+	max-width: 640px;
+	margin: 2rem auto;
+	padding: 1.4rem 1.6rem;
+	border-radius: var(--hdp-radius);
+	background: var(--wp--preset--color--wit);
+	box-shadow: var(--hdp-schaduw);
+}
+.hdp-collega-geen-toegang p { margin: 0; }

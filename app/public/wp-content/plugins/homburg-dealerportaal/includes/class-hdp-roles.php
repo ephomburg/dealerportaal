@@ -102,7 +102,11 @@ class HDP_Roles {
 			return true;
 		}
 
-		return (bool) get_user_meta( $user_id, 'hdp_goedgekeurd', true );
+		if ( ! get_user_meta( $user_id, 'hdp_goedgekeurd', true ) ) {
+			return false;
+		}
+		// Een collega alleen zolang hij niet verwijderd is en zijn bedrijf zelf binnen mag.
+		return ! class_exists( 'HDP_Collegas' ) || HDP_Collegas::collega_mag_binnen( $user_id );
 	}
 
 	/**
