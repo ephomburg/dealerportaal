@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.103.1 (thema 1.44.2)
+
+- Fix: de paginering onderaan de webshop viel uit elkaar (hoog rood blokje bij pagina 1, dunne cijfers, dubbel pijltje). WooCommerce 11.2 zet eigen regels met een langere selector; onze regels staan nu met dezelfde keten erbij. Op een telefoon is de balk kleiner en gaat hij zo nodig over twee regels.
+
 ## 1.103.0
 
 - Nieuw: **trainingen naar PowerAll** (`HDP_Training_PowerAll`). Een training krijgt een "Prijs per persoon voor de factuur". Elke aanmelding wordt dan meteen een order in PowerAll op het klantnummer van de dealer (één per deelnemer, via het trainingsartikel onder WooCommerce > PowerAll), zodat de factuur er vóór de training is. Eigen reeks TR1, TR2, ... (in PowerAll 91000001 en verder), dezelfde stand uit/proef/aan als de webshop, elk uur een nieuwe poging bij een storing, nooit dubbel.

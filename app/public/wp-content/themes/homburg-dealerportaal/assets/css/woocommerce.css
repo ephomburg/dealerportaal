@@ -153,11 +153,16 @@ p.no-comments {
 	display: flex;
 	justify-content: center;
 }
-/* WooCommerce zet zelf een grijsig kader + verticale lijntjes tussen elk
+/* WooCommerce (11.2+) zet zelf .woocommerce nav.woocommerce-pagination ul/li/a
+   met display:block, padding .5em en font-weight 400. Daarom staat elke regel
+   hieronder ook met diezelfde keten erbij, anders wint WooCommerce en valt de
+   pil uit elkaar (hoog rood blokje, dunne cijfers).
+   WooCommerce zet zelf een grijsig kader + verticale lijntjes tussen elk
    nummer (".woocommerce nav.woocommerce-pagination ul/li" — 3-4 elementen
    in de keten, wint van onze klasse-only selectors qua specificiteit).
    Hieronder expliciet met !important teruggezet naar onze eigen pil-vorm. */
-.woocommerce-pagination ul.page-numbers {
+.woocommerce-pagination ul.page-numbers,
+.woocommerce nav.woocommerce-pagination ul.page-numbers {
 	display: flex;
 	align-items: center;
 	gap: 0.3rem;
@@ -169,12 +174,15 @@ p.no-comments {
 	border-radius: 999px;
 	box-shadow: var(--hdp-wc-schaduw);
 }
-.woocommerce-pagination .page-numbers li {
+.woocommerce-pagination .page-numbers li,
+.woocommerce nav.woocommerce-pagination ul.page-numbers li {
 	display: inline-flex;
 	border-right: 0 !important;
 }
 .woocommerce-pagination .page-numbers a,
-.woocommerce-pagination .page-numbers span {
+.woocommerce-pagination .page-numbers span,
+.woocommerce nav.woocommerce-pagination ul.page-numbers li a,
+.woocommerce nav.woocommerce-pagination ul.page-numbers li span {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -204,8 +212,29 @@ p.no-comments {
 	color: var(--wp--preset--color--wit) !important;
 }
 .woocommerce-pagination .page-numbers .next,
-.woocommerce-pagination .page-numbers .prev {
+.woocommerce-pagination .page-numbers .prev,
+.woocommerce nav.woocommerce-pagination ul.page-numbers li .next,
+.woocommerce nav.woocommerce-pagination ul.page-numbers li .prev {
 	font-size: 0;
+}
+/* Telefoon: kleiner en zo nodig over twee regels, nooit breder dan het scherm. */
+@media (max-width: 600px) {
+	.woocommerce-pagination ul.page-numbers,
+	.woocommerce nav.woocommerce-pagination ul.page-numbers {
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.1rem;
+		max-width: 100%;
+		border-radius: 1.4rem;
+	}
+	.woocommerce-pagination .page-numbers a,
+	.woocommerce-pagination .page-numbers span,
+	.woocommerce nav.woocommerce-pagination ul.page-numbers li a,
+	.woocommerce nav.woocommerce-pagination ul.page-numbers li span {
+		min-width: 2rem;
+		height: 2rem;
+		padding: 0 0.4rem !important;
+	}
 }
 .woocommerce-pagination .page-numbers .next::after,
 .woocommerce-pagination .page-numbers .prev::after {
