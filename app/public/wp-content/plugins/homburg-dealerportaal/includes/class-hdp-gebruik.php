@@ -1235,7 +1235,7 @@ class HDP_Gebruik {
 		if ( $stilgevallen ) {
 			$lijst[] = array(
 				'niveau' => 'let-op',
-				'tekst'  => sprintf( 1 === count( $stilgevallen ) ? '%d bedrijf kwam regelmatig, maar is al ruim %d dagen niet geweest.' : '%d bedrijven kwamen eerder wel, maar zijn al ruim %d dagen niet geweest.', count( $stilgevallen ), self::STIL_DAGEN ),
+				'tekst'  => sprintf( 1 === count( $stilgevallen ) ? '%d bedrijf kwam eerder wel, maar is al ruim %d dagen niet geweest.' : '%d bedrijven kwamen eerder wel, maar zijn al ruim %d dagen niet geweest.', count( $stilgevallen ), self::STIL_DAGEN ),
 				'link'   => $tab( 'dealers' ) . '&activiteit=stil',
 				'knop'   => 'Wie?',
 			);

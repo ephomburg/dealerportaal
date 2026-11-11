@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.110.1
+
+- Tekst in "Vraagt aandacht": een bedrijf dat al ruim 30 dagen weg is "kwam eerder wel" (er stond "kwam regelmatig", wat niet vaststaat).
+
 ## 1.110.0
 
 - **Portaalgebruik vernieuwd** (Dashboard > Portaalgebruik, nu `HDP_Gebruik` voor de cijfers en `HDP_Gebruik_Scherm` voor de weergave). In tabbladen: Overzicht, Dealers, Webshop, Documenten & zoeken, Trainingen.
