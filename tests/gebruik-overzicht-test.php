@@ -7,8 +7,8 @@
  * "actieve bedrijven" niet, en staat een bedrijf op de bellijst terwijl een
  * collega er gisteren nog was); een onderdeel telt bij elke klik opnieuw;
  * een bestelling zonder klant komt bij de ingelogde beheerder terecht; de
- * webshopcijfers rekenen de toeslag als artikel; "Vraagt aandacht" roept
- * iets terwijl alles in orde is.
+ * webshopcijfers rekenen de toeslag als artikel; de stappen naar een
+ * bestelling lopen omhoog; "Net gebeurd" toont een beheerder of testaccount.
  *
  * @group hdp-gebruik
  */
@@ -204,30 +204,107 @@ class Gebruik_Overzicht_Test extends WP_UnitTestCase {
 		$this->assertTrue( $wagens[0]['vergeten'] );
 	}
 
-	/* --- Vraagt aandacht ------------------------------------------------- */
+	/* --- Winkelwagen, stappen, per week, net gebeurd ---------------------- */
 
-	public function test_aandacht_leeg_als_alles_in_orde_is() {
-		update_user_meta( $this->hoofd, HDP_Gebruik::LAATST_META, time() );
-		$this->assertSame( array(), HDP_Gebruik::aandacht() );
+	public function test_winkelwagen_telt_een_keer_per_dag() {
+		wp_set_current_user( $this->collega );
+		HDP_Gebruik::noteer_winkelwagen();
+		HDP_Gebruik::noteer_winkelwagen();
+		HDP_Gebruik::noteer_onderdeel_voor( $this->collega, 'webshop' );
+		global $wpdb;
+		$this->assertSame( '1', $wpdb->get_var( 'SELECT COUNT(*) FROM ' . HDP_Gebruik::tabel() . " WHERE soort = 'winkelwagen'" ) ); // phpcs:ignore WordPress.DB
+		$this->assertSame( '1', $wpdb->get_var( 'SELECT COUNT(*) FROM ' . HDP_Gebruik::tabel() . " WHERE soort = 'onderdeel'" ), 'Onderdeel en winkelwagen zitten elkaar niet in de weg.' ); // phpcs:ignore WordPress.DB
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		HDP_Gebruik::noteer_winkelwagen();
+		$this->assertSame( '1', $wpdb->get_var( 'SELECT COUNT(*) FROM ' . HDP_Gebruik::tabel() . " WHERE soort = 'winkelwagen'" ), 'Een beheerder telt niet.' ); // phpcs:ignore WordPress.DB
 	}
 
-	public function test_aandacht_bij_zoeken_zonder_resultaat_en_vergeten_wagen() {
-		HDP_Gebruik::noteer( 'webshopzoek', 'zaaischijf xl', 0, $this->hoofd );
-		update_user_meta( $this->hoofd, '_woocommerce_persistent_cart_' . get_current_blog_id(), array( 'cart' => array( 'a' => array( 'product_id' => 1, 'quantity' => 1, 'line_total' => 10 ) ) ) );
-		update_user_meta( $this->hoofd, HDP_Gebruik::LAATST_META, time() - 10 * DAY_IN_SECONDS );
+	public function test_stappen_naar_een_bestelling_lopen_nooit_omhoog() {
+		$tweede = $this->dealer( 'Agro Bosma' );
+		HDP_Gebruik::noteer( 'bezoek', 'computer|nl', 0, $this->hoofd );
+		HDP_Gebruik::noteer( 'bezoek', 'computer|nl', 0, $tweede );
+		HDP_Gebruik::noteer_onderdeel_voor( $this->collega, 'webshop' );
+		wp_set_current_user( $this->collega );
+		HDP_Gebruik::noteer_winkelwagen();
 
-		$teksten = implode( ' | ', wp_list_pluck( HDP_Gebruik::aandacht(), 'tekst' ) );
-		$this->assertStringContainsString( 'gevulde winkelwagen', $teksten );
-		$this->assertStringContainsString( 'niets opleverde', $teksten );
+		$stap = HDP_Gebruik::trechter( 30 );
+		$this->assertSame( array( 'portaal' => 2, 'webshop' => 1, 'winkelwagen' => 1, 'besteld' => 0 ), $stap, 'Collega en hoofdaccount zijn één bedrijf.' );
+
+		if ( function_exists( 'wc_create_order' ) ) {
+			// Bestelde zonder dat de meting de webshop zag (van voor de meting): toch alle stappen.
+			$this->bestelling( $tweede, 20, 'SCH-9' );
+			HDP_Gebruik::vergeet_orders();
+			$stap = HDP_Gebruik::trechter( 30 );
+			$this->assertSame( 2, $stap['webshop'] );
+			$this->assertSame( 2, $stap['winkelwagen'] );
+			$this->assertSame( 1, $stap['besteld'] );
+		}
 	}
 
-	public function test_stilgevallen_bedrijf_in_aandacht() {
-		update_user_meta( $this->hoofd, HDP_Gebruik::LAATST_META, time() - 40 * DAY_IN_SECONDS );
-		$this->assertStringContainsString( 'niet geweest', implode( ' ', wp_list_pluck( HDP_Gebruik::aandacht(), 'tekst' ) ) );
+	public function test_webshop_per_week_en_net_gebeurd() {
+		if ( ! function_exists( 'wc_create_order' ) ) {
+			$this->markTestSkipped( 'WooCommerce is niet geladen.' );
+		}
+		$order = $this->bestelling( $this->collega, 50 );
+		$beheerder = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->bestelling( $beheerder, 70, 'SCH-3' );
+		HDP_Gebruik::noteer( 'webshopzoek', 'kogellager 6205', 0, $this->hoofd );
+		HDP_Gebruik::noteer( 'webshopzoek', 'strooischijf', 4, $this->hoofd );
+		HDP_Gebruik::vergeet_orders();
 
-		// Nog nooit geweest is geen "stilgevallen": daarvoor is de bellijst.
-		update_user_meta( $this->hoofd, HDP_Gebruik::LAATST_META, '' );
-		$this->assertSame( array(), HDP_Gebruik::aandacht() );
+		$weken = HDP_Gebruik::webshop_per_week( 12 );
+		$this->assertCount( 12, $weken );
+		$this->assertSame( 1, $weken[11]['bestellingen'], 'Deze week, zonder de beheerder.' );
+		$this->assertEqualsWithDelta( 100.0, $weken[11]['omzet'], 0.01 );
+
+		$gebeurd = HDP_Gebruik::gebeurtenissen( 8, 7 );
+		$teksten = implode( ' | ', wp_list_pluck( $gebeurd, 'tekst' ) );
+		$this->assertStringContainsString( 'bestelde ' . $order->get_order_number(), $teksten );
+		$this->assertStringContainsString( 'zocht "kogellager 6205": niets gevonden', $teksten );
+		$this->assertStringNotContainsString( 'strooischijf', $teksten, 'Alleen zoeken zonder resultaat.' );
+		$this->assertCount( 2, $gebeurd, 'De bestelling van de beheerder staat er niet in.' );
+		$bestelling = wp_list_filter( $gebeurd, array( 'soort' => 'bestelling' ) );
+		$bestelling = reset( $bestelling );
+		$this->assertSame( 'Frits', $bestelling['wie'] );
+		$this->assertSame( 'Loonbedrijf Jansen', $bestelling['bij'], 'Een collega met zijn bedrijf erbij.' );
+	}
+
+	public function test_dealerlijst_met_weken_termen_en_accounts() {
+		HDP_Gebruik::noteer( 'bezoek', 'computer|nl', 0, $this->hoofd );
+		HDP_Gebruik::noteer( 'zoek', 'slijtplaat', 3, $this->collega );
+		HDP_Gebruik::noteer_onderdeel_voor( $this->collega, 'downloads' );
+		update_user_meta( $this->hoofd, 'billing_city', 'Dokkum' );
+
+		$rij = HDP_Gebruik::dealerlijst( 30 )[0];
+		$this->assertCount( 12, $rij['weken'] );
+		$this->assertSame( 1, $rij['weken'][11], 'Deze week één bezoekdag.' );
+		$this->assertSame( array( 'slijtplaat' ), $rij['termen'] );
+		$this->assertSame( array( 'downloads' => 1 ), $rij['onderdelen'] );
+		$this->assertSame( 'Dokkum', $rij['plaats'] );
+		$this->assertSame( array( 'hoofdaccount', 'collega' ), wp_list_pluck( $rij['personen'], 'rol' ) );
+	}
+
+	public function test_samenvatting_in_gewone_taal() {
+		$nu   = array( 'bedrijven' => 41, 'actieve_bedrijven' => 27, 'omzet' => 48320.0 );
+		$toen = array( 'bedrijven' => 41, 'actieve_bedrijven' => 23, 'omzet' => 42220.0 );
+		$delen = HDP_Gebruik::onderdelen( 30 );
+		$delen['webshop']['bedrijven']   = 22;
+		$delen['downloads']['bedrijven'] = 15;
+		$delen['start']['bedrijven']     = 27;
+		list( $zin, $onder ) = HDP_Gebruik_Scherm::samenvatting( 30, $nu, $toen, true, array( 'besteld' => 18 ), $delen );
+		$this->assertSame( '27 van de 41 bedrijven waren in het portaal. 18 bedrijven bestelden, samen voor <em>€ 48.320</em>.', $zin );
+		$this->assertSame( 'Dat is 4 bedrijven meer en € 6.100 meer omzet dan de 30 dagen ervoor. Meest gebruikt: de webshop, daarna downloads.', $onder );
+
+		list( $zin, $onder ) = HDP_Gebruik_Scherm::samenvatting( 30, array( 'bedrijven' => 2, 'actieve_bedrijven' => 1, 'omzet' => 0.0 ), array( 'actieve_bedrijven' => 0, 'omzet' => 0.0 ), false, array( 'besteld' => 0 ), HDP_Gebruik::onderdelen( 30 ) );
+		$this->assertSame( '1 van de 2 bedrijven was in het portaal. Er is niets besteld.', $zin );
+		$this->assertSame( '', $onder );
+	}
+
+	public function test_initialen() {
+		$this->assertSame( 'LV', HDP_Gebruik_Scherm::initialen( 'Loonbedrijf De Vries' ) );
+		$this->assertSame( 'JA', HDP_Gebruik_Scherm::initialen( 'Jansen Agri' ) );
+		$this->assertSame( 'T', HDP_Gebruik_Scherm::initialen( 'Test 1' ) );
 	}
 
 	/* --- Het scherm ------------------------------------------------------ */
@@ -240,7 +317,8 @@ class Gebruik_Overzicht_Test extends WP_UnitTestCase {
 			ob_start();
 			HDP_Gebruik_Scherm::render();
 			$html = ob_get_clean();
-			$this->assertStringContainsString( 'nav-tab-active', $html, $tab );
+			$this->assertStringContainsString( 'aria-current="page"', $html, $tab );
+			$this->assertStringNotContainsString( 'Vraagt aandacht', $html );
 			$this->assertStringContainsString( HDP_Gebruik_Scherm::TABS[ $tab ] === 'Documenten & zoeken' ? 'Documenten &amp; zoeken' : HDP_Gebruik_Scherm::TABS[ $tab ], $html );
 		}
 		unset( $_GET['tab'] );

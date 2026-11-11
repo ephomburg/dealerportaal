@@ -92,6 +92,7 @@ class HDP_Gebruik {
 		add_action( 'template_redirect', array( __CLASS__, 'noteer_bezoek' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'noteer_webshopzoek' ), 20 );
 		add_action( 'template_redirect', array( __CLASS__, 'noteer_onderdeel' ), 30 );
+		add_action( 'woocommerce_add_to_cart', array( __CLASS__, 'noteer_winkelwagen' ) );
 		add_action( 'admin_menu', array( 'HDP_Gebruik_Scherm', 'registreer_menu' ) );
 		add_action( 'admin_post_' . self::EXPORT_ACTIE, array( __CLASS__, 'exporteer' ) );
 		add_action( 'edit_user_profile', array( 'HDP_Gebruik_Scherm', 'render_profiel' ), 20 );
@@ -292,21 +293,44 @@ class HDP_Gebruik {
 
 	/** Los van de pagina, zodat het te testen is. */
 	public static function noteer_onderdeel_voor( $user_id, $onderdeel ) {
-		if ( ! isset( self::ONDERDELEN[ $onderdeel ] ) ) {
+		if ( isset( self::ONDERDELEN[ $onderdeel ] ) ) {
+			self::noteer_vandaag( $user_id, 'onderdeel', $onderdeel );
+		}
+	}
+
+	/**
+	 * Iets in de winkelwagen gedaan: één keer per dag. Voor de stap
+	 * "iets in de winkelwagen" tussen webshop en bestelling.
+	 */
+	public static function noteer_winkelwagen() {
+		$user_id = get_current_user_id();
+		if ( $user_id && self::telt_mee( $user_id ) ) {
+			self::noteer_vandaag( $user_id, 'winkelwagen', '' );
+		}
+	}
+
+	/**
+	 * Legt soort + sleutel hooguit één keer per dag per gebruiker vast. Wat
+	 * vandaag al geteld is staat in één gebruikersmeta, zodat dit geen
+	 * opvraag per pagina kost.
+	 */
+	public static function noteer_vandaag( $user_id, $soort, $sleutel ) {
+		if ( ! self::telt_mee( $user_id ) ) {
 			return;
 		}
 		$vandaag = wp_date( 'Y-m-d' );
+		$teken   = $soort . '/' . $sleutel;
 		$stand   = (string) get_user_meta( $user_id, self::ONDERDEEL_META, true );
 		$al      = array();
 		if ( 0 === strpos( $stand, $vandaag . ':' ) ) {
 			$al = array_filter( explode( ',', substr( $stand, strlen( $vandaag ) + 1 ) ) );
 		}
-		if ( in_array( $onderdeel, $al, true ) ) {
+		if ( in_array( $teken, $al, true ) ) {
 			return;
 		}
-		$al[] = $onderdeel;
+		$al[] = $teken;
 		update_user_meta( $user_id, self::ONDERDEEL_META, $vandaag . ':' . implode( ',', $al ) );
-		self::noteer( 'onderdeel', $onderdeel, 0, $user_id );
+		self::noteer( $soort, $sleutel, 0, $user_id );
 	}
 
 	/**
@@ -1067,16 +1091,42 @@ class HDP_Gebruik {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- eigen tabel, beheerscherm.
 		$tellingen = $wpdb->get_results( $wpdb->prepare( "SELECT user_id, soort, COUNT(*) AS aantal FROM {$tabel} WHERE tijd >= %s AND soort IN ('download','zoek','webshopzoek') GROUP BY user_id, soort", $vanaf ) );
 		$dagen_rij = $wpdb->get_results( $wpdb->prepare( "SELECT DISTINCT user_id, DATE(tijd) AS dag FROM {$tabel} WHERE soort = 'bezoek' AND tijd >= %s", self::vanaf( max( (int) $dagen, 30 ) ) ) );
-		$termen    = $alleen ? $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT sleutel FROM {$tabel} WHERE soort IN ('zoek','webshopzoek') AND tijd >= %s AND user_id IN (" . implode( ',', array_map( 'intval', array_merge( $accounts[ $alleen ], array( $alleen ) ) ) ) . ') GROUP BY sleutel ORDER BY COUNT(*) DESC, MAX(tijd) DESC LIMIT 8',
-				$vanaf
-			)
-		) : array();
+		$zoekrijen = $wpdb->get_results( $wpdb->prepare( "SELECT user_id, sleutel, COUNT(*) AS aantal FROM {$tabel} WHERE soort IN ('zoek','webshopzoek') AND tijd >= %s GROUP BY user_id, sleutel", $vanaf ) );
+		$deelrijen = $wpdb->get_results( $wpdb->prepare( "SELECT user_id, sleutel, COUNT(*) AS aantal FROM {$tabel} WHERE soort = 'onderdeel' AND tijd >= %s GROUP BY user_id, sleutel", $vanaf ) );
+		$weekrijen = $wpdb->get_results( $wpdb->prepare( "SELECT DISTINCT user_id, DATE(tijd) AS dag FROM {$tabel} WHERE soort = 'bezoek' AND tijd >= %s", self::vanaf( 12 * 7 ) ) );
 		// phpcs:enable
 
-		$leeg = array( 'download' => 0, 'zoek' => 0, 'bezoekdagen' => array(), 'dagen30' => array(), 'bestellingen' => 0, 'omzet' => 0.0, 'laatste_bestelling' => 0, 'trainingen' => 0 );
+		$leeg = array( 'download' => 0, 'zoek' => 0, 'bezoekdagen' => array(), 'dagen30' => array(), 'bestellingen' => 0, 'omzet' => 0.0, 'laatste_bestelling' => 0, 'trainingen' => 0, 'termen' => array(), 'onderdelen' => array(), 'weken' => array() );
 		$per  = array();
+
+		// Bezoekdagen per week, de laatste 12 weken (0 = deze week), per bedrijf.
+		$vandaag = strtotime( gmdate( 'Y-m-d' ) . ' 00:00:00 UTC' );
+		foreach ( $weekrijen as $rij ) {
+			$b = self::bedrijf_van( (int) $rij->user_id );
+			if ( ! isset( $per[ $b ] ) ) {
+				$per[ $b ] = $leeg;
+			}
+			$terug = (int) floor( ( $vandaag - strtotime( $rij->dag . ' 00:00:00 UTC' ) ) / WEEK_IN_SECONDS );
+			if ( $terug >= 0 && $terug < 12 ) {
+				$per[ $b ]['weken'][ $terug ][ $rij->dag ] = true;
+			}
+		}
+		foreach ( $zoekrijen as $rij ) {
+			$b = self::bedrijf_van( (int) $rij->user_id );
+			if ( ! isset( $per[ $b ] ) ) {
+				$per[ $b ] = $leeg;
+			}
+			$term                         = (string) $rij->sleutel;
+			$per[ $b ]['termen'][ $term ] = ( isset( $per[ $b ]['termen'][ $term ] ) ? $per[ $b ]['termen'][ $term ] : 0 ) + (int) $rij->aantal;
+		}
+		foreach ( $deelrijen as $rij ) {
+			$b = self::bedrijf_van( (int) $rij->user_id );
+			if ( ! isset( $per[ $b ] ) ) {
+				$per[ $b ] = $leeg;
+			}
+			$deel                             = (string) $rij->sleutel;
+			$per[ $b ]['onderdelen'][ $deel ] = ( isset( $per[ $b ]['onderdelen'][ $deel ] ) ? $per[ $b ]['onderdelen'][ $deel ] : 0 ) + (int) $rij->aantal;
+		}
 
 		$cutoff = gmdate( 'Y-m-d', time() - (int) $dagen * DAY_IN_SECONDS );
 		foreach ( $dagen_rij as $rij ) {
@@ -1129,6 +1179,23 @@ class HDP_Gebruik {
 			}
 			$c       = isset( $per[ $hoofd_id ] ) ? $per[ $hoofd_id ] : $leeg;
 			$laatst  = self::laatst_actief_bedrijf( $hoofd_id, $leden );
+			arsort( $c['termen'] );
+			arsort( $c['onderdelen'] );
+			$weken = array();
+			for ( $i = 11; $i >= 0; $i-- ) {
+				$weken[] = isset( $c['weken'][ $i ] ) ? count( $c['weken'][ $i ] ) : 0;
+			}
+			$personen = array();
+			foreach ( array_unique( array_merge( array( (int) $hoofd_id ), $leden ) ) as $id ) {
+				$persoon = get_userdata( $id );
+				if ( $persoon ) {
+					$personen[] = array(
+						'naam'   => $persoon->display_name,
+						'rol'    => (int) $id === (int) $hoofd_id ? 'hoofdaccount' : 'collega',
+						'laatst' => self::laatst_actief( $id ),
+					);
+				}
+			}
 			$relatie = class_exists( 'HDP_PowerAll_Dealers' ) ? (string) get_user_meta( $hoofd_id, HDP_PowerAll_Dealers::META_RELATIE, true ) : '';
 			$lijst[] = array(
 				'id'                 => (int) $hoofd_id,
@@ -1148,7 +1215,11 @@ class HDP_Gebruik {
 				'laatste_bestelling' => $c['laatste_bestelling'],
 				'trainingen'         => $c['trainingen'],
 				'activiteit'         => self::activiteit( $laatst, count( $c['dagen30'] ) ),
-				'termen'             => $termen,
+				'termen'             => array_slice( array_map( 'strval', array_keys( $c['termen'] ) ), 0, 8 ),
+				'onderdelen'         => $c['onderdelen'],
+				'weken'              => $weken,
+				'plaats'             => (string) get_user_meta( $hoofd_id, 'billing_city', true ),
+				'personen'           => $personen,
 			);
 		}
 
@@ -1162,85 +1233,198 @@ class HDP_Gebruik {
 	}
 
 	/* ---------------------------------------------------------------------
-	 * Wat vraagt aandacht
+	 * Voor het overzicht: per week, de stappen naar een bestelling, en wat
+	 * er net gebeurde
 	 * ------------------------------------------------------------------- */
 
 	/**
-	 * De dingen waar iemand iets mee moet, belangrijkste eerst. Leeg = alles
-	 * in orde.
+	 * Bestellingen en omzet per week, de laatste $weken weken, oudste eerst.
 	 *
-	 * @return array<int, array{niveau: string, tekst: string, link: string, knop: string}>
+	 * @return array<int, array{week: string, nr: int, bestellingen: int, omzet: float}>
 	 */
-	public static function aandacht() {
+	public static function webshop_per_week( $weken = 12 ) {
+		$per_week = array();
+		foreach ( self::orders( $weken * 7 ) as $order ) {
+			$moment = $order->get_date_created() ? $order->get_date_created()->getTimestamp() : 0;
+			if ( ! $moment ) {
+				continue;
+			}
+			$sleutel = gmdate( 'o', $moment ) . gmdate( 'W', $moment );
+			if ( ! isset( $per_week[ $sleutel ] ) ) {
+				$per_week[ $sleutel ] = array( 0, 0.0 );
+			}
+			++$per_week[ $sleutel ][0];
+			$per_week[ $sleutel ][1] += self::netto( $order );
+		}
 		$lijst = array();
-		$tab   = static function ( $tab ) {
-			return admin_url( 'index.php?page=' . HDP_Gebruik_Scherm::PAGINA . '&tab=' . $tab );
+		for ( $i = $weken - 1; $i >= 0; $i-- ) {
+			$moment  = time() - $i * WEEK_IN_SECONDS;
+			$sleutel = gmdate( 'o', $moment ) . gmdate( 'W', $moment );
+			$lijst[] = array(
+				'week'         => 'Week ' . (int) gmdate( 'W', $moment ),
+				'nr'           => (int) gmdate( 'W', $moment ),
+				'bestellingen' => isset( $per_week[ $sleutel ] ) ? $per_week[ $sleutel ][0] : 0,
+				'omzet'        => isset( $per_week[ $sleutel ] ) ? $per_week[ $sleutel ][1] : 0.0,
+			);
+		}
+		return $lijst;
+	}
+
+	/**
+	 * Van bezoek naar bestelling: hoeveel bedrijven elke stap haalden. Wie
+	 * bestelde, had ook iets in de winkelwagen en was in de webshop (ook als
+	 * dat van voor de meting was), dus de stappen lopen nooit omhoog.
+	 *
+	 * @return array{portaal: int, webshop: int, winkelwagen: int, besteld: int}
+	 */
+	public static function trechter( $dagen ) {
+		global $wpdb;
+		$tabel  = self::tabel();
+		$bekend = self::bekende_bedrijven();
+		$rijen  = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->prepare(
+				"SELECT DISTINCT user_id, soort FROM {$tabel} WHERE tijd >= %s AND ( soort IN ('bezoek','winkelwagen') OR ( soort = 'onderdeel' AND sleutel = 'webshop' ) )", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				self::vanaf( $dagen )
+			)
+		);
+		$stap = array( 'portaal' => array(), 'webshop' => array(), 'winkelwagen' => array(), 'besteld' => array() );
+		foreach ( $rijen as $rij ) {
+			$b = self::bedrijf_van( (int) $rij->user_id );
+			if ( ! isset( $bekend[ $b ] ) ) {
+				continue;
+			}
+			$naam                = 'bezoek' === $rij->soort ? 'portaal' : ( 'winkelwagen' === $rij->soort ? 'winkelwagen' : 'webshop' );
+			$stap[ $naam ][ $b ] = true;
+		}
+		foreach ( self::orders( $dagen ) as $order ) {
+			$b = self::bedrijf_van( (int) $order->get_customer_id() );
+			if ( isset( $bekend[ $b ] ) ) {
+				$stap['besteld'][ $b ] = true;
+			}
+		}
+		$stap['winkelwagen'] += $stap['besteld'];
+		$stap['webshop']     += $stap['winkelwagen'];
+		$stap['portaal']     += $stap['webshop'];
+		return array_map( 'count', $stap );
+	}
+
+	/**
+	 * Wie iets deed, zoals in "Net gebeurd": de naam, en bij een collega het
+	 * bedrijf erachter.
+	 *
+	 * @return string[] array( naam, bedrijf of leeg )
+	 */
+	private static function wie( $user_id ) {
+		$bedrijf = self::bedrijf_van( $user_id );
+		$naam    = self::bedrijfsnaam( $bedrijf );
+		if ( $bedrijf !== (int) $user_id ) {
+			$persoon = get_userdata( $user_id );
+			return array( $persoon ? $persoon->display_name : $naam, $naam );
+		}
+		return array( $naam, '' );
+	}
+
+	/**
+	 * Wat er de laatste $dagen dagen gebeurde, nieuwste eerst: bestellingen,
+	 * bestellingen die niet in PowerAll kwamen, geopende documenten,
+	 * zoekopdrachten zonder resultaat, trainingaanmeldingen en garantieclaims.
+	 *
+	 * @return array<int, array{tijd: int, soort: string, wie: string, bij: string, tekst: string}>
+	 */
+	public static function gebeurtenissen( $limiet = 8, $dagen = 7 ) {
+		global $wpdb;
+		$tabel  = self::tabel();
+		$bekend = self::bekende_bedrijven();
+		$lijst  = array();
+		$voeg   = static function ( $tijd, $soort, $user_id, $tekst ) use ( &$lijst, $bekend ) {
+			$user_id = (int) $user_id;
+			if ( ! $tijd || ! $user_id || ! isset( $bekend[ self::bedrijf_van( $user_id ) ] ) ) {
+				return;
+			}
+			list( $wie, $bij ) = self::wie( $user_id );
+			$lijst[]           = array( 'tijd' => (int) $tijd, 'soort' => $soort, 'wie' => $wie, 'bij' => $bij, 'tekst' => $tekst );
 		};
 
-		$fouten = self::powerall_fouten();
-		if ( $fouten && class_exists( 'HDP_PowerAll_Orders' ) && 'aan' === HDP_PowerAll_Orders::modus() ) {
-			$lijst[] = array(
-				'niveau' => 'fout',
-				'tekst'  => sprintf( 1 === count( $fouten ) ? '%d bestelling is niet in PowerAll aangekomen.' : '%d bestellingen zijn niet in PowerAll aangekomen.', count( $fouten ) ),
-				'link'   => $tab( 'webshop' ),
-				'knop'   => 'Bekijken',
-			);
+		foreach ( self::orders( $dagen ) as $order ) {
+			$voeg( $order->get_date_created() ? $order->get_date_created()->getTimestamp() : 0, 'bestelling', $order->get_customer_id(), sprintf( 'bestelde %s · € %s', $order->get_order_number(), number_format( self::netto( $order ), 2, ',', '.' ) ) );
+		}
+		if ( class_exists( 'HDP_PowerAll_Orders' ) && 'aan' === HDP_PowerAll_Orders::modus() ) {
+			foreach ( self::powerall_fouten() as $order ) {
+				$moment = $order->get_date_modified() ? $order->get_date_modified()->getTimestamp() : 0;
+				if ( $moment >= time() - $dagen * DAY_IN_SECONDS ) {
+					$voeg( $moment, 'fout', $order->get_customer_id(), sprintf( 'bestelling %s kwam niet in PowerAll aan', $order->get_order_number() ) );
+				}
+			}
 		}
 
-		$training = self::training_fouten();
-		if ( $training ) {
-			$lijst[] = array(
-				'niveau' => 'fout',
-				'tekst'  => sprintf( 1 === $training ? '%d trainingaanmelding is niet als order in PowerAll aangekomen.' : '%d trainingaanmeldingen zijn niet als order in PowerAll aangekomen.', $training ),
-				'link'   => HDP_Trainingen::beheer_url(),
-				'knop'   => 'Naar aanmeldingen',
-			);
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- eigen tabellen, beheerscherm.
+		$rijen = $wpdb->get_results( $wpdb->prepare( "SELECT tijd, user_id, soort, sleutel FROM {$tabel} WHERE tijd >= %s AND ( soort = 'download' OR ( soort IN ('zoek','webshopzoek') AND aantal = 0 ) ) ORDER BY tijd DESC LIMIT 40", self::vanaf( $dagen ) ) );
+		foreach ( $rijen as $rij ) {
+			$moment = strtotime( $rij->tijd . ' UTC' );
+			if ( 'download' === $rij->soort ) {
+				$titel = get_the_title( (int) $rij->sleutel );
+				$voeg( $moment, 'download', $rij->user_id, $titel ? sprintf( 'opende "%s"', html_entity_decode( $titel ) ) : 'opende een document' );
+			} else {
+				$voeg( $moment, 'zoek', $rij->user_id, sprintf( 'zocht "%s": niets gevonden', $rij->sleutel ) );
+			}
+		}
+		if ( class_exists( 'HDP_Trainingen' ) ) {
+			$ttabel = HDP_Trainingen::tabel();
+			foreach ( $wpdb->get_results( $wpdb->prepare( "SELECT user_id, training_titel, aangemaakt FROM {$ttabel} WHERE status = %s AND aangemaakt >= %s ORDER BY aangemaakt DESC LIMIT 20", HDP_Trainingen::STATUS_AANGEMELD, self::vanaf( $dagen ) ) ) as $rij ) {
+				$voeg( strtotime( $rij->aangemaakt . ' UTC' ), 'training', $rij->user_id, sprintf( 'meldde zich aan voor "%s"', $rij->training_titel ) );
+			}
+		}
+		// phpcs:enable
+		foreach ( self::recente_claims( $dagen ) as $claim ) {
+			$voeg( $claim['tijd'], 'garantie', $claim['dealer_id'], sprintf( 'diende garantieclaim %s in', $claim['nummer'] ) );
 		}
 
-		$uitrol = self::uitrol();
-		if ( $uitrol['verlopen'] ) {
-			$lijst[] = array(
-				'niveau' => 'let-op',
-				'tekst'  => sprintf( 1 === $uitrol['verlopen'] ? '%d uitnodiging is verlopen zonder dat de dealer een wachtwoord koos.' : '%d uitnodigingen zijn verlopen zonder dat de dealer een wachtwoord koos.', $uitrol['verlopen'] ),
-				'link'   => admin_url( 'users.php?page=' . HDP_PowerAll_Dealers::PAGINA ),
-				'knop'   => 'Opnieuw uitnodigen',
-			);
-		}
+		usort(
+			$lijst,
+			static function ( $a, $b ) {
+				return $b['tijd'] <=> $a['tijd'];
+			}
+		);
+		return array_slice( $lijst, 0, $limiet );
+	}
 
-		$wagens = array_filter( self::open_winkelwagens(), static function ( $w ) {
-			return $w['vergeten'];
-		} );
-		if ( $wagens ) {
-			$lijst[] = array(
-				'niveau' => 'let-op',
-				'tekst'  => sprintf( 1 === count( $wagens ) ? '%d dealer heeft een gevulde winkelwagen maar is al %d dagen niet geweest.' : '%d dealers hebben een gevulde winkelwagen maar zijn al %d dagen niet geweest.', count( $wagens ), self::VERGETEN_DAGEN ),
-				'link'   => $tab( 'webshop' ) . '#winkelwagens',
-				'knop'   => 'Bekijken',
-			);
+	/**
+	 * Garantieclaims van de laatste dagen, van alle dealers. Ze staan in de
+	 * garantiedatabase (Supabase); een kwartier bewaard, zodat het overzicht
+	 * niet bij elke klik daarop wacht. Een storing geeft een lege lijst.
+	 *
+	 * @return array<int, array{tijd: int, dealer_id: int, nummer: string}>
+	 */
+	public static function recente_claims( $dagen = 7 ) {
+		if ( ! class_exists( 'HDP_Supabase' ) || ! HDP_Supabase::beschikbaar( HDP_Supabase::APP ) ) {
+			return array();
 		}
-
-		$niets = count( self::zoektermen( 7, true, 100, 'zoek' ) ) + count( self::zoektermen( 7, true, 100, 'webshopzoek' ) );
-		if ( $niets ) {
-			$lijst[] = array(
-				'niveau' => 'let-op',
-				'tekst'  => sprintf( 1 === $niets ? 'Deze week is op %d term gezocht die niets opleverde.' : 'Deze week is op %d termen gezocht die niets opleverden.', $niets ),
-				'link'   => $tab( 'inhoud' ),
-				'knop'   => 'Bekijken',
-			);
+		$sleutel = 'hdp_gebruik_claims_' . (int) $dagen;
+		$lijst   = get_transient( $sleutel );
+		if ( is_array( $lijst ) ) {
+			return $lijst;
 		}
-
-		$stilgevallen = array_filter( self::stille_dealers(), static function ( $d ) {
-			return $d['laatst'] && $d['laatst'] >= time() - 2 * self::STIL_DAGEN * DAY_IN_SECONDS;
-		} );
-		if ( $stilgevallen ) {
-			$lijst[] = array(
-				'niveau' => 'let-op',
-				'tekst'  => sprintf( 1 === count( $stilgevallen ) ? '%d bedrijf kwam eerder wel, maar is al ruim %d dagen niet geweest.' : '%d bedrijven kwamen eerder wel, maar zijn al ruim %d dagen niet geweest.', count( $stilgevallen ), self::STIL_DAGEN ),
-				'link'   => $tab( 'dealers' ) . '&activiteit=stil',
-				'knop'   => 'Wie?',
-			);
+		$rijen = HDP_Supabase::selecteer(
+			HDP_Supabase::APP,
+			'claims',
+			array(
+				'select'       => 'nummer,dealer_id,ingediend_op',
+				'ingediend_op' => 'gte.' . gmdate( 'Y-m-d\TH:i:s\Z', time() - (int) $dagen * DAY_IN_SECONDS ),
+				'order'        => 'ingediend_op.desc',
+				'limit'        => '20',
+			)
+		);
+		$lijst = array();
+		if ( ! is_wp_error( $rijen ) && is_array( $rijen ) ) {
+			foreach ( $rijen as $rij ) {
+				$lijst[] = array(
+					'tijd'      => (int) strtotime( (string) $rij['ingediend_op'] ),
+					'dealer_id' => (int) $rij['dealer_id'],
+					'nummer'    => (string) $rij['nummer'],
+				);
+			}
 		}
-
+		set_transient( $sleutel, $lijst, is_wp_error( $rijen ) ? 2 * MINUTE_IN_SECONDS : 15 * MINUTE_IN_SECONDS );
 		return $lijst;
 	}
 

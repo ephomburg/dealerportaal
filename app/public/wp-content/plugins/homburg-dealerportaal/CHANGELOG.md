@@ -8,6 +8,13 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.111.0
+
+- **Portaalgebruik in een nieuw jasje.** Bovenaan een donkere band die de periode in gewone taal samenvat ("27 van de 41 bedrijven waren in het portaal. 18 bedrijven bestelden, samen voor € 48.320."), met drie kerncijfers, een verschilpilletje en hun verloop over 12 weken. Periode kiezen met één schakelaar; tabbladen als knoppen.
+- Overzicht: **omzet per week** (staande kolommen, aanwijzen toont bedrag en bestellingen), **hoe actief de bedrijven zijn** (ring, klik voor de namen), **Net gebeurd** (bestellingen, bestellingen die niet in PowerAll kwamen, geopende documenten, zoeken zonder resultaat, trainingaanmeldingen en garantieclaims van de laatste 7 dagen), **van bezoek naar bestelling** (portaal, webshop, winkelwagen, besteld), **meest besteld** en **wat gebruiken ze**. "Vraagt aandacht" is weg; de foutmeldingen over PowerAll staan nog bij Webshop en Trainingen.
+- Dealers: één regel per bedrijf met beginletters, status en een mini-grafiek van 12 weken; klik voor een **detailpaneel** met bellen, mailen, de cijfers, wat ze doen, waar ze naar zochten en hun accounts. Sorteren, zoeken en filteren blijven.
+- Nieuw gemeten: **iets in de winkelwagen gedaan** (één keer per dag), voor de stap tussen webshop en bestelling. Garantieclaims voor Net gebeurd komen uit de garantiedatabase en worden een kwartier bewaard.
+
 ## 1.110.1
 
 - Tekst in "Vraagt aandacht": een bedrijf dat al ruim 30 dagen weg is "kwam eerder wel" (er stond "kwam regelmatig", wat niet vaststaat).

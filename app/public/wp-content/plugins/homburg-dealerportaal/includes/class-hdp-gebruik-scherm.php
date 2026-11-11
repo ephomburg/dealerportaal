@@ -1,10 +1,14 @@
 <?php
 /**
  * Het scherm Dashboard > Portaalgebruik, in tabbladen:
- * Overzicht (wat vraagt aandacht, kerncijfers met vergelijking, activiteit
- * per week, onderdelen, apparaat en taal, uitnodigingen), Dealers (één
- * lijst per bedrijf, te sorteren en te filteren), Webshop, Documenten &
- * zoeken, en Trainingen. Plus het blokje op het profiel van een dealer.
+ * - Overzicht: een samenvatting in gewone taal met drie kerncijfers en hun
+ *   verloop, omzet per week, hoe actief de bedrijven zijn, wat er net
+ *   gebeurde, van bezoek naar bestelling, meest besteld, en welke
+ *   onderdelen gebruikt worden;
+ * - Dealers: één regel per bedrijf met een detailpaneel (bellen, mailen,
+ *   wat ze doen, waar ze naar zochten, hun accounts);
+ * - Webshop, Documenten & zoeken, Trainingen.
+ * Plus het blokje op het profiel van een dealer.
  *
  * De cijfers komen uit HDP_Gebruik; hier staat alleen de weergave.
  */
@@ -32,6 +36,25 @@ class HDP_Gebruik_Scherm {
 		'nooit'     => 'Nog nooit',
 	);
 
+	/** De kleur per activiteit (ring, stip). Altijd met de naam erbij, nooit alleen kleur. */
+	const ACTIVITEIT_KLEUR = array(
+		'actief'    => '#1f9d4c',
+		'af-en-toe' => '#e0a100',
+		'stil'      => '#c41214',
+		'nooit'     => '#b9bcc2',
+	);
+
+	const AVATARKLEUREN = array( '#c41214', '#17191c', '#34507a', '#5b3a8f', '#146c34', '#8a5a00', '#3d4148', '#8a1012' );
+
+	const TIJDLIJN_ICOON = array(
+		'bestelling' => array( 'cart', 'is-groen' ),
+		'download'   => array( 'media-document', 'is-blauw' ),
+		'zoek'       => array( 'search', 'is-geel' ),
+		'training'   => array( 'welcome-learn-more', 'is-paars' ),
+		'garantie'   => array( 'shield', 'is-rood' ),
+		'fout'       => array( 'warning', 'is-rood' ),
+	);
+
 	public static function registreer_menu() {
 		add_dashboard_page( 'Portaalgebruik', 'Portaalgebruik', 'manage_options', self::PAGINA, array( __CLASS__, 'render' ) );
 	}
@@ -44,29 +67,87 @@ class HDP_Gebruik_Scherm {
 		return add_query_arg( array_merge( array( 'page' => self::PAGINA, 'tab' => $tab, 'periode' => (int) $dagen ), $extra ), admin_url( 'index.php' ) );
 	}
 
+	/** € 1.786,50 */
 	private static function geld( $bedrag ) {
-		return function_exists( 'wc_price' ) ? wp_strip_all_tags( wc_price( $bedrag ) ) : '€ ' . number_format( (float) $bedrag, 2, ',', '.' );
+		return '€ ' . number_format( (float) $bedrag, 2, ',', '.' );
+	}
+
+	/** € 48.320 (zonder centen, voor grote getallen). */
+	private static function geld_rond( $bedrag ) {
+		return '€ ' . number_format( round( (float) $bedrag ), 0, ',', '.' );
 	}
 
 	private static function datum( $tijdstempel ) {
 		return $tijdstempel ? wp_date( 'j M Y', $tijdstempel ) : '—';
 	}
 
-	/** "↑ 3 t.o.v. de vorige periode". Null = er valt niets te vergelijken. */
-	private static function verschil( $nu, $toen, $geld = false ) {
+	/** "vandaag", "gisteren", "3 dagen geleden", of een datum. */
+	private static function wanneer( $tijdstempel ) {
+		if ( ! $tijdstempel ) {
+			return 'nog nooit';
+		}
+		$dagen = (int) round( ( strtotime( wp_date( 'Y-m-d' ) ) - strtotime( wp_date( 'Y-m-d', $tijdstempel ) ) ) / DAY_IN_SECONDS );
+		if ( $dagen <= 0 ) {
+			return 'vandaag';
+		}
+		if ( 1 === $dagen ) {
+			return 'gisteren';
+		}
+		return $dagen < 60 ? $dagen . ' dagen geleden' : wp_date( 'j M Y', $tijdstempel );
+	}
+
+	/** Het tijdstip in "Net gebeurd": 10:42, gisteren, of 3 nov. */
+	private static function tijdstip( $tijdstempel ) {
+		if ( wp_date( 'Y-m-d', $tijdstempel ) === wp_date( 'Y-m-d' ) ) {
+			return wp_date( 'H:i', $tijdstempel );
+		}
+		if ( wp_date( 'Y-m-d', $tijdstempel ) === wp_date( 'Y-m-d', time() - DAY_IN_SECONDS ) ) {
+			return 'gisteren';
+		}
+		return wp_date( 'j M', $tijdstempel );
+	}
+
+	private static function periode_tekst( $dagen ) {
+		return str_replace( 'Laatste ', '', HDP_Gebruik::PERIODES[ $dagen ] );
+	}
+
+	/**
+	 * Een pilletje met het verschil: "↑ 3" groen, "↓ 2" rood, "=" grijs.
+	 * Null = er valt niets te vergelijken: dan niets.
+	 */
+	private static function pil( $nu, $toen, $soort = 'getal' ) {
 		if ( null === $toen ) {
-			return '<span class="hdp-g-delta">nog geen vergelijking</span>';
+			return '';
 		}
 		$verschil = $nu - $toen;
 		if ( abs( $verschil ) < 0.005 ) {
-			return '<span class="hdp-g-delta">gelijk aan de vorige periode</span>';
+			return '<span class="hdp-g-pil">=</span>';
 		}
-		$tekst = $geld ? self::geld( abs( $verschil ) ) : number_format_i18n( abs( $verschil ) );
-		return '<span class="hdp-g-delta"><b aria-hidden="true">' . ( $verschil > 0 ? '↑' : '↓' ) . '</b> ' . ( $verschil > 0 ? 'meer' : 'minder' ) . ': ' . esc_html( $tekst ) . ' t.o.v. de vorige periode</span>';
+		if ( 'procent' === $soort && $toen > 0 ) {
+			$tekst = round( abs( $verschil ) / $toen * 100 ) . '%';
+		} elseif ( 'procent' === $soort || 'geld' === $soort ) {
+			$tekst = self::geld_rond( abs( $verschil ) );
+		} else {
+			$tekst = number_format_i18n( abs( $verschil ) );
+		}
+		$op = $verschil > 0;
+		return '<span class="hdp-g-pil is-' . ( $op ? 'op' : 'neer' ) . '"><span aria-hidden="true">' . ( $op ? '↑' : '↓' ) . '</span><span class="screen-reader-text">' . ( $op ? 'meer:' : 'minder:' ) . '</span> ' . esc_html( $tekst ) . '</span>';
 	}
 
-	private static function tegel( $waarde, $label, $onder = '' ) {
-		echo '<div class="hdp-g-tegel"><span class="hdp-g-tegel-label">' . esc_html( $label ) . '</span><strong>' . wp_kses_post( $waarde ) . '</strong>' . wp_kses_post( $onder ) . '</div>';
+	/** Een lijntje van het verloop (12 weken), als SVG met een omschrijving. */
+	private static function lijntje( array $waarden, $omschrijving ) {
+		$hoogste = max( 1, max( $waarden ) );
+		$stap    = count( $waarden ) > 1 ? 120 / ( count( $waarden ) - 1 ) : 120;
+		$punten  = array();
+		foreach ( array_values( $waarden ) as $i => $waarde ) {
+			$punten[] = round( $i * $stap, 1 ) . ',' . round( 32 - $waarde / $hoogste * 28, 1 );
+		}
+		return '<svg class="hdp-g-lijntje" width="120" height="36" viewBox="0 0 120 36" role="img" aria-label="' . esc_attr( $omschrijving ) . '"><polyline points="' . esc_attr( implode( ' ', $punten ) ) . '" fill="none" stroke="#ff8a8c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>';
+	}
+
+	/** Een kerncijfer op een witte kaart: icoon, label, groot getal, eventueel een regel eronder. */
+	private static function tegel( $waarde, $label, $onder = '', $icoon = 'chart-bar' ) {
+		echo '<div class="hdp-g-tegel"><span class="hdp-g-tegel-kop"><span class="hdp-g-icoon dashicons dashicons-' . esc_attr( $icoon ) . '" aria-hidden="true"></span>' . esc_html( $label ) . '</span><strong>' . wp_kses_post( $waarde ) . '</strong>' . ( $onder ? '<span class="hdp-g-tegel-onder">' . wp_kses_post( $onder ) . '</span>' : '' ) . '</div>';
 	}
 
 	/**
@@ -74,17 +155,17 @@ class HDP_Gebruik_Scherm {
 	 *
 	 * @param array<int, array{label: string, waarde: float, tekst: string}> $rijen
 	 */
-	private static function staven( array $rijen, $label_breedte = 150 ) {
+	private static function staven( array $rijen ) {
 		$hoogste = 0;
 		foreach ( $rijen as $rij ) {
 			$hoogste = max( $hoogste, (float) $rij['waarde'] );
 		}
 		$hoogste = $hoogste > 0 ? $hoogste : 1;
-		echo '<div class="hdp-g-staven" style="--label: ' . (int) $label_breedte . 'px">';
+		echo '<div class="hdp-g-staven">';
 		foreach ( $rijen as $rij ) {
-			$breedte = (float) $rij['waarde'] > 0 ? max( 1, round( (float) $rij['waarde'] / $hoogste * 100, 1 ) ) : 0;
+			$breedte = (float) $rij['waarde'] > 0 ? max( 2, round( (float) $rij['waarde'] / $hoogste * 100, 1 ) ) : 0;
 			printf(
-				'<div class="hdp-g-staaf" title="%1$s: %2$s"><span>%1$s</span><i><u style="width:%3$s%%"></u></i><b>%2$s</b></div>',
+				'<div class="hdp-g-staaf" title="%1$s: %2$s"><span class="hdp-g-staaf-kop"><span>%1$s</span><b>%2$s</b></span><i><u style="width:%3$s%%"></u></i></div>',
 				esc_attr( $rij['label'] ),
 				esc_html( $rij['tekst'] ),
 				esc_attr( (string) $breedte )
@@ -93,23 +174,53 @@ class HDP_Gebruik_Scherm {
 		echo '</div>';
 	}
 
-	private static function leeg( $tekst ) {
-		echo '<p class="hdp-g-leeg">' . esc_html( $tekst ) . '</p>';
+	private static function leeg( $tekst, $icoon = 'chart-bar' ) {
+		echo '<div class="hdp-g-leegte"><span class="dashicons dashicons-' . esc_attr( $icoon ) . '" aria-hidden="true"></span><p>' . esc_html( $tekst ) . '</p></div>';
 	}
 
-	private static function blok_open( $titel, $uitleg = '', $id = '' ) {
-		echo '<section class="hdp-g-blok"' . ( $id ? ' id="' . esc_attr( $id ) . '"' : '' ) . '><h2>' . esc_html( $titel ) . '</h2>';
+	private static function kaart_open( $titel, $uitleg = '', $id = '', $extra = '' ) {
+		echo '<section class="hdp-g-kaart ' . esc_attr( $extra ) . '"' . ( $id ? ' id="' . esc_attr( $id ) . '"' : '' ) . '><div class="hdp-g-kaart-kop"><h2>' . esc_html( $titel ) . '</h2>';
 		if ( $uitleg ) {
-			echo '<p class="hdp-g-uitleg">' . wp_kses_post( $uitleg ) . '</p>';
+			echo '<p>' . wp_kses_post( $uitleg ) . '</p>';
 		}
+		echo '</div>';
 	}
 
-	private static function blok_dicht() {
+	private static function kaart_dicht() {
 		echo '</section>';
 	}
 
 	private static function bedrijf_link( $id, $naam ) {
 		return $id ? '<a href="' . esc_url( get_edit_user_link( $id ) ) . '">' . esc_html( $naam ) . '</a>' : esc_html( $naam );
+	}
+
+	/** "LV" voor Loonbedrijf De Vries: de eerste letters van de laatste twee echte woorden. */
+	public static function initialen( $naam ) {
+		$woorden = array_values(
+			array_filter(
+				preg_split( '/\s+/', trim( (string) $naam ) ),
+				static function ( $woord ) {
+					return mb_strlen( $woord ) > 2;
+				}
+			)
+		);
+		if ( ! $woorden ) {
+			return mb_strtoupper( mb_substr( trim( (string) $naam ), 0, 1 ) );
+		}
+		$letters = '';
+		foreach ( array_slice( $woorden, -2 ) as $woord ) {
+			$letters .= mb_substr( $woord, 0, 1 );
+		}
+		return mb_strtoupper( $letters );
+	}
+
+	private static function avatar( $id, $naam, $groot = false ) {
+		$kleur = self::AVATARKLEUREN[ abs( (int) $id ) % count( self::AVATARKLEUREN ) ];
+		return '<span class="hdp-g-avatar' . ( $groot ? ' is-groot' : '' ) . '" style="background:' . esc_attr( $kleur ) . '" aria-hidden="true">' . esc_html( self::initialen( $naam ) ) . '</span>';
+	}
+
+	private static function label( $code, $tekst ) {
+		return '<span class="hdp-g-label is-' . esc_attr( $code ) . '">' . esc_html( $tekst ) . '</span>';
 	}
 
 	/* ---------------------------------------------------------------------
@@ -131,25 +242,27 @@ class HDP_Gebruik_Scherm {
 		if ( ! isset( self::TABS[ $tab ] ) ) {
 			$tab = 'overzicht';
 		}
+		$aantal_bedrijven = count( HDP_Gebruik::bedrijven() );
 		?>
 		<div class="wrap hdp-gebruik">
 			<?php self::stijl(); ?>
-			<h1>Portaalgebruik</h1>
+			<div class="hdp-g-kop">
+				<h1>Portaalgebruik</h1>
+				<div class="hdp-g-kop-acties">
+					<div class="hdp-g-segment" role="group" aria-label="Periode">
+						<?php foreach ( HDP_Gebruik::PERIODES as $waarde => $label ) : ?>
+							<a href="<?php echo esc_url( self::url( $tab, $waarde ) ); ?>" class="<?php echo $waarde === $dagen ? 'is-actief' : ''; ?>"<?php echo $waarde === $dagen ? ' aria-current="true"' : ''; ?>><?php echo esc_html( self::periode_tekst( $waarde ) ); ?></a>
+						<?php endforeach; ?>
+					</div>
+					<a class="hdp-g-knop" href="<?php echo esc_url( HDP_Gebruik::export_url( $dagen ) ); ?>"><span class="dashicons dashicons-download" aria-hidden="true"></span> Naar Excel</a>
+				</div>
+			</div>
 
-			<nav class="nav-tab-wrapper hdp-g-tabs" aria-label="Onderdelen van portaalgebruik">
+			<nav class="hdp-g-tabs" aria-label="Onderdelen van portaalgebruik">
 				<?php foreach ( self::TABS as $sleutel => $naam ) : ?>
-					<a href="<?php echo esc_url( self::url( $sleutel, $dagen ) ); ?>" class="nav-tab <?php echo $sleutel === $tab ? 'nav-tab-active' : ''; ?>"<?php echo $sleutel === $tab ? ' aria-current="page"' : ''; ?>><?php echo esc_html( $naam ); ?></a>
+					<a href="<?php echo esc_url( self::url( $sleutel, $dagen ) ); ?>" class="<?php echo $sleutel === $tab ? 'is-actief' : ''; ?>"<?php echo $sleutel === $tab ? ' aria-current="page"' : ''; ?>><?php echo esc_html( $naam ); ?><?php echo 'dealers' === $sleutel ? ' <span class="hdp-g-tab-aantal">' . (int) $aantal_bedrijven . '</span>' : ''; ?></a>
 				<?php endforeach; ?>
 			</nav>
-
-			<div class="hdp-g-balk">
-				<div class="hdp-g-periodes" role="group" aria-label="Periode">
-					<?php foreach ( HDP_Gebruik::PERIODES as $waarde => $label ) : ?>
-						<a href="<?php echo esc_url( self::url( $tab, $waarde ) ); ?>" class="button<?php echo $waarde === $dagen ? ' button-primary' : ''; ?>"<?php echo $waarde === $dagen ? ' aria-current="true"' : ''; ?>><?php echo esc_html( $label ); ?></a>
-					<?php endforeach; ?>
-				</div>
-				<a class="button" href="<?php echo esc_url( HDP_Gebruik::export_url( $dagen ) ); ?>"><span class="dashicons dashicons-download" aria-hidden="true"></span> Alle dealers naar Excel</a>
-			</div>
 
 			<?php
 			switch ( $tab ) {
@@ -170,132 +283,369 @@ class HDP_Gebruik_Scherm {
 			}
 			?>
 
-			<p class="description hdp-g-voet">Collega's tellen mee bij hun bedrijf. Beheerders en testaccounts (aan te vinken in het gebruikersprofiel) tellen niet mee. Alles staat in de eigen database, zonder cookies of externe dienst; gegevens ouder dan <?php echo (int) HDP_Gebruik::STERMIJN_DAGEN; ?> dagen worden automatisch verwijderd.</p>
+			<p class="hdp-g-voet">Collega's tellen mee bij hun bedrijf. Beheerders en testaccounts (aan te vinken in het gebruikersprofiel) tellen niet mee. Alles staat in de eigen database, zonder cookies of externe dienst; gegevens ouder dan <?php echo (int) HDP_Gebruik::STERMIJN_DAGEN; ?> dagen worden automatisch verwijderd.</p>
 		</div>
 		<?php
+		self::script();
 	}
 
 	/* ---------------------------------------------------------------------
 	 * Overzicht
 	 * ------------------------------------------------------------------- */
 
+	/**
+	 * De samenvatting bovenaan, in gewone taal.
+	 *
+	 * @return string[] array( hoofdzin met <em> om het bedrag, regel eronder )
+	 */
+	public static function samenvatting( $dagen, $nu, $toen, $vergelijk, $trechter, $delen ) {
+		$periode = self::periode_tekst( $dagen );
+		if ( ! $nu['bedrijven'] ) {
+			return array( 'Er zijn nog geen dealers die meetellen.', '' );
+		}
+
+		if ( 1 === (int) $nu['bedrijven'] ) {
+			$zin = $nu['actieve_bedrijven'] ? 'Het enige bedrijf was in het portaal.' : 'Het enige bedrijf was niet in het portaal.';
+		} else {
+			$zin = sprintf(
+				1 === (int) $nu['actieve_bedrijven'] ? '%d van de %d bedrijven was in het portaal.' : '%d van de %d bedrijven waren in het portaal.',
+				$nu['actieve_bedrijven'],
+				$nu['bedrijven']
+			);
+		}
+		if ( $trechter['besteld'] ) {
+			$zin .= ' ' . sprintf( 1 === (int) $trechter['besteld'] ? '%d bedrijf bestelde, samen voor %s.' : '%d bedrijven bestelden, samen voor %s.', $trechter['besteld'], '<em>' . esc_html( self::geld_rond( $nu['omzet'] ) ) . '</em>' );
+		} else {
+			$zin .= ' Er is niets besteld.';
+		}
+
+		$delen_zin = array();
+		if ( $vergelijk ) {
+			$verschil = $nu['actieve_bedrijven'] - $toen['actieve_bedrijven'];
+			if ( $verschil ) {
+				$delen_zin[] = sprintf( '%d %s %s', abs( $verschil ), 1 === abs( $verschil ) ? 'bedrijf' : 'bedrijven', $verschil > 0 ? 'meer' : 'minder' );
+			}
+		}
+		$omzet = $nu['omzet'] - $toen['omzet'];
+		if ( abs( $omzet ) >= 1 ) {
+			$delen_zin[] = sprintf( '%s %s omzet', self::geld_rond( abs( $omzet ) ), $omzet > 0 ? 'meer' : 'minder' );
+		}
+		$onder = $delen_zin ? 'Dat is ' . implode( ' en ', $delen_zin ) . ' dan de ' . $periode . ' ervoor.' : '';
+
+		$gebruikt = array_filter(
+			$delen,
+			static function ( $deel, $sleutel ) {
+				return $deel['bedrijven'] > 0 && ! in_array( $sleutel, array( 'start', 'account' ), true );
+			},
+			ARRAY_FILTER_USE_BOTH
+		);
+		uasort(
+			$gebruikt,
+			static function ( $a, $b ) {
+				return $b['bedrijven'] <=> $a['bedrijven'];
+			}
+		);
+		$namen = array_map( 'mb_strtolower', array_slice( array_values( wp_list_pluck( $gebruikt, 'naam' ) ), 0, 2 ) );
+		if ( $namen ) {
+			$onder .= ( $onder ? ' ' : '' ) . 'Meest gebruikt: de ' . $namen[0] . ( isset( $namen[1] ) ? ', daarna ' . $namen[1] : '' ) . '.';
+		}
+		return array( $zin, $onder );
+	}
+
 	private static function tab_overzicht( $dagen ) {
-		$nu       = HDP_Gebruik::kerncijfers( $dagen );
-		$toen     = HDP_Gebruik::kerncijfers( $dagen, true );
+		$nu        = HDP_Gebruik::kerncijfers( $dagen );
+		$toen      = HDP_Gebruik::kerncijfers( $dagen, true );
 		$vergelijk = HDP_Gebruik::vergelijkbaar( $dagen );
-		$aandacht = HDP_Gebruik::aandacht();
-		$per_week = HDP_Gebruik::actief_per_week( 12 );
-		$delen    = HDP_Gebruik::onderdelen( $dagen );
-		$apparaat = HDP_Gebruik::apparaten( $dagen );
-		$uitrol   = HDP_Gebruik::uitrol();
+		$trechter  = HDP_Gebruik::trechter( $dagen );
+		$delen     = HDP_Gebruik::onderdelen( $dagen );
+		$per_week  = HDP_Gebruik::actief_per_week( 12 );
+		$shop_week = HDP_Gebruik::webshop_per_week( 12 );
+		$bedrijven = HDP_Gebruik::dealerlijst( 30 );
+		$gebeurd   = HDP_Gebruik::gebeurtenissen( 8, 7 );
+		$cijfers   = HDP_Gebruik::webshopcijfers( $dagen );
+		$apparaat  = HDP_Gebruik::apparaten( $dagen );
+		$uitrol    = HDP_Gebruik::uitrol();
 
-		$meting = static function ( $sleutel ) use ( $vergelijk, $toen ) {
-			return $vergelijk ? $toen[ $sleutel ] : null;
-		};
+		list( $zin, $onder ) = self::samenvatting( $dagen, $nu, $toen, $vergelijk, $trechter, $delen );
 		?>
-		<section class="hdp-g-aandacht" aria-labelledby="hdp-g-aandacht-kop">
-			<h2 id="hdp-g-aandacht-kop">Vraagt aandacht</h2>
-			<?php if ( $aandacht ) : ?>
-				<ul>
-					<?php foreach ( $aandacht as $punt ) : ?>
-						<li class="is-<?php echo esc_attr( $punt['niveau'] ); ?>">
-							<span class="dashicons <?php echo 'fout' === $punt['niveau'] ? 'dashicons-warning' : 'dashicons-flag'; ?>" aria-hidden="true"></span>
-							<span class="screen-reader-text"><?php echo 'fout' === $punt['niveau'] ? 'Fout:' : 'Let op:'; ?></span>
-							<span class="hdp-g-aandacht-tekst"><?php echo esc_html( $punt['tekst'] ); ?></span>
-							<a class="button button-small" href="<?php echo esc_url( $punt['link'] ); ?>"><?php echo esc_html( $punt['knop'] ); ?></a>
-						</li>
-					<?php endforeach; ?>
-				</ul>
-			<?php else : ?>
-				<p class="hdp-g-alles-goed"><span class="dashicons dashicons-yes-alt" aria-hidden="true"></span> Alles in orde. Geen fouten richting PowerAll, geen verlopen uitnodigingen, geen vergeten winkelwagens en geen zoekopdrachten zonder resultaat deze week.</p>
-			<?php endif; ?>
+		<section class="hdp-g-held" aria-labelledby="hdp-g-held-kop">
+			<div class="hdp-g-held-tekst">
+				<span class="hdp-g-held-label" id="hdp-g-held-kop"><?php echo esc_html( HDP_Gebruik::PERIODES[ $dagen ] ); ?> in het kort</span>
+				<p class="hdp-g-held-zin"><?php echo wp_kses( $zin, array( 'em' => array() ) ); ?></p>
+				<?php if ( $onder ) : ?>
+					<p class="hdp-g-held-onder"><?php echo esc_html( $onder ); ?></p>
+				<?php endif; ?>
+			</div>
+			<div class="hdp-g-held-cijfers">
+				<div class="hdp-g-held-cijfer">
+					<div><span>Actieve bedrijven</span><strong><?php echo (int) $nu['actieve_bedrijven']; ?> <?php echo wp_kses_post( self::pil( $nu['actieve_bedrijven'], $vergelijk ? $toen['actieve_bedrijven'] : null ) ); ?></strong></div>
+					<?php echo self::lijntje( wp_list_pluck( $per_week, 'aantal' ), 'Actieve bedrijven per week, laatste 12 weken' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- geëscaped in lijntje. ?>
+				</div>
+				<div class="hdp-g-held-cijfer">
+					<div><span>Bestellingen</span><strong><?php echo (int) $nu['bestellingen']; ?> <?php echo wp_kses_post( self::pil( $nu['bestellingen'], $toen['bestellingen'] ) ); ?></strong></div>
+					<?php echo self::lijntje( wp_list_pluck( $shop_week, 'bestellingen' ), 'Bestellingen per week, laatste 12 weken' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</div>
+				<div class="hdp-g-held-cijfer">
+					<div><span>Omzet excl. btw</span><strong><?php echo esc_html( self::geld_rond( $nu['omzet'] ) ); ?> <?php echo wp_kses_post( self::pil( $nu['omzet'], $toen['omzet'], 'procent' ) ); ?></strong></div>
+					<?php echo self::lijntje( wp_list_pluck( $shop_week, 'omzet' ), 'Omzet per week, laatste 12 weken' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</div>
+			</div>
 		</section>
+		<?php if ( ! $vergelijk && HDP_Gebruik::meting_sinds() ) : ?>
+			<p class="hdp-g-voetnoot">Bezoeken worden bijgehouden sinds <?php echo esc_html( wp_date( 'j F Y', HDP_Gebruik::meting_sinds() ) ); ?>. Zodra dat langer loopt dan de gekozen periode, worden ook de actieve bedrijven met de periode ervoor vergeleken.</p>
+		<?php endif; ?>
 
-		<div class="hdp-g-tegels">
+		<div class="hdp-g-rij-flex">
 			<?php
-			self::tegel( (int) $nu['actieve_bedrijven'] . ' <small>van ' . (int) $nu['bedrijven'] . '</small>', 'Bedrijven actief geweest', self::verschil( $nu['actieve_bedrijven'], $meting( 'actieve_bedrijven' ) ) );
-			self::tegel( (string) (int) $nu['bezoeken'], 'Bezoekdagen', self::verschil( $nu['bezoeken'], $meting( 'bezoeken' ) ) );
-			self::tegel( (string) (int) $nu['bestellingen'], 'Bestellingen', self::verschil( $nu['bestellingen'], $toen['bestellingen'] ) );
-			self::tegel( esc_html( self::geld( $nu['omzet'] ) ), 'Omzet webshop excl. btw', self::verschil( $nu['omzet'], $toen['omzet'], true ) );
-			self::tegel( (string) (int) $nu['downloads'], 'Documenten geopend', self::verschil( $nu['downloads'], $meting( 'downloads' ) ) );
-			$zoek = $nu['zoekopdrachten'] + $nu['webshopzoek'];
-			$niets = $nu['zonder_treffer'] + $nu['webshop_niets'];
-			self::tegel( (string) (int) $zoek, 'Zoekopdrachten', '<span class="hdp-g-delta">' . ( $niets ? (int) $niets . ' zonder resultaat' : 'alles leverde iets op' ) . '</span>' );
+			self::kaart_open( 'Omzet per week', 'Webshop, excl. btw · wijs een week aan voor details', '', 'is-breed' );
+			self::omzetgrafiek( $shop_week );
+			self::kaart_dicht();
+
+			self::kaart_open( 'Hoe actief zijn de bedrijven', 'Laatste 30 dagen · klik voor de namen', '', 'is-smal' );
+			self::donut( $bedrijven, $dagen );
+			self::kaart_dicht();
 			?>
 		</div>
 
 		<div class="hdp-g-raster">
 			<?php
-			self::blok_open( 'Actieve bedrijven per week', 'Hoeveel verschillende bedrijven per week minstens één keer in het portaal waren. Altijd de laatste 12 weken.' );
-			self::staven(
-				array_map(
-					static function ( $week ) {
-						return array( 'label' => $week['week'], 'waarde' => $week['aantal'], 'tekst' => (string) $week['aantal'] );
-					},
-					$per_week
-				),
-				70
-			);
-			self::blok_dicht();
+			self::kaart_open( 'Net gebeurd', 'De laatste 7 dagen' );
+			self::tijdlijn( $gebeurd );
+			self::kaart_dicht();
 
-			self::blok_open( 'Welke onderdelen worden gebruikt', 'Hoeveel bedrijven elk onderdeel in deze periode openden.' );
-			if ( array_sum( wp_list_pluck( $delen, 'dagen' ) ) ) {
-				self::staven(
-					array_map(
-						static function ( $deel ) {
-							return array( 'label' => $deel['naam'], 'waarde' => $deel['bedrijven'], 'tekst' => $deel['bedrijven'] . ( 1 === $deel['bedrijven'] ? ' bedrijf' : ' bedrijven' ) );
-						},
-						array_values( $delen )
-					),
-					140
-				);
-			} else {
-				self::leeg( 'Nog niets gemeten in deze periode. Dit wordt bijgehouden vanaf versie 1.110.0.' );
-			}
-			self::blok_dicht();
+			self::kaart_open( 'Van bezoek naar bestelling', 'Hoeveel bedrijven elke stap haalden' );
+			self::trechter( $trechter );
+			self::kaart_dicht();
 
-			self::blok_open( 'Apparaat en taal', 'Waarop en in welke taal dealers het portaal gebruiken, in bezoekdagen.' );
-			$app_totaal  = array_sum( $apparaat['apparaat'] );
-			$taal_totaal = array_sum( $apparaat['taal'] );
-			if ( $app_totaal ) {
-				$procent = static function ( $deel, $totaal ) {
-					return $totaal ? round( $deel / $totaal * 100 ) : 0;
-				};
-				self::staven(
-					array(
-						array( 'label' => 'Computer', 'waarde' => $apparaat['apparaat']['computer'], 'tekst' => $procent( $apparaat['apparaat']['computer'], $app_totaal ) . '%' ),
-						array( 'label' => 'Telefoon of tablet', 'waarde' => $apparaat['apparaat']['mobiel'], 'tekst' => $procent( $apparaat['apparaat']['mobiel'], $app_totaal ) . '%' ),
-					),
-					140
-				);
-				echo '<div class="hdp-g-tussen"></div>';
-				self::staven(
-					array(
-						array( 'label' => 'Nederlands', 'waarde' => $apparaat['taal']['nl'], 'tekst' => $procent( $apparaat['taal']['nl'], $taal_totaal ) . '%' ),
-						array( 'label' => 'Frans', 'waarde' => $apparaat['taal']['fr'], 'tekst' => $procent( $apparaat['taal']['fr'], $taal_totaal ) . '%' ),
-					),
-					140
-				);
-			} else {
-				self::leeg( 'Nog niets gemeten in deze periode. Dit wordt bijgehouden vanaf versie 1.110.0.' );
-			}
-			self::blok_dicht();
+			self::kaart_open( 'Meest besteld', 'Op aantal stuks' );
+			self::meest_besteld( array_slice( $cijfers['artikelen'], 0, 5 ) );
+			self::kaart_dicht();
 
-			if ( $uitrol['totaal'] ) {
-				self::blok_open( 'Uitnodigingen (dealers uit PowerAll)', 'Hoe ver de dealers uit PowerAll zijn met hun account. Telt altijd alles, los van de periode. <a href="' . esc_url( self::url( 'dealers', $dagen ) ) . '#nalopen">Wie moet er nog?</a>' );
-				?>
-				<div class="hdp-g-trechter">
-					<div><strong><?php echo (int) $uitrol['totaal']; ?></strong><span>gekoppeld</span></div>
-					<div><strong><?php echo (int) ( $uitrol['totaal'] - $uitrol['niet'] ); ?></strong><span>uitgenodigd</span></div>
-					<div><strong><?php echo (int) $uitrol['gekozen']; ?></strong><span>wachtwoord gekozen</span></div>
-					<div><strong><?php echo (int) $uitrol['geweest']; ?></strong><span>al eens in het portaal</span></div>
-				</div>
-				<?php
-				self::blok_dicht();
+			self::kaart_open( 'Wat gebruiken ze', 'Bedrijven per onderdeel' );
+			self::wat_gebruiken_ze( $delen, $apparaat );
+			self::kaart_dicht();
+
+			if ( $uitrol['totaal'] && $uitrol['gekozen'] < $uitrol['totaal'] ) {
+				self::kaart_open( 'Uitnodigingen', 'Dealers uit PowerAll, los van de periode · <a href="' . esc_url( self::url( 'dealers', $dagen ) ) . '#nalopen">wie moet er nog?</a>' );
+				self::trechter_uitrol( $uitrol );
+				self::kaart_dicht();
 			}
 			?>
 		</div>
 		<?php
+	}
+
+	/** Staande kolommen per week; aanwijzen of tabben toont het bedrag en de bestellingen. */
+	private static function omzetgrafiek( array $weken ) {
+		$hoogste = max( wp_list_pluck( $weken, 'omzet' ) );
+		if ( $hoogste <= 0 ) {
+			self::leeg( 'Nog geen bestellingen in de laatste 12 weken.', 'cart' );
+			return;
+		}
+		$gemiddeld = array_sum( wp_list_pluck( $weken, 'omzet' ) ) / count( $weken );
+		$laatste   = end( $weken );
+		$uitleg    = static function ( $week, $deze ) {
+			return 'week ' . $week['nr'] . ( $deze ? ' (deze week)' : '' ) . ' · ' . $week['bestellingen'] . ( 1 === $week['bestellingen'] ? ' bestelling' : ' bestellingen' );
+		};
+		$standaard_bedrag = self::geld_rond( $laatste['omzet'] );
+		$standaard_uitleg = $uitleg( $laatste, true );
+		?>
+		<div class="hdp-g-grafiek" data-bedrag="<?php echo esc_attr( $standaard_bedrag ); ?>" data-uitleg="<?php echo esc_attr( $standaard_uitleg ); ?>">
+			<div class="hdp-g-uitlezing" aria-live="polite"><strong><?php echo esc_html( $standaard_bedrag ); ?></strong><span><?php echo esc_html( $standaard_uitleg ); ?></span></div>
+			<div class="hdp-g-kolommen">
+				<div class="hdp-g-gemiddeld" style="bottom: <?php echo esc_attr( (string) round( $gemiddeld / $hoogste * 196 ) ); ?>px" aria-hidden="true"><span>gemiddeld <?php echo esc_html( self::geld_rond( $gemiddeld ) ); ?></span></div>
+				<?php foreach ( $weken as $i => $week ) : ?>
+					<?php $deze = count( $weken ) - 1 === $i; ?>
+					<button type="button" class="hdp-g-kolom<?php echo $deze ? ' is-deze' : ''; ?>" data-bedrag="<?php echo esc_attr( self::geld_rond( $week['omzet'] ) ); ?>" data-uitleg="<?php echo esc_attr( $uitleg( $week, $deze ) ); ?>" aria-label="<?php echo esc_attr( $week['week'] . ': ' . self::geld_rond( $week['omzet'] ) . ', ' . $week['bestellingen'] . ' bestellingen' ); ?>">
+						<i style="height: <?php echo esc_attr( (string) ( $week['omzet'] > 0 ? max( 3, round( $week['omzet'] / $hoogste * 196 ) ) : 2 ) ); ?>px"></i>
+					</button>
+				<?php endforeach; ?>
+			</div>
+			<div class="hdp-g-weeknummers" aria-hidden="true">
+				<?php foreach ( $weken as $i => $week ) : ?>
+					<span<?php echo count( $weken ) - 1 === $i ? ' class="is-deze"' : ''; ?>><?php echo (int) $week['nr']; ?></span>
+				<?php endforeach; ?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/** De bedrijven naar activiteit, als ring met een legenda die naar de dealerlijst linkt. */
+	private static function donut( array $bedrijven, $dagen ) {
+		if ( ! $bedrijven ) {
+			self::leeg( 'Er zijn nog geen goedgekeurde dealers.', 'groups' );
+			return;
+		}
+		$tellingen = array_fill_keys( array_keys( self::ACTIVITEITEN ), 0 );
+		foreach ( $bedrijven as $rij ) {
+			++$tellingen[ $rij['activiteit']['code'] ];
+		}
+		$totaal    = count( $bedrijven );
+		$omtrek    = 2 * M_PI * 56;
+		$tussen    = count( array_filter( $tellingen ) ) > 1 ? 2.0 : 0.0;
+		$verschuif = 0.0;
+		$tekst     = array();
+		foreach ( self::ACTIVITEITEN as $code => $naam ) {
+			$tekst[] = $naam . ' ' . $tellingen[ $code ];
+		}
+		?>
+		<div class="hdp-g-donut-blok">
+			<div class="hdp-g-donut">
+				<svg width="148" height="148" viewBox="0 0 148 148" role="img" aria-label="<?php echo esc_attr( $totaal . ' bedrijven: ' . implode( ', ', $tekst ) ); ?>">
+					<g transform="rotate(-90 74 74)" fill="none" stroke-width="18">
+						<?php
+						foreach ( self::ACTIVITEITEN as $code => $naam ) {
+							if ( ! $tellingen[ $code ] ) {
+								continue;
+							}
+							$lengte = $tellingen[ $code ] / $totaal * $omtrek;
+							printf(
+								'<circle cx="74" cy="74" r="56" stroke="%1$s" stroke-dasharray="%2$s %3$s" stroke-dashoffset="%4$s"></circle>',
+								esc_attr( self::ACTIVITEIT_KLEUR[ $code ] ),
+								esc_attr( (string) round( max( 0.5, $lengte - $tussen ), 2 ) ),
+								esc_attr( (string) round( $omtrek, 2 ) ),
+								esc_attr( (string) round( -$verschuif, 2 ) )
+							);
+							$verschuif += $lengte;
+						}
+						?>
+					</g>
+				</svg>
+				<div class="hdp-g-donut-midden"><strong><?php echo (int) $totaal; ?></strong><span><?php echo 1 === $totaal ? 'bedrijf' : 'bedrijven'; ?></span></div>
+			</div>
+			<ul class="hdp-g-legenda">
+				<?php foreach ( self::ACTIVITEITEN as $code => $naam ) : ?>
+					<li><a href="<?php echo esc_url( self::url( 'dealers', $dagen, array( 'activiteit' => $code ) ) ); ?>"><i style="background: <?php echo esc_attr( self::ACTIVITEIT_KLEUR[ $code ] ); ?>" aria-hidden="true"></i><span><?php echo esc_html( $naam ); ?></span><b><?php echo (int) $tellingen[ $code ]; ?></b></a></li>
+				<?php endforeach; ?>
+			</ul>
+		</div>
+		<?php
+	}
+
+	private static function tijdlijn( array $gebeurd ) {
+		if ( ! $gebeurd ) {
+			self::leeg( 'De afgelopen 7 dagen is er nog niets gebeurd.', 'clock' );
+			return;
+		}
+		echo '<ol class="hdp-g-tijdlijn">';
+		foreach ( $gebeurd as $punt ) {
+			$icoon = isset( self::TIJDLIJN_ICOON[ $punt['soort'] ] ) ? self::TIJDLIJN_ICOON[ $punt['soort'] ] : array( 'marker', 'is-grijs' );
+			printf(
+				'<li><time datetime="%1$s">%2$s</time><span class="hdp-g-tijdlijn-icoon %3$s dashicons dashicons-%4$s" aria-hidden="true"></span><span><strong>%5$s</strong>%6$s %7$s</span></li>',
+				esc_attr( gmdate( 'c', $punt['tijd'] ) ),
+				esc_html( self::tijdstip( $punt['tijd'] ) ),
+				esc_attr( $icoon[1] ),
+				esc_attr( $icoon[0] ),
+				esc_html( $punt['wie'] ),
+				$punt['bij'] ? ' <span class="hdp-g-zacht">(' . esc_html( $punt['bij'] ) . ')</span>' : '',
+				esc_html( $punt['tekst'] )
+			);
+		}
+		echo '</ol>';
+	}
+
+	private static function trechter( array $stap ) {
+		if ( ! $stap['portaal'] ) {
+			self::leeg( 'Nog geen bezoeken in deze periode.', 'filter' );
+			return;
+		}
+		$stappen = array(
+			array( 'In het portaal', $stap['portaal'] ),
+			array( 'Webshop geopend', $stap['webshop'] ),
+			array( 'Iets in de winkelwagen', $stap['winkelwagen'] ),
+			array( 'Besteld', $stap['besteld'] ),
+		);
+		echo '<div class="hdp-g-trechter">';
+		foreach ( $stappen as $i => $s ) {
+			$procent = round( $s[1] / $stap['portaal'] * 100 );
+			printf(
+				'<div><span class="hdp-g-trechter-kop"><span>%1$s</span><b>%2$d%3$s</b></span><i><u class="is-%4$d" style="width:%5$d%%"></u></i></div>',
+				esc_html( $s[0] ),
+				(int) $s[1],
+				$i ? ' <span class="hdp-g-zacht">· ' . (int) $procent . '%</span>' : '',
+				(int) $i + 1,
+				(int) max( $s[1] ? 2 : 0, $procent )
+			);
+		}
+		echo '</div>';
+		$niet = $stap['winkelwagen'] - $stap['besteld'];
+		if ( $niet > 0 ) {
+			echo '<p class="hdp-g-opmerking">' . esc_html( sprintf( 1 === $niet ? '%d bedrijf deed iets in de winkelwagen maar bestelde niet.' : '%d bedrijven deden iets in de winkelwagen maar bestelden niet.', $niet ) ) . '</p>';
+		}
+	}
+
+	private static function meest_besteld( array $artikelen ) {
+		if ( ! $artikelen ) {
+			self::leeg( 'In deze periode is nog niets besteld.', 'cart' );
+			return;
+		}
+		$hoogste = max( 1, max( wp_list_pluck( $artikelen, 'stuks' ) ) );
+		echo '<ol class="hdp-g-top">';
+		foreach ( array_values( $artikelen ) as $i => $artikel ) {
+			printf(
+				'<li><span class="hdp-g-top-nr">%1$d</span><span class="hdp-g-top-naam"><span title="%2$s">%2$s</span><i style="width:%3$d%%"></i></span><b>%4$d</b></li>',
+				(int) $i + 1,
+				esc_html( $artikel['naam'] ),
+				(int) max( 3, round( $artikel['stuks'] / $hoogste * 100 ) ),
+				(int) $artikel['stuks']
+			);
+		}
+		echo '</ol>';
+	}
+
+	private static function wat_gebruiken_ze( array $delen, array $apparaat ) {
+		$gebruikt = array_filter(
+			$delen,
+			static function ( $deel ) {
+				return $deel['bedrijven'] > 0;
+			}
+		);
+		if ( ! $gebruikt ) {
+			self::leeg( 'Nog geen gegevens in deze periode. Dit vult zich vanzelf zodra dealers het portaal gebruiken.', 'screenoptions' );
+			return;
+		}
+		uasort(
+			$gebruikt,
+			static function ( $a, $b ) {
+				return $b['bedrijven'] <=> $a['bedrijven'];
+			}
+		);
+		echo '<div class="hdp-g-vakken">';
+		$rang = 0;
+		foreach ( array_slice( $gebruikt, 0, 6 ) as $deel ) {
+			++$rang;
+			printf( '<div class="is-%1$d"><span>%2$s</span><strong>%3$d</strong></div>', (int) $rang, esc_html( $deel['naam'] ), (int) $deel['bedrijven'] );
+		}
+		echo '</div>';
+		$app_totaal  = array_sum( $apparaat['apparaat'] );
+		$taal_totaal = array_sum( $apparaat['taal'] );
+		if ( $app_totaal ) {
+			printf(
+				'<p class="hdp-g-opmerking">%d%% op de telefoon of tablet · %d%% in het Frans</p>',
+				(int) round( $apparaat['apparaat']['mobiel'] / $app_totaal * 100 ),
+				(int) ( $taal_totaal ? round( $apparaat['taal']['fr'] / $taal_totaal * 100 ) : 0 )
+			);
+		}
+	}
+
+	private static function trechter_uitrol( array $uitrol ) {
+		$stappen = array(
+			array( 'Gekoppeld', $uitrol['totaal'] ),
+			array( 'Uitgenodigd', $uitrol['totaal'] - $uitrol['niet'] ),
+			array( 'Wachtwoord gekozen', $uitrol['gekozen'] ),
+			array( 'Al eens in het portaal', $uitrol['geweest'] ),
+		);
+		echo '<div class="hdp-g-trechter">';
+		foreach ( $stappen as $i => $s ) {
+			printf(
+				'<div><span class="hdp-g-trechter-kop"><span>%1$s</span><b>%2$d</b></span><i><u class="is-%3$d" style="width:%4$d%%"></u></i></div>',
+				esc_html( $s[0] ),
+				(int) $s[1],
+				(int) $i + 1,
+				(int) ( $uitrol['totaal'] ? max( $s[1] ? 2 : 0, round( $s[1] / $uitrol['totaal'] * 100 ) ) : 0 )
+			);
+		}
+		echo '</div>';
 	}
 
 	/* ---------------------------------------------------------------------
@@ -311,78 +661,89 @@ class HDP_Gebruik_Scherm {
 			$filter = '';
 		}
 
+		if ( ! $lijst ) {
+			self::kaart_open( 'Dealers' );
+			self::leeg( 'Er zijn nog geen goedgekeurde dealers.', 'groups' );
+			self::kaart_dicht();
+			return;
+		}
+
+		usort(
+			$lijst,
+			static function ( $a, $b ) {
+				return array( $b['omzet'], $b['bezoekdagen'], $a['bedrijf'] ) <=> array( $a['omzet'], $a['bezoekdagen'], $b['bedrijf'] );
+			}
+		);
 		$tellingen = array_fill_keys( array_keys( self::ACTIVITEITEN ), 0 );
 		foreach ( $lijst as $rij ) {
 			++$tellingen[ $rij['activiteit']['code'] ];
 		}
+		$volgorde = array( 'actief' => 4, 'af-en-toe' => 3, 'stil' => 2, 'nooit' => 1 );
 		?>
-		<section class="hdp-g-blok hdp-g-dealers">
-			<h2>Alle bedrijven</h2>
-			<p class="hdp-g-uitleg">Eén regel per bedrijf; collega's tellen mee. <strong>Actief</strong> = <?php echo (int) HDP_Gebruik::ACTIEF_DAGEN; ?> of meer bezoekdagen in de laatste 30 dagen, <strong>af en toe</strong> = minder vaak, <strong>stil</strong> = langer dan 30 dagen niet geweest. De cijfers gaan over de gekozen periode. Klik op een kolomkop om te sorteren.</p>
+		<div class="hdp-g-dealers" data-filter="<?php echo esc_attr( $filter ); ?>">
+			<section class="hdp-g-kaart hdp-g-dealerlijst" aria-label="Alle bedrijven">
+				<div class="hdp-g-filters">
+					<label class="screen-reader-text" for="hdp-g-zoek">Zoek een bedrijf</label>
+					<input type="search" id="hdp-g-zoek" placeholder="Zoek op bedrijf, plaats, naam of klantnummer" autocomplete="off">
+					<div class="hdp-g-keuzes" role="group" aria-label="Filter op activiteit">
+						<button type="button" data-activiteit="" aria-pressed="<?php echo '' === $filter ? 'true' : 'false'; ?>">Alle <span><?php echo count( $lijst ); ?></span></button>
+						<?php foreach ( self::ACTIVITEITEN as $code => $naam ) : ?>
+							<button type="button" data-activiteit="<?php echo esc_attr( $code ); ?>" aria-pressed="<?php echo $code === $filter ? 'true' : 'false'; ?>"><i style="background: <?php echo esc_attr( self::ACTIVITEIT_KLEUR[ $code ] ); ?>" aria-hidden="true"></i><?php echo esc_html( $naam ); ?> <span><?php echo (int) $tellingen[ $code ]; ?></span></button>
+						<?php endforeach; ?>
+					</div>
+				</div>
 
-			<div class="hdp-g-filters">
-				<label class="screen-reader-text" for="hdp-g-zoek">Zoek een bedrijf</label>
-				<input type="search" id="hdp-g-zoek" placeholder="Zoek op bedrijf, naam, e-mail of klantnummer" autocomplete="off">
-				<div class="hdp-g-keuzes" role="group" aria-label="Filter op activiteit">
-					<button type="button" class="button<?php echo '' === $filter ? ' is-gekozen' : ''; ?>" data-activiteit="" aria-pressed="<?php echo '' === $filter ? 'true' : 'false'; ?>">Alle <span class="hdp-g-aantal"><?php echo count( $lijst ); ?></span></button>
-					<?php foreach ( self::ACTIVITEITEN as $code => $naam ) : ?>
-						<button type="button" class="button<?php echo $code === $filter ? ' is-gekozen' : ''; ?>" data-activiteit="<?php echo esc_attr( $code ); ?>" aria-pressed="<?php echo $code === $filter ? 'true' : 'false'; ?>"><span class="hdp-g-label is-<?php echo esc_attr( $code ); ?>"><?php echo esc_html( $naam ); ?></span> <span class="hdp-g-aantal"><?php echo (int) $tellingen[ $code ]; ?></span></button>
+				<div class="hdp-g-lijstkop">
+					<button type="button" data-sorteer="bedrijf" data-soort="tekst">Bedrijf</button>
+					<button type="button" data-sorteer="activiteit">Activiteit</button>
+					<span class="hdp-g-kol-weken">Laatste 12 weken</span>
+					<button type="button" data-sorteer="bestellingen" class="is-rechts hdp-g-kol-bestellingen">Bestellingen</button>
+					<button type="button" data-sorteer="omzet" class="is-rechts" aria-sort="descending">Omzet</button>
+				</div>
+				<div class="hdp-g-rijen" id="hdp-g-rijen">
+					<?php foreach ( $lijst as $rij ) : ?>
+						<?php
+						$hoogste = max( 1, max( $rij['weken'] ) );
+						$zoek    = mb_strtolower( implode( ' ', array( $rij['bedrijf'], $rij['plaats'], $rij['naam'], $rij['email'], $rij['klantnummer'] ) ) );
+						?>
+						<button type="button" class="hdp-g-rij" aria-pressed="false" aria-controls="hdp-g-detail-<?php echo (int) $rij['id']; ?>"
+							data-id="<?php echo (int) $rij['id']; ?>"
+							data-zoek="<?php echo esc_attr( $zoek ); ?>"
+							data-activiteit="<?php echo esc_attr( $rij['activiteit']['code'] ); ?>"
+							data-s-bedrijf="<?php echo esc_attr( mb_strtolower( $rij['bedrijf'] ) ); ?>"
+							data-s-activiteit="<?php echo (int) $volgorde[ $rij['activiteit']['code'] ]; ?>"
+							data-s-bestellingen="<?php echo (int) $rij['bestellingen']; ?>"
+							data-s-omzet="<?php echo esc_attr( (string) round( $rij['omzet'], 2 ) ); ?>">
+							<span class="hdp-g-rij-naam">
+								<?php echo self::avatar( $rij['id'], $rij['bedrijf'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- geëscaped in avatar. ?>
+								<span><strong><?php echo esc_html( $rij['bedrijf'] ); ?></strong><small><?php echo esc_html( implode( ' · ', array_filter( array( $rij['plaats'], self::wanneer( $rij['laatst'] ) ) ) ) ); ?></small></span>
+							</span>
+							<span class="hdp-g-kol-activiteit"><?php echo self::label( $rij['activiteit']['code'], $rij['activiteit']['tekst'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+							<span class="hdp-g-mini hdp-g-kol-weken" aria-label="<?php echo esc_attr( 'Bezoekdagen per week: ' . implode( ', ', $rij['weken'] ) ); ?>">
+								<?php foreach ( $rij['weken'] as $waarde ) : ?>
+									<i class="<?php echo $waarde ? ( 'stil' === $rij['activiteit']['code'] ? 'is-zacht' : 'is-vol' ) : ''; ?>" style="height: <?php echo (int) ( $waarde ? max( 4, round( $waarde / $hoogste * 26 ) ) : 2 ); ?>px"></i>
+								<?php endforeach; ?>
+							</span>
+							<span class="is-rechts hdp-g-kol-bestellingen"><?php echo (int) $rij['bestellingen']; ?></span>
+							<span class="is-rechts hdp-g-vet"><?php echo $rij['omzet'] ? esc_html( self::geld_rond( $rij['omzet'] ) ) : '—'; ?></span>
+						</button>
 					<?php endforeach; ?>
 				</div>
-			</div>
+				<p class="hdp-g-leeg-tekst" id="hdp-g-geen-treffer" hidden>Geen bedrijf gevonden.</p>
+			</section>
 
-			<?php if ( $lijst ) : ?>
-				<div class="hdp-g-scroll">
-					<table class="widefat striped hdp-g-sorteer" id="hdp-g-dealertabel">
-						<thead>
-							<tr>
-								<th scope="col" aria-sort="ascending"><button type="button" data-kolom="0" data-soort="tekst">Bedrijf</button></th>
-								<th scope="col"><button type="button" data-kolom="1" data-soort="getal">Activiteit</button></th>
-								<th scope="col" class="num"><button type="button" data-kolom="2" data-soort="getal">Laatst geweest</button></th>
-								<th scope="col" class="num"><button type="button" data-kolom="3" data-soort="getal">Bezoekdagen</button></th>
-								<th scope="col" class="num"><button type="button" data-kolom="4" data-soort="getal">Documenten</button></th>
-								<th scope="col" class="num"><button type="button" data-kolom="5" data-soort="getal">Zoekopdr.</button></th>
-								<th scope="col" class="num"><button type="button" data-kolom="6" data-soort="getal">Bestellingen</button></th>
-								<th scope="col" class="num"><button type="button" data-kolom="7" data-soort="getal">Omzet</button></th>
-								<th scope="col" class="num"><button type="button" data-kolom="8" data-soort="getal">Trainingen</button></th>
-							</tr>
-						</thead>
-						<tbody>
-						<?php
-						$volgorde = array( 'actief' => 4, 'af-en-toe' => 3, 'stil' => 2, 'nooit' => 1 );
-						foreach ( $lijst as $rij ) :
-							$zoek = mb_strtolower( implode( ' ', array( $rij['bedrijf'], $rij['naam'], $rij['email'], $rij['klantnummer'] ) ) );
-							?>
-							<tr data-zoek="<?php echo esc_attr( $zoek ); ?>" data-activiteit="<?php echo esc_attr( $rij['activiteit']['code'] ); ?>">
-								<td data-waarde="<?php echo esc_attr( mb_strtolower( $rij['bedrijf'] ) ); ?>">
-									<?php echo self::bedrijf_link( $rij['id'], $rij['bedrijf'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- geëscaped in bedrijf_link. ?>
-									<br><small><?php echo esc_html( $rij['naam'] . ( $rij['klantnummer'] ? ' · ' . $rij['klantnummer'] : '' ) . ( $rij['collegas'] ? ' · ' . $rij['collegas'] . ( 1 === $rij['collegas'] ? ' collega' : " collega's" ) : '' ) ); ?></small>
-								</td>
-								<td data-waarde="<?php echo (int) $volgorde[ $rij['activiteit']['code'] ]; ?>"><span class="hdp-g-label is-<?php echo esc_attr( $rij['activiteit']['code'] ); ?>"><?php echo esc_html( $rij['activiteit']['tekst'] ); ?></span></td>
-								<td class="num" data-waarde="<?php echo (int) $rij['laatst']; ?>"><?php echo esc_html( $rij['laatst'] ? self::datum( $rij['laatst'] ) : 'Nog nooit' ); ?></td>
-								<td class="num" data-waarde="<?php echo (int) $rij['bezoekdagen']; ?>"><?php echo (int) $rij['bezoekdagen']; ?></td>
-								<td class="num" data-waarde="<?php echo (int) $rij['downloads']; ?>"><?php echo (int) $rij['downloads']; ?></td>
-								<td class="num" data-waarde="<?php echo (int) $rij['zoeken']; ?>"><?php echo (int) $rij['zoeken']; ?></td>
-								<td class="num" data-waarde="<?php echo (int) $rij['bestellingen']; ?>"><?php echo (int) $rij['bestellingen']; ?></td>
-								<td class="num" data-waarde="<?php echo esc_attr( (string) round( $rij['omzet'], 2 ) ); ?>"><?php echo $rij['omzet'] ? esc_html( self::geld( $rij['omzet'] ) ) : '—'; ?></td>
-								<td class="num" data-waarde="<?php echo (int) $rij['trainingen']; ?>"><?php echo (int) $rij['trainingen']; ?></td>
-							</tr>
-						<?php endforeach; ?>
-						</tbody>
-					</table>
-				</div>
-				<p class="hdp-g-leeg" id="hdp-g-geen-treffer" hidden>Geen bedrijf gevonden.</p>
-			<?php else : ?>
-				<?php self::leeg( 'Er zijn nog geen goedgekeurde dealers.' ); ?>
-			<?php endif; ?>
-		</section>
+			<aside class="hdp-g-kaart hdp-g-detail" aria-label="Details van het gekozen bedrijf" id="hdp-g-detail">
+				<?php foreach ( $lijst as $rij ) : ?>
+					<?php self::detail( $rij ); ?>
+				<?php endforeach; ?>
+			</aside>
+		</div>
 
 		<?php if ( $uitrol['nalopen'] ) : ?>
-			<section class="hdp-g-blok" id="nalopen">
-				<h2>Uitgenodigd, nog geen wachtwoord gekozen</h2>
-				<p class="hdp-g-uitleg">Een verlopen uitnodiging stuur je opnieuw via <a href="<?php echo esc_url( admin_url( 'users.php?page=' . HDP_PowerAll_Dealers::PAGINA ) ); ?>">Gebruikers &gt; Dealers uit PowerAll</a>.</p>
+			<section class="hdp-g-kaart" id="nalopen">
+				<div class="hdp-g-kaart-kop"><h2>Uitgenodigd, nog geen wachtwoord gekozen</h2><p>Een verlopen uitnodiging stuur je opnieuw via <a href="<?php echo esc_url( admin_url( 'users.php?page=' . HDP_PowerAll_Dealers::PAGINA ) ); ?>">Gebruikers &gt; Dealers uit PowerAll</a>.</p></div>
 				<div class="hdp-g-scroll">
-					<table class="widefat striped">
+					<table class="hdp-g-tabel">
 						<thead><tr><th>Dealer</th><th>Klantnummer</th><th>Stand</th></tr></thead>
 						<tbody>
 						<?php foreach ( $uitrol['nalopen'] as $dealer ) : ?>
@@ -398,7 +759,66 @@ class HDP_Gebruik_Scherm {
 			</section>
 		<?php endif; ?>
 		<?php
-		self::script_dealers();
+	}
+
+	/** Het detailpaneel van één bedrijf (verborgen tot het in de lijst gekozen wordt). */
+	private static function detail( array $rij ) {
+		$telefoon = preg_replace( '/[^0-9+]/', '', $rij['telefoon'] );
+		$delen    = array();
+		foreach ( $rij['onderdelen'] as $sleutel => $aantal ) {
+			if ( isset( HDP_Gebruik::ONDERDELEN[ $sleutel ] ) ) {
+				$delen[] = array( 'label' => HDP_Gebruik::ONDERDELEN[ $sleutel ], 'waarde' => $aantal, 'tekst' => $aantal . ( 1 === (int) $aantal ? ' dag' : ' dagen' ) );
+			}
+		}
+		?>
+		<div class="hdp-g-detail-paneel" id="hdp-g-detail-<?php echo (int) $rij['id']; ?>" data-id="<?php echo (int) $rij['id']; ?>" hidden>
+			<div class="hdp-g-detail-kop">
+				<?php echo self::avatar( $rij['id'], $rij['bedrijf'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<div>
+					<h2><?php echo esc_html( $rij['bedrijf'] ); ?></h2>
+					<p><?php echo esc_html( implode( ' · ', array_filter( array( $rij['plaats'], $rij['klantnummer'] ? 'klantnummer ' . $rij['klantnummer'] : '' ) ) ) ); ?></p>
+				</div>
+			</div>
+			<div class="hdp-g-detail-acties">
+				<?php if ( $telefoon ) : ?>
+					<a class="is-donker" href="<?php echo esc_url( 'tel:' . $telefoon ); ?>"><span class="dashicons dashicons-phone" aria-hidden="true"></span><?php echo esc_html( $rij['telefoon'] ); ?></a>
+				<?php endif; ?>
+				<a href="<?php echo esc_url( 'mailto:' . $rij['email'] ); ?>"><span class="dashicons dashicons-email" aria-hidden="true"></span>Mailen</a>
+				<a href="<?php echo esc_url( get_edit_user_link( $rij['id'] ) ); ?>"><span class="dashicons dashicons-admin-users" aria-hidden="true"></span>Profiel</a>
+			</div>
+			<div class="hdp-g-detail-cijfers">
+				<div><span>Bezoekdagen</span><strong><?php echo (int) $rij['bezoekdagen']; ?></strong></div>
+				<div><span>Bestellingen</span><strong><?php echo (int) $rij['bestellingen']; ?></strong></div>
+				<div><span>Omzet</span><strong><?php echo esc_html( $rij['omzet'] ? self::geld_rond( $rij['omzet'] ) : '—' ); ?></strong></div>
+			</div>
+			<p class="hdp-g-opmerking"><?php echo esc_html( sprintf( 'Laatst geweest: %s · laatste bestelling: %s · %d documenten geopend · %d trainingaanmeldingen', self::wanneer( $rij['laatst'] ), $rij['laatste_bestelling'] ? self::datum( $rij['laatste_bestelling'] ) : 'geen in deze periode', $rij['downloads'], $rij['trainingen'] ) ); ?></p>
+
+			<h3>Wat ze doen</h3>
+			<?php if ( $delen ) : ?>
+				<?php self::staven( array_slice( $delen, 0, 6 ) ); ?>
+			<?php else : ?>
+				<p class="hdp-g-leeg-tekst">Nog niets gemeten in deze periode.</p>
+			<?php endif; ?>
+
+			<h3>Zocht naar</h3>
+			<?php if ( $rij['termen'] ) : ?>
+				<div class="hdp-g-chips">
+					<?php foreach ( $rij['termen'] as $term ) : ?>
+						<span><?php echo esc_html( $term ); ?></span>
+					<?php endforeach; ?>
+				</div>
+			<?php else : ?>
+				<p class="hdp-g-leeg-tekst">Niets gezocht in deze periode.</p>
+			<?php endif; ?>
+
+			<h3>Accounts</h3>
+			<ul class="hdp-g-accounts">
+				<?php foreach ( $rij['personen'] as $persoon ) : ?>
+					<li><span><?php echo esc_html( $persoon['naam'] ); ?> <small><?php echo esc_html( $persoon['rol'] ); ?></small></span><span class="hdp-g-zacht"><?php echo esc_html( self::wanneer( $persoon['laatst'] ) ); ?></span></li>
+				<?php endforeach; ?>
+			</ul>
+		</div>
+		<?php
 	}
 
 	/* ---------------------------------------------------------------------
@@ -426,51 +846,55 @@ class HDP_Gebruik_Scherm {
 			}
 		);
 		$gemiddeld = $nu['bestellingen'] ? $nu['omzet'] / $nu['bestellingen'] : 0;
+		$vorige    = ' t.o.v. vorige ' . self::periode_tekst( $dagen );
 
 		if ( $pa_fouten ) :
 			?>
-			<div class="notice notice-error inline">
-				<?php if ( 'aan' === HDP_PowerAll_Orders::modus() ) : ?>
-					<p><strong><?php echo esc_html( count( $pa_fouten ) . ( 1 === count( $pa_fouten ) ? ' bestelling is' : ' bestellingen zijn' ) ); ?> niet in PowerAll aangekomen.</strong> Voer ze met de hand in PowerAll in, of open de bestelling en kies bij Bestelacties "Opnieuw naar PowerAll versturen".</p>
-				<?php else : ?>
-					<p><strong>Bij <?php echo esc_html( count( $pa_fouten ) . ( 1 === count( $pa_fouten ) ? ' bestelling' : ' bestellingen' ) ); ?> ging de proef met PowerAll mis.</strong> Er gaat nu nog niets echt naar PowerAll, maar zo zou het straks ook misgaan.</p>
-				<?php endif; ?>
-				<ul>
-					<?php foreach ( array_slice( $pa_fouten, 0, 10 ) as $order ) : ?>
-						<li><a href="<?php echo esc_url( $order->get_edit_order_url() ); ?>">Bestelling <?php echo esc_html( $order->get_order_number() ); ?></a> — <?php echo esc_html( $order->get_billing_company() ? $order->get_billing_company() : $order->get_formatted_billing_full_name() ); ?>: <?php echo esc_html( (string) $order->get_meta( HDP_PowerAll_Orders::META_FOUT ) ); ?></li>
-					<?php endforeach; ?>
-				</ul>
+			<div class="hdp-g-melding">
+				<span class="dashicons dashicons-warning" aria-hidden="true"></span>
+				<div>
+					<?php if ( 'aan' === HDP_PowerAll_Orders::modus() ) : ?>
+						<p><strong><?php echo esc_html( count( $pa_fouten ) . ( 1 === count( $pa_fouten ) ? ' bestelling is' : ' bestellingen zijn' ) ); ?> niet in PowerAll aangekomen.</strong> Voer ze met de hand in PowerAll in, of open de bestelling en kies bij Bestelacties "Opnieuw naar PowerAll versturen".</p>
+					<?php else : ?>
+						<p><strong>Bij <?php echo esc_html( count( $pa_fouten ) . ( 1 === count( $pa_fouten ) ? ' bestelling' : ' bestellingen' ) ); ?> ging de proef met PowerAll mis.</strong> Er gaat nu nog niets echt naar PowerAll, maar zo zou het straks ook misgaan.</p>
+					<?php endif; ?>
+					<ul>
+						<?php foreach ( array_slice( $pa_fouten, 0, 10 ) as $order ) : ?>
+							<li><a href="<?php echo esc_url( $order->get_edit_order_url() ); ?>">Bestelling <?php echo esc_html( $order->get_order_number() ); ?></a> — <?php echo esc_html( $order->get_billing_company() ? $order->get_billing_company() : $order->get_formatted_billing_full_name() ); ?>: <?php echo esc_html( (string) $order->get_meta( HDP_PowerAll_Orders::META_FOUT ) ); ?></li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
 			</div>
 			<?php
 		endif;
 		?>
 		<div class="hdp-g-tegels">
 			<?php
-			self::tegel( (string) (int) $nu['bestellingen'], 'Bestellingen', self::verschil( $nu['bestellingen'], $toen['bestellingen'] ) );
-			self::tegel( esc_html( self::geld( $nu['omzet'] ) ), 'Omzet excl. btw', self::verschil( $nu['omzet'], $toen['omzet'], true ) );
-			self::tegel( esc_html( self::geld( $gemiddeld ) ), 'Gemiddelde bestelling', '<span class="hdp-g-delta">excl. btw, met verzending en toeslag</span>' );
-			self::tegel( (string) (int) $cijfers['toeslag']['keer'] . ' <small>keer</small>', 'Kleinordertoeslag', '<span class="hdp-g-delta">samen ' . esc_html( self::geld( $cijfers['toeslag']['bedrag'] ) ) . '</span>' );
+			self::tegel( (string) (int) $nu['bestellingen'], 'Bestellingen', self::pil( $nu['bestellingen'], $toen['bestellingen'] ) . esc_html( $vorige ), 'cart' );
+			self::tegel( esc_html( self::geld_rond( $nu['omzet'] ) ), 'Omzet excl. btw', self::pil( $nu['omzet'], $toen['omzet'], 'procent' ) . esc_html( $vorige ), 'money-alt' );
+			self::tegel( esc_html( self::geld( $gemiddeld ) ), 'Gemiddelde bestelling', 'excl. btw, met verzending en toeslag', 'calculator' );
+			self::tegel( (int) $cijfers['toeslag']['keer'] . '<small> keer</small>', 'Kleinordertoeslag', 'samen ' . esc_html( self::geld( $cijfers['toeslag']['bedrag'] ) ), 'tag' );
 			?>
 		</div>
 
 		<div class="hdp-g-raster">
 			<?php
-			self::blok_open( 'Omzet per merk', 'Artikelen excl. btw, zonder verzending en toeslag. Het merk is de hoofdcategorie in de webshop.' );
+			self::kaart_open( 'Omzet per merk', 'Artikelen excl. btw, zonder verzending en toeslag. Het merk is de hoofdcategorie in de webshop.' );
 			if ( $cijfers['merken'] ) {
 				$rijen = array();
 				foreach ( $cijfers['merken'] as $merk => $bedrag ) {
 					$rijen[] = array( 'label' => $merk, 'waarde' => $bedrag, 'tekst' => self::geld( $bedrag ) );
 				}
-				self::staven( $rijen, 130 );
+				self::staven( $rijen );
 			} else {
-				self::leeg( 'In deze periode geen bestellingen.' );
+				self::leeg( 'In deze periode geen bestellingen.', 'cart' );
 			}
-			self::blok_dicht();
+			self::kaart_dicht();
 
-			self::blok_open( 'Meest bestelde artikelen', 'Op aantal stuks.' );
+			self::kaart_open( 'Meest bestelde artikelen', 'Op aantal stuks.' );
 			if ( $cijfers['artikelen'] ) :
 				?>
-				<div class="hdp-g-scroll"><table class="widefat striped">
+				<div class="hdp-g-scroll"><table class="hdp-g-tabel">
 					<thead><tr><th>Artikel</th><th class="num">Stuks</th><th class="num">Bedrijven</th><th class="num">Omzet</th></tr></thead>
 					<tbody>
 					<?php foreach ( array_slice( $cijfers['artikelen'], 0, 15 ) as $artikel ) : ?>
@@ -485,14 +909,14 @@ class HDP_Gebruik_Scherm {
 				</table></div>
 				<?php
 			else :
-				self::leeg( 'In deze periode geen bestellingen.' );
+				self::leeg( 'In deze periode geen bestellingen.', 'cart' );
 			endif;
-			self::blok_dicht();
+			self::kaart_dicht();
 
-			self::blok_open( 'Per bedrijf', 'Hoogste omzet bovenaan; bestellingen van collega\'s tellen mee bij hun bedrijf.' );
+			self::kaart_open( 'Per bedrijf', 'Hoogste omzet bovenaan; bestellingen van collega\'s tellen mee bij hun bedrijf.' );
 			if ( $bedrijven ) :
 				?>
-				<div class="hdp-g-scroll"><table class="widefat striped">
+				<div class="hdp-g-scroll"><table class="hdp-g-tabel">
 					<thead><tr><th>Bedrijf</th><th class="num">Bestellingen</th><th class="num">Omzet</th><th class="num">Laatste</th></tr></thead>
 					<tbody>
 					<?php foreach ( array_slice( $bedrijven, 0, 25 ) as $rij ) : ?>
@@ -507,14 +931,14 @@ class HDP_Gebruik_Scherm {
 				</table></div>
 				<?php
 			else :
-				self::leeg( 'In deze periode geen bestellingen.' );
+				self::leeg( 'In deze periode geen bestellingen.', 'cart' );
 			endif;
-			self::blok_dicht();
+			self::kaart_dicht();
 
-			self::blok_open( 'Winkelwagens die nog niet besteld zijn', 'Nu, los van de periode. <strong>Vergeten</strong> = de dealer is al ' . (int) HDP_Gebruik::VERGETEN_DAGEN . ' dagen of langer niet geweest; misschien een belletje waard.', 'winkelwagens' );
+			self::kaart_open( 'Winkelwagens die nog niet besteld zijn', 'Nu, los van de periode. <strong>Vergeten</strong> = de dealer is al ' . (int) HDP_Gebruik::VERGETEN_DAGEN . ' dagen of langer niet geweest; misschien een belletje waard.', 'winkelwagens' );
 			if ( $wagens ) :
 				?>
-				<div class="hdp-g-scroll"><table class="widefat striped">
+				<div class="hdp-g-scroll"><table class="hdp-g-tabel">
 					<thead><tr><th>Bedrijf</th><th class="num">Artikelen</th><th class="num">Waarde</th><th class="num">Laatst geweest</th></tr></thead>
 					<tbody>
 					<?php foreach ( $wagens as $wagen ) : ?>
@@ -522,24 +946,24 @@ class HDP_Gebruik_Scherm {
 							<td><?php echo self::bedrijf_link( $wagen['bedrijf_id'], $wagen['bedrijf'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><?php echo $wagen['bedrijf_id'] !== $wagen['id'] ? '<br><small>' . esc_html( $wagen['naam'] ) . '</small>' : ''; ?></td>
 							<td class="num"><?php echo (int) $wagen['stuks']; ?></td>
 							<td class="num"><?php echo esc_html( self::geld( $wagen['waarde'] ) ); ?></td>
-							<td class="num"><?php echo esc_html( self::datum( $wagen['laatst'] ) ); ?><?php echo $wagen['vergeten'] ? ' <span class="hdp-g-label is-stil">Vergeten</span>' : ''; ?></td>
+							<td class="num"><?php echo esc_html( self::datum( $wagen['laatst'] ) ); ?><?php echo $wagen['vergeten'] ? ' ' . self::label( 'stil', 'Vergeten' ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
 						</tr>
 					<?php endforeach; ?>
 					</tbody>
 				</table></div>
 				<?php
 			else :
-				self::leeg( 'Geen open winkelwagens.' );
+				self::leeg( 'Geen open winkelwagens.', 'cart' );
 			endif;
-			self::blok_dicht();
+			self::kaart_dicht();
 
-			self::blok_open( 'Gezocht in de webshop, niets gevonden', 'Het artikel ontbreekt, heet anders, of hoort bij een merk dat deze dealers niet voeren.' );
+			self::kaart_open( 'Gezocht in de webshop, niets gevonden', 'Het artikel ontbreekt, heet anders, of hoort bij een merk dat deze dealers niet voeren.' );
 			self::termen( HDP_Gebruik::zoektermen( $dagen, true, 20, 'webshopzoek' ) );
-			self::blok_dicht();
+			self::kaart_dicht();
 
-			self::blok_open( 'Meest gezocht in de webshop' );
+			self::kaart_open( 'Meest gezocht in de webshop' );
 			self::termen( HDP_Gebruik::zoektermen( $dagen, false, 20, 'webshopzoek' ) );
-			self::blok_dicht();
+			self::kaart_dicht();
 			?>
 		</div>
 		<?php
@@ -555,18 +979,18 @@ class HDP_Gebruik_Scherm {
 		?>
 		<div class="hdp-g-raster">
 			<?php
-			self::blok_open( 'Gezocht, niets gevonden', 'In de zoekbalk bovenin. Vaak een artikel of document dat ontbreekt, of een andere schrijfwijze.' );
+			self::kaart_open( 'Gezocht, niets gevonden', 'In de zoekbalk bovenin. Vaak een artikel of document dat ontbreekt, of een andere schrijfwijze.' );
 			self::termen( HDP_Gebruik::zoektermen( $dagen, true ) );
-			self::blok_dicht();
+			self::kaart_dicht();
 
-			self::blok_open( 'Meest gezocht', 'Alle zoekopdrachten in de zoekbalk bovenin, vaakst eerst. Zoeken in de webshop staat onder het tabblad Webshop.' );
+			self::kaart_open( 'Meest gezocht', 'Alle zoekopdrachten in de zoekbalk bovenin, vaakst eerst. Zoeken in de webshop staat onder Webshop.' );
 			self::termen( HDP_Gebruik::zoektermen( $dagen ) );
-			self::blok_dicht();
+			self::kaart_dicht();
 
-			self::blok_open( 'Meest geopende documenten' );
+			self::kaart_open( 'Meest geopende documenten' );
 			if ( $downloads ) :
 				?>
-				<div class="hdp-g-scroll"><table class="widefat striped">
+				<div class="hdp-g-scroll"><table class="hdp-g-tabel">
 					<thead><tr><th>Document</th><th class="num">Keer</th><th class="num">Dealers</th></tr></thead>
 					<tbody>
 					<?php foreach ( $downloads as $rij ) : ?>
@@ -581,14 +1005,14 @@ class HDP_Gebruik_Scherm {
 				</table></div>
 				<?php
 			else :
-				self::leeg( 'In deze periode nog niets geopend.' );
+				self::leeg( 'In deze periode nog niets geopend.', 'media-document' );
 			endif;
-			self::blok_dicht();
+			self::kaart_dicht();
 
-			self::blok_open( 'Door niemand geopend', 'Documenten die in deze periode door geen enkele dealer zijn geopend. Verouderd, verkeerd genoemd, of niet te vinden?' );
+			self::kaart_open( 'Door niemand geopend', 'Documenten die in deze periode door geen enkele dealer zijn geopend. Verouderd, verkeerd genoemd, of niet te vinden?' );
 			if ( $ongebruikt ) :
 				?>
-				<div class="hdp-g-scroll"><table class="widefat striped">
+				<div class="hdp-g-scroll"><table class="hdp-g-tabel">
 					<thead><tr><th>Document</th><th class="num">Online sinds</th></tr></thead>
 					<tbody>
 					<?php foreach ( array_slice( $ongebruikt, 0, 25 ) as $post ) : ?>
@@ -600,13 +1024,13 @@ class HDP_Gebruik_Scherm {
 					</tbody>
 				</table></div>
 				<?php if ( count( $ongebruikt ) > 25 ) : ?>
-					<p class="hdp-g-uitleg">En nog <?php echo (int) ( count( $ongebruikt ) - 25 ); ?> andere.</p>
+					<p class="hdp-g-opmerking">En nog <?php echo (int) ( count( $ongebruikt ) - 25 ); ?> andere.</p>
 				<?php endif; ?>
 				<?php
 			else :
-				self::leeg( 'Elk document is in deze periode minstens één keer geopend.' );
+				self::leeg( 'Elk document is in deze periode minstens één keer geopend.', 'yes-alt' );
 			endif;
-			self::blok_dicht();
+			self::kaart_dicht();
 			?>
 		</div>
 		<?php
@@ -621,26 +1045,26 @@ class HDP_Gebruik_Scherm {
 		$fouten     = HDP_Gebruik::training_fouten();
 		if ( $fouten ) :
 			?>
-			<div class="notice notice-error inline"><p><strong><?php echo esc_html( $fouten . ( 1 === $fouten ? ' aanmelding is' : ' aanmeldingen zijn' ) ); ?> niet als order in PowerAll aangekomen.</strong> <a href="<?php echo esc_url( HDP_Trainingen::beheer_url() ); ?>">Naar de aanmeldingen</a> en kies daar "Opnieuw versturen".</p></div>
+			<div class="hdp-g-melding"><span class="dashicons dashicons-warning" aria-hidden="true"></span><div><p><strong><?php echo esc_html( $fouten . ( 1 === $fouten ? ' aanmelding is' : ' aanmeldingen zijn' ) ); ?> niet als order in PowerAll aangekomen.</strong> <a href="<?php echo esc_url( HDP_Trainingen::beheer_url() ); ?>">Naar de aanmeldingen</a> en kies daar "Opnieuw versturen".</p></div></div>
 			<?php
 		endif;
+		$cijfers = array_sum( wp_list_pluck( $trainingen, 'cijfers' ) );
+		$som     = 0.0;
+		foreach ( $trainingen as $t ) {
+			$som += $t['gemiddeld'] * $t['cijfers'];
+		}
 		?>
 		<div class="hdp-g-tegels">
 			<?php
-			self::tegel( (string) (int) array_sum( wp_list_pluck( $trainingen, 'aanmeldingen' ) ), 'Aanmeldingen' );
-			$cijfers = array_sum( wp_list_pluck( $trainingen, 'cijfers' ) );
-			$som     = 0.0;
-			foreach ( $trainingen as $t ) {
-				$som += $t['gemiddeld'] * $t['cijfers'];
-			}
-			self::tegel( $cijfers ? esc_html( number_format_i18n( $som / $cijfers, 1 ) ) : '—', 'Gemiddeld cijfer', '<span class="hdp-g-delta">' . (int) $cijfers . ' beoordelingen</span>' );
+			self::tegel( (string) (int) array_sum( wp_list_pluck( $trainingen, 'aanmeldingen' ) ), 'Aanmeldingen', '', 'welcome-learn-more' );
+			self::tegel( $cijfers ? esc_html( number_format_i18n( $som / $cijfers, 1 ) ) : '—', 'Gemiddeld cijfer', (int) $cijfers . ' beoordelingen', 'star-filled' );
 			?>
 		</div>
 		<?php
-		self::blok_open( 'Per training', 'Aanmeldingen en beoordelingen in deze periode (cijfer van 1 tot 10).' );
+		self::kaart_open( 'Per training', 'Aanmeldingen en beoordelingen in deze periode (cijfer van 1 tot 10).' );
 		if ( $trainingen ) :
 			?>
-			<div class="hdp-g-scroll"><table class="widefat striped">
+			<div class="hdp-g-scroll"><table class="hdp-g-tabel">
 				<thead><tr><th>Training</th><th class="num">Aanmeldingen</th><th class="num">Bedrijven</th><th class="num">Gemiddeld cijfer</th></tr></thead>
 				<tbody>
 				<?php foreach ( $trainingen as $training ) : ?>
@@ -655,9 +1079,9 @@ class HDP_Gebruik_Scherm {
 			</table></div>
 			<?php
 		else :
-			self::leeg( 'In deze periode geen aanmeldingen of beoordelingen.' );
+			self::leeg( 'In deze periode geen aanmeldingen of beoordelingen.', 'welcome-learn-more' );
 		endif;
-		self::blok_dicht();
+		self::kaart_dicht();
 	}
 
 	/* ---------------------------------------------------------------------
@@ -666,11 +1090,11 @@ class HDP_Gebruik_Scherm {
 
 	private static function termen( $termen ) {
 		if ( ! $termen ) {
-			self::leeg( 'In deze periode nog niets.' );
+			self::leeg( 'In deze periode nog niets.', 'search' );
 			return;
 		}
 		?>
-		<div class="hdp-g-scroll"><table class="widefat striped">
+		<div class="hdp-g-scroll"><table class="hdp-g-tabel">
 			<thead><tr><th>Zoekterm</th><th class="num">Keer</th><th class="num">Dealers</th><th class="num">Laatst</th></tr></thead>
 			<tbody>
 			<?php foreach ( $termen as $rij ) : ?>
@@ -712,21 +1136,16 @@ class HDP_Gebruik_Scherm {
 		$c = $kwartaal[0];
 		$j = $jaar[0];
 		?>
+		<style>.hdp-g-label{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;font-weight:600}.hdp-g-label.is-actief{background:#eaf6ee;color:#146c34}.hdp-g-label.is-af-en-toe{background:#fff3d6;color:#6b4b00}.hdp-g-label.is-stil{background:#fdecec;color:#8a1012}.hdp-g-label.is-nooit{background:#f0f0ec;color:#3d4148}</style>
 		<table class="form-table" role="presentation">
-			<tr><th>Laatst geweest</th><td><?php echo esc_html( $c['laatst'] ? wp_date( 'j F Y', $c['laatst'] ) : 'Nog nooit (sinds de meting)' ); ?> · <span class="hdp-g-label is-<?php echo esc_attr( $c['activiteit']['code'] ); ?>"><?php echo esc_html( $c['activiteit']['tekst'] ); ?></span><?php echo wp_kses_post( $test ); ?></td></tr>
+			<tr><th>Laatst geweest</th><td><?php echo esc_html( $c['laatst'] ? wp_date( 'j F Y', $c['laatst'] ) : 'Nog nooit (sinds de meting)' ); ?> · <?php echo self::label( $c['activiteit']['code'], $c['activiteit']['tekst'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><?php echo wp_kses_post( $test ); ?></td></tr>
 			<tr><th>Laatste 3 maanden</th><td><?php echo esc_html( sprintf( '%d bezoekdagen · %d documenten geopend · %d zoekopdrachten · %d trainingaanmeldingen', $c['bezoekdagen'], $c['downloads'], $c['zoeken'], $c['trainingen'] ) ); ?><?php echo $c['collegas'] ? esc_html( sprintf( ' (met %d %s)', $c['collegas'], 1 === $c['collegas'] ? 'collega' : "collega's" ) ) : ''; ?></td></tr>
 			<tr><th>Webshop, laatste 12 maanden</th><td><?php echo esc_html( sprintf( '%d bestellingen, %s excl. btw', $j['bestellingen'], self::geld( $j['omzet'] ) ) ); ?></td></tr>
 			<?php if ( $c['termen'] ) : ?>
 				<tr><th>Zocht naar</th><td><?php echo esc_html( implode( ', ', $c['termen'] ) ); ?></td></tr>
 			<?php endif; ?>
+			<tr><th>Meer</th><td><a href="<?php echo esc_url( self::url( 'dealers', 90 ) ); ?>">Alle bedrijven in Portaalgebruik</a></td></tr>
 		</table>
-		<style>
-			.hdp-g-label { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
-			.hdp-g-label.is-actief { background: #edfaef; color: #00450c; }
-			.hdp-g-label.is-af-en-toe { background: #fcf9e8; color: #4d3a00; }
-			.hdp-g-label.is-stil { background: #fcf0f1; color: #8a2424; }
-			.hdp-g-label.is-nooit { background: #f0f0f1; color: #3c434a; }
-		</style>
 		<?php
 	}
 
@@ -737,131 +1156,308 @@ class HDP_Gebruik_Scherm {
 	private static function stijl() {
 		?>
 		<style>
-			.hdp-gebruik { --hdp-rood: #c41214; --hdp-rand: #dcdcde; --hdp-zacht: #50575e; }
-			.hdp-gebruik .hdp-g-tabs { margin-bottom: 0; }
-			.hdp-gebruik .hdp-g-balk { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin: 16px 0; }
-			.hdp-gebruik .hdp-g-periodes { display: flex; flex-wrap: wrap; gap: 6px; }
-			.hdp-gebruik .hdp-g-balk .dashicons { vertical-align: text-bottom; font-size: 17px; }
+			.hdp-gebruik { --ink: #17191c; --zacht: #5c6068; --rand: #e3e3df; --vlak: #f7f7f5; --rood: #c41214; color: var(--ink); font-size: 14px; max-width: 1400px; }
+			.hdp-gebruik h1, .hdp-gebruik h2, .hdp-gebruik h3 { color: var(--ink); }
+			.hdp-gebruik a { color: var(--ink); }
+			.hdp-gebruik a:hover, .hdp-gebruik a:focus { color: var(--rood); }
+			.hdp-gebruik .hdp-g-zacht { color: var(--zacht); font-weight: 400; }
+			.hdp-gebruik .hdp-g-vet { font-weight: 600; }
 
-			.hdp-gebruik .hdp-g-aandacht { background: #fff; border: 1px solid var(--hdp-rand); border-left: 4px solid var(--hdp-rood); border-radius: 6px; padding: 4px 16px 12px; margin-bottom: 20px; }
-			.hdp-gebruik .hdp-g-aandacht h2 { font-size: 15px; margin: 12px 0 8px; }
-			.hdp-gebruik .hdp-g-aandacht ul { margin: 0; }
-			.hdp-gebruik .hdp-g-aandacht li { display: flex; gap: 10px; align-items: center; padding: 8px 0; margin: 0; border-top: 1px solid #f0f0f1; }
-			.hdp-gebruik .hdp-g-aandacht li:first-child { border-top: 0; }
-			.hdp-gebruik .hdp-g-aandacht-tekst { flex: 1; }
-			.hdp-gebruik .hdp-g-aandacht li.is-fout .dashicons { color: #d63638; }
-			.hdp-gebruik .hdp-g-aandacht li.is-let-op .dashicons { color: #b26200; }
-			.hdp-gebruik .hdp-g-alles-goed { margin: 0 0 6px; color: #1d2327; }
-			.hdp-gebruik .hdp-g-alles-goed .dashicons { color: #008a20; }
-			.hdp-gebruik .hdp-g-aandacht:has(.hdp-g-alles-goed) { border-left-color: #008a20; }
+			.hdp-g-kop { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; justify-content: space-between; margin: 8px 0 16px; }
+			.hdp-gebruik .hdp-g-kop h1 { margin: 0; padding: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+			.hdp-g-kop-acties { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+			.hdp-g-segment { display: inline-flex; background: #fff; border: 1px solid var(--rand); border-radius: 12px; padding: 4px; gap: 2px; }
+			.hdp-gebruik .hdp-g-segment a { padding: 8px 16px; border-radius: 9px; text-decoration: none; color: #3d4148; }
+			.hdp-gebruik .hdp-g-segment a.is-actief { background: var(--ink); color: #fff; font-weight: 600; }
+			.hdp-gebruik .hdp-g-knop { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border: 1px solid var(--rand); border-radius: 12px; background: #fff; text-decoration: none; font-weight: 500; }
+			.hdp-g-knop .dashicons { font-size: 17px; width: 17px; height: 17px; }
+			.hdp-g-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+			.hdp-gebruik .hdp-g-tabs a { padding: 9px 16px; border-radius: 999px; text-decoration: none; color: #3d4148; border: 1px solid transparent; }
+			.hdp-gebruik .hdp-g-tabs a.is-actief { background: #fff; border-color: var(--rand); color: var(--ink); font-weight: 600; }
+			.hdp-g-tab-aantal { color: #6b6f76; font-weight: 400; }
 
-			.hdp-gebruik .hdp-g-tegels { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 0 0 20px; }
-			.hdp-gebruik .hdp-g-tegel { background: #fff; border: 1px solid var(--hdp-rand); border-radius: 6px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
-			.hdp-gebruik .hdp-g-tegel-label { color: var(--hdp-zacht); font-size: 13px; }
-			.hdp-gebruik .hdp-g-tegel strong { font-size: 26px; line-height: 1.15; color: #1d2327; font-variant-numeric: tabular-nums; }
-			.hdp-gebruik .hdp-g-tegel strong small { font-size: 14px; font-weight: 400; color: var(--hdp-zacht); }
-			.hdp-gebruik .hdp-g-delta { color: var(--hdp-zacht); font-size: 12px; }
-			.hdp-gebruik .hdp-g-delta b { color: #1d2327; }
+			.hdp-g-kaart { background: #fff; border: 1px solid var(--rand); border-radius: 18px; padding: 22px 24px; display: flex; flex-direction: column; gap: 16px; min-width: 0; box-sizing: border-box; margin-bottom: 20px; }
+			.hdp-g-raster .hdp-g-kaart, .hdp-g-rij-flex .hdp-g-kaart, .hdp-g-dealers .hdp-g-kaart { margin-bottom: 0; }
+			.hdp-g-kaart-kop { display: flex; flex-direction: column; gap: 2px; }
+			.hdp-gebruik .hdp-g-kaart-kop h2 { margin: 0; font-size: 17px; font-weight: 700; }
+			.hdp-g-kaart-kop p { margin: 0; color: var(--zacht); font-size: 13px; }
+			.hdp-g-raster { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(480px, 100%), 1fr)); gap: 20px; align-items: stretch; margin-bottom: 20px; }
+			.hdp-g-rij-flex { display: flex; flex-wrap: wrap; gap: 20px; align-items: stretch; margin-bottom: 20px; }
+			.hdp-g-rij-flex .is-breed { flex: 999 1 560px; }
+			.hdp-g-rij-flex .is-smal { flex: 1 1 340px; }
+			.hdp-g-leegte { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 26px 16px; background: var(--vlak); border-radius: 12px; text-align: center; color: var(--zacht); }
+			.hdp-g-leegte .dashicons { font-size: 26px; width: 26px; height: 26px; }
+			.hdp-g-leegte p { margin: 0; max-width: 360px; }
+			.hdp-g-leeg-tekst { margin: 0; color: var(--zacht); font-size: 13px; }
+			.hdp-g-opmerking { margin: 0; font-size: 13px; color: #3d4148; background: var(--vlak); border-radius: 10px; padding: 10px 12px; }
+			.hdp-g-voet { color: var(--zacht); font-size: 12px; margin-top: 8px; }
+			.hdp-g-voetnoot { color: var(--zacht); font-size: 12px; margin: -8px 0 20px; }
 
-			.hdp-gebruik .hdp-g-raster { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr)); gap: 20px; align-items: start; }
-			.hdp-gebruik .hdp-g-blok { background: #fff; border: 1px solid var(--hdp-rand); border-radius: 6px; padding: 4px 16px 16px; margin-bottom: 20px; min-width: 0; }
-			.hdp-gebruik .hdp-g-raster .hdp-g-blok { margin-bottom: 0; }
-			.hdp-gebruik .hdp-g-blok h2 { font-size: 15px; margin: 14px 0 4px; }
-			.hdp-gebruik .hdp-g-uitleg { margin: 0 0 12px; color: var(--hdp-zacht); }
-			.hdp-gebruik .hdp-g-blok table { border: 0; box-shadow: none; }
-			.hdp-gebruik .hdp-g-scroll { overflow-x: auto; }
-			.hdp-gebruik td.num, .hdp-gebruik th.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-			.hdp-gebruik .hdp-g-leeg { color: var(--hdp-zacht); font-style: italic; }
-			.hdp-gebruik .hdp-g-voet { margin-top: 24px; }
+			.hdp-g-held { background: var(--ink); color: #fff; border-radius: 20px; padding: 30px 34px; display: flex; flex-wrap: wrap; gap: 28px; margin-bottom: 20px; }
+			.hdp-g-held-tekst { flex: 999 1 460px; display: flex; flex-direction: column; gap: 12px; justify-content: center; }
+			.hdp-g-held-label { color: #b4b8bf; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+			.hdp-g-held-zin { margin: 0; font-size: 28px; line-height: 1.28; font-weight: 600; letter-spacing: -0.015em; }
+			.hdp-g-held-zin em { font-style: normal; color: #ff8a8c; }
+			.hdp-g-held-onder { margin: 0; color: #c9ccd1; font-size: 15px; }
+			.hdp-g-held-cijfers { flex: 1 1 320px; display: flex; flex-direction: column; gap: 10px; }
+			.hdp-g-held-cijfer { display: flex; align-items: center; gap: 16px; padding: 14px 16px; background: #23262b; border-radius: 14px; }
+			.hdp-g-held-cijfer > div { flex: 1; display: flex; flex-direction: column; }
+			.hdp-g-held-cijfer > div > span { color: #b4b8bf; font-size: 12px; }
+			.hdp-g-held-cijfer strong { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+			.hdp-g-held .hdp-g-pil { background: #33373d; color: #e3e5e8; }
+			.hdp-g-held .hdp-g-pil.is-op { background: #1d3b27; color: #8fe3a5; }
+			.hdp-g-held .hdp-g-pil.is-neer { background: #45201f; color: #ffb3b4; }
+			.hdp-g-lijntje { flex-shrink: 0; }
 
-			.hdp-gebruik .hdp-g-staven { display: grid; gap: 6px; }
-			.hdp-gebruik .hdp-g-staaf { display: grid; grid-template-columns: var(--label) 1fr minmax(60px, auto); align-items: center; gap: 10px; font-size: 13px; padding: 2px 0; }
-			.hdp-gebruik .hdp-g-staaf span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-			.hdp-gebruik .hdp-g-staaf i { display: block; height: 12px; }
-			.hdp-gebruik .hdp-g-staaf u { display: block; height: 100%; background: var(--hdp-rood); border-radius: 0 4px 4px 0; text-decoration: none; }
-			.hdp-gebruik .hdp-g-staaf b { text-align: right; font-weight: 600; color: #1d2327; font-variant-numeric: tabular-nums; white-space: nowrap; }
-			.hdp-gebruik .hdp-g-staaf:hover { background: #f6f7f7; }
-			.hdp-gebruik .hdp-g-tussen { height: 14px; }
+			.hdp-g-pil { display: inline-flex; align-items: center; gap: 2px; padding: 2px 9px; border-radius: 999px; background: #f0f0ec; color: #3d4148; font-size: 12px; font-weight: 600; line-height: 1.5; }
+			.hdp-g-pil.is-op { background: #eaf6ee; color: #146c34; }
+			.hdp-g-pil.is-neer { background: #fdecec; color: #8a1012; }
+			.hdp-g-label { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+			.hdp-g-label.is-actief { background: #eaf6ee; color: #146c34; }
+			.hdp-g-label.is-af-en-toe { background: #fff3d6; color: #6b4b00; }
+			.hdp-g-label.is-stil { background: #fdecec; color: #8a1012; }
+			.hdp-g-label.is-nooit { background: #f0f0ec; color: #3d4148; }
+			.hdp-g-tegels { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 20px; }
+			.hdp-g-tegel { background: #fff; border: 1px solid var(--rand); border-radius: 16px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+			.hdp-g-tegel-kop { display: flex; align-items: center; gap: 10px; color: var(--zacht); font-size: 13px; }
+			.hdp-g-icoon.dashicons { width: 32px; height: 32px; border-radius: 9px; background: #fcf0f1; color: var(--rood); display: inline-flex; align-items: center; justify-content: center; font-size: 18px; }
+			.hdp-g-tegel strong { font-size: 30px; line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; }
+			.hdp-g-tegel strong small { font-size: 15px; font-weight: 400; color: var(--zacht); }
+			.hdp-g-tegel-onder { font-size: 12px; color: var(--zacht); }
+			.hdp-g-melding { display: flex; gap: 12px; background: #fdf2f2; border: 1px solid #f3c9c9; border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; }
+			.hdp-g-melding .dashicons { color: var(--rood); }
+			.hdp-g-melding p { margin: 0 0 6px; }
+			.hdp-g-melding ul { margin: 0; }
 
-			.hdp-gebruik .hdp-g-trechter { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
-			.hdp-gebruik .hdp-g-trechter div { background: #f6f7f7; border-radius: 4px; padding: 8px 10px; }
-			.hdp-gebruik .hdp-g-trechter strong { display: block; font-size: 20px; }
-			.hdp-gebruik .hdp-g-trechter span { font-size: 12px; color: var(--hdp-zacht); }
+			.hdp-g-grafiek { display: flex; flex-direction: column; gap: 8px; }
+			.hdp-g-uitlezing { display: flex; flex-direction: column; align-items: flex-end; margin-top: -50px; min-height: 44px; }
+			.hdp-g-uitlezing strong { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+			.hdp-g-uitlezing span { font-size: 12px; color: var(--zacht); }
+			.hdp-g-kolommen { position: relative; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px; align-items: end; height: 210px; border-bottom: 1px solid var(--rand); }
+			.hdp-g-kolom { height: 100%; display: flex; flex-direction: column; justify-content: flex-end; background: none; border: 0; padding: 0; cursor: pointer; }
+			.hdp-g-kolom i { display: block; background: #c9ccd1; border-radius: 6px 6px 0 0; transition: background .15s; }
+			.hdp-g-kolom.is-deze i { background: var(--ink); }
+			.hdp-g-kolom:hover i, .hdp-g-kolom:focus-visible i { background: var(--rood); }
+			.hdp-g-kolom:focus-visible { outline: 2px solid #2271b1; outline-offset: 2px; }
+			.hdp-g-gemiddeld { position: absolute; left: 0; right: 0; border-top: 1px dashed #b9bcc2; pointer-events: none; }
+			.hdp-g-gemiddeld span { position: absolute; right: 0; bottom: 2px; font-size: 11px; color: var(--zacht); background: #fff; padding: 0 4px; }
+			.hdp-g-weeknummers { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px; text-align: center; font-size: 12px; color: var(--zacht); font-variant-numeric: tabular-nums; }
+			.hdp-g-weeknummers .is-deze { color: var(--ink); font-weight: 700; }
 
-			.hdp-gebruik .hdp-g-label { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
-			.hdp-gebruik .hdp-g-label.is-actief { background: #edfaef; color: #00450c; }
-			.hdp-gebruik .hdp-g-label.is-af-en-toe { background: #fcf9e8; color: #4d3a00; }
-			.hdp-gebruik .hdp-g-label.is-stil { background: #fcf0f1; color: #8a2424; }
-			.hdp-gebruik .hdp-g-label.is-nooit { background: #f0f0f1; color: #3c434a; }
+			.hdp-g-donut-blok { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; }
+			.hdp-g-donut { position: relative; width: 148px; height: 148px; flex-shrink: 0; }
+			.hdp-g-donut-midden { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+			.hdp-g-donut-midden strong { font-size: 30px; font-weight: 700; line-height: 1; }
+			.hdp-g-donut-midden span { font-size: 12px; color: var(--zacht); }
+			.hdp-g-legenda { flex: 1 1 150px; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+			.hdp-g-legenda li { margin: 0; }
+			.hdp-gebruik .hdp-g-legenda a { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; background: var(--vlak); text-decoration: none; }
+			.hdp-g-legenda i { width: 12px; height: 12px; border-radius: 4px; }
+			.hdp-g-legenda span { flex: 1; }
 
-			.hdp-gebruik .hdp-g-filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
-			.hdp-gebruik #hdp-g-zoek { min-width: min(320px, 100%); }
-			.hdp-gebruik .hdp-g-keuzes { display: flex; flex-wrap: wrap; gap: 6px; }
-			.hdp-gebruik .hdp-g-keuzes .button.is-gekozen { border-color: #1d2327; box-shadow: inset 0 0 0 1px #1d2327; }
-			.hdp-gebruik .hdp-g-aantal { color: var(--hdp-zacht); }
-			.hdp-gebruik .hdp-g-sorteer th button { background: none; border: 0; padding: 0; font: inherit; font-weight: 600; color: inherit; cursor: pointer; }
-			.hdp-gebruik .hdp-g-sorteer th[aria-sort="ascending"] button::after { content: " ▲"; font-size: 10px; }
-			.hdp-gebruik .hdp-g-sorteer th[aria-sort="descending"] button::after { content: " ▼"; font-size: 10px; }
-			.hdp-gebruik .hdp-g-sorteer th button:focus-visible { outline: 2px solid #2271b1; outline-offset: 2px; }
-			.hdp-gebruik .hdp-g-dealers td { vertical-align: middle; }
-			.hdp-gebruik .hdp-g-sorteer td:first-child { min-width: 180px; }
+			.hdp-g-tijdlijn { list-style: none; margin: 0; padding: 0; }
+			.hdp-g-tijdlijn li { display: grid; grid-template-columns: 58px 28px 1fr; gap: 10px; align-items: start; padding: 9px 0; margin: 0; border-bottom: 1px solid #f0f0ec; }
+			.hdp-g-tijdlijn li:last-child { border-bottom: 0; }
+			.hdp-g-tijdlijn time { color: #6b6f76; font-size: 12px; font-variant-numeric: tabular-nums; padding-top: 4px; }
+			.hdp-g-tijdlijn strong { font-weight: 600; }
+			.hdp-g-tijdlijn-icoon.dashicons { width: 26px; height: 26px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 15px; }
+			.hdp-g-tijdlijn-icoon.is-groen { background: #eaf6ee; color: #146c34; }
+			.hdp-g-tijdlijn-icoon.is-blauw { background: #eef1f6; color: #34507a; }
+			.hdp-g-tijdlijn-icoon.is-geel { background: #fff3d6; color: #8a5a00; }
+			.hdp-g-tijdlijn-icoon.is-paars { background: #f3eefb; color: #5b3a8f; }
+			.hdp-g-tijdlijn-icoon.is-rood { background: #fdecec; color: #8a1012; }
+			.hdp-g-tijdlijn-icoon.is-grijs { background: #f0f0ec; color: #3d4148; }
 
+			.hdp-g-trechter { display: flex; flex-direction: column; gap: 12px; }
+			.hdp-g-trechter-kop, .hdp-g-staaf-kop { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+			.hdp-g-trechter b, .hdp-g-staaf b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+			.hdp-g-trechter i { display: block; height: 14px; border-radius: 7px; background: #f0f0ec; }
+			.hdp-g-trechter u { display: block; height: 100%; border-radius: 7px; text-decoration: none; }
+			.hdp-g-trechter u.is-1 { background: var(--ink); }
+			.hdp-g-trechter u.is-2 { background: #3d4148; }
+			.hdp-g-trechter u.is-3 { background: #6b6f76; }
+			.hdp-g-trechter u.is-4 { background: var(--rood); }
+			.hdp-g-staven { display: flex; flex-direction: column; gap: 10px; }
+			.hdp-g-staaf i { display: block; height: 8px; border-radius: 4px; background: #f0f0ec; }
+			.hdp-g-staaf u { display: block; height: 100%; border-radius: 4px; background: var(--rood); text-decoration: none; }
+			.hdp-g-staaf-kop span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+			.hdp-g-top { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+			.hdp-g-top li { display: grid; grid-template-columns: 24px 1fr auto; gap: 10px; align-items: center; margin: 0; }
+			.hdp-g-top-nr { color: var(--zacht); font-weight: 600; }
+			.hdp-g-top-naam { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+			.hdp-g-top-naam span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+			.hdp-g-top-naam i { display: block; height: 6px; border-radius: 3px; background: var(--rood); }
+			.hdp-g-top b { font-variant-numeric: tabular-nums; }
+			.hdp-g-vakken { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+			.hdp-g-vakken div { padding: 12px 14px; border-radius: 12px; }
+			.hdp-g-vakken span { display: block; font-size: 12px; }
+			.hdp-g-vakken strong { display: block; font-size: 22px; font-weight: 700; }
+			.hdp-g-vakken .is-1 { background: var(--ink); color: #fff; }
+			.hdp-g-vakken .is-1 span { color: #c9ccd1; }
+			.hdp-g-vakken .is-2 { background: #3d4148; color: #fff; }
+			.hdp-g-vakken .is-2 span { color: #dcdee2; }
+			.hdp-g-vakken .is-3 { background: #e3e3df; }
+			.hdp-g-vakken .is-4 { background: #ebebe7; }
+			.hdp-g-vakken .is-5 { background: #f0f0ec; }
+			.hdp-g-vakken .is-6 { background: var(--vlak); }
+			.hdp-g-vakken .is-3 span, .hdp-g-vakken .is-4 span, .hdp-g-vakken .is-5 span, .hdp-g-vakken .is-6 span { color: #3d4148; }
+
+			.hdp-g-dealers { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; margin-bottom: 20px; }
+			.hdp-g-dealerlijst { flex: 999 1 620px; }
+			.hdp-g-detail { flex: 1 1 360px; position: sticky; top: 46px; }
+			.hdp-g-filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+			.hdp-gebruik #hdp-g-zoek { flex: 1 1 240px; padding: 10px 14px; border: 1px solid #d9d9d4; border-radius: 12px; background: #fafaf8; font-size: 14px; }
+			.hdp-g-keuzes { display: flex; flex-wrap: wrap; gap: 6px; }
+			.hdp-g-keuzes button { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: 999px; border: 1px solid var(--rand); background: #fff; font: inherit; cursor: pointer; color: var(--ink); }
+			.hdp-g-keuzes button span { color: var(--zacht); }
+			.hdp-g-keuzes button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; font-weight: 600; }
+			.hdp-g-keuzes button[aria-pressed="true"] span { color: #c9ccd1; }
+			.hdp-g-keuzes i { width: 8px; height: 8px; border-radius: 50%; }
+			.hdp-g-lijstkop, .hdp-g-rij { display: grid; grid-template-columns: minmax(200px, 2.2fr) 110px minmax(110px, 1.2fr) 96px 110px; gap: 12px; align-items: center; }
+			.hdp-g-lijstkop { padding: 0 12px; }
+			.hdp-g-lijstkop button, .hdp-g-lijstkop span { background: none; border: 0; padding: 0; font: inherit; font-size: 12px; font-weight: 600; color: var(--zacht); text-align: left; cursor: pointer; }
+			.hdp-g-lijstkop span { cursor: default; }
+			.hdp-g-lijstkop .is-rechts, .hdp-g-rij .is-rechts { text-align: right; justify-self: end; }
+			.hdp-g-lijstkop button[aria-sort="ascending"]::after { content: " ↑"; }
+			.hdp-g-lijstkop button[aria-sort="descending"]::after { content: " ↓"; }
+			.hdp-g-rijen { display: flex; flex-direction: column; gap: 4px; }
+			.hdp-g-rij { padding: 10px 12px; border-radius: 14px; border: 1px solid transparent; background: #fff; font: inherit; color: inherit; cursor: pointer; text-align: left; width: 100%; }
+			.hdp-g-rij[hidden] { display: none; }
+			.hdp-g-rij:hover { background: var(--vlak); }
+			.hdp-g-rij[aria-pressed="true"] { background: var(--vlak); border-color: var(--ink); }
+			.hdp-g-rij:focus-visible { outline: 2px solid #2271b1; outline-offset: 2px; }
+			.hdp-g-rij-naam { display: flex; align-items: center; gap: 12px; min-width: 0; }
+			.hdp-g-rij-naam > span { display: flex; flex-direction: column; min-width: 0; }
+			.hdp-g-rij-naam strong, .hdp-g-rij-naam small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+			.hdp-g-rij-naam small { color: var(--zacht); font-size: 12px; }
+			.hdp-g-avatar { display: inline-flex; flex-shrink: 0; width: 38px; height: 38px; border-radius: 12px; color: #fff; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+			.hdp-g-avatar.is-groot { width: 56px; height: 56px; border-radius: 17px; font-size: 20px; }
+			.hdp-g-mini { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2px; align-items: end; height: 26px; }
+			.hdp-g-mini i { display: block; border-radius: 2px; background: var(--rand); }
+			.hdp-g-mini i.is-vol { background: var(--rood); }
+			.hdp-g-mini i.is-zacht { background: #e8a7a8; }
+			.hdp-g-detail-paneel { display: flex; flex-direction: column; gap: 16px; }
+			.hdp-g-detail-paneel[hidden] { display: none; }
+			.hdp-g-detail-kop { display: flex; gap: 14px; align-items: center; }
+			.hdp-gebruik .hdp-g-detail-kop h2 { margin: 0; font-size: 19px; font-weight: 700; }
+			.hdp-g-detail-kop p { margin: 0; color: var(--zacht); font-size: 13px; }
+			.hdp-g-detail-acties { display: flex; flex-wrap: wrap; gap: 8px; }
+			.hdp-gebruik .hdp-g-detail-acties a { flex: 1 1 110px; display: inline-flex; justify-content: center; align-items: center; gap: 6px; padding: 11px; border-radius: 12px; border: 1px solid var(--rand); text-decoration: none; font-weight: 600; }
+			.hdp-gebruik .hdp-g-detail-acties a.is-donker { background: var(--ink); border-color: var(--ink); color: #fff; }
+			.hdp-g-detail-acties .dashicons { font-size: 17px; width: 17px; height: 17px; }
+			.hdp-g-detail-cijfers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+			.hdp-g-detail-cijfers div { padding: 12px; border-radius: 12px; background: var(--vlak); }
+			.hdp-g-detail-cijfers span { display: block; font-size: 12px; color: var(--zacht); }
+			.hdp-g-detail-cijfers strong { display: block; font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+			.hdp-gebruik .hdp-g-detail h3 { margin: 4px 0 -6px; font-size: 14px; font-weight: 700; }
+			.hdp-g-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+			.hdp-g-chips span { padding: 5px 10px; border-radius: 999px; background: #f0f0ec; font-size: 13px; }
+			.hdp-g-accounts { list-style: none; margin: 0; padding: 0; }
+			.hdp-g-accounts li { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 8px 0; margin: 0; border-bottom: 1px solid #f0f0ec; }
+			.hdp-g-accounts small { color: var(--zacht); }
+
+			.hdp-g-scroll { overflow-x: auto; }
+			.hdp-g-tabel { width: 100%; border-collapse: collapse; }
+			.hdp-g-tabel th { text-align: left; font-size: 12px; font-weight: 600; color: var(--zacht); padding: 8px 10px; border-bottom: 1px solid var(--rand); }
+			.hdp-g-tabel td { padding: 10px; border-bottom: 1px solid #f0f0ec; vertical-align: top; }
+			.hdp-g-tabel tr:last-child td { border-bottom: 0; }
+			.hdp-g-tabel .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+			.hdp-g-tabel small { color: var(--zacht); }
+
+			@media (max-width: 900px) {
+				.hdp-g-lijstkop, .hdp-g-rij { grid-template-columns: minmax(0, 1fr) auto 90px; }
+				.hdp-g-kol-weken, .hdp-g-kol-bestellingen { display: none !important; }
+				.hdp-g-detail { position: static; }
+				.hdp-g-held { padding: 22px 20px; }
+				.hdp-g-held-zin { font-size: 21px; }
+				.hdp-g-uitlezing { margin-top: 0; align-items: flex-start; }
+				.hdp-g-kolommen, .hdp-g-weeknummers { gap: 4px; }
+				.hdp-g-tijdlijn li { grid-template-columns: 50px 28px 1fr; }
+			}
 			@media (max-width: 600px) {
-				.hdp-gebruik .hdp-g-staaf { grid-template-columns: minmax(70px, 38%) 1fr auto; }
-				.hdp-gebruik .hdp-g-aandacht li { flex-wrap: wrap; }
+				.hdp-g-segment { width: 100%; box-sizing: border-box; }
+				.hdp-gebruik .hdp-g-segment a { flex: 1; text-align: center; padding: 8px 6px; }
+				.hdp-g-lijstkop, .hdp-g-rij { grid-template-columns: minmax(0, 1fr) 84px; }
+				.hdp-g-lijstkop button[data-sorteer="activiteit"], .hdp-g-kol-activiteit { display: none; }
+				.hdp-g-kaart { padding: 18px 16px; }
+				.hdp-g-weeknummers span:nth-child(odd) { visibility: hidden; }
 			}
 		</style>
 		<?php
 	}
 
-	private static function script_dealers() {
+	private static function script() {
 		?>
 		<script>
 		( function () {
-			var tabel = document.getElementById( 'hdp-g-dealertabel' );
-			if ( ! tabel ) { return; }
-			var tbody = tabel.tBodies[0];
+			// Omzet per week: aanwijzen of tabben toont die week.
+			document.querySelectorAll( '.hdp-g-grafiek' ).forEach( function ( grafiek ) {
+				var uit = grafiek.querySelector( '.hdp-g-uitlezing' );
+				function toon( bedrag, uitleg ) {
+					uit.querySelector( 'strong' ).textContent = bedrag;
+					uit.querySelector( 'span' ).textContent = uitleg;
+				}
+				grafiek.querySelectorAll( '.hdp-g-kolom' ).forEach( function ( kolom ) {
+					[ 'mouseenter', 'focus' ].forEach( function ( soort ) {
+						kolom.addEventListener( soort, function () { toon( kolom.dataset.bedrag, kolom.dataset.uitleg ); } );
+					} );
+				} );
+				grafiek.querySelector( '.hdp-g-kolommen' ).addEventListener( 'mouseleave', function () { toon( grafiek.dataset.bedrag, grafiek.dataset.uitleg ); } );
+			} );
+
+			// Dealers: kiezen, zoeken, filteren, sorteren.
+			var lijst = document.getElementById( 'hdp-g-rijen' );
+			if ( ! lijst ) { return; }
+			var rijen = Array.prototype.slice.call( lijst.querySelectorAll( '.hdp-g-rij' ) );
 			var zoek = document.getElementById( 'hdp-g-zoek' );
 			var knoppen = document.querySelectorAll( '.hdp-g-keuzes button' );
 			var geen = document.getElementById( 'hdp-g-geen-treffer' );
-			var activiteit = '';
-			knoppen.forEach( function ( k ) { if ( k.getAttribute( 'aria-pressed' ) === 'true' ) { activiteit = k.dataset.activiteit; } } );
+			var detail = document.getElementById( 'hdp-g-detail' );
+			var activiteit = document.querySelector( '.hdp-g-dealers' ).dataset.filter || '';
 
+			function kies( rij, scroll ) {
+				rijen.forEach( function ( r ) { r.setAttribute( 'aria-pressed', r === rij ? 'true' : 'false' ); } );
+				detail.querySelectorAll( '.hdp-g-detail-paneel' ).forEach( function ( p ) { p.hidden = ! rij || p.dataset.id !== rij.dataset.id; } );
+				if ( scroll && window.innerWidth < 900 ) { detail.scrollIntoView( { behavior: 'smooth', block: 'start' } ); }
+			}
 			function filter() {
 				var term = zoek.value.trim().toLowerCase();
-				var zichtbaar = 0;
-				Array.prototype.forEach.call( tbody.rows, function ( rij ) {
+				var eerste = null;
+				var gekozenZichtbaar = false;
+				rijen.forEach( function ( rij ) {
 					var toon = ( ! term || rij.dataset.zoek.indexOf( term ) !== -1 ) && ( ! activiteit || rij.dataset.activiteit === activiteit );
 					rij.hidden = ! toon;
-					if ( toon ) { zichtbaar++; }
+					if ( toon && ! eerste ) { eerste = rij; }
+					if ( toon && rij.getAttribute( 'aria-pressed' ) === 'true' ) { gekozenZichtbaar = true; }
 				} );
-				geen.hidden = zichtbaar > 0;
+				geen.hidden = !! eerste;
+				detail.hidden = ! eerste;
+				if ( ! gekozenZichtbaar ) { kies( eerste, false ); }
 			}
+			rijen.forEach( function ( rij ) { rij.addEventListener( 'click', function () { kies( rij, true ); } ); } );
 			zoek.addEventListener( 'input', filter );
 			knoppen.forEach( function ( knop ) {
+				knop.setAttribute( 'aria-pressed', knop.dataset.activiteit === activiteit ? 'true' : 'false' );
 				knop.addEventListener( 'click', function () {
 					activiteit = knop.dataset.activiteit;
-					knoppen.forEach( function ( k ) { k.classList.toggle( 'is-gekozen', k === knop ); k.setAttribute( 'aria-pressed', k === knop ? 'true' : 'false' ); } );
+					knoppen.forEach( function ( k ) { k.setAttribute( 'aria-pressed', k === knop ? 'true' : 'false' ); } );
 					filter();
 				} );
 			} );
-
-			tabel.querySelectorAll( 'th button' ).forEach( function ( knop ) {
+			document.querySelectorAll( '.hdp-g-lijstkop button' ).forEach( function ( knop ) {
 				knop.addEventListener( 'click', function () {
-					var th = knop.parentNode;
-					var kolom = parseInt( knop.dataset.kolom, 10 );
+					var naam = knop.dataset.sorteer;
+					var sleutel = 's' + naam.charAt( 0 ).toUpperCase() + naam.slice( 1 );
 					var tekst = knop.dataset.soort === 'tekst';
-					// Eerste klik: tekst A-Z, getallen hoog-laag.
-					var oplopend = th.getAttribute( 'aria-sort' ) ? th.getAttribute( 'aria-sort' ) !== 'ascending' : tekst;
-					tabel.querySelectorAll( 'th' ).forEach( function ( t ) { t.removeAttribute( 'aria-sort' ); } );
-					th.setAttribute( 'aria-sort', oplopend ? 'ascending' : 'descending' );
-					var rijen = Array.prototype.slice.call( tbody.rows );
+					var oplopend = knop.getAttribute( 'aria-sort' ) ? knop.getAttribute( 'aria-sort' ) !== 'ascending' : tekst;
+					document.querySelectorAll( '.hdp-g-lijstkop button' ).forEach( function ( k ) { k.removeAttribute( 'aria-sort' ); } );
+					knop.setAttribute( 'aria-sort', oplopend ? 'ascending' : 'descending' );
 					rijen.sort( function ( a, b ) {
-						var x = a.cells[ kolom ].dataset.waarde, y = b.cells[ kolom ].dataset.waarde;
+						var x = a.dataset[ sleutel ], y = b.dataset[ sleutel ];
 						var v = tekst ? x.localeCompare( y, 'nl' ) : parseFloat( x ) - parseFloat( y );
 						return oplopend ? v : -v;
 					} );
-					rijen.forEach( function ( r ) { tbody.appendChild( r ); } );
+					rijen.forEach( function ( r ) { lijst.appendChild( r ); } );
 				} );
 			} );
 			filter();
