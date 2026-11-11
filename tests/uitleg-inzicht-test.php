@@ -202,8 +202,8 @@ class Uitleg_Inzicht_Test extends WP_UnitTestCase {
 		HDP_Gebruik::noteer( 'webshopzoek', 'zaaischijf', 0, $this->dealer );
 		update_user_meta( $this->dealer, 'billing_company', '=Loonbedrijf' );
 
-		$c = HDP_Gebruik::per_dealer( $this->dealer, 90 );
-		$this->assertSame( 1, $c['bezoeken'] );
+		$c = HDP_Gebruik::dealerlijst( 90, $this->dealer )[0];
+		$this->assertSame( 1, $c['bezoekdagen'] );
 		$this->assertSame( 1, $c['downloads'] );
 		$this->assertSame( array( 'zaaischijf' ), $c['termen'] );
 
@@ -211,17 +211,17 @@ class Uitleg_Inzicht_Test extends WP_UnitTestCase {
 		$this->assertSame( 'Bedrijf', $rijen[0][0] );
 		$this->assertCount( 2, $rijen, 'Kopregel plus deze ene dealer.' );
 		$this->assertSame( "'=Loonbedrijf", HDP_Gebruik::veilige_cel( $rijen[1][0] ), 'Geen formule in Excel.' );
-		$this->assertSame( 'Zelf aangemeld', $rijen[1][6] );
+		$this->assertSame( 'Zelf aangemeld', $rijen[1][7] );
 	}
 
 	public function test_profielblok_alleen_voor_beheerder() {
 		ob_start();
-		HDP_Gebruik::render_profiel( get_userdata( $this->dealer ) );
+		HDP_Gebruik_Scherm::render_profiel( get_userdata( $this->dealer ) );
 		$this->assertSame( '', ob_get_clean(), 'Een dealer ziet dit niet.' );
 
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		ob_start();
-		HDP_Gebruik::render_profiel( get_userdata( $this->dealer ) );
+		HDP_Gebruik_Scherm::render_profiel( get_userdata( $this->dealer ) );
 		$this->assertStringContainsString( 'Portaalgebruik', ob_get_clean() );
 	}
 

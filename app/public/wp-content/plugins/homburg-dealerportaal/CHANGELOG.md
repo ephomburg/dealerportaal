@@ -8,6 +8,17 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.110.0
+
+- **Portaalgebruik vernieuwd** (Dashboard > Portaalgebruik, nu `HDP_Gebruik` voor de cijfers en `HDP_Gebruik_Scherm` voor de weergave). In tabbladen: Overzicht, Dealers, Webshop, Documenten & zoeken, Trainingen.
+- Bovenaan **"Vraagt aandacht"**: bestellingen of trainingaanmeldingen die niet in PowerAll kwamen, verlopen uitnodigingen, vergeten winkelwagens (gevuld, dealer 3 dagen of langer weg), zoektermen zonder resultaat deze week, en bedrijven die eerder kwamen maar al ruim 30 dagen weg zijn. Niets aan de hand: "Alles in orde".
+- Kerncijfers met **vergelijking met de vorige periode** (alleen als de meting toen al liep; bestellingen altijd).
+- **Alles per bedrijf**: een collega telt mee bij zijn hoofdaccount (actieve bedrijven, bellijst, bestellingen en omzet, export, profiel). Een bestelling van een collega stond eerder los onder de collega.
+- Tabblad **Dealers**: één lijst per bedrijf met activiteit (actief / af en toe / stil / nog nooit), laatst geweest, bezoekdagen, documenten, zoekopdrachten, bestellingen, omzet en trainingen; sorteren op elke kolom, zoeken en filteren. De Excel-export is ook één regel per bedrijf, met collega's en activiteit erbij.
+- Tabblad **Webshop**: gemiddelde bestelling, hoe vaak de kleinordertoeslag is berekend, omzet per merk (hoofdcategorie), meest bestelde artikelen, per bedrijf, en winkelwagens die niet besteld zijn.
+- Nieuw gemeten: **welke onderdelen** een dealer opent (startpagina, webshop, bestelgeschiedenis, downloads, content, huisstijl, garantie, trainingen, mijn account; één keer per onderdeel per dag) en per bezoek **apparaat** (computer of telefoon/tablet) en **taal**. Nog steeds zonder cookies of externe dienst.
+- Oude metingen van accounts die niet meer meetellen (verwijderd, beheerder of testaccount geworden) tellen niet meer als actief bedrijf.
+
 ## 1.109.0 (thema 1.44.3)
 
 - Gewijzigd: een dealer **zonder merken** ziet nu overal alleen het algemene, niet meer alles. Downloads en content met een merk, trainingen met een merk en berichten met een merk zijn voor hem verborgen (ook via de directe link); Algemeen en zonder merk blijven zichtbaar. Zo is het gelijk aan de webshop (alleen Diversen en de outlet). "Mijn merken" legt het uit. Een beheerder ziet nog steeds alles.
