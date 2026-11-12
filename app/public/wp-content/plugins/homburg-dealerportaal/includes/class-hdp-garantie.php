@@ -678,15 +678,20 @@ class HDP_Garantie {
 	 *
 	 * Een afgewezen machine weigerde de database pas nádat de dealer het hele
 	 * formulier had ingevuld. En op een machine waarvan de garantie verlopen
-	 * was, kon gewoon geclaimd worden — dat wordt nu tegengehouden. Een
-	 * machine die nog beoordeeld wordt mag wel: daar staat in de keuzelijst
-	 * al bij dat de beoordeling loopt.
+	 * was, kon gewoon geclaimd worden — dat wordt nu tegengehouden.
 	 *
-	 * @return string '' als het kan, anders 'afgewezen' of 'verlopen'.
+	 * Sinds 2026-11-12 ook: pas na goedkeuring door Homburg. Een machine
+	 * die nog beoordeeld wordt (of zonder status) is niet te claimen.
+	 *
+	 * @return string '' als het kan, anders 'afgewezen', 'in_behandeling' of 'verlopen'.
 	 */
 	public static function waarom_niet_claimbaar( $machine, $nu = 0 ) {
-		if ( isset( $machine['status'] ) && 'afgewezen' === $machine['status'] ) {
+		$status = isset( $machine['status'] ) ? (string) $machine['status'] : '';
+		if ( 'afgewezen' === $status ) {
 			return 'afgewezen';
+		}
+		if ( 'goedgekeurd' !== $status ) {
+			return 'in_behandeling';
 		}
 		if ( self::garantiestand( $machine, $nu )['verlopen'] ) {
 			return 'verlopen';
@@ -1216,6 +1221,9 @@ class HDP_Garantie {
 			$waarom = self::waarom_niet_claimbaar( $machine );
 			if ( 'afgewezen' === $waarom ) {
 				return new WP_Error( 'hdp_machine_afgewezen', HDP_I18N::t( 'garantie_fout_machine_afgewezen' ) );
+			}
+			if ( 'in_behandeling' === $waarom ) {
+				return new WP_Error( 'hdp_machine_in_behandeling', HDP_I18N::t( 'garantie_fout_machine_in_behandeling' ) );
 			}
 			if ( 'verlopen' === $waarom ) {
 				return new WP_Error(

@@ -1004,8 +1004,8 @@ class Garantie_Test extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( 'claims', $this->geschreven, 'Er hoort niets weggeschreven te zijn.' );
 	}
 
-	/** Claimen op een machine die nog beoordeeld wordt, mag gewoon. */
-	public function test_claim_op_een_nog_te_beoordelen_machine_mag() {
+	/** Sinds 2026-11-12: eerst moet Homburg de machine goedkeuren. */
+	public function test_claim_op_een_nog_te_beoordelen_machine_wordt_geweigerd() {
 		$this->als_goedgekeurde_dealer();
 
 		$claim = HDP_Garantie::dien_claim_in(
@@ -1017,8 +1017,18 @@ class Garantie_Test extends WP_UnitTestCase {
 			)
 		);
 
+		$this->assertWPError( $claim );
+		$this->assertSame( 'hdp_machine_in_behandeling', $claim->get_error_code() );
+		$this->assertArrayNotHasKey( 'claims', $this->geschreven );
+	}
+
+	public function test_claim_op_een_goedgekeurde_machine_mag() {
+		$this->als_goedgekeurde_dealer();
+
+		$claim = HDP_Garantie::dien_claim_in( array( 'machine' => 'HN4-220718-0391', 'klacht' => 'Sensor defect.' ) );
+
 		$this->assertIsArray( $claim );
-		$this->assertSame( 'm-2', $this->geschreven['claims'][0]['machine_id'] );
+		$this->assertSame( 'm-1', $this->geschreven['claims'][0]['machine_id'] );
 	}
 
 	/* =====================================================================
@@ -1057,13 +1067,29 @@ class Garantie_Test extends WP_UnitTestCase {
 		$_GET['soort'] = 'machine';
 		$formulier     = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 		$this->assertMatchesRegularExpression( '/value="HN4-220718-0391"[^>]*disabled/', $formulier );
-		$this->assertDoesNotMatchRegularExpression( '/value="BM35-240503-0042"[^>]*disabled/', $formulier );
+		// Nog niet goedgekeurd: ook niet te kiezen.
+		$this->assertMatchesRegularExpression( '/value="BM35-240503-0042"[^>]*disabled/', $formulier );
 
 		unset( $_GET['nieuw'], $_GET['soort'] );
 		$_GET['toon'] = 'machines';
 		$lijst        = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 		$this->assertStringNotContainsString( 'machine=HN4-220718-0391', $lijst );
-		$this->assertStringContainsString( 'machine=BM35-240503-0042', $lijst );
+		$this->assertStringNotContainsString( 'machine=BM35-240503-0042', $lijst );
+	}
+
+	/** Een goedgekeurde machine met lopende garantie is wél te kiezen en heeft een claimknop. */
+	public function test_goedgekeurde_machine_is_te_kiezen_en_heeft_een_claimknop() {
+		$this->als_goedgekeurde_dealer();
+
+		$_GET['nieuw'] = 'claim';
+		$_GET['soort'] = 'machine';
+		$formulier     = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+		$this->assertDoesNotMatchRegularExpression( '/value="HN4-220718-0391"[^>]*disabled/', $formulier );
+
+		unset( $_GET['nieuw'], $_GET['soort'] );
+		$_GET['toon'] = 'machines';
+		$lijst        = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
+		$this->assertStringContainsString( 'machine=HN4-220718-0391', $lijst );
 	}
 
 	/** Vanaf de machinekaart staat de machine al gekozen. */
@@ -1071,12 +1097,12 @@ class Garantie_Test extends WP_UnitTestCase {
 		$this->als_goedgekeurde_dealer();
 		$_GET['nieuw']   = 'claim';
 		$_GET['soort']   = 'machine';
-		$_GET['machine'] = 'BM35-240503-0042';
+		$_GET['machine'] = 'HN4-220718-0391';
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 		unset( $_GET['machine'] );
 
-		$this->assertMatchesRegularExpression( '/value="BM35-240503-0042"\s+selected/', $html );
+		$this->assertMatchesRegularExpression( '/value="HN4-220718-0391"\s+selected/', $html );
 	}
 
 	/* =====================================================================
@@ -1272,7 +1298,8 @@ class Garantie_Test extends WP_UnitTestCase {
 			$this->assertStringContainsString( '<form', $html, "Formulier $nieuw $soort is geen form." );
 			$this->assertStringContainsString( '_wpnonce', $html, "Formulier $nieuw $soort heeft geen nonce." );
 			$this->assertStringContainsString( 'type="submit"', $html, "Formulier $nieuw $soort heeft geen verzendknop." );
-			$this->assertStringNotContainsString( 'disabled', $html, "Formulier $nieuw $soort staat nog uit." );
+			// Een uitgeschakelde keuze in de machinelijst mag (niet goedgekeurd); een uitgeschakeld veld of knop niet.
+			$this->assertDoesNotMatchRegularExpression( '/<(input|button|textarea|fieldset|select)[^>]*\sdisabled/', $html, "Formulier $nieuw $soort staat nog uit." );
 		}
 	}
 

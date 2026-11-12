@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.115.0
+
+- **Claimen pas na goedkeuring.** Op een aangemelde machine kan pas een claim worden ingediend als Homburg de aanmelding heeft goedgekeurd. Tot die tijd staat de machine in de keuzelijst met "Aanmelding wordt beoordeeld" maar is niet te kiezen, en heeft de machinekaart geen claimknop. Ook buiten het formulier om wordt het tegengehouden. De teksten na het aanmelden en op de startkaart zeggen dat nu ook (NL/FR/EN).
+
 ## 1.114.0 (thema 1.46.0)
 
 - **Onderdelenclaim strenger.** Verplicht: het Homburg-factuurnummer van precies 6 tekens (het formulier laat geen 5 of 7 door), het vinkje "Ik stuur onderdelen retour naar Stiens", en een foto van vóór én een foto van na de reparatie (twee eigen velden; de bestanden heten bij Homburg "voor-reparatie-…" en "na-reparatie-…"). Bij "Niet ontvangen" vallen vinkje en foto's weg: dan is er geen onderdeel. Het oude fotovak heet nu "Overige foto's of documenten" en is niet verplicht.

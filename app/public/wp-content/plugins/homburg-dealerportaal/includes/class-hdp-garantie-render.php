@@ -1218,6 +1218,8 @@ class HDP_Garantie_Render {
 						<?php endif; ?>
 						<?php if ( 'afgewezen' === $waarom ) : ?>
 							— <?php echo esc_html( HDP_I18N::t( 'garantie_machine_afgewezen' ) ); ?>
+						<?php elseif ( 'in_behandeling' === $waarom ) : ?>
+							— <?php echo esc_html( HDP_I18N::t( 'garantie_machine_in_behandeling' ) ); ?>
 						<?php elseif ( 'verlopen' === $waarom ) : ?>
 							— <?php echo esc_html( sprintf( HDP_I18N::t( 'garantie_verlopen_op' ), HDP_I18N::datum( 'j M Y', strtotime( $stand['tot'] ) ) ) ); ?>
 						<?php else : ?>

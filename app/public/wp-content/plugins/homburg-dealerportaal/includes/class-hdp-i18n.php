@@ -644,8 +644,8 @@ class HDP_I18N {
 			),
 
 			'garantie_ok_machine'        => array(
-				'nl' => 'Je machine is aangemeld. We beoordelen de aanmelding; je kunt er alvast een claim op indienen.',
-				'fr' => "Votre machine est enregistrée. Nous examinons l'enregistrement ; vous pouvez déjà introduire une demande.",
+				'nl' => 'Je machine is aangemeld. Homburg beoordeelt de aanmelding; zodra die is goedgekeurd, kun je er claims op indienen.',
+				'fr' => "Votre machine est enregistrée. Homburg examine l'enregistrement ; dès qu'il est approuvé, vous pourrez introduire des demandes.",
 			),
 			/* translators: %s is het ticketnummer. */
 			'garantie_ok_claim'          => array(
@@ -712,8 +712,12 @@ class HDP_I18N {
 				'fr' => 'Cette machine a été refusée pour la garantie. Aucune demande ne peut être introduite.',
 			),
 			'garantie_machine_niet_kiesbaar' => array(
-				'nl' => 'Machines met verlopen garantie of een afgewezen aanmelding staan erbij, maar zijn niet te kiezen.',
-				'fr' => 'Les machines dont la garantie a expiré ou dont l’enregistrement a été refusé figurent dans la liste, mais ne peuvent pas être choisies.',
+				'nl' => 'Machines die Homburg nog beoordeelt, die zijn afgewezen of waarvan de garantie verlopen is, staan erbij maar zijn niet te kiezen.',
+				'fr' => 'Les machines encore en cours d’examen par Homburg, refusées ou dont la garantie a expiré figurent dans la liste, mais ne peuvent pas être choisies.',
+			),
+			'garantie_fout_machine_in_behandeling' => array(
+				'nl' => 'Homburg beoordeelt deze machine nog. Zodra de aanmelding is goedgekeurd, kun je er een claim op indienen.',
+				'fr' => 'Homburg examine encore cette machine. Dès que l’enregistrement est approuvé, vous pourrez introduire une demande.',
 			),
 			'garantie_fout_datum_toekomst' => array(
 				'nl' => 'De aankoopdatum ligt in de toekomst. Controleer de datum.',
@@ -783,8 +787,8 @@ class HDP_I18N {
 			// Garantie — overzichtspagina (twee ingangen)
 			'garantie_ingang_machine_titel' => array( 'nl' => 'Machine aanmelden', 'fr' => 'Enregistrer une machine' ),
 			'garantie_ingang_machine_tekst' => array(
-				'nl' => 'Meld een geleverde machine aan voor garantie. Daarna kun je er claims op indienen zonder gegevens over te typen.',
-				'fr' => 'Enregistrez une machine livrée pour la garantie. Vous pourrez ensuite introduire des demandes sans retaper les données.',
+				'nl' => 'Meld een geleverde machine aan voor garantie. Na goedkeuring door Homburg kun je er claims op indienen zonder gegevens over te typen.',
+				'fr' => 'Enregistrez une machine livrée pour la garantie. Après approbation par Homburg, vous pourrez introduire des demandes sans retaper les données.',
 			),
 			'garantie_ingang_machine_knop'  => array( 'nl' => 'Machine aanmelden', 'fr' => 'Enregistrer une machine' ),
 			'garantie_ingang_claim_titel'   => array( 'nl' => 'Garantieclaim indienen', 'fr' => 'Introduire une demande de garantie' ),
