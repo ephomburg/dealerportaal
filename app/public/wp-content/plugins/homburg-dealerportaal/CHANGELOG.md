@@ -8,6 +8,12 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.112.0
+
+- **De webshop volgt PowerAll precies.** Wat in PowerAll actief is en op "Verberg op webshop: Nee" staat, staat in de webshop; de rest niet. De beveiliging die het verbergen van meer dan 20% in één keer tegenhield is weg: die hield de webshop vol toen in PowerAll bewust alles op verbergen werd gezet om opnieuw te kiezen. Bij een foutmelding van PowerAll verandert er nog steeds niets.
+- De artikelen worden **elk uur** bijgewerkt in plaats van één keer per nacht (de oude nachtelijke planning wordt vanzelf omgezet). "Artikelen nu bijwerken" onder WooCommerce > PowerAll blijft voor meteen.
+- Verbergen gaat in blokken van 500 in één keer (met het bijwerken van de aantallen per merk), zodat ook duizenden artikelen binnen één achtergrondstap passen.
+
 ## 1.111.0
 
 - **Portaalgebruik in een nieuw jasje.** Bovenaan een donkere band die de periode in gewone taal samenvat ("27 van de 41 bedrijven waren in het portaal. 18 bedrijven bestelden, samen voor € 48.320."), met drie kerncijfers, een verschilpilletje en hun verloop over 12 weken. Periode kiezen met één schakelaar; tabbladen als knoppen.

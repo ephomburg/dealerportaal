@@ -158,6 +158,37 @@ class PowerAll_Webshop_Test extends WP_UnitTestCase {
 		$this->assertSame( 'publish', get_post_status( wc_get_product_id_by_sku( 'VD-100' ) ) );
 	}
 
+	public function test_alles_verborgen_in_powerall_is_ook_weg_uit_de_webshop() {
+		// Veel artikelen, zodat het om meer gaat dan een handjevol.
+		for ( $i = 1; $i <= 40; $i++ ) {
+			$this->artikelen[] = $this->artikel( 'VD-' . ( 1000 + $i ), 'Onderdeel ' . $i, '070', '5.00' );
+		}
+		HDP_PowerAll_Artikelen::ronde_nu();
+		$this->assertSame( 43, HDP_PowerAll_Artikelen::stand()['vorige']['nieuw'] );
+
+		// In PowerAll alles op "Verberg op webshop" (de API geeft niets meer terug), op één na.
+		$this->artikelen = array( $this->artikelen[0] );
+		$stand           = HDP_PowerAll_Artikelen::ronde_nu();
+
+		$this->assertSame( 42, $stand['vorige']['verborgen'], 'De webshop volgt PowerAll, ook bij heel veel tegelijk.' );
+		$this->assertSame( 'publish', get_post_status( wc_get_product_id_by_sku( 'VD-100' ) ) );
+		$this->assertSame( 'draft', get_post_status( wc_get_product_id_by_sku( 'VD-1040' ) ) );
+
+		// Weer op "Nee" in PowerAll: bij de volgende ronde terug.
+		$this->artikelen[] = $this->artikel( 'VD-1040', 'Onderdeel 40', '070', '5.00' );
+		HDP_PowerAll_Artikelen::ronde_nu();
+		$this->assertSame( 'publish', get_post_status( wc_get_product_id_by_sku( 'VD-1040' ) ) );
+	}
+
+	public function test_ronde_loopt_elk_uur() {
+		wp_clear_scheduled_hook( HDP_PowerAll_Artikelen::HOOK_START );
+		wp_schedule_event( time() + DAY_IN_SECONDS, 'daily', HDP_PowerAll_Artikelen::HOOK_START );
+		HDP_PowerAll_Artikelen::plan();
+		$this->assertSame( 'hourly', wp_get_schedule( HDP_PowerAll_Artikelen::HOOK_START ) );
+		$this->assertLessThanOrEqual( time() + HOUR_IN_SECONDS, wp_next_scheduled( HDP_PowerAll_Artikelen::HOOK_START ) );
+		wp_clear_scheduled_hook( HDP_PowerAll_Artikelen::HOOK_START );
+	}
+
 	public function test_ongewijzigd_artikel_wordt_niet_opnieuw_opgeslagen() {
 		HDP_PowerAll_Artikelen::ronde_nu();
 		$stand = HDP_PowerAll_Artikelen::ronde_nu();

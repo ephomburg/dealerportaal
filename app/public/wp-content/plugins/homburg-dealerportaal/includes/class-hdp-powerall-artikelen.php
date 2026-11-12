@@ -7,10 +7,13 @@
  * verkoopprijs (excl. btw) en het merk als categorie. De inkoop- en
  * verrekenprijs worden nooit overgenomen.
  *
- * Eén keer per dag loopt het portaal alles na, in stappen van 200 artikelen
- * (Action Scheduler van WooCommerce), zodat geen enkele stap lang duurt. Een
- * artikel dat niet meer meekomt (verborgen, niet meer actief of weg), gaat op
- * concept: het verdwijnt uit de webshop, oude bestellingen blijven kloppen.
+ * Elk uur loopt het portaal alles na, in stappen van 200 artikelen (Action
+ * Scheduler van WooCommerce), zodat geen enkele stap lang duurt. De webshop
+ * volgt PowerAll precies: een artikel dat niet meer meekomt (op "Verberg op
+ * webshop", niet meer actief of weg) gaat op concept, ook als dat er heel veel
+ * tegelijk zijn (bijvoorbeeld als in PowerAll alles op verbergen wordt gezet om
+ * opnieuw te kiezen). Het verdwijnt uit de webshop; oude bestellingen blijven
+ * kloppen. Alleen bij een foutmelding van PowerAll verandert er niets.
  *
  * Producten die met de hand zijn aangemaakt, zoals de outlet, raakt dit nooit:
  * alleen producten met het kenmerk META_BRON worden bijgewerkt of verborgen.
@@ -51,9 +54,6 @@ class HDP_PowerAll_Artikelen {
 		'085' => array( 'ekobot', 'Ekobot' ),
 	);
 
-	/** Een ronde mag niet meer dan dit deel van de artikelen verbergen; anders is er iets mis. */
-	const MAX_WEG_DEEL = 0.2;
-
 	public static function init() {
 		add_action( self::HOOK_START, array( __CLASS__, 'start' ) );
 		add_action( self::HOOK_STAP, array( __CLASS__, 'stap' ) );
@@ -62,10 +62,13 @@ class HDP_PowerAll_Artikelen {
 
 	public static function plan() {
 		$gepland = wp_next_scheduled( self::HOOK_START );
+		if ( $gepland && 'hourly' !== wp_get_schedule( self::HOOK_START ) ) {
+			// Was eerder één keer per nacht.
+			wp_clear_scheduled_hook( self::HOOK_START );
+			$gepland = false;
+		}
 		if ( HDP_PowerAll::beschikbaar() && ! $gepland ) {
-			// 's Nachts, rond 03:00 Nederlandse tijd.
-			$morgen = strtotime( 'tomorrow 02:00 UTC' );
-			wp_schedule_event( $morgen, 'daily', self::HOOK_START );
+			wp_schedule_event( time() + 5 * MINUTE_IN_SECONDS, 'hourly', self::HOOK_START );
 		} elseif ( ! HDP_PowerAll::beschikbaar() && $gepland ) {
 			wp_clear_scheduled_hook( self::HOOK_START );
 		}
@@ -165,7 +168,7 @@ class HDP_PowerAll_Artikelen {
 		$stand['bijgewerkt'] = time();
 
 		if ( count( (array) $artikelen ) < self::PER_STAP ) {
-			$stand['verborgen'] = self::verberg_ongeziene( (int) $stand['ronde'], (int) $stand['gezien'] );
+			$stand['verborgen'] = self::verberg_ongeziene( (int) $stand['ronde'] );
 			$stand['bezig']     = false;
 			$stand['vorige']    = self::samenvatting( $stand );
 			self::zet_stand( $stand );
@@ -267,11 +270,10 @@ class HDP_PowerAll_Artikelen {
 
 	/**
 	 * Zet PowerAll-producten die deze ronde niet meer meekwamen op concept.
-	 * Niet als dat er verdacht veel zijn: dan liever een melding dan een lege webshop.
 	 *
 	 * @return int Hoeveel er verborgen zijn.
 	 */
-	private static function verberg_ongeziene( $ronde, $gezien ) {
+	private static function verberg_ongeziene( $ronde ) {
 		global $wpdb;
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery
 		$weg = $wpdb->get_col(
@@ -290,17 +292,23 @@ class HDP_PowerAll_Artikelen {
 		if ( ! $weg ) {
 			return 0;
 		}
-		if ( count( $weg ) > max( 25, self::MAX_WEG_DEEL * ( $gezien + count( $weg ) ) ) ) {
-			HDP_Log::schrijf( 'PowerAll-artikelen: ' . count( $weg ) . ' producten zouden verdwijnen; niet gedaan.', 'WAARSCHUWING' );
-			return 0;
+		if ( count( $weg ) > 25 ) {
+			HDP_Log::schrijf( 'PowerAll-artikelen: ' . count( $weg ) . ' producten staan in PowerAll niet meer voor de webshop en zijn uit de webshop gehaald.', 'INFO' );
 		}
-		foreach ( $weg as $id ) {
-			wp_update_post(
-				array(
-					'ID'          => $id,
-					'post_status' => 'draft',
-				)
-			);
+		// In blokken in één keer op concept, niet product voor product: als in
+		// PowerAll alles op verbergen gaat, zijn het er duizenden, en dat moet
+		// binnen één achtergrondstap passen.
+		foreach ( array_chunk( $weg, 500 ) as $blok ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- alleen gehele getallen.
+			$wpdb->query( "UPDATE {$wpdb->posts} SET post_status = 'draft' WHERE ID IN (" . implode( ',', $blok ) . ')' );
+			foreach ( $blok as $id ) {
+				clean_post_cache( $id );
+			}
+		}
+		// De aantallen per merk in het filter tellen alleen gepubliceerde producten.
+		$termen = get_terms( array( 'taxonomy' => 'product_cat', 'hide_empty' => false, 'fields' => 'ids' ) );
+		if ( ! is_wp_error( $termen ) && $termen ) {
+			wp_update_term_count_now( $termen, 'product_cat' );
 		}
 		return count( $weg );
 	}

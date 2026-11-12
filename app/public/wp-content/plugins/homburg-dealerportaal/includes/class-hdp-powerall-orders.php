@@ -586,7 +586,7 @@ class HDP_PowerAll_Orders {
 			<?php endif; ?>
 
 			<h2>Artikelen</h2>
-			<p>Alle actieve artikelen waarbij in PowerAll "verbergen op webshop" uit staat, staan in de webshop, met de verkoopprijs en het merk. Een dealer met een klantnummer ziet zijn eigen prijs. Dit wordt elke nacht bijgewerkt. Met de hand aangemaakte producten, zoals de outlet, blijven ongemoeid.</p>
+			<p>De webshop volgt PowerAll: alle actieve artikelen waarbij "Verberg op webshop" op <strong>Nee</strong> staat, staan in de webshop, met de verkoopprijs en het merk; de rest niet. Een dealer met een klantnummer ziet zijn eigen prijs. Dit wordt elk uur bijgewerkt; met de knop hieronder meteen. Met de hand aangemaakte producten, zoals de outlet, blijven ongemoeid.</p>
 			<p><strong><?php echo esc_html( number_format_i18n( $aantal ) ); ?></strong> artikelen uit PowerAll in de webshop.
 				<?php if ( ! empty( $stand['bezig'] ) ) : ?>
 					Bezig met bijwerken: <?php echo esc_html( number_format_i18n( (int) $stand['gezien'] ) ); ?> nagelopen.
