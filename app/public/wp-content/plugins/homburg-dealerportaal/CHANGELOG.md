@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.113.1
+
+- Engels ook voor de koppen en introzinnen van de portaalpagina's (Downloads, Bestelgeschiedenis, Garantie, Trainingen, Content, Huisstijl), de lege winkelwagen en de privacypagina.
+
 ## 1.113.0 (thema 1.45.0)
 
 - **Engels als derde taal.** Rechtsboven staat nu NL · FR · EN. In het Engels zijn alle vaste teksten van het portaal vertaald (menu, startpagina, webshop, winkelwagen en afrekenen, downloads, garantie, trainingen, account, collega's, foutschermen en mails aan de dealer); WordPress en WooCommerce lopen dan in hun eigen Engels. Datums staan in het Engels.

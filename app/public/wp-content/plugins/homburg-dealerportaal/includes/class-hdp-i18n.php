@@ -288,7 +288,7 @@ class HDP_I18N {
 	 * met .hdp-taal-nl). Alleen als de hele tekst van het blok bekend is.
 	 */
 	public static function engelse_inhoud( $inhoud, $blok ) {
-		if ( ! self::is_engels() || ! in_array( $blok['blockName'], array( 'core/heading', 'core/paragraph' ), true ) ) {
+		if ( ! self::is_engels() || ! in_array( $blok['blockName'], array( 'core/heading', 'core/paragraph', 'core/button' ), true ) ) {
 			return $inhoud;
 		}
 		$tekst = trim( wp_strip_all_tags( $inhoud ) );

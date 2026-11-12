@@ -129,6 +129,20 @@ class HDP_I18N_EN {
 			'Kies het merk van de machine. Je gaat direct naar het onderdelenportaal van dat merk.' => 'Choose the brand of the machine. You’ll go straight to that brand’s parts portal.',
 			'Naar onderdelen'          => 'Go to parts',
 			'Oudere Rabe-machines'     => 'Older Rabe machines',
+			// Kop en intro van de portaalpagina's (standaardwaarden van de blokken).
+			'Deze bestanden zijn uitsluitend bedoeld voor Homburg-dealers en mogen niet verder worden verspreid.' => 'These files are intended exclusively for Homburg dealers and may not be distributed further.',
+			'Bestelgeschiedenis'       => 'Order history',
+			'Een overzicht van al je eerdere bestellingen bij Homburg.' => 'An overview of all your previous orders with Homburg.',
+			'Dien hier een garantieclaim in en volg de status van je lopende claims.' => 'Submit a warranty claim here and follow the status of your open claims.',
+			'Bekijk de komende trainingen van Homburg en meld je aan.' => 'View Homburg’s upcoming trainings and sign up.',
+			'Beeldmateriaal en teksten voor op je eigen social media of advertenties, exclusief voor Homburg-dealers.' => 'Images and copy for your own social media or advertisements, exclusively for Homburg dealers.',
+			'Logo\'s, kleuren en lettertypen van Homburg en van de merken die wij voeren — klaar voor gebruik op je eigen site, briefpapier en advertenties.' => 'Logos, colours and fonts of Homburg and of the brands we carry — ready to use on your own website, stationery and advertisements.',
+			// Winkelwagen en privacy (vaste tekst op die pagina's).
+			'Je winkelwagen is nog leeg' => 'Your cart is still empty',
+			'Zoek je een onderdeel of artikel? In de webshop vind je het hele assortiment.' => 'Looking for a part or item? The webshop has the full range.',
+			'Privacyverklaring'        => 'Privacy statement',
+			'Voor het dealerportaal en de webshop van Homburg Machinehandel BV geldt de privacyverklaring van Homburg Holland. Hierin lees je hoe we omgaan met jouw persoonsgegevens.' => 'The Homburg Holland privacy statement applies to the dealer portal and webshop of Homburg Machinehandel BV. It explains how we handle your personal data.',
+			'Bekijk de privacyverklaring op homburg-holland.com' => 'View the privacy statement on homburg-holland.com',
 		);
 	}
 
