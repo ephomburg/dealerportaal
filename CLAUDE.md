@@ -30,8 +30,10 @@ Daarom:
   of `app/public/wp-content/themes/homburg-dealerportaal/**` of
   `.github/workflows/deploy.yml` raakt → deploy van **plugin + thema** via
   rsync (`--delete`) naar de live server. Niets anders wordt geraakt.
-- Server: cPanel, host `109.71.54.11`, user `homburgd`, poort `2222`,
-  webroot `/home/homburgd/public_html/`. Deploy-sleutel: `.deploy/deploy_key`
+- Server (sinds 2026-11-12, domein `homburg-portal.com`): cPanel, host
+  `109.71.54.120`, user `hombu119` (niet de teamlogin `erik`), poort `2222`,
+  webroot `/home/hombu119/public_html/`. Oude server (`homburgdevelopment.nl`):
+  host `109.71.54.11`, user `homburgd` — krijgt geen deploys meer. Deploy-sleutel: `.deploy/deploy_key`
   (gitignored).
 - Huisstijl: elke afgeronde wijziging krijgt een eigen versiebump in de
   plugin-header + een `CHANGELOG.md`-regel.

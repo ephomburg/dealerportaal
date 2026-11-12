@@ -6,10 +6,10 @@ name: Deploy naar live
 #
 # Benodigde repository-secrets (Settings > Secrets and variables > Actions):
 #   SSH_PRIVATE_KEY  volledige inhoud van .deploy/deploy_key (incl. BEGIN/END-regels)
-#   REMOTE_HOST      109.71.54.11
-#   REMOTE_USER      homburgd
+#   REMOTE_HOST      109.71.54.120   (homburg-portal.com, sinds 2026-11-12)
+#   REMOTE_USER      hombu119
 #   REMOTE_PORT      2222
-#   REMOTE_TARGET    /home/homburgd/public_html/wp-content/plugins/homburg-dealerportaal/
+#   REMOTE_TARGET    /home/hombu119/public_html/wp-content/plugins/homburg-dealerportaal/
 #
 # Het themapad wordt afgeleid uit REMOTE_TARGET: /plugins/ -> /themes/. Plugin
 # en thema heten allebei "homburg-dealerportaal" in een standaard WP-indeling.

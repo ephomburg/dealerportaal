@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.112.1
+
+- **Nieuw adres: homburg-portal.com.** Het portaal draait op een nieuwe server; updates gaan vanaf deze versie daarheen in plaats van naar homburgdevelopment.nl. Geen wijziging in wat dealers zien — deze versie is de eerste test van het live zetten naar de nieuwe server.
+
 ## 1.112.0
 
 - **De webshop volgt PowerAll precies.** Wat in PowerAll actief is en op "Verberg op webshop: Nee" staat, staat in de webshop; de rest niet. De beveiliging die het verbergen van meer dan 20% in één keer tegenhield is weg: die hield de webshop vol toen in PowerAll bewust alles op verbergen werd gezet om opnieuw te kiezen. Bij een foutmelding van PowerAll verandert er nog steeds niets.
