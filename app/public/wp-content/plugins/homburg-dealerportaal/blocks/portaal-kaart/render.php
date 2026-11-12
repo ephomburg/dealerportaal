@@ -20,9 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * blok ingevulde URL.
  */
 
-$titel     = HDP_I18N::kies( isset( $attributes['titel'] ) ? $attributes['titel'] : '', isset( $attributes['titelFr'] ) ? $attributes['titelFr'] : '' );
-$tekst     = HDP_I18N::kies( isset( $attributes['tekst'] ) ? $attributes['tekst'] : '', isset( $attributes['tekstFr'] ) ? $attributes['tekstFr'] : '' );
-$knoptekst = HDP_I18N::kies( isset( $attributes['knoptekst'] ) ? $attributes['knoptekst'] : '', isset( $attributes['knoptekstFr'] ) ? $attributes['knoptekstFr'] : '' );
+$titel     = HDP_I18N::kies( isset( $attributes['titel'] ) ? $attributes['titel'] : '', isset( $attributes['titelFr'] ) ? $attributes['titelFr'] : '', isset( $attributes['titelEn'] ) ? $attributes['titelEn'] : '' );
+$tekst     = HDP_I18N::kies( isset( $attributes['tekst'] ) ? $attributes['tekst'] : '', isset( $attributes['tekstFr'] ) ? $attributes['tekstFr'] : '', isset( $attributes['tekstEn'] ) ? $attributes['tekstEn'] : '' );
+$knoptekst = HDP_I18N::kies( isset( $attributes['knoptekst'] ) ? $attributes['knoptekst'] : '', isset( $attributes['knoptekstFr'] ) ? $attributes['knoptekstFr'] : '', isset( $attributes['knoptekstEn'] ) ? $attributes['knoptekstEn'] : '' );
 
 $icoon                   = isset( $attributes['icoon'] ) ? $attributes['icoon'] : 'webshop';
 $url                     = isset( $attributes['url'] ) ? $attributes['url'] : '';

@@ -11,8 +11,10 @@
 		"icoon": { "type": "string", "default": "mail" },
 		"titel": { "type": "string", "default": "" },
 		"titelFr": { "type": "string", "default": "" },
+		"titelEn": { "type": "string", "default": "" },
 		"tekst": { "type": "string", "default": "" },
 		"tekstFr": { "type": "string", "default": "" },
+		"tekstEn": { "type": "string", "default": "" },
 		"email": { "type": "string", "default": "" },
 		"telefoon": { "type": "string", "default": "" }
 	},

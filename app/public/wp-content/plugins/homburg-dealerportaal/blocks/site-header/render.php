@@ -163,9 +163,10 @@ $link_icoon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 				})();
 				</script>
 			<?php endif; ?>
-			<div class="hdp-taalswitch" role="group" aria-label="Taal / Langue">
-				<a href="<?php echo esc_url( add_query_arg( 'hdp_taal', 'nl' ) ); ?>" class="hdp-taal-knop<?php echo 'nl' === $huidige_taal ? ' hdp-taal-actief' : ''; ?>"<?php echo 'nl' === $huidige_taal ? ' aria-current="true"' : ''; ?>>NL</a>
-				<a href="<?php echo esc_url( add_query_arg( 'hdp_taal', 'fr' ) ); ?>" class="hdp-taal-knop<?php echo 'fr' === $huidige_taal ? ' hdp-taal-actief' : ''; ?>"<?php echo 'fr' === $huidige_taal ? ' aria-current="true"' : ''; ?>>FR</a>
+			<div class="hdp-taalswitch" role="group" aria-label="Taal / Langue / Language">
+				<?php foreach ( HDP_I18N::TALEN as $taalcode ) : ?>
+					<a href="<?php echo esc_url( add_query_arg( 'hdp_taal', $taalcode ) ); ?>" class="hdp-taal-knop<?php echo $taalcode === $huidige_taal ? ' hdp-taal-actief' : ''; ?>"<?php echo $taalcode === $huidige_taal ? ' aria-current="true"' : ''; ?> lang="<?php echo esc_attr( $taalcode ); ?>"><?php echo esc_html( strtoupper( $taalcode ) ); ?></a>
+				<?php endforeach; ?>
 			</div>
 		</nav>
 	</div>

@@ -484,7 +484,7 @@ add_filter( 'single_post_title', 'homburg_wc_paginatitel', 10, 2 );
  * @param int|WP_Post $post  De pagina.
  */
 function homburg_wc_paginatitel( $titel, $post = 0 ) {
-	if ( is_admin() || ! class_exists( 'HDP_I18N' ) || ! HDP_I18N::is_frans() ) {
+	if ( is_admin() || ! class_exists( 'HDP_I18N' ) || ! HDP_I18N::is_vertaald() ) {
 		return $titel;
 	}
 	$id = $post instanceof WP_Post ? $post->ID : (int) $post;

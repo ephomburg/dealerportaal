@@ -806,7 +806,9 @@ body.hdp-login-actief {
    ========================================================================== */
 [data-taal="fr"] .hdp-taal-nl { display: none !important; }
 [data-taal="nl"] .hdp-taal-fr,
+[data-taal="en"] .hdp-taal-fr,
 html:not([data-taal]) .hdp-taal-fr { display: none !important; }
+/* Engels: deze blokken hebben (nog) geen Engelse tekst, dus het Nederlands. */
 
 /* ==========================================================================
    AANVULLENDE INFORMATIE (bestellen, contact, technische documentatie)

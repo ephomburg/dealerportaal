@@ -285,7 +285,7 @@ class HDP_Training_Reviews {
 
 	/** Eén mail, in de taal waarin de deelnemer zich aanmeldde. */
 	public static function verstuur( $rij, $soort ) {
-		$taal  = 'fr' === $rij['taal'] ? 'fr' : 'nl';
+		$taal  = in_array( $rij['taal'], array( 'fr', 'en' ), true ) ? $rij['taal'] : 'nl';
 		$id    = (int) $rij['training_id'];
 		$titel = self::titel_in( $id, $taal );
 
@@ -388,7 +388,7 @@ class HDP_Training_Reviews {
 		$sleutel = isset( $_GET['sleutel'] ) ? sanitize_text_field( wp_unslash( $_GET['sleutel'] ) ) : '';
 		// phpcs:enable
 		$rij  = self::aanmelding_bij_link( $id, $sleutel );
-		$taal = $rij && 'fr' === $rij['taal'] ? 'fr' : HDP_I18N::huidige_taal();
+		$taal = $rij && in_array( $rij['taal'], array( 'fr', 'en' ), true ) ? $rij['taal'] : HDP_I18N::huidige_taal();
 
 		ob_start();
 		echo '<div class="hdp-portaal alignfull"><section class="hdp-trainingen hdp-training-beoordeel">';

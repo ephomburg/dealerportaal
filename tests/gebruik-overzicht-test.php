@@ -143,11 +143,12 @@ class Gebruik_Overzicht_Test extends WP_UnitTestCase {
 	public function test_apparaat_en_taal() {
 		HDP_Gebruik::noteer( 'bezoek', 'computer|nl', 0, $this->hoofd );
 		HDP_Gebruik::noteer( 'bezoek', 'mobiel|fr', 0, $this->collega );
+		HDP_Gebruik::noteer( 'bezoek', 'computer|en', 0, $this->collega );
 		HDP_Gebruik::noteer( 'bezoek', '', 0, $this->hoofd ); // Van voor deze versie.
 
 		$uit = HDP_Gebruik::apparaten( 30 );
-		$this->assertSame( array( 'computer' => 1, 'mobiel' => 1 ), $uit['apparaat'] );
-		$this->assertSame( array( 'nl' => 1, 'fr' => 1 ), $uit['taal'] );
+		$this->assertSame( array( 'computer' => 2, 'mobiel' => 1 ), $uit['apparaat'] );
+		$this->assertSame( array( 'nl' => 1, 'fr' => 1, 'en' => 1 ), $uit['taal'] );
 	}
 
 	public function test_bezoek_legt_apparaat_en_taal_vast() {

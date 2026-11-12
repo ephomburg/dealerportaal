@@ -18,6 +18,16 @@ $titel_fr    = isset( $attributes['titelFr'] ) ? $attributes['titelFr'] : '';
 $tekst       = isset( $attributes['tekst'] ) ? $attributes['tekst'] : '';
 $tekst_fr    = isset( $attributes['tekstFr'] ) ? $attributes['tekstFr'] : '';
 $icoon       = isset( $attributes['icoon'] ) ? $attributes['icoon'] : 'mail';
+
+// Engels: geen eigen markup met CSS-wissel nodig, het blok wordt per bezoek
+// opgebouwd. Het Engels staat dan als "Nederlandse" regel (die is in het
+// Engels zichtbaar), en de Franse regel valt weg.
+if ( HDP_I18N::is_engels() ) {
+	$titel    = HDP_I18N::kies( $titel, '', isset( $attributes['titelEn'] ) ? $attributes['titelEn'] : '' );
+	$tekst    = HDP_I18N::kies( $tekst, '', isset( $attributes['tekstEn'] ) ? $attributes['tekstEn'] : '' );
+	$titel_fr = '';
+	$tekst_fr = '';
+}
 $email       = isset( $attributes['email'] ) ? trim( $attributes['email'] ) : '';
 $telefoon    = isset( $attributes['telefoon'] ) ? trim( $attributes['telefoon'] ) : '';
 $telefoon_href = $telefoon ? 'tel:' . preg_replace( '/[^\d+]/', '', $telefoon ) : '';

@@ -99,6 +99,21 @@
 							value: a.linkTekstFr,
 							onChange: function ( waarde ) { setAttributes( { linkTekstFr: waarde } ); }
 						} )
+					),
+					el(
+						PanelBody,
+						{ title: 'Engels (EN)', initialOpen: false },
+						el( TextControl, {
+							label: 'Titel (EN)',
+							help: 'Leeg laten = de Nederlandse titel.',
+							value: a.titelEn,
+							onChange: function ( waarde ) { setAttributes( { titelEn: waarde } ); }
+						} ),
+						el( TextControl, {
+							label: 'Linktekst (EN)',
+							value: a.linkTekstEn,
+							onChange: function ( waarde ) { setAttributes( { linkTekstEn: waarde } ); }
+						} )
 					)
 				),
 				el(

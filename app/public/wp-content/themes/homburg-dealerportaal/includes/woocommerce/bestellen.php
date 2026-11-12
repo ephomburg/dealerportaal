@@ -104,11 +104,14 @@ function homburg_wc_referentie( $order ) {
 
 /** De Metaalunievoorwaarden van Homburg, per taal. */
 function homburg_wc_voorwaarden_url() {
-	$frans = class_exists( 'HDP_I18N' ) && HDP_I18N::is_frans();
+	$taal = class_exists( 'HDP_I18N' ) ? HDP_I18N::huidige_taal() : 'nl';
+	$naam = array(
+		'nl' => 'Nederlands',
+		'fr' => 'Frans',
+		'en' => 'Engels',
+	);
 
-	return $frans
-		? 'https://www.homburg-holland.com/wp-content/uploads/2025/01/Metaalunievoorwaarden-2025-Frans.pdf'
-		: 'https://www.homburg-holland.com/wp-content/uploads/2025/01/Metaalunievoorwaarden-2025-Nederlands.pdf';
+	return 'https://www.homburg-holland.com/wp-content/uploads/2025/01/Metaalunievoorwaarden-2025-' . ( isset( $naam[ $taal ] ) ? $naam[ $taal ] : $naam['nl'] ) . '.pdf';
 }
 
 add_action( 'wp_enqueue_scripts', 'homburg_wc_voorwaarden_link', 20 );
@@ -370,7 +373,7 @@ function homburg_wc_teammail_einde() {
 }
 
 function homburg_wc_nederlands_aan() {
-	if ( ! class_exists( 'HDP_I18N' ) || ! HDP_I18N::is_frans() ) {
+	if ( ! class_exists( 'HDP_I18N' ) || ! HDP_I18N::is_vertaald() ) {
 		return;
 	}
 	HDP_I18N::alleen_nederlands( true );

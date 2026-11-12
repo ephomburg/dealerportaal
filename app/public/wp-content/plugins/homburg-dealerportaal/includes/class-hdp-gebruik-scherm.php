@@ -620,10 +620,12 @@ class HDP_Gebruik_Scherm {
 		$app_totaal  = array_sum( $apparaat['apparaat'] );
 		$taal_totaal = array_sum( $apparaat['taal'] );
 		if ( $app_totaal ) {
+			$engels = $taal_totaal && ! empty( $apparaat['taal']['en'] ) ? (int) round( $apparaat['taal']['en'] / $taal_totaal * 100 ) : 0;
 			printf(
-				'<p class="hdp-g-opmerking">%d%% op de telefoon of tablet · %d%% in het Frans</p>',
+				'<p class="hdp-g-opmerking">%d%% op de telefoon of tablet · %d%% in het Frans%s</p>',
 				(int) round( $apparaat['apparaat']['mobiel'] / $app_totaal * 100 ),
-				(int) ( $taal_totaal ? round( $apparaat['taal']['fr'] / $taal_totaal * 100 ) : 0 )
+				(int) ( $taal_totaal ? round( $apparaat['taal']['fr'] / $taal_totaal * 100 ) : 0 ),
+				$engels ? esc_html( ' · ' . $engels . '% in het Engels' ) : ''
 			);
 		}
 	}

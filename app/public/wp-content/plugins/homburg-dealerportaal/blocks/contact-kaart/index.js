@@ -91,6 +91,20 @@
 							value: a.tekstFr,
 							onChange: function ( waarde ) { setAttributes( { tekstFr: waarde } ); }
 						} )
+					),
+					el(
+						PanelBody,
+						{ title: 'Engels (EN)', initialOpen: false },
+						el( TextControl, {
+							label: 'Titel (EN)',
+							value: a.titelEn,
+							onChange: function ( waarde ) { setAttributes( { titelEn: waarde } ); }
+						} ),
+						el( TextareaControl, {
+							label: 'Tekst (EN)',
+							value: a.tekstEn,
+							onChange: function ( waarde ) { setAttributes( { tekstEn: waarde } ); }
+						} )
 					)
 				),
 				el(

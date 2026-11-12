@@ -152,7 +152,8 @@ class HDP_Zijbalk {
 	private static function kaart_naar_onderdeel( $attrs ) {
 		$titel = HDP_I18N::kies(
 			isset( $attrs['titel'] ) ? $attrs['titel'] : '',
-			isset( $attrs['titelFr'] ) ? $attrs['titelFr'] : ''
+			isset( $attrs['titelFr'] ) ? $attrs['titelFr'] : '',
+			isset( $attrs['titelEn'] ) ? $attrs['titelEn'] : ''
 		);
 
 		// De link staat óf rechtstreeks op de kaart, óf als sleutel naar de

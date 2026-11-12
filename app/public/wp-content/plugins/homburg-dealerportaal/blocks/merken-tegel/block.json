@@ -11,6 +11,8 @@
 		"titel": { "type": "string", "default": "" },
 		"linkTekst": { "type": "string", "default": "" },
 		"linkTekstFr": { "type": "string", "default": "" },
+		"linkTekstEn": { "type": "string", "default": "" },
+		"titelEn": { "type": "string", "default": "" },
 		"url": { "type": "string", "default": "" },
 		"kleur": { "type": "string", "default": "donker" },
 		"nieuweTab": { "type": "boolean", "default": true },

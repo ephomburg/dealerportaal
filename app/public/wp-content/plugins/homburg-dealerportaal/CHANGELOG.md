@@ -8,6 +8,14 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.113.0 (thema 1.45.0)
+
+- **Engels als derde taal.** Rechtsboven staat nu NL · FR · EN. In het Engels zijn alle vaste teksten van het portaal vertaald (menu, startpagina, webshop, winkelwagen en afrekenen, downloads, garantie, trainingen, account, collega's, foutschermen en mails aan de dealer); WordPress en WooCommerce lopen dan in hun eigen Engels. Datums staan in het Engels.
+- De bekende teksten op de startpagina (portaalkaarten, zijmenu, contactkaart, "Per merk") hebben alvast een Engelse versie. De portaalkaart, contactkaart en merkentegel krijgen in de editor een paneel "Engels (EN)" om dat zelf aan te passen; leeg = de Nederlandse tekst.
+- Wat nog geen Engelse versie heeft (berichten, trainingen, productnamen uit PowerAll) blijft Nederlands. Een Engelstalige dealer ziet bij downloads de Engelse én de Nederlandse bestanden.
+- Algemene voorwaarden: in het Engels de Engelse Metaalunievoorwaarden. Mails aan het eigen team blijven altijd Nederlands.
+- Portaalgebruik telt het Engels mee ("… % in het Engels").
+
 ## 1.112.1
 
 - **Nieuw adres: homburg-portal.com.** Het portaal draait op een nieuwe server; updates gaan vanaf deze versie daarheen in plaats van naar homburgdevelopment.nl. Geen wijziging in wat dealers zien — deze versie is de eerste test van het live zetten naar de nieuwe server.

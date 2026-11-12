@@ -667,7 +667,7 @@ class HDP_Gebruik {
 		);
 		$uit = array(
 			'apparaat' => array( 'computer' => 0, 'mobiel' => 0 ),
-			'taal'     => array( 'nl' => 0, 'fr' => 0 ),
+			'taal'     => array( 'nl' => 0, 'fr' => 0, 'en' => 0 ),
 		);
 		foreach ( $rijen as $rij ) {
 			$delen = explode( '|', (string) $rij->sleutel );

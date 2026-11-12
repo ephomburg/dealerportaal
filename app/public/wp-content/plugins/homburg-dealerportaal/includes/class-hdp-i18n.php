@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class HDP_I18N {
 
 	const COOKIE = 'hdp_taal';
-	const TALEN  = array( 'nl', 'fr' );
+	const TALEN  = array( 'nl', 'fr', 'en' );
 
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'verwerk_taalwissel' ) );
@@ -24,6 +24,7 @@ class HDP_I18N {
 		add_filter( 'locale', array( __CLASS__, 'frontend_locale' ) );
 		add_filter( 'gettext_homburg-dealerportaal-theme', array( __CLASS__, 'thema_tekst' ), 10, 2 );
 		add_filter( 'render_block', array( __CLASS__, 'vaste_sjabloontekst' ), 10, 2 );
+		add_filter( 'render_block', array( __CLASS__, 'engelse_inhoud' ), 11, 2 );
 	}
 
 	/**
@@ -37,7 +38,15 @@ class HDP_I18N {
 	 * Engels, wat erger is dan Nederlands. wp-admin blijft in de eigen taal.
 	 */
 	public static function frontend_locale( $locale ) {
-		if ( is_admin() || ! self::is_frans() || ! self::franse_taalbestanden() ) {
+		if ( is_admin() ) {
+			return $locale;
+		}
+		// Engels heeft geen taalbestanden nodig: dat is de brontaal van
+		// WordPress en WooCommerce zelf.
+		if ( self::is_engels() ) {
+			return 'en_US';
+		}
+		if ( ! self::is_frans() || ! self::franse_taalbestanden() ) {
 			return $locale;
 		}
 		return 'fr_FR';
@@ -58,11 +67,26 @@ class HDP_I18N {
 	 * Het thema heeft geen eigen taalbestanden, dus hier het Frans erbij.
 	 */
 	public static function thema_tekst( $vertaling, $tekst ) {
-		if ( ! self::is_frans() ) {
+		$teksten = self::thema_teksten_in_taal();
+		if ( ! $teksten ) {
 			return $vertaling;
 		}
-		$teksten = self::thema_teksten();
 		return isset( $teksten[ $tekst ] ) ? $teksten[ $tekst ] : $vertaling;
+	}
+
+	/**
+	 * De thema-teksten (Nederlands => huidige taal), of leeg in het Nederlands.
+	 *
+	 * @return array<string, string>
+	 */
+	private static function thema_teksten_in_taal() {
+		if ( self::is_frans() ) {
+			return self::thema_teksten();
+		}
+		if ( self::is_engels() ) {
+			return HDP_I18N_EN::thema();
+		}
+		return array();
 	}
 
 	/**
@@ -70,13 +94,13 @@ class HDP_I18N {
 	 * blokken zelf en loopt dus niet langs __().
 	 */
 	public static function vaste_sjabloontekst( $inhoud, $blok ) {
-		if ( ! self::is_frans() || ! ( is_404() || is_search() ) ) {
+		if ( ! self::is_vertaald() || ! ( is_404() || is_search() ) ) {
 			return $inhoud;
 		}
 		if ( ! in_array( $blok['blockName'], array( 'core/heading', 'core/paragraph', 'core/search' ), true ) ) {
 			return $inhoud;
 		}
-		return strtr( $inhoud, self::thema_teksten() );
+		return strtr( $inhoud, self::thema_teksten_in_taal() );
 	}
 
 	/**
@@ -205,6 +229,13 @@ class HDP_I18N {
 	/** Een tekst in een vaste taal, los van de keuze van de bezoeker. */
 	public static function t_in( $sleutel, $taal ) {
 		$teksten = self::teksten();
+		if ( 'en' === $taal ) {
+			$engels = HDP_I18N_EN::teksten();
+			if ( isset( $engels[ $sleutel ] ) ) {
+				return $engels[ $sleutel ];
+			}
+			$taal = 'nl';
+		}
 		return isset( $teksten[ $sleutel ][ $taal ] ) ? $teksten[ $sleutel ][ $taal ] : $sleutel;
 	}
 
@@ -220,17 +251,49 @@ class HDP_I18N {
 		return 'fr' === self::huidige_taal();
 	}
 
+	public static function is_engels() {
+		return 'en' === self::huidige_taal();
+	}
+
+	/** Staat het portaal in een andere taal dan Nederlands? */
+	public static function is_vertaald() {
+		return 'nl' !== self::huidige_taal();
+	}
+
 	/**
-	 * Wisselt tussen twee waarden op basis van de huidige taal — handig
+	 * Wisselt tussen waarden op basis van de huidige taal — handig
 	 * voor bewerkbare blokvelden die al een Nederlandse waarde uit
 	 * block.json/de editor hebben en er een Franse naast krijgen.
-	 * Valt terug op $nl wanneer $fr leeg is (nog niet ingevuld).
+	 * Valt terug op $nl wanneer de andere taal leeg is (nog niet ingevuld).
+	 * Engels zonder eigen tekst valt terug op het Nederlands.
 	 */
-	public static function kies( $nl, $fr ) {
+	public static function kies( $nl, $fr, $en = '' ) {
 		if ( self::is_frans() && '' !== trim( (string) $fr ) ) {
 			return $fr;
 		}
+		if ( self::is_engels() ) {
+			if ( '' !== trim( (string) $en ) ) {
+				return $en;
+			}
+			$bekend = HDP_I18N_EN::vertaal_inhoud( $nl );
+			if ( '' !== $bekend ) {
+				return $bekend;
+			}
+		}
 		return $nl;
+	}
+
+	/**
+	 * Engels voor vaste kopjes en alinea's op de startpagina (core-blokken
+	 * met .hdp-taal-nl). Alleen als de hele tekst van het blok bekend is.
+	 */
+	public static function engelse_inhoud( $inhoud, $blok ) {
+		if ( ! self::is_engels() || ! in_array( $blok['blockName'], array( 'core/heading', 'core/paragraph' ), true ) ) {
+			return $inhoud;
+		}
+		$tekst = trim( wp_strip_all_tags( $inhoud ) );
+		$en    = HDP_I18N_EN::vertaal_inhoud( $tekst );
+		return '' === $en ? $inhoud : str_replace( $tekst, $en, $inhoud );
 	}
 
 	/**
@@ -300,19 +363,31 @@ class HDP_I18N {
 	 * @return string
 	 */
 	public static function datum( $formaat, $tijdstempel ) {
-		if ( ! self::is_frans() ) {
+		if ( ! self::is_vertaald() ) {
 			return date_i18n( $formaat, $tijdstempel );
 		}
 
 		$maand = (int) date_i18n( 'n', $tijdstempel );
 		$dag   = (int) date_i18n( 'w', $tijdstempel );
 
-		$woorden = array(
-			'F' => self::MAANDEN_FR[ $maand - 1 ],
-			'M' => self::MAANDEN_FR_KORT[ $maand - 1 ],
-			'l' => self::DAGEN_FR[ $dag ],
-			'D' => self::DAGEN_FR_KORT[ $dag ],
-		);
+		if ( self::is_engels() ) {
+			// Engelse namen rechtstreeks uit PHP: los van de taal van de site.
+			$basis   = gmmktime( 12, 0, 0, $maand, 1, 2026 );
+			$zondag  = gmmktime( 12, 0, 0, 1, 4, 2026 ) + $dag * DAY_IN_SECONDS;
+			$woorden = array(
+				'F' => gmdate( 'F', $basis ),
+				'M' => gmdate( 'M', $basis ),
+				'l' => gmdate( 'l', $zondag ),
+				'D' => gmdate( 'D', $zondag ),
+			);
+		} else {
+			$woorden = array(
+				'F' => self::MAANDEN_FR[ $maand - 1 ],
+				'M' => self::MAANDEN_FR_KORT[ $maand - 1 ],
+				'l' => self::DAGEN_FR[ $dag ],
+				'D' => self::DAGEN_FR_KORT[ $dag ],
+			);
+		}
 
 		// Teken voor teken, zodat een al ontsnapt teken (\j) met rust
 		// gelaten wordt en alleen een echt formaatteken vervangen wordt.
@@ -352,6 +427,12 @@ class HDP_I18N {
 		$teksten = self::teksten();
 		$taal    = self::huidige_taal();
 
+		if ( 'en' === $taal ) {
+			$engels = HDP_I18N_EN::teksten();
+			if ( isset( $engels[ $sleutel ] ) ) {
+				return $engels[ $sleutel ];
+			}
+		}
 		if ( isset( $teksten[ $sleutel ][ $taal ] ) ) {
 			return $teksten[ $sleutel ][ $taal ];
 		}
@@ -786,7 +867,7 @@ class HDP_I18N {
 			'uitleg_trainingen_tekst' => array( 'nl' => 'Meld jezelf of je monteurs aan voor een training van Homburg.', 'fr' => 'Inscrivez-vous, vous ou vos techniciens, à une formation Homburg.' ),
 			'uitleg_account_titel'    => array( 'nl' => 'Mijn account', 'fr' => 'Mon compte' ),
 			'uitleg_account_tekst'    => array( 'nl' => 'Je bestellingen, favorieten, adressen en wachtwoord.', 'fr' => 'Vos commandes, favoris, adresses et mot de passe.' ),
-			'uitleg_tip'              => array( 'nl' => 'Rechtsboven kies je Nederlands of Frans. Deze uitleg vind je later terug onder Mijn account.', 'fr' => 'En haut à droite, vous choisissez le néerlandais ou le français. Vous retrouverez ces explications sous Mon compte.' ),
+			'uitleg_tip'              => array( 'nl' => 'Rechtsboven kies je Nederlands, Frans of Engels. Deze uitleg vind je later terug onder Mijn account.', 'fr' => 'En haut à droite, vous choisissez le néerlandais, le français ou l’anglais. Vous retrouverez ces explications sous Mon compte.' ),
 			'uitleg_vragen'           => array( 'nl' => 'Vragen? Neem contact op:', 'fr' => 'Des questions ? Contactez-nous :' ),
 			'uitleg_begrepen'         => array( 'nl' => 'Begrepen', 'fr' => 'Compris' ),
 			'uitleg_menu'             => array( 'nl' => 'Uitleg over het portaal', 'fr' => 'Explications sur le portail' ),

@@ -402,7 +402,7 @@ function homburg_wc_outlet_categorie_vertalen( $term, $taxonomie ) {
 	if ( is_admin() || 'product_cat' !== $taxonomie || ! is_object( $term ) || HOMBURG_WC_OUTLET !== $term->slug ) {
 		return $term;
 	}
-	if ( class_exists( 'HDP_I18N' ) && HDP_I18N::is_frans() ) {
+	if ( class_exists( 'HDP_I18N' ) && HDP_I18N::is_vertaald() ) {
 		$term->name        = HDP_I18N::t( 'outlet_categorie' );
 		$term->description = HDP_I18N::t( 'outlet_categorie_uitleg' );
 	}

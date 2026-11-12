@@ -11,10 +11,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * de andere kaart-blokken in deze plugin.
  */
 
-$titel          = isset( $attributes['titel'] ) ? $attributes['titel'] : '';
+$titel          = HDP_I18N::kies( isset( $attributes['titel'] ) ? $attributes['titel'] : '', '', isset( $attributes['titelEn'] ) ? $attributes['titelEn'] : '' );
 $link_tekst     = HDP_I18N::kies(
 	isset( $attributes['linkTekst'] ) ? $attributes['linkTekst'] : '',
-	isset( $attributes['linkTekstFr'] ) ? $attributes['linkTekstFr'] : ''
+	isset( $attributes['linkTekstFr'] ) ? $attributes['linkTekstFr'] : '',
+	isset( $attributes['linkTekstEn'] ) ? $attributes['linkTekstEn'] : ''
 );
 $url            = isset( $attributes['url'] ) ? $attributes['url'] : '';
 $kleur          = isset( $attributes['kleur'] ) && 'rood' === $attributes['kleur'] ? 'rood' : 'donker';

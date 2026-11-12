@@ -20,6 +20,10 @@
 			"type": "string",
 			"default": ""
 		},
+		"titelEn": {
+			"type": "string",
+			"default": ""
+		},
 		"tekst": {
 			"type": "string",
 			"default": ""
@@ -28,11 +32,19 @@
 			"type": "string",
 			"default": ""
 		},
+		"tekstEn": {
+			"type": "string",
+			"default": ""
+		},
 		"knoptekst": {
 			"type": "string",
 			"default": ""
 		},
 		"knoptekstFr": {
+			"type": "string",
+			"default": ""
+		},
+		"knoptekstEn": {
 			"type": "string",
 			"default": ""
 		},

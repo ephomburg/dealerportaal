@@ -83,37 +83,41 @@ class HDP_Foutscherm {
 		return array(
 			'niet_ingelogd'   => array(
 				'icoon'   => 'slot',
-				'titel'   => array( 'nl' => 'Je bent niet meer ingelogd', 'fr' => 'Vous n\'êtes plus connecté' ),
+				'titel'   => array( 'nl' => 'Je bent niet meer ingelogd', 'fr' => 'Vous n\'êtes plus connecté', 'en' => 'You are no longer logged in' ),
 				'tekst'   => array(
 					'nl' => 'Je sessie is verlopen. Log opnieuw in om dit bestand te downloaden.',
 					'fr' => 'Votre session a expiré. Reconnectez-vous pour télécharger ce fichier.',
+					'en' => 'Your session has expired. Log in again to download this file.',
 				),
 				'contact' => false,
 			),
 			'wacht_goedkeuring' => array(
 				'icoon'   => 'wachten',
-				'titel'   => array( 'nl' => 'Je account is nog in behandeling', 'fr' => 'Votre compte est en cours de validation' ),
+				'titel'   => array( 'nl' => 'Je account is nog in behandeling', 'fr' => 'Votre compte est en cours de validation', 'en' => 'Your account is still pending' ),
 				'tekst'   => array(
 					'nl' => 'Zodra je account is goedgekeurd, kun je alle bestanden in het dealerportaal downloaden. Je krijgt hier automatisch bericht van.',
 					'fr' => 'Dès que votre compte sera approuvé, vous pourrez télécharger tous les fichiers du portail concessionnaire. Vous en serez averti automatiquement.',
+					'en' => 'As soon as your account is approved, you can download all files in the dealer portal. You will be notified automatically.',
 				),
 				'contact' => true,
 			),
 			'geen_merkrecht'  => array(
 				'icoon'   => 'slot',
-				'titel'   => array( 'nl' => 'Dit bestand hoort bij een ander merk', 'fr' => 'Ce fichier concerne une autre marque' ),
+				'titel'   => array( 'nl' => 'Dit bestand hoort bij een ander merk', 'fr' => 'Ce fichier concerne une autre marque', 'en' => 'This file belongs to another brand' ),
 				'tekst'   => array(
 					'nl' => 'Dit bestand hoort bij een merk dat niet aan je account gekoppeld is. Voer je dit merk wel? Neem dan even contact op, dan zetten we het voor je open.',
 					'fr' => "Ce fichier concerne une marque qui n'est pas liée à votre compte. Vous distribuez cette marque ? Contactez-nous et nous l'activerons pour vous.",
+					'en' => 'This file belongs to a brand that is not linked to your account. Do you sell this brand? Get in touch and we will enable it for you.',
 				),
 				'contact' => true,
 			),
 			'niet_gevonden'   => array(
 				'icoon'   => 'downloads',
-				'titel'   => array( 'nl' => 'Dit bestand bestaat niet meer', 'fr' => "Ce fichier n'existe plus" ),
+				'titel'   => array( 'nl' => 'Dit bestand bestaat niet meer', 'fr' => "Ce fichier n'existe plus", 'en' => 'This file no longer exists' ),
 				'tekst'   => array(
 					'nl' => 'Het bestand is verplaatst of verwijderd. Op de downloadspagina staat de actuele lijst.',
 					'fr' => 'Le fichier a été déplacé ou supprimé. La liste actuelle se trouve sur la page de téléchargements.',
+					'en' => 'The file has been moved or deleted. The downloads page has the current list.',
 				),
 				'contact' => false,
 			),
@@ -134,7 +138,7 @@ class HDP_Foutscherm {
 		$schermen = self::schermen();
 		$scherm   = isset( $schermen[ $sleutel ] ) ? $schermen[ $sleutel ] : $schermen['niet_gevonden'];
 
-		$taal    = HDP_I18N::is_frans() ? 'fr' : 'nl';
+		$taal    = HDP_I18N::huidige_taal();
 		$titel   = $scherm['titel'][ $taal ];
 		$tekst   = $scherm['tekst'][ $taal ];
 		$portaal = home_url( '/dealerportaal/' );
@@ -211,7 +215,7 @@ class HDP_Foutscherm {
 		<div class="hdp-fout-knoppen">
 			<a class="hdp-btn" href="<?php echo esc_url( $portaal ); ?>"><?php echo esc_html( HDP_I18N::t( 'terug_naar_portaal' ) ); ?></a>
 			<?php if ( 'niet_gevonden' === $sleutel || 'geen_merkrecht' === $sleutel ) : ?>
-				<a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/downloads/' ) ); ?>"><?php echo esc_html( 'fr' === $taal ? 'Tous les téléchargements' : 'Alle downloads' ); ?></a>
+				<a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( home_url( '/downloads/' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'nieuw_alle_downloads' ) ); ?></a>
 			<?php endif; ?>
 		</div>
 		<p class="hdp-fout-code"><?php echo esc_html( 'fr' === $taal ? 'Code' : 'Code' ); ?> <?php echo esc_html( (string) $status ); ?></p>
@@ -239,7 +243,12 @@ class HDP_Foutscherm {
 			$delen[] = '<a href="mailto:' . esc_attr( $email ) . '">' . esc_html( $email ) . '</a>';
 		}
 
-		$aanhef = 'fr' === $taal ? 'Nous contacter&nbsp;:' : 'Contact opnemen:';
+		$aanhefs = array(
+			'nl' => 'Contact opnemen:',
+			'fr' => 'Nous contacter&nbsp;:',
+			'en' => 'Get in touch:',
+		);
+		$aanhef  = isset( $aanhefs[ $taal ] ) ? $aanhefs[ $taal ] : $aanhefs['nl'];
 
 		return $aanhef . ' ' . implode( ' &middot; ', $delen );
 	}
