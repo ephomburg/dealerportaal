@@ -908,7 +908,7 @@ ul.products.hdp-lijst-weergave li.product.hdp-card { position: relative; }
 	   51 pixels overbleef: de productnaam werd afgekapt tot "12-ad…" en de
 	   kolomkop liep over die van het merk heen. Ze zijn nu krapper gezet,
 	   precies ruim genoeg voor wat erin staat. */
-	grid-template-columns: 110px minmax(0, 1fr) 124px 96px 56px 186px;
+	grid-template-columns: 110px minmax(0, 1fr) 124px 96px 112px 186px;
 	align-items: center;
 	column-gap: 0.8rem;
 	row-gap: 0;
@@ -1014,12 +1014,27 @@ ul.products.hdp-lijst-weergave li.product.hdp-card { position: relative; }
 .hdp-card__aantal { display: none; }
 /* Even hoog als de knop ernaast, en zonder de pijltjes van de browser:
    daar hield hij ruimte voor vrij, waardoor de "1" uit het midden stond. */
-.hdp-card__aantal input[type="number"] {
-	width: 56px;
+/* [ − ][ aantal ][ + ] als één blokje, met de rand om het geheel. */
+.hdp-lijst-weergave .hdp-card__aantal {
+	display: flex;
+	align-items: stretch;
+	width: max-content;
 	height: 37px;
-	padding: 0 0.3rem;
 	border: 1px solid var(--wp--preset--color--rand);
 	border-radius: 6px;
+	overflow: hidden;
+	background: var(--wp--preset--color--wit);
+}
+.hdp-card__aantal label { display: flex; margin: 0; }
+.hdp-card__aantal .hdp-qty-btn { width: 30px; padding: 0; font-size: 1rem; }
+.hdp-card__aantal .hdp-qty-min { border-right: 1px solid var(--wp--preset--color--rand); }
+.hdp-card__aantal .hdp-qty-plus { border-left: 1px solid var(--wp--preset--color--rand); }
+.hdp-card__aantal input[type="number"] {
+	width: 44px;
+	height: 100%;
+	padding: 0 0.2rem;
+	border: 0;
+	border-radius: 0;
 	background: var(--wp--preset--color--wit);
 	color: var(--wp--preset--color--donkergrijs);
 	font: inherit;
@@ -1039,7 +1054,7 @@ ul.products.hdp-lijst-weergave li.product.hdp-card { position: relative; }
 body.hdp-shop-lijst .hdp-lijst-kop {
 	display: grid;
 	/* Exact dezelfde kolommen en dezelfde marge rechts als een rij. */
-	grid-template-columns: 110px minmax(0, 1fr) 124px 96px 56px 186px;
+	grid-template-columns: 110px minmax(0, 1fr) 124px 96px 112px 186px;
 	column-gap: 0.8rem;
 	align-items: center;
 	padding: 0.55rem 3.15rem 0.55rem 0.9rem;

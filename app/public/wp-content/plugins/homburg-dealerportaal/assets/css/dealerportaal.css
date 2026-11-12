@@ -1873,6 +1873,13 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 	flex: none;
 }
 .hdp-veld:has( > input[type="checkbox"] ) label { margin-bottom: 0; }
+/* Velden die het script verbergt (onderdelenclaim, "niet ontvangen"): de
+   flex hierboven zou het hidden-attribuut anders overstemmen. */
+.hdp-veld[hidden] { display: none !important; }
+/* Vinkje en tekst naast elkaar, ook op een smal scherm; de toelichting
+   eronder over de volle breedte. */
+.hdp-veld:has( > input[type="checkbox"] ) label { flex: 1 1 0; min-width: 0; }
+.hdp-veld:has( > input[type="checkbox"] ) .hdp-veld-hint { flex-basis: 100%; }
 .hdp-veld:has( > input[type="checkbox"] ) .hdp-veld-hint { flex-basis: 100%; margin-left: 1.7rem; }
 
 /* ── Indienformulier ──────────────────────────────────────────── */

@@ -1019,6 +1019,11 @@ class HDP_Garantie_Render {
 							$label     = ( $is_onderdeel && 'klacht' === $naam )
 								? HDP_I18N::t( 'garantie_veld_klacht_onderdeel' )
 								: HDP_I18N::t( 'garantie_veld_' . $naam );
+							// Naast de verplichte foto's van vóór en na is dit het
+							// vak voor de rest (factuur van een andere leverancier e.d.).
+							if ( $is_onderdeel && 'fotos' === $naam ) {
+								$label = HDP_I18N::t( 'garantie_veld_fotos_extra' );
+							}
 							$breed     = in_array( $veld['type'], array( 'textarea', 'file', 'regels' ), true );
 							$veld_id   = 'hdp-' . $soort . '-' . $naam;
 							$verplicht = $veld['verplicht'];
@@ -1031,7 +1036,7 @@ class HDP_Garantie_Render {
 							$eerder = HDP_Garantie_Formulier::eerder( 'fotos' === $naam ? '' : $naam );
 							?>
 							<?php // Een div en geen p: de onderdelenregels zijn blokelementen, en die sluiten een <p> stilzwijgend af — de regels en de knop belandden dan als losse vakjes in het raster. ?>
-							<div class="hdp-veld<?php echo $breed ? ' hdp-veld-breed' : ''; ?>">
+							<div class="hdp-veld<?php echo $breed ? ' hdp-veld-breed' : ''; ?><?php echo 'checkbox' === $veld['type'] ? ' hdp-veld-vinkje' : ''; ?>"<?php echo ! empty( $veld['met_onderdeel'] ) ? ' data-met-onderdeel="1"' : ''; ?><?php echo ! empty( $veld['alleen_merk'] ) ? ' data-alleen-merk="' . esc_attr( $veld['alleen_merk'] ) . '" hidden' : ''; ?>>
 								<label for="<?php echo esc_attr( $veld_id ); ?>">
 									<?php echo esc_html( $label ); ?>
 									<?php if ( $verplicht ) : ?>
@@ -1041,9 +1046,18 @@ class HDP_Garantie_Render {
 								<?php if ( 'textarea' === $veld['type'] ) : ?>
 									<textarea id="<?php echo esc_attr( $veld_id ); ?>" name="<?php echo esc_attr( $naam ); ?>" rows="3" <?php echo $verplicht ? 'required' : ''; ?>><?php echo esc_textarea( $eerder ); ?></textarea>
 								<?php elseif ( 'file' === $veld['type'] ) : ?>
-									<input type="file" id="<?php echo esc_attr( $veld_id ); ?>" name="<?php echo esc_attr( 'machine' === $soort ? 'bijlagen' : 'fotos' ); ?>[]" multiple
-										accept="<?php echo esc_attr( self::toegestane_bestanden() ); ?>">
-									<span class="hdp-veld-hint"><?php echo esc_html( HDP_I18N::t( 'claim' === $soort ? 'garantie_fotos_hint' : 'garantie_bijlagen_hint' ) ); ?></span>
+									<?php
+									// De vaste verplichte documenten hebben elk hun eigen veld;
+									// "fotos"/"bijlagen" is het vak voor de rest.
+									$bestandsveld = in_array( $naam, array( 'fotos', 'bijlagen' ), true ) ? ( 'machine' === $soort ? 'bijlagen' : 'fotos' ) : $naam;
+									// Een veld voor één merk (QI) maakt het script pas verplicht bij dat merk.
+									$nu_verplicht = $verplicht && empty( $veld['alleen_merk'] );
+									?>
+									<input type="file" id="<?php echo esc_attr( $veld_id ); ?>" name="<?php echo esc_attr( $bestandsveld ); ?>[]" multiple
+										accept="<?php echo esc_attr( self::toegestane_bestanden() ); ?>" <?php echo $nu_verplicht ? 'required' : ''; ?>>
+									<?php if ( in_array( $naam, array( 'fotos', 'bijlagen' ), true ) ) : ?>
+										<span class="hdp-veld-hint"><?php echo esc_html( HDP_I18N::t( 'claim' === $soort ? ( $is_onderdeel ? 'garantie_fotos_extra_hint' : 'garantie_fotos_hint' ) : 'garantie_bijlagen_hint' ) ); ?></span>
+									<?php endif; ?>
 								<?php elseif ( 'regels' === $veld['type'] ) : ?>
 									<?php self::render_claimregels( HDP_Garantie_Formulier::eerder( 'regels', array() ), ! empty( $veld['uren'] ) ); ?>
 								<?php elseif ( 'probleem' === $veld['type'] ) : ?>
@@ -1054,7 +1068,7 @@ class HDP_Garantie_Render {
 										<?php endforeach; ?>
 									</select>
 								<?php elseif ( 'checkbox' === $veld['type'] ) : ?>
-									<input type="checkbox" id="<?php echo esc_attr( $veld_id ); ?>" name="<?php echo esc_attr( $naam ); ?>" value="1" <?php checked( (bool) $eerder ); ?>>
+									<input type="checkbox" id="<?php echo esc_attr( $veld_id ); ?>" name="<?php echo esc_attr( $naam ); ?>" value="1" <?php checked( (bool) $eerder ); ?> <?php echo $verplicht ? 'required' : ''; ?>>
 								<?php elseif ( 'uren' === $veld['type'] ) : ?>
 									<input type="number" min="0" step="0.25" id="<?php echo esc_attr( $veld_id ); ?>" name="<?php echo esc_attr( $naam ); ?>"
 										value="<?php echo esc_attr( $eerder ); ?>">
@@ -1068,7 +1082,7 @@ class HDP_Garantie_Render {
 								<?php else : ?>
 									<?php // Een aankoopdatum ligt nooit in de toekomst; een tikfout als 2062 gaf een garantie die decennia doorliep. ?>
 									<input type="<?php echo esc_attr( $veld['type'] ); ?>" id="<?php echo esc_attr( $veld_id ); ?>" name="<?php echo esc_attr( $naam ); ?>"
-										value="<?php echo esc_attr( $eerder ); ?>" <?php echo $verplicht ? 'required' : ''; ?><?php echo 'date' === $veld['type'] ? ' max="' . esc_attr( current_time( 'Y-m-d' ) ) . '"' : ''; ?>>
+										value="<?php echo esc_attr( $eerder ); ?>" <?php echo $verplicht ? 'required' : ''; ?><?php echo 'date' === $veld['type'] ? ' max="' . esc_attr( current_time( 'Y-m-d' ) ) . '"' : ''; ?><?php echo ! empty( $veld['lengte'] ) ? ' minlength="' . (int) $veld['lengte'] . '" maxlength="' . (int) $veld['lengte'] . '" autocomplete="off" title="' . esc_attr( sprintf( HDP_I18N::t( 'garantie_fout_factuurnummer' ), (int) $veld['lengte'] ) ) . '"' : ''; ?>>
 								<?php endif; ?>
 								<?php if ( ! empty( $veld['hint'] ) ) : ?>
 									<span class="hdp-veld-hint"><?php echo esc_html( HDP_I18N::t( 'garantie_veld_' . $naam . '_hint' ) ); ?></span>

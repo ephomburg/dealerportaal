@@ -8,6 +8,12 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.114.0 (thema 1.46.0)
+
+- **Onderdelenclaim strenger.** Verplicht: het Homburg-factuurnummer van precies 6 tekens (het formulier laat geen 5 of 7 door), het vinkje "Ik stuur onderdelen retour naar Stiens", en een foto van vóór én een foto van na de reparatie (twee eigen velden; de bestanden heten bij Homburg "voor-reparatie-…" en "na-reparatie-…"). Bij "Niet ontvangen" vallen vinkje en foto's weg: dan is er geen onderdeel. Het oude fotovak heet nu "Overige foto's of documenten" en is niet verplicht.
+- **Machine aanmelden: verplichte documenten.** PDI-formulier (elk merk), QI-formulier (alleen bij Väderstad; het veld verschijnt zodra dat merk gekozen is) en de factuur aan de eindklant met onleesbaar gemaakte bedragen. De eindklant is nu ook verplicht. Bestandsnamen bij Homburg: "pdi-…", "qi-…", "factuur-eindklant-…".
+- **Webshop, lijstweergave:** − en + naast het aantal, zoals op de productpagina; het gekozen aantal gaat mee met "In winkelwagen".
+
 ## 1.113.1
 
 - Engels ook voor de koppen en introzinnen van de portaalpagina's (Downloads, Bestelgeschiedenis, Garantie, Trainingen, Content, Huisstijl), de lege winkelwagen en de privacypagina.

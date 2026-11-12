@@ -139,6 +139,22 @@ class HDP_Garantie_Formulier {
 			self::terug_met_fout( 'machine', HDP_I18N::t( 'garantie_fout_merk' ), $waarden );
 		}
 
+		// PDI, factuur aan de eindklant en (Väderstad) QI zijn verplicht.
+		$papieren = array();
+		foreach ( array( 'pdi', 'qi', 'factuur_eindklant' ) as $veld ) {
+			$papieren[ $veld ] = self::heeft_bestand( self::bestanden( $veld ) );
+		}
+		$mist = HDP_Garantie::ontbrekende_machinebestanden( $waarden['merk'], $papieren );
+		if ( $mist ) {
+			$namen = array_map(
+				static function ( $veld ) {
+					return HDP_I18N::t( 'garantie_veld_' . $veld );
+				},
+				$mist
+			);
+			self::terug_met_fout( 'machine', self::melding_ontbrekend( $namen ), $waarden );
+		}
+
 		// Een tikfout als 2062 in plaats van 2026 gaf een garantie die
 		// decennia doorliep. Het veld zelf weigert al een datum na vandaag,
 		// maar dat is in de browser te omzeilen.
@@ -152,7 +168,14 @@ class HDP_Garantie_Formulier {
 			self::terug_met_fout( 'machine', self::leesbaar( $machine ), $waarden );
 		}
 
-		$mislukt = HDP_Garantie::bewaar_bijlagen( self::bestanden( 'bijlagen' ), 'machine', $machine['id'] );
+		// Met een voorvoegsel, zodat bij Homburg aan de naam te zien is welk
+		// document het is. Het QI-formulier alleen bij het merk dat erom vraagt.
+		$mislukt = array_merge(
+			HDP_Garantie::bewaar_bijlagen( self::bestanden( 'pdi' ), 'machine', $machine['id'], 'pdi-' ),
+			HDP_Garantie::vraagt_qi( $waarden['merk'] ) ? HDP_Garantie::bewaar_bijlagen( self::bestanden( 'qi' ), 'machine', $machine['id'], 'qi-' ) : array(),
+			HDP_Garantie::bewaar_bijlagen( self::bestanden( 'factuur_eindklant' ), 'machine', $machine['id'], 'factuur-eindklant-' ),
+			HDP_Garantie::bewaar_bijlagen( self::bestanden( 'bijlagen' ), 'machine', $machine['id'] )
+		);
 
 		self::terug_met_melding(
 			'garantie',
@@ -196,8 +219,26 @@ class HDP_Garantie_Formulier {
 			self::terug_met_fout( 'claim', self::melding_ontbrekend( $ontbreekt ), $waarden, $terug );
 		}
 
+		if ( HDP_Garantie::SOORT_ONDERDEEL === $soort && ! HDP_Garantie::factuurnummer_klopt( $waarden['factuurnummer'] ) ) {
+			self::terug_met_fout( 'claim', sprintf( HDP_I18N::t( 'garantie_fout_factuurnummer' ), HDP_Garantie::FACTUURNUMMER_LENGTE ), $waarden, $terug );
+		}
+
 		if ( HDP_Garantie::SOORT_ONDERDEEL === $soort && ! $waarden['regels'] ) {
 			self::terug_met_fout( 'claim', HDP_I18N::t( 'garantie_fout_geen_regels' ), $waarden, $terug );
+		}
+
+		// Bij een onderdeel (dus niet bij "niet ontvangen"): de dealer
+		// bevestigt dat het naar Stiens komt, en stuurt bewijs mee van vóór
+		// en na de reparatie.
+		$foto_voor = self::bestanden( 'foto_voor' );
+		$foto_na   = self::bestanden( 'foto_na' );
+		if ( HDP_Garantie::SOORT_ONDERDEEL === $soort && HDP_Garantie::onderdeel_verwacht( $waarden ) ) {
+			if ( ! $waarden['onderdeel_retour'] ) {
+				self::terug_met_fout( 'claim', HDP_I18N::t( 'garantie_fout_retour' ), $waarden, $terug );
+			}
+			if ( ! self::heeft_bestand( $foto_voor ) || ! self::heeft_bestand( $foto_na ) ) {
+				self::terug_met_fout( 'claim', HDP_I18N::t( 'garantie_fout_foto_voor_na' ), $waarden, $terug );
+			}
 		}
 
 		// Bij een machineclaim horen de uren per onderdeel te staan. Zonder
@@ -219,7 +260,11 @@ class HDP_Garantie_Formulier {
 			self::terug_met_fout( 'claim', self::leesbaar( $claim ), $waarden, $terug );
 		}
 
-		$mislukt = HDP_Garantie::bewaar_bijlagen( $bestanden, 'claim', $claim['id'] );
+		$mislukt = array_merge(
+			HDP_Garantie::bewaar_bijlagen( $foto_voor, 'claim', $claim['id'], 'voor-reparatie-' ),
+			HDP_Garantie::bewaar_bijlagen( $foto_na, 'claim', $claim['id'], 'na-reparatie-' ),
+			HDP_Garantie::bewaar_bijlagen( $bestanden, 'claim', $claim['id'] )
+		);
 
 		// Verwachten we een onderdeel, dan is dat het eerste wat de dealer
 		// moet weten: tot het pakket hier is, gebeurt er niets. Geen "stuurt
@@ -425,7 +470,8 @@ class HDP_Garantie_Formulier {
 			if ( empty( $veld['verplicht'] ) || ! empty( $veld['uit_machine'] ) ) {
 				continue;
 			}
-			if ( 'file' === $veld['type'] ) {
+			// Bestanden en het retourvinkje hebben een eigen controle en melding.
+			if ( 'file' === $veld['type'] || 'checkbox' === $veld['type'] ) {
 				continue;
 			}
 			if ( ! isset( $waarden[ $naam ] ) || '' === $waarden[ $naam ] ) {
@@ -475,7 +521,11 @@ class HDP_Garantie_Formulier {
 		// laat een bestandsveld niet door een website vullen. Zonder deze
 		// zin verstuurde de dealer de tweede keer zonder foto's, zonder het
 		// te merken.
-		if ( self::heeft_bestand( self::bestanden( 'fotos' ) ) || self::heeft_bestand( self::bestanden( 'bijlagen' ) ) ) {
+		$gekozen = false;
+		foreach ( array( 'fotos', 'bijlagen', 'foto_voor', 'foto_na', 'pdi', 'qi', 'factuur_eindklant' ) as $veld ) {
+			$gekozen = $gekozen || self::heeft_bestand( self::bestanden( $veld ) );
+		}
+		if ( $gekozen ) {
 			$melding .= ' ' . HDP_I18N::t( 'garantie_bestanden_opnieuw' );
 		}
 

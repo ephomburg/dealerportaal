@@ -94,15 +94,20 @@ if ( '' === $brand ) {
 		// productpagina en zegt een aantal nog niets.
 		if ( $product->is_purchasable() && $product->is_in_stock() && ! $product->is_type( 'variable' ) ) :
 			?>
-			<label class="hdp-card__aantal">
-				<span class="hdp-vh">
-					<?php
-					/* translators: %s: productnaam. */
-					printf( esc_html__( 'Aantal %s', 'homburg-dealerportaal-theme' ), esc_html( $product->get_name() ) );
-					?>
-				</span>
-				<input type="number" min="1" step="1" value="1" inputmode="numeric" data-hdp-aantal>
-			</label>
+			<?php // [ − ][ aantal ][ + ]: zelfde blokje als op de productpagina, zodat je zonder typen 5 of 10 stuks in de mand legt. ?>
+			<div class="hdp-card__aantal">
+				<button type="button" class="hdp-qty-btn hdp-qty-min" data-hdp-stap="-1" aria-label="<?php esc_attr_e( 'Minder', 'homburg-dealerportaal-theme' ); ?>">&minus;</button>
+				<label>
+					<span class="hdp-vh">
+						<?php
+						/* translators: %s: productnaam. */
+						printf( esc_html__( 'Aantal %s', 'homburg-dealerportaal-theme' ), esc_html( $product->get_name() ) );
+						?>
+					</span>
+					<input type="number" min="1" step="1" value="1" inputmode="numeric" data-hdp-aantal>
+				</label>
+				<button type="button" class="hdp-qty-btn hdp-qty-plus" data-hdp-stap="1" aria-label="<?php esc_attr_e( 'Meer', 'homburg-dealerportaal-theme' ); ?>">&plus;</button>
+			</div>
 			<?php
 		endif;
 

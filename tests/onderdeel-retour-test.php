@@ -131,11 +131,41 @@ class Onderdeel_Retour_Test extends WP_UnitTestCase {
 
 	/* --- Het formulier -------------------------------------------------- */
 
-	/** Geen vinkje meer dat de dealer kan vergeten. */
-	public function test_het_vinkje_staat_niet_meer_op_het_onderdelenformulier() {
+	/**
+	 * Sinds 2026-11-12 staat het vinkje er weer, maar verplicht: de dealer
+	 * bevestigt zelf dat het onderdeel naar Stiens komt. Samen met de
+	 * verplichte foto's van vóór en na de reparatie. Alle drie alleen als er
+	 * een onderdeel is (niet bij "niet ontvangen").
+	 */
+	public function test_retourvinkje_en_fotos_zijn_verplicht_op_het_onderdelenformulier() {
 		$velden = HDP_Garantie::invulvelden( HDP_Garantie::SOORT_ONDERDEEL );
 
-		$this->assertArrayNotHasKey( 'onderdeel_retour', $velden );
+		foreach ( array( 'onderdeel_retour', 'foto_voor', 'foto_na' ) as $naam ) {
+			$this->assertArrayHasKey( $naam, $velden );
+			$this->assertTrue( $velden[ $naam ]['verplicht'], $naam );
+			$this->assertTrue( $velden[ $naam ]['met_onderdeel'], $naam );
+		}
+		$this->assertTrue( $velden['factuurnummer']['verplicht'] );
+	}
+
+	public function test_factuurnummer_heeft_precies_zes_tekens() {
+		$this->assertTrue( HDP_Garantie::factuurnummer_klopt( '123456' ) );
+		$this->assertTrue( HDP_Garantie::factuurnummer_klopt( ' A12345 ' ), 'Spaties eromheen tellen niet.' );
+		$this->assertFalse( HDP_Garantie::factuurnummer_klopt( '12345' ) );
+		$this->assertFalse( HDP_Garantie::factuurnummer_klopt( '1234567' ) );
+		$this->assertFalse( HDP_Garantie::factuurnummer_klopt( '' ) );
+	}
+
+	public function test_formulier_vraagt_beide_fotos_en_zes_tekens() {
+		$methode = new ReflectionMethod( 'HDP_Garantie_Render', 'render_formulier' );
+		$methode->setAccessible( true );
+		$html = $methode->invoke( null, 'claim', HDP_Garantie::SOORT_ONDERDEEL );
+
+		$this->assertMatchesRegularExpression( '/name="foto_voor\[\]"[^>]*required/', $html );
+		$this->assertMatchesRegularExpression( '/name="foto_na\[\]"[^>]*required/', $html );
+		$this->assertMatchesRegularExpression( '/name="onderdeel_retour"[^>]*required/', $html );
+		$this->assertStringContainsString( 'minlength="6" maxlength="6"', $html );
+		$this->assertSame( 3, substr_count( $html, 'data-met-onderdeel="1"' ) );
 	}
 
 	/** Bij een machineclaim is het wél een keuze en hoort het er dus te staan. */

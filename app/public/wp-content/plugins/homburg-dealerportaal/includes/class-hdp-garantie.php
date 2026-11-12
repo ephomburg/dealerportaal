@@ -132,19 +132,25 @@ class HDP_Garantie {
 			// niet bij een serienummer. Het factuurnummer is hier wél
 			// verplicht — dat is het enige houvast om de levering terug te
 			// vinden.
+			// 'met_onderdeel': alleen verplicht (en zichtbaar) als er een
+			// onderdeel is. Bij "niet ontvangen" valt er niets terug te sturen
+			// of te fotograferen; zie onderdeel_verwacht().
 			return array(
 				'onderdeel_probleem' => array( 'type' => 'probleem', 'verplicht' => true ),
-				'factuurnummer'      => array( 'type' => 'text', 'verplicht' => true, 'hint' => true ),
+				// Een factuurnummer van Homburg heeft precies zes tekens.
+				'factuurnummer'      => array( 'type' => 'text', 'verplicht' => true, 'hint' => true, 'lengte' => self::FACTUURNUMMER_LENGTE ),
 				'klacht'             => array( 'type' => 'textarea', 'verplicht' => true, 'hint' => true ),
 				'regels'             => array( 'type' => 'regels', 'verplicht' => false ),
 				'te_claimen_tijd'    => array( 'type' => 'uren', 'verplicht' => false, 'hint' => true ),
 				'klantreferentie'    => array( 'type' => 'text', 'verplicht' => false, 'hint' => true ),
 				'opmerkingen'        => array( 'type' => 'textarea', 'verplicht' => false, 'hint' => true ),
-				// Geen vinkje "ik stuur een onderdeel retour": bij een
-				// onderdelenclaim is dat geen keuze maar de regel. We nemen de
-				// claim pas in behandeling als het onderdeel hier is, dus het
-				// hoort als mededeling op het formulier en niet als iets dat de
-				// dealer kan vergeten aan te vinken. Zie onderdeel_verwacht().
+				// Toch weer een vinkje (2026-11-12): de dealer bevestigt zelf
+				// dat het onderdeel naar Stiens komt. Verplicht, dus niet over
+				// te slaan; de mededeling boven het formulier blijft staan.
+				'onderdeel_retour'   => array( 'type' => 'checkbox', 'verplicht' => true, 'hint' => true, 'met_onderdeel' => true ),
+				// Bewijs: een foto van vóór en een van na de reparatie.
+				'foto_voor'          => array( 'type' => 'file', 'verplicht' => true, 'hint' => true, 'met_onderdeel' => true ),
+				'foto_na'            => array( 'type' => 'file', 'verplicht' => true, 'hint' => true, 'met_onderdeel' => true ),
 				'fotos'              => array( 'type' => 'file', 'verplicht' => false ),
 			);
 		}
@@ -215,6 +221,45 @@ class HDP_Garantie {
 	/** Het enige probleem waarbij de dealer niets terug kan sturen. */
 	const PROBLEEM_ZONDER_ONDERDEEL = 'niet_ontvangen';
 
+	/** Een factuurnummer van Homburg bestaat uit precies zoveel tekens. */
+	const FACTUURNUMMER_LENGTE = 6;
+
+	/** Alleen bij dit merk hoort er een QI-formulier bij de aanmelding. */
+	const QI_MERK = 'Väderstad';
+
+	/** Is dit het merk waarvoor een QI-formulier nodig is? (Ook "Vaderstad" zonder puntjes.) */
+	public static function vraagt_qi( $merk ) {
+		return strtolower( remove_accents( trim( (string) $merk ) ) ) === strtolower( remove_accents( self::QI_MERK ) );
+	}
+
+	/**
+	 * Welke verplichte bestanden ontbreken bij een machine-aanmelding?
+	 *
+	 * @param string $merk       Het gekozen merk.
+	 * @param array  $meegestuurd Veldnaam => of er een bestand bij zit.
+	 * @return string[] Veldnamen.
+	 */
+	public static function ontbrekende_machinebestanden( $merk, $meegestuurd ) {
+		$mist = array();
+		foreach ( self::machinevelden() as $naam => $veld ) {
+			if ( 'file' !== $veld['type'] || empty( $veld['verplicht'] ) ) {
+				continue;
+			}
+			if ( ! empty( $veld['alleen_merk'] ) && ! self::vraagt_qi( $merk ) ) {
+				continue;
+			}
+			if ( empty( $meegestuurd[ $naam ] ) ) {
+				$mist[] = $naam;
+			}
+		}
+		return $mist;
+	}
+
+	/** Klopt de lengte van dit factuurnummer (spaties eromheen tellen niet)? */
+	public static function factuurnummer_klopt( $nummer ) {
+		return self::FACTUURNUMMER_LENGTE === mb_strlen( trim( (string) $nummer ) );
+	}
+
 	/**
 	 * Of dit een soort claim is die we kennen; alles anders wordt een
 	 * machineclaim, want dat is wat er vóór deze uitbreiding bestond.
@@ -236,15 +281,20 @@ class HDP_Garantie {
 			'merk'         => array( 'type' => 'merk', 'verplicht' => true ),
 			'serienummer'  => array( 'type' => 'text', 'verplicht' => true ),
 			'aankoopdatum' => array( 'type' => 'date', 'verplicht' => true ),
-			'klant'        => array( 'type' => 'text', 'verplicht' => false ),
+			// Verplicht sinds 2026-11-12: zonder eindklant valt de garantie
+			// niet te koppelen aan wie de machine gebruikt.
+			'klant'        => array( 'type' => 'text', 'verplicht' => true ),
 			// Geen hectares hier: bij aanmelding is die stand een
 			// momentopname die meteen veroudert. Wat telt is de stand op het
 			// moment van de klacht, en die vraagt het claimformulier.
 			//
-			// Homburg beoordeelt elke aanmelding. Een factuur of afleverbon
-			// erbij maakt dat sneller; de verwerking ervan bestond al, alleen
-			// stond het veld er niet. Niet verplicht: niet elke dealer heeft
-			// dat papier bij de hand op het moment van aanmelden.
+			// Verplichte papieren bij aanmelding (2026-11-12): het PDI-formulier
+			// (elk merk), het QI-formulier (alleen Väderstad) en de factuur aan
+			// de eindklant, met de bedragen onleesbaar gemaakt.
+			'pdi'              => array( 'type' => 'file', 'verplicht' => true, 'hint' => true ),
+			'qi'               => array( 'type' => 'file', 'verplicht' => true, 'hint' => true, 'alleen_merk' => self::QI_MERK ),
+			'factuur_eindklant' => array( 'type' => 'file', 'verplicht' => true, 'hint' => true ),
+			// De rest (afleverbon, foto typeplaatje): niet verplicht.
 			'bijlagen'     => array( 'type' => 'file', 'verplicht' => false ),
 		);
 	}
@@ -1266,7 +1316,7 @@ class HDP_Garantie {
 	 * @param string $soort     'claim' of 'machine'.
 	 * @return array Namen van de bestanden die niet gelukt zijn.
 	 */
-	public static function bewaar_bijlagen( $bestanden, $soort, $id ) {
+	public static function bewaar_bijlagen( $bestanden, $soort, $id, $voorvoegsel = '' ) {
 		$mislukt = array();
 
 		if ( empty( $bestanden['name'] ) || ! is_array( $bestanden['name'] ) ) {
@@ -1291,6 +1341,9 @@ class HDP_Garantie {
 			if ( '' === $naam || UPLOAD_ERR_NO_FILE === (int) $bestanden['error'][ $i ] ) {
 				continue;
 			}
+			// Zo is bij Homburg aan de naam te zien wat de foto is
+			// ("voor-reparatie-IMG_1234.jpg").
+			$naam = $voorvoegsel . $naam;
 
 			if ( UPLOAD_ERR_OK !== (int) $bestanden['error'][ $i ] || (int) $bestanden['size'][ $i ] > self::BIJLAGE_MAX ) {
 				$mislukt[] = $naam;

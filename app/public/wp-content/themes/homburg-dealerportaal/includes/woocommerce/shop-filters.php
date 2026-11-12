@@ -445,6 +445,21 @@ function homburg_wc_shop_inline_js() {
 		knop.setAttribute('href', url.pathname + url.search);
 	});
 
+	// De − en + naast het aantal. Ze sturen een input-event, zodat het
+	// stukje hierboven het aantal ook in de bestelknop zet.
+	document.addEventListener('click', function (e) {
+		var knop = e.target.closest ? e.target.closest('[data-hdp-stap]') : null;
+		if (!knop) { return; }
+		var blok = knop.closest('.hdp-card__aantal');
+		var veld = blok && blok.querySelector('[data-hdp-aantal]');
+		if (!veld) { return; }
+		var aantal = (parseInt(veld.value, 10) || 1) + parseInt(knop.dataset.hdpStap, 10);
+		var max = parseInt(veld.getAttribute('max'), 10);
+		if (max > 0 && aantal > max) { aantal = max; }
+		veld.value = Math.max(1, aantal);
+		veld.dispatchEvent(new Event('input', { bubbles: true }));
+	});
+
 	// Merkfilter direct toepassen bij het aan-/uitvinken.
 	var merkForm = document.querySelector('.hdp-shop-merken-form');
 	if (merkForm) {

@@ -141,6 +141,36 @@
 } )();
 
 /**
+ * Machine aanmelden: het QI-formulier hoort alleen bij Väderstad. Het veld
+ * verschijnt (en wordt verplicht) zodra dat merk gekozen is. Welk merk dat
+ * is staat in data-alleen-merk; de server controleert hetzelfde.
+ */
+( function () {
+	var keuze = document.getElementById( 'hdp-machine-merk' );
+	var velden = document.querySelectorAll( '[data-alleen-merk]' );
+	if ( ! keuze || ! velden.length ) {
+		return;
+	}
+
+	function kaal( tekst ) {
+		return ( tekst || '' ).normalize( 'NFD' ).replace( /[̀-ͯ]/g, '' ).trim().toLowerCase();
+	}
+
+	function bijwerken() {
+		velden.forEach( function ( veld ) {
+			var aan = kaal( keuze.value ) === kaal( veld.dataset.alleenMerk );
+			veld.hidden = ! aan;
+			veld.querySelectorAll( 'input' ).forEach( function ( invoer ) {
+				invoer.required = aan;
+			} );
+		} );
+	}
+
+	keuze.addEventListener( 'change', bijwerken );
+	bijwerken();
+} )();
+
+/**
  * De mededeling bij een onderdelenclaim ("stuur het onderdeel naar
  * Stiens") hoort te verdwijnen zodra de dealer "niet ontvangen" kiest: dan
  * is er niets om terug te sturen.
@@ -162,8 +192,20 @@
 		return;
 	}
 
+	// De velden die alleen bij een onderdeel horen (retourvinkje, foto's van
+	// vóór en na): bij "niet ontvangen" weg én niet meer verplicht, anders
+	// houdt de browser het formulier tegen op een veld dat er niet staat.
+	var velden = document.querySelectorAll( '[data-met-onderdeel]' );
+
 	function bijwerken() {
-		blok.hidden = keuze.value === blok.dataset.zonderOnderdeel;
+		var zonder = keuze.value === blok.dataset.zonderOnderdeel;
+		blok.hidden = zonder;
+		velden.forEach( function ( veld ) {
+			veld.hidden = zonder;
+			veld.querySelectorAll( 'input' ).forEach( function ( invoer ) {
+				invoer.required = ! zonder;
+			} );
+		} );
 	}
 
 	keuze.addEventListener( 'change', bijwerken );

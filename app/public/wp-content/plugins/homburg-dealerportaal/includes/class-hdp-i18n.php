@@ -617,10 +617,26 @@ class HDP_I18N {
 			'garantie_annuleren'         => array( 'nl' => 'Annuleren', 'fr' => 'Annuler' ),
 			// Alleen bij "machine aanmelden"; de claim heeft garantie_fotos_hint.
 			'garantie_bijlagen_hint'     => array(
-				'nl' => 'Bijvoorbeeld de factuur of afleverbon, en een foto van het typeplaatje. Daarmee kunnen we je aanmelding sneller beoordelen. JPG, PNG, WEBP, HEIC of PDF; maximaal 10 bestanden van 10 MB.',
-				'fr' => 'Par exemple la facture ou le bon de livraison, et une photo de la plaque signalétique. Cela nous permet de traiter votre enregistrement plus rapidement. JPG, PNG, WEBP, HEIC ou PDF ; maximum 10 fichiers de 10 Mo.',
+				'nl' => 'Niet verplicht. Bijvoorbeeld de afleverbon of een foto van het typeplaatje. JPG, PNG, WEBP, HEIC of PDF; maximaal 10 bestanden van 10 MB in totaal.',
+				'fr' => 'Facultatif. Par exemple le bon de livraison ou une photo de la plaque signalétique. JPG, PNG, WEBP, HEIC ou PDF ; maximum 10 fichiers de 10 Mo au total.',
 			),
-			'garantie_veld_bijlagen'     => array( 'nl' => 'Factuur of afleverbon', 'fr' => 'Facture ou bon de livraison' ),
+			'garantie_veld_bijlagen'     => array( 'nl' => 'Overige documenten', 'fr' => 'Autres documents' ),
+			// Verplichte documenten bij het aanmelden van een machine.
+			'garantie_veld_pdi'          => array( 'nl' => 'PDI-formulier', 'fr' => 'Formulaire PDI' ),
+			'garantie_veld_pdi_hint'     => array(
+				'nl' => 'Het ingevulde en ondertekende PDI-formulier (inspectie vóór aflevering).',
+				'fr' => 'Le formulaire PDI rempli et signé (inspection avant livraison).',
+			),
+			'garantie_veld_qi'           => array( 'nl' => 'QI-formulier (Väderstad)', 'fr' => 'Formulaire QI (Väderstad)' ),
+			'garantie_veld_qi_hint'      => array(
+				'nl' => 'Bij een Väderstad-machine verplicht: het ingevulde QI-formulier.',
+				'fr' => 'Obligatoire pour une machine Väderstad : le formulaire QI rempli.',
+			),
+			'garantie_veld_factuur_eindklant'      => array( 'nl' => 'Factuur aan de eindklant', 'fr' => 'Facture au client final' ),
+			'garantie_veld_factuur_eindklant_hint' => array(
+				'nl' => 'Je factuur aan de eindgebruiker. Maak de bedragen onleesbaar voordat je hem uploadt; wij hebben alleen de gegevens van machine, klant en datum nodig.',
+				'fr' => 'Votre facture à l’utilisateur final. Rendez les montants illisibles avant de la téléverser ; nous n’avons besoin que des données de la machine, du client et de la date.',
+			),
 			/* translators: %s zijn de bestandsnamen die niet gelukt zijn. */
 			'garantie_bijlagen_mislukt'  => array(
 				'nl' => 'Deze bestanden konden we niet opslaan: %s. Je kunt ze alsnog meesturen via een bericht bij het ticket.',
@@ -1040,8 +1056,35 @@ class HDP_I18N {
 			'garantie_veld_klacht_onderdeel' => array( 'nl' => 'Toelichting', 'fr' => 'Précisions' ),
 			'garantie_veld_factuurnummer'      => array( 'nl' => 'Homburg-factuurnummer', 'fr' => 'Numéro de facture Homburg' ),
 			'garantie_veld_factuurnummer_hint' => array(
-				'nl' => 'Het factuur- of ordernummer waarop deze onderdelen zijn geleverd.',
-				'fr' => 'Le numéro de facture ou de commande sur lequel ces pièces ont été livrées.',
+				'nl' => 'Het factuurnummer van Homburg waarop deze onderdelen zijn geleverd: precies 6 tekens.',
+				'fr' => 'Le numéro de facture Homburg sur lequel ces pièces ont été livrées : exactement 6 caractères.',
+			),
+			'garantie_fout_factuurnummer'      => array(
+				'nl' => 'Een factuurnummer van Homburg bestaat uit precies %d tekens. Controleer het nummer op de factuur.',
+				'fr' => 'Un numéro de facture Homburg comporte exactement %d caractères. Vérifiez le numéro sur la facture.',
+			),
+			'garantie_fout_retour'             => array(
+				'nl' => 'Vink aan dat je de onderdelen retour stuurt naar Stiens. Zonder het onderdeel kunnen we de claim niet behandelen.',
+				'fr' => 'Cochez que vous renvoyez les pièces à Stiens. Sans la pièce, nous ne pouvons pas traiter la demande.',
+			),
+			'garantie_fout_foto_voor_na'       => array(
+				'nl' => 'Voeg een foto toe van vóór én van na de reparatie. Die zijn nodig als bewijs.',
+				'fr' => 'Ajoutez une photo d’avant et une photo d’après la réparation. Elles servent de preuve.',
+			),
+			'garantie_veld_foto_voor'          => array( 'nl' => 'Foto vóór de reparatie', 'fr' => 'Photo avant la réparation' ),
+			'garantie_veld_foto_voor_hint'     => array(
+				'nl' => 'Het defect of de schade zoals je die aantrof, met het onderdeelnummer of typeplaatje erbij als dat kan.',
+				'fr' => 'Le défaut ou les dégâts tels que vous les avez constatés, avec si possible la référence ou la plaque signalétique.',
+			),
+			'garantie_veld_foto_na'            => array( 'nl' => 'Foto na de reparatie', 'fr' => 'Photo après la réparation' ),
+			'garantie_veld_foto_na_hint'       => array(
+				'nl' => 'Het resultaat na de reparatie, met het nieuwe onderdeel gemonteerd.',
+				'fr' => 'Le résultat après la réparation, avec la nouvelle pièce montée.',
+			),
+			'garantie_veld_fotos_extra'        => array( 'nl' => 'Overige foto\'s of documenten', 'fr' => 'Autres photos ou documents' ),
+			'garantie_fotos_extra_hint'        => array(
+				'nl' => 'Niet verplicht. Bijvoorbeeld de factuur van een andere leverancier. JPG, PNG, WEBP, HEIC of PDF; maximaal 10 bestanden van 10 MB in totaal.',
+				'fr' => 'Facultatif. Par exemple la facture d’un autre fournisseur. JPG, PNG, WEBP, HEIC ou PDF ; maximum 10 fichiers de 10 Mo au total.',
 			),
 
 			'garantie_veld_regels'           => array( 'nl' => 'Te claimen onderdelen', 'fr' => 'Pièces à déclarer' ),
