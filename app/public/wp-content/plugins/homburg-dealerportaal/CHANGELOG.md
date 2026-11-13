@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.116.0
+
+- **Nieuw filter op Downloads, Content en Huisstijl: een zijkolom met vinkjes** (zoals het merkfilter van de webshop). Merk: meerdere tegelijk aan te vinken, met het aantal bestanden erachter, grootste merk bovenaan. Taal van het bestand: Alle talen, Nederlands, Frans of Engels (vervangt "Regio"; alleen talen die er echt zijn). Soort bestand: PDF, Excel, afbeelding of software (zip). Bovenaan de lijst staat wat er aan staat ("27 bestanden · HARDI × · Nederlands ×"), met een kruisje per filter en "Filters wissen". Op een telefoon is de kolom een knop "Filters" om open te klappen. Een groep met maar één keuze wordt niet getoond.
+
 ## 1.115.0
 
 - **Claimen pas na goedkeuring.** Op een aangemelde machine kan pas een claim worden ingediend als Homburg de aanmelding heeft goedgekeurd. Tot die tijd staat de machine in de keuzelijst met "Aanmelding wordt beoordeeld" maar is niet te kiezen, en heeft de machinekaart geen claimknop. Ook buiten het formulier om wordt het tegengehouden. De teksten na het aanmelden en op de startkaart zeggen dat nu ook (NL/FR/EN).

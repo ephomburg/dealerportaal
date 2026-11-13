@@ -1077,6 +1077,109 @@ html:not([data-taal]) .hdp-taal-fr { display: none !important; }
 }
 .hdp-wis-filters:hover { color: var(--wp--preset--color--homburg-rood-donker); }
 
+/* ── Zijkolom met vinkjes (Downloads, Content, Huisstijl) ─────── */
+.hdp-dl-indeling {
+	display: grid;
+	grid-template-columns: 250px minmax(0, 1fr);
+	gap: 1.25rem;
+	align-items: start;
+}
+.hdp-dl-hoofd { min-width: 0; }
+.hdp-dl-hoofd .hdp-dl-werkbalk { padding: 1rem 1.2rem; gap: 0.8rem; margin-bottom: 1rem; }
+.hdp-dl-filters {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	padding: 1.2rem 1.25rem;
+}
+.hdp-dl-filters-knop {
+	cursor: pointer;
+	font-weight: 700;
+	font-size: 0.95rem;
+	list-style: none;
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+.hdp-dl-filters-knop::-webkit-details-marker { display: none; }
+.hdp-dl-filters-knop::after {
+	content: "";
+	margin-left: auto;
+	width: 8px;
+	height: 8px;
+	border-right: 2px solid currentColor;
+	border-bottom: 2px solid currentColor;
+	transform: rotate(45deg);
+}
+.hdp-dl-filters[open] .hdp-dl-filters-knop::after { transform: rotate(-135deg); }
+.hdp-dl-filters-aantal { color: var(--wp--preset--color--homburg-rood); }
+.hdp-dl-filtergroep { border: 0; margin: 0; padding: 0; min-width: 0; }
+.hdp-dl-filtergroep + .hdp-dl-filtergroep {
+	margin-top: 1.1rem;
+	padding-top: 1.1rem;
+	border-top: 1px solid var(--wp--preset--color--rand);
+}
+/* Zwevend: anders tekent de browser de scheidingslijn erboven dwars door het kopje. */
+.hdp-dl-filtergroep legend {
+	float: left;
+	width: 100%;
+	padding: 0;
+	margin-bottom: 0.55rem;
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--donkergrijs);
+}
+.hdp-dl-optie {
+	clear: both;
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0.28rem 0;
+	font-size: 0.9rem;
+	cursor: pointer;
+}
+.hdp-dl-optie input {
+	width: 17px;
+	height: 17px;
+	margin: 0;
+	flex: none;
+	accent-color: var(--wp--preset--color--homburg-rood);
+	cursor: pointer;
+}
+.hdp-dl-optie-naam { flex: 1; min-width: 0; }
+.hdp-dl-optie-aantal { font-size: 0.78rem; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-dl-zoekrij { display: flex; gap: 0.75rem; align-items: center; }
+.hdp-dl-zoekrij .hdp-zoekveld { flex: 1; min-width: 0; }
+.hdp-dl-hoofd .hdp-filterrij-onder { justify-content: flex-start; gap: 0.6rem; }
+.hdp-dl-hoofd .hdp-telling { margin: 0; }
+.hdp-dl-hoofd .hdp-telling strong { color: var(--wp--preset--color--donkergrijs); }
+.hdp-dl-hoofd .hdp-wis-filters { margin-left: auto; }
+.hdp-actieve-filters { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.hdp-actief-filter {
+	border: 0;
+	background: #fdecec;
+	color: var(--wp--preset--color--homburg-rood-donker);
+	font-family: inherit;
+	font-size: 0.8rem;
+	font-weight: 600;
+	padding: 0.3rem 0.7rem;
+	border-radius: 999px;
+	cursor: pointer;
+}
+.hdp-actief-filter:hover { background: #f9d6d6; }
+@media (min-width: 901px) {
+	/* Breed scherm: de kolom staat altijd open, de klapknop is overbodig. */
+	.hdp-dl-filters-knop { display: none; }
+	.hdp-dl-filters > .hdp-dl-filtergroep:first-of-type { margin-top: 0; }
+}
+@media (max-width: 900px) {
+	.hdp-dl-indeling { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+	.hdp-dl-filters { padding: 0.9rem 1.1rem; }
+	.hdp-dl-filters[open] .hdp-dl-filters-knop { margin-bottom: 1rem; }
+}
+
 .hdp-leeg-resultaat {
 	display: none;
 	background: var(--wp--preset--color--wit);

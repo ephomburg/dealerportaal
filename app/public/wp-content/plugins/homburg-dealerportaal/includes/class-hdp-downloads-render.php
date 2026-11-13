@@ -180,71 +180,106 @@ class HDP_Downloads_Render {
 			);
 		}
 
-		// Merken voor de filterchips worden automatisch afgeleid uit de
-		// downloads zelf — als Homburg later een nieuw merk invult bij een
-		// download, verschijnt de chip vanzelf, zonder codewijziging.
+		// Filters in een zijkolom met vinkjes (2026-11-12, zoals het merkfilter
+		// van de webshop): merk (meerdere tegelijk, met aantallen), de taal
+		// van het bestand en de soort bestand. Alles afgeleid uit de
+		// downloads zelf: een nieuw merk of bestandstype verschijnt vanzelf.
 		$merken = array();
+		$talen  = array();
+		$soorten = array();
 		foreach ( $downloads as $download ) {
 			$merk = HDP_Downloads_CPT::get_merk( $download->ID );
-			if ( $merk && ! in_array( $merk, $merken, true ) ) {
-				$merken[] = $merk;
+			if ( $merk ) {
+				$merken[ $merk ] = ( isset( $merken[ $merk ] ) ? $merken[ $merk ] : 0 ) + 1;
+			}
+			foreach ( self::talen_van( $download->ID ) as $taal ) {
+				$talen[ $taal ] = true;
+			}
+			foreach ( self::soorten_van( $download->ID ) as $soort ) {
+				$soorten[ $soort ] = ( isset( $soorten[ $soort ] ) ? $soorten[ $soort ] : 0 ) + 1;
 			}
 		}
-		sort( $merken );
+		// Grootste merk bovenaan: daar zoeken de meeste dealers.
+		uksort(
+			$merken,
+			static function ( $a, $b ) use ( $merken ) {
+				return $merken[ $b ] <=> $merken[ $a ] ?: strcasecmp( $a, $b );
+			}
+		);
+		$taalvolgorde = array_values( array_intersect( array( 'nl', 'fr', 'en' ), array_keys( $talen ) ) );
+		$soortvolgorde = array_values( array_intersect( array( 'pdf', 'excel', 'afbeelding', 'zip', 'overig' ), array_keys( $soorten ) ) );
 
-		ob_start();
-		?>
-		<div class="hdp-dl-werkbalk">
-			<div class="hdp-zoekveld">
-				<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-				<input type="text" id="hdp-zoeken" placeholder="<?php echo esc_attr( HDP_I18N::t( 'zoek_placeholder' ) ); ?>" autocomplete="off">
-			</div>
-			<div class="hdp-filterrij">
-				<div class="hdp-filtergroep">
-					<?php // Geen <label for>: dit zijn knoppen, geen invoerveld. Een groep met een naam is hier het juiste gereedschap, zodat de losse knoppen als "Regio: Nederland" worden aangekondigd. ?>
-					<span class="hdp-filtergroep-label" id="hdp-regio-label"><?php echo esc_html( HDP_I18N::t( 'filter_regio' ) ); ?></span>
-					<div class="hdp-chips" id="hdp-regio-chips" role="group" aria-labelledby="hdp-regio-label">
-						<button type="button" class="hdp-chip hdp-chip-actief" data-regio="alle"><?php echo esc_html( HDP_I18N::t( 'filter_alles' ) ); ?></button>
-						<?php if ( HDP_I18N::is_frans() ) : ?>
-							<button type="button" class="hdp-chip" data-regio="be-fr"><?php echo esc_html( HDP_I18N::t( 'filter_belgie_fr' ) ); ?></button>
-						<?php else : ?>
-							<button type="button" class="hdp-chip" data-regio="nl"><?php echo esc_html( HDP_I18N::t( 'filter_nederland' ) ); ?></button>
-							<button type="button" class="hdp-chip" data-regio="be"><?php echo esc_html( HDP_I18N::t( 'filter_belgie' ) ); ?></button>
-						<?php endif; ?>
-						<button type="button" class="hdp-chip" data-regio="en"><?php echo esc_html( HDP_I18N::t( 'filter_engels' ) ); ?></button>
-					</div>
-				</div>
-				<?php if ( $merken ) : ?>
-				<div class="hdp-filtergroep">
-					<span class="hdp-filtergroep-label" id="hdp-merk-label"><?php echo esc_html( HDP_I18N::t( 'filter_merk' ) ); ?></span>
-					<div class="hdp-chips" id="hdp-merk-chips" role="group" aria-labelledby="hdp-merk-label">
-						<?php foreach ( $merken as $merk ) : ?>
-							<button type="button" class="hdp-chip" data-merk="<?php echo esc_attr( $merk ); ?>"><?php echo esc_html( $merk ); ?></button>
-						<?php endforeach; ?>
-					</div>
-				</div>
-				<?php endif; ?>
-				<div class="hdp-filtergroep">
-					<label class="hdp-filtergroep-label" for="hdp-sorteer"><?php echo esc_html( HDP_I18N::t( 'sorteren_label' ) ); ?></label>
-					<select id="hdp-sorteer" class="hdp-sorteer-select">
-						<option value="datum-nieuw"><?php echo esc_html( HDP_I18N::t( 'sorteer_nieuw' ) ); ?></option>
-						<option value="datum-oud"><?php echo esc_html( HDP_I18N::t( 'sorteer_oud' ) ); ?></option>
-						<option value="naam-az"><?php echo esc_html( HDP_I18N::t( 'sorteer_naam' ) ); ?></option>
-					</select>
-				</div>
-			</div>
-			<div class="hdp-filterrij-onder">
-				<p class="hdp-telling" aria-live="polite" aria-atomic="true"><strong id="hdp-telling-zichtbaar"><?php echo count( $downloads ); ?></strong> <?php echo esc_html( HDP_I18N::t( 'telling_van' ) ); ?> <?php echo count( $downloads ); ?> <?php echo esc_html( HDP_I18N::t( 'telling_zichtbaar' ) ); ?></p>
-				<button type="button" class="hdp-wis-filters" id="hdp-wis-filters"><?php echo esc_html( HDP_I18N::t( 'wis_filters' ) ); ?></button>
-			</div>
-		</div>
-
-		<?php
 		// Content is beeldmateriaal: dat wil een dealer zien voordat hij het
 		// downloadt. Daar dus een galerij met voorbeelden in plaats van een
 		// lijst met bestandsnamen.
 		$galerij = 'content' === $categorie;
+
+		ob_start();
 		?>
+		<div class="hdp-dl-indeling">
+		<details class="hdp-dl-filters" id="hdp-dl-filters">
+			<summary class="hdp-dl-filters-knop"><?php echo esc_html( HDP_I18N::t( 'filters_knop' ) ); ?> <span class="hdp-dl-filters-aantal" id="hdp-filters-aantal"></span></summary>
+			<?php if ( count( $merken ) > 1 ) : ?>
+				<fieldset class="hdp-dl-filtergroep" id="hdp-filter-merk">
+					<legend><?php echo esc_html( HDP_I18N::t( 'filter_merk' ) ); ?></legend>
+					<?php foreach ( $merken as $merk => $aantal ) : ?>
+						<label class="hdp-dl-optie">
+							<input type="checkbox" value="<?php echo esc_attr( $merk ); ?>" data-label="<?php echo esc_attr( $merk ); ?>">
+							<span class="hdp-dl-optie-naam"><?php echo esc_html( $merk ); ?></span>
+							<span class="hdp-dl-optie-aantal"><?php echo (int) $aantal; ?></span>
+						</label>
+					<?php endforeach; ?>
+				</fieldset>
+			<?php endif; ?>
+			<?php if ( count( $taalvolgorde ) > 1 ) : ?>
+				<fieldset class="hdp-dl-filtergroep" id="hdp-filter-taal">
+					<legend><?php echo esc_html( HDP_I18N::t( 'filter_taal_bestand' ) ); ?></legend>
+					<label class="hdp-dl-optie">
+						<input type="radio" name="hdp-dl-taal" value="" checked>
+						<span class="hdp-dl-optie-naam"><?php echo esc_html( HDP_I18N::t( 'filter_alle_talen' ) ); ?></span>
+					</label>
+					<?php foreach ( $taalvolgorde as $taal ) : ?>
+						<label class="hdp-dl-optie">
+							<input type="radio" name="hdp-dl-taal" value="<?php echo esc_attr( $taal ); ?>" data-label="<?php echo esc_attr( HDP_I18N::t( 'filter_taal_' . $taal ) ); ?>">
+							<span class="hdp-dl-optie-naam"><?php echo esc_html( HDP_I18N::t( 'filter_taal_' . $taal ) ); ?></span>
+						</label>
+					<?php endforeach; ?>
+				</fieldset>
+			<?php endif; ?>
+			<?php if ( count( $soortvolgorde ) > 1 ) : ?>
+				<fieldset class="hdp-dl-filtergroep" id="hdp-filter-soort">
+					<legend><?php echo esc_html( HDP_I18N::t( 'filter_soort' ) ); ?></legend>
+					<?php foreach ( $soortvolgorde as $soort ) : ?>
+						<label class="hdp-dl-optie">
+							<input type="checkbox" value="<?php echo esc_attr( $soort ); ?>" data-label="<?php echo esc_attr( HDP_I18N::t( 'soort_' . $soort ) ); ?>">
+							<span class="hdp-dl-optie-naam"><?php echo esc_html( HDP_I18N::t( 'soort_' . $soort ) ); ?></span>
+							<span class="hdp-dl-optie-aantal"><?php echo (int) $soorten[ $soort ]; ?></span>
+						</label>
+					<?php endforeach; ?>
+				</fieldset>
+			<?php endif; ?>
+		</details>
+
+		<div class="hdp-dl-hoofd">
+		<div class="hdp-dl-werkbalk">
+			<div class="hdp-dl-zoekrij">
+				<div class="hdp-zoekveld">
+					<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+					<input type="text" id="hdp-zoeken" placeholder="<?php echo esc_attr( HDP_I18N::t( 'zoek_placeholder' ) ); ?>" aria-label="<?php echo esc_attr( HDP_I18N::t( 'zoek_placeholder' ) ); ?>" autocomplete="off">
+				</div>
+				<select id="hdp-sorteer" class="hdp-sorteer-select" aria-label="<?php echo esc_attr( HDP_I18N::t( 'sorteren_label' ) ); ?>">
+					<option value="datum-nieuw"><?php echo esc_html( HDP_I18N::t( 'sorteer_nieuw' ) ); ?></option>
+					<option value="datum-oud"><?php echo esc_html( HDP_I18N::t( 'sorteer_oud' ) ); ?></option>
+					<option value="naam-az"><?php echo esc_html( HDP_I18N::t( 'sorteer_naam' ) ); ?></option>
+				</select>
+			</div>
+			<div class="hdp-filterrij-onder">
+				<p class="hdp-telling" aria-live="polite" aria-atomic="true"><strong id="hdp-telling-zichtbaar" data-een="<?php echo esc_attr( HDP_I18N::t( 'telling_een_bestand' ) ); ?>" data-meer="<?php echo esc_attr( HDP_I18N::t( 'telling_bestanden' ) ); ?>"><?php echo esc_html( sprintf( HDP_I18N::t( 1 === count( $downloads ) ? 'telling_een_bestand' : 'telling_bestanden' ), count( $downloads ) ) ); ?></strong></p>
+				<div class="hdp-actieve-filters" id="hdp-actieve-filters" data-weghalen="<?php echo esc_attr( HDP_I18N::t( 'filter_weghalen' ) ); ?>"></div>
+				<button type="button" class="hdp-wis-filters" id="hdp-wis-filters" hidden><?php echo esc_html( HDP_I18N::t( 'wis_filters' ) ); ?></button>
+			</div>
+		</div>
+
 		<?php if ( $galerij ) : ?>
 			<p class="hdp-content-alles">
 				<a class="hdp-btn hdp-btn-secundair" href="<?php echo esc_url( HDP_Downloads_CPT::zip_url( 'content' ) ); ?>"><?php echo esc_html( HDP_I18N::t( 'btn_alles_downloaden' ) ); ?></a>
@@ -257,6 +292,8 @@ class HDP_Downloads_Render {
 		</div>
 
 		<p class="hdp-leeg-resultaat" id="hdp-leeg-resultaat"><?php echo esc_html( HDP_I18N::t( 'leeg_resultaat' ) ); ?></p>
+		</div>
+		</div>
 
 		<script>
 		(function () {
@@ -265,12 +302,23 @@ class HDP_Downloads_Render {
 			var items = lijst ? lijst.querySelectorAll('.hdp-download-item') : [];
 			var tellingEl = document.getElementById('hdp-telling-zichtbaar');
 			var leegEl = document.getElementById('hdp-leeg-resultaat');
-			var regioChips = document.getElementById('hdp-regio-chips');
-			var merkChips = document.getElementById('hdp-merk-chips');
 			var wisKnop = document.getElementById('hdp-wis-filters');
 			var sorteerSelect = document.getElementById('hdp-sorteer');
-			var actieveRegio = 'alle';
-			var actieveMerken = [];
+			var actiefVak = document.getElementById('hdp-actieve-filters');
+			var filtersVak = document.getElementById('hdp-dl-filters');
+			var aantalVak = document.getElementById('hdp-filters-aantal');
+
+			// Op een breed scherm staat de zijkolom altijd open; op een
+			// telefoon is het een knop "Filters" die je openklapt.
+			var breed = window.matchMedia('(min-width: 901px)');
+			function openOpBreed() { if (filtersVak && breed.matches) { filtersVak.open = true; } }
+			openOpBreed();
+			if (breed.addEventListener) { breed.addEventListener('change', openOpBreed); }
+
+			function gekozen(groep) {
+				var vak = document.getElementById(groep);
+				return vak ? Array.prototype.slice.call(vak.querySelectorAll('input:checked')).filter(function (i) { return i.value !== ''; }) : [];
+			}
 
 			function sorteerToepassen() {
 				if (!sorteerSelect || !lijst) { return; }
@@ -298,55 +346,70 @@ class HDP_Downloads_Render {
 				});
 			}
 
+			function waarden(lijstInputs) { return lijstInputs.map(function (i) { return i.value; }); }
+
 			function filterToepassen() {
 				var zoekterm = zoekveld ? zoekveld.value.trim().toLowerCase() : '';
+				var merken = gekozen('hdp-filter-merk');
+				var taal = gekozen('hdp-filter-taal');
+				var soorten = gekozen('hdp-filter-soort');
+				var merkW = waarden(merken), taalW = waarden(taal), soortW = waarden(soorten);
 				var zichtbaar = 0;
 				items.forEach(function (item) {
-					// Titel, omschrijving en merk: eerder alleen de titel.
+					// Titel, omschrijving en merk.
 					var voldoetZoek = !zoekterm || item.dataset.zoek.indexOf(zoekterm) !== -1;
-					var voldoetRegio = actieveRegio === 'alle' || item.dataset.regios.split(' ').indexOf(actieveRegio) !== -1;
-					var voldoetMerk = actieveMerken.length === 0 || actieveMerken.indexOf(item.dataset.merk) !== -1;
-					var zicht = voldoetZoek && voldoetRegio && voldoetMerk;
+					var voldoetMerk = !merkW.length || merkW.indexOf(item.dataset.merk) !== -1;
+					var voldoetTaal = !taalW.length || item.dataset.talen.split(' ').indexOf(taalW[0]) !== -1;
+					var itemSoorten = item.dataset.soorten.split(' ');
+					var voldoetSoort = !soortW.length || soortW.some(function (s) { return itemSoorten.indexOf(s) !== -1; });
+					var zicht = voldoetZoek && voldoetMerk && voldoetTaal && voldoetSoort;
 					item.style.display = zicht ? '' : 'none';
 					if (zicht) { zichtbaar++; }
 				});
-				if (tellingEl) { tellingEl.textContent = zichtbaar; }
+				if (tellingEl) { tellingEl.textContent = (zichtbaar === 1 ? tellingEl.dataset.een : tellingEl.dataset.meer).replace('%d', zichtbaar); }
 				if (leegEl) { leegEl.classList.toggle('hdp-zichtbaar', zichtbaar === 0); }
+
+				// Wat er aan staat, als knopjes met een kruisje.
+				var alle = merken.concat(taal, soorten);
+				if (actiefVak) {
+					actiefVak.textContent = '';
+					alle.forEach(function (invoer) {
+						var knop = document.createElement('button');
+						knop.type = 'button';
+						knop.className = 'hdp-actief-filter';
+						knop.setAttribute('aria-label', actiefVak.dataset.weghalen.replace('%s', invoer.dataset.label));
+						knop.appendChild(document.createTextNode(invoer.dataset.label + ' '));
+						var kruis = document.createElement('span');
+						kruis.setAttribute('aria-hidden', 'true');
+						kruis.textContent = '×';
+						knop.appendChild(kruis);
+						knop.addEventListener('click', function () {
+							if (invoer.type === 'radio') {
+								var allesTalen = document.querySelector('#hdp-filter-taal input[value=""]');
+								if (allesTalen) { allesTalen.checked = true; }
+							} else {
+								invoer.checked = false;
+							}
+							filterToepassen();
+						});
+						actiefVak.appendChild(knop);
+					});
+				}
+				if (aantalVak) { aantalVak.textContent = alle.length ? '(' + alle.length + ')' : ''; }
+				if (wisKnop) { wisKnop.hidden = !(alle.length || zoekterm); }
 			}
 
 			if (zoekveld) { zoekveld.addEventListener('input', filterToepassen); }
-
-			if (regioChips) {
-				regioChips.addEventListener('click', function (e) {
-					var chip = e.target.closest('.hdp-chip');
-					if (!chip) { return; }
-					actieveRegio = chip.dataset.regio;
-					regioChips.querySelectorAll('.hdp-chip').forEach(function (c) { c.classList.remove('hdp-chip-actief'); });
-					chip.classList.add('hdp-chip-actief');
-					filterToepassen();
-				});
-			}
-
-			if (merkChips) {
-				merkChips.addEventListener('click', function (e) {
-					var chip = e.target.closest('.hdp-chip');
-					if (!chip) { return; }
-					var merk = chip.dataset.merk;
-					var idx = actieveMerken.indexOf(merk);
-					if (idx === -1) { actieveMerken.push(merk); chip.classList.add('hdp-chip-actief'); }
-					else { actieveMerken.splice(idx, 1); chip.classList.remove('hdp-chip-actief'); }
-					filterToepassen();
-				});
-			}
+			if (filtersVak) { filtersVak.addEventListener('change', filterToepassen); }
 
 			if (wisKnop) {
 				wisKnop.addEventListener('click', function () {
 					if (zoekveld) { zoekveld.value = ''; }
-					actieveRegio = 'alle';
-					actieveMerken = [];
-					document.querySelectorAll('.hdp-chip').forEach(function (c) { c.classList.remove('hdp-chip-actief'); });
-					var alles = regioChips ? regioChips.querySelector('[data-regio="alle"]') : null;
-					if (alles) { alles.classList.add('hdp-chip-actief'); }
+					if (filtersVak) {
+						filtersVak.querySelectorAll('input[type="checkbox"]').forEach(function (i) { i.checked = false; });
+						var allesTalen = filtersVak.querySelector('#hdp-filter-taal input[value=""]');
+						if (allesTalen) { allesTalen.checked = true; }
+					}
 					filterToepassen();
 				});
 			}
@@ -354,6 +417,62 @@ class HDP_Downloads_Render {
 		</script>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * In welke taal (of talen) dit bestand is: 'nl', 'fr', 'en'.
+	 *
+	 * De opgeslagen regio's: 'nl' en 'be' zijn allebei Nederlandstalig,
+	 * 'be-fr' Frans, 'en' Engels. Zonder regio is het voor iedereen bedoeld
+	 * en telt het in elke taal mee.
+	 *
+	 * @return string[]
+	 */
+	public static function talen_van( $download_id ) {
+		$regios = HDP_Downloads_CPT::get_regios( $download_id );
+		if ( ! $regios ) {
+			return array( 'nl', 'fr', 'en' );
+		}
+		$talen = array();
+		if ( array_intersect( $regios, array( 'nl', 'be' ) ) ) {
+			$talen[] = 'nl';
+		}
+		if ( in_array( 'be-fr', $regios, true ) ) {
+			$talen[] = 'fr';
+		}
+		if ( in_array( 'en', $regios, true ) ) {
+			$talen[] = 'en';
+		}
+		return $talen;
+	}
+
+	/**
+	 * Welke soorten bestand er bij deze download horen (hoofdbestand en
+	 * extra formaten): 'pdf', 'excel', 'afbeelding', 'zip' of 'overig'.
+	 *
+	 * @return string[]
+	 */
+	public static function soorten_van( $download_id ) {
+		$per_extensie = array(
+			'PDF'  => 'pdf',
+			'XLS'  => 'excel',
+			'XLSX' => 'excel',
+			'XLSM' => 'excel',
+			'CSV'  => 'excel',
+			'JPG'  => 'afbeelding',
+			'JPEG' => 'afbeelding',
+			'PNG'  => 'afbeelding',
+			'WEBP' => 'afbeelding',
+			'GIF'  => 'afbeelding',
+			'SVG'  => 'afbeelding',
+			'ZIP'  => 'zip',
+		);
+		$soorten = array();
+		foreach ( HDP_Downloads_CPT::bestanden( $download_id ) as $attachment_id ) {
+			$extensie  = HDP_Downloads_CPT::type_label( $download_id, $attachment_id );
+			$soorten[] = isset( $per_extensie[ $extensie ] ) ? $per_extensie[ $extensie ] : 'overig';
+		}
+		return array_values( array_unique( $soorten ) );
 	}
 
 	/**
@@ -400,6 +519,8 @@ class HDP_Downloads_Render {
 			data-zoek="<?php echo esc_attr( mb_strtolower( implode( ' ', array_filter( array( $download->post_title, $omschrijving, $merk ) ) ) ) ); ?>"
 			data-merk="<?php echo esc_attr( $merk ); ?>"
 			data-regios="<?php echo esc_attr( implode( ' ', $regios ) ); ?>"
+			data-talen="<?php echo esc_attr( implode( ' ', self::talen_van( $download->ID ) ) ); ?>"
+			data-soorten="<?php echo esc_attr( implode( ' ', self::soorten_van( $download->ID ) ) ); ?>"
 			data-datum="<?php echo esc_attr( get_post_time( 'U', true, $download ) ); ?>"
 			data-nieuw="<?php echo $nieuw ? '1' : '0'; ?>">
 			<?php if ( $galerij ) : ?>

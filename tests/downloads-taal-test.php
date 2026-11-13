@@ -98,18 +98,33 @@ class Downloads_Taal_Test extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'Aucun téléchargement disponible dans cette langue.', $html );
 	}
 
-	public function test_regiofilterchips_tonen_alleen_taalrelevante_opties() {
+	/**
+	 * Sinds 2026-11-12 een zijkolom met vinkjes: de taalkeuze toont alleen
+	 * talen waarvan er voor deze bezoeker ook echt bestanden zijn.
+	 */
+	public function test_taalfilter_toont_alleen_talen_met_bestanden() {
 		$this->maak_download( 'Prijslijst NL', array( 'nl' ) );
+		$this->maak_download( 'Manual EN', array( 'en' ) );
 
 		$this->zet_taal( 'nl' );
 		$html_nl = HDP_Downloads_Render::render_downloads_pagina( $this->attributen );
-		$this->assertStringContainsString( 'data-regio="nl"', $html_nl );
-		$this->assertStringNotContainsString( 'data-regio="be-fr"', $html_nl );
+		$this->assertStringContainsString( 'name="hdp-dl-taal" value="nl"', $html_nl );
+		$this->assertStringContainsString( 'name="hdp-dl-taal" value="en"', $html_nl );
+		$this->assertStringNotContainsString( 'name="hdp-dl-taal" value="fr"', $html_nl );
 
 		$this->maak_download( 'Liste FR', array( 'be-fr' ) );
 		$this->zet_taal( 'fr' );
 		$html_fr = HDP_Downloads_Render::render_downloads_pagina( $this->attributen );
-		$this->assertStringContainsString( 'data-regio="be-fr"', $html_fr );
-		$this->assertStringNotContainsString( 'data-regio="nl"', $html_fr );
+		$this->assertStringContainsString( 'name="hdp-dl-taal" value="fr"', $html_fr );
+		$this->assertStringNotContainsString( 'name="hdp-dl-taal" value="nl"', $html_fr );
+	}
+
+	public function test_taal_en_soort_per_bestand() {
+		$nl  = $this->maak_download( 'NL', array( 'be' ) );
+		$mix = $this->maak_download( 'Mix', array( 'nl', 'be-fr', 'en' ) );
+		$geen = $this->maak_download( 'Zonder', array() );
+		$this->assertSame( array( 'nl' ), HDP_Downloads_Render::talen_van( $nl ) );
+		$this->assertSame( array( 'nl', 'fr', 'en' ), HDP_Downloads_Render::talen_van( $mix ) );
+		$this->assertSame( array( 'nl', 'fr', 'en' ), HDP_Downloads_Render::talen_van( $geen ), 'Zonder regio: voor iedereen.' );
 	}
 }
