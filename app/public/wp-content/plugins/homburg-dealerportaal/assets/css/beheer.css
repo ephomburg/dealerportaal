@@ -1,0 +1,215 @@
+/*
+ * De beheerkant (wp-admin) in Homburg-stijl, zoals het portaal zelf:
+ * donker menu, Homburg-rood voor wat actief is en voor knoppen.
+ * Alleen kleuren en lettertype van menu, bovenbalk, knoppen en links;
+ * de schermen zelf (WooCommerce, FileBird) blijven zoals ze zijn.
+ * Zie HDP_Beheer_Stijl.
+ */
+:root {
+	--hdp-b-rood: #c00d0d;
+	--hdp-b-rood-donker: #9a0a0a;
+	--hdp-b-menu: #2b2d31;
+	--hdp-b-menu-sub: #232427;
+	--hdp-b-menu-hover: #36383d;
+	--hdp-b-balk: #1f2023;
+	--hdp-b-tekst: #d4d6db;
+	--hdp-b-tekst-zacht: #a9acb3;
+	--hdp-b-font: 'Montserrat', Arial, sans-serif;
+}
+
+/* ── Bovenbalk (ook op de voorkant voor beheerders) ───────────── */
+#wpadminbar {
+	background: var(--hdp-b-balk);
+	font-family: var(--hdp-b-font);
+}
+#wpadminbar .ab-item,
+#wpadminbar a.ab-item,
+#wpadminbar > #wp-toolbar span.ab-label,
+#wpadminbar > #wp-toolbar span.noticon {
+	color: #ffffff;
+	font-family: var(--hdp-b-font);
+}
+#wpadminbar .ab-icon:before,
+#wpadminbar .ab-item:before,
+#wpadminbar .ab-item:after { color: var(--hdp-b-tekst-zacht); }
+#wpadminbar .ab-top-menu > li:hover > .ab-item,
+#wpadminbar .ab-top-menu > li.hover > .ab-item,
+#wpadminbar .ab-top-menu > li > .ab-item:focus,
+#wpadminbar.nojq .quicklinks .ab-top-menu > li > .ab-item:focus {
+	background: var(--hdp-b-menu);
+	color: #ffffff;
+}
+#wpadminbar:not(.mobile) .ab-top-menu > li:hover > .ab-item:before,
+#wpadminbar:not(.mobile) .ab-top-menu > li:hover > .ab-item .ab-icon:before { color: #ffffff; }
+#wpadminbar .menupop .ab-sub-wrapper,
+#wpadminbar .shortlink-input { background: var(--hdp-b-menu); }
+#wpadminbar .quicklinks .menupop ul li a,
+#wpadminbar .quicklinks .menupop ul li .ab-item { color: var(--hdp-b-tekst); }
+#wpadminbar .quicklinks .menupop ul li a:hover,
+#wpadminbar .quicklinks .menupop ul li a:focus { color: #ffffff; }
+#wpadminbar .quicklinks .menupop ul.ab-sub-secondary { background: var(--hdp-b-menu-sub); }
+
+/* Het merk links in de balk: "HOMBURG  BEHEER". */
+#wpadminbar #wp-admin-bar-hdp-merk > .ab-item {
+	font-weight: 800;
+	letter-spacing: 0.04em;
+	font-size: 14px;
+}
+#wpadminbar #wp-admin-bar-hdp-merk .hdp-b-sub {
+	margin-left: 8px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	color: var(--hdp-b-tekst-zacht);
+}
+#wpadminbar #wp-admin-bar-hdp-portaal > .ab-item:before {
+	content: "\f102";
+	top: 2px;
+}
+
+/* ── Menu links ───────────────────────────────────────────────── */
+#adminmenuback,
+#adminmenuwrap,
+#adminmenu { background: var(--hdp-b-menu); }
+#adminmenu,
+#adminmenu .wp-submenu,
+#collapse-button { font-family: var(--hdp-b-font); }
+#adminmenu a { color: var(--hdp-b-tekst); }
+#adminmenu div.wp-menu-image:before { color: var(--hdp-b-tekst-zacht); }
+#adminmenu a:hover,
+#adminmenu li.menu-top:hover,
+#adminmenu li.opensub > a.menu-top,
+#adminmenu li > a.menu-top:focus {
+	background: var(--hdp-b-menu-hover);
+	color: #ffffff;
+}
+#adminmenu li.menu-top:hover div.wp-menu-image:before,
+#adminmenu li.opensub > a.menu-top div.wp-menu-image:before,
+#adminmenu li > a.menu-top:focus div.wp-menu-image:before { color: #ffffff; }
+#adminmenu li.wp-has-current-submenu a.wp-has-current-submenu,
+#adminmenu li.current a.menu-top,
+#adminmenu .wp-has-current-submenu .wp-submenu .wp-submenu-head,
+#adminmenu .wp-menu-arrow,
+#adminmenu .wp-menu-arrow div,
+.folded #adminmenu li.current.menu-top,
+.folded #adminmenu li.wp-has-current-submenu {
+	background: var(--hdp-b-rood);
+	color: #ffffff;
+	font-weight: 600;
+}
+#adminmenu li.wp-has-current-submenu div.wp-menu-image:before,
+#adminmenu li.current div.wp-menu-image:before,
+#adminmenu a.current:hover div.wp-menu-image:before { color: #ffffff; }
+#adminmenu .wp-submenu,
+#adminmenu .wp-has-current-submenu .wp-submenu,
+#adminmenu .wp-has-current-submenu.opensub .wp-submenu,
+.folded #adminmenu .wp-has-current-submenu .wp-submenu,
+#adminmenu a.wp-has-current-submenu:focus + .wp-submenu { background: var(--hdp-b-menu-sub); }
+#adminmenu .wp-submenu a,
+#adminmenu .wp-has-current-submenu .wp-submenu a { color: #c9cbd1; }
+#adminmenu .wp-submenu a:hover,
+#adminmenu .wp-submenu a:focus { color: #ffffff; background: transparent; }
+#adminmenu .wp-submenu li.current a,
+#adminmenu .wp-submenu li.current a:hover { color: #ffffff; font-weight: 600; }
+/* Het pijltje naar de opengeklapte submenu's. */
+#adminmenu li.wp-has-submenu.wp-not-current-submenu.opensub:hover:after,
+#adminmenu li.wp-has-submenu.wp-not-current-submenu:focus-within:after { border-right-color: var(--hdp-b-menu-sub); }
+#adminmenu .awaiting-mod,
+#adminmenu .update-plugins,
+#wpadminbar .ab-top-menu .update-plugins { background: var(--hdp-b-rood); color: #ffffff; }
+#adminmenu li.current a .awaiting-mod,
+#adminmenu li a.wp-has-current-submenu .update-plugins { background: #ffffff; color: var(--hdp-b-rood); }
+#collapse-button { color: var(--hdp-b-tekst-zacht); }
+#collapse-button:hover,
+#collapse-button:focus { color: #ffffff; }
+
+/* ── Knoppen, links en focus ──────────────────────────────────── */
+.wp-core-ui .button-primary {
+	background: var(--hdp-b-rood);
+	border-color: var(--hdp-b-rood);
+	color: #ffffff;
+}
+.wp-core-ui .button-primary:hover,
+.wp-core-ui .button-primary:focus,
+.wp-core-ui .button-primary:active {
+	background: var(--hdp-b-rood-donker);
+	border-color: var(--hdp-b-rood-donker);
+	color: #ffffff;
+}
+.wp-core-ui .button-primary:focus { box-shadow: 0 0 0 1px #ffffff, 0 0 0 3px var(--hdp-b-rood); }
+.wp-core-ui .button,
+.wp-core-ui .button-secondary {
+	color: var(--hdp-b-rood);
+	border-color: var(--hdp-b-rood);
+}
+.wp-core-ui .button:hover,
+.wp-core-ui .button-secondary:hover {
+	color: var(--hdp-b-rood-donker);
+	border-color: var(--hdp-b-rood-donker);
+}
+.wp-core-ui .button-primary.button,
+.wp-core-ui .button-primary.button:hover { color: #ffffff; }
+#wpbody-content a { color: var(--hdp-b-rood); }
+#wpbody-content a:hover,
+#wpbody-content a:active { color: var(--hdp-b-rood-donker); }
+#wpbody-content a.button-primary,
+#wpbody-content a.button-primary:hover { color: #ffffff; }
+.wp-core-ui input[type="text"]:focus,
+.wp-core-ui input[type="search"]:focus,
+.wp-core-ui input[type="email"]:focus,
+.wp-core-ui input[type="number"]:focus,
+.wp-core-ui input[type="password"]:focus,
+.wp-core-ui input[type="url"]:focus,
+.wp-core-ui select:focus,
+.wp-core-ui textarea:focus {
+	border-color: var(--hdp-b-rood);
+	box-shadow: 0 0 0 1px var(--hdp-b-rood);
+}
+.wrap > h1,
+.wrap h1.wp-heading-inline { font-family: var(--hdp-b-font); font-weight: 700; }
+
+/* ── Welkomstblok op het dashboard ────────────────────────────── */
+.hdp-b-welkom {
+	background: var(--hdp-b-menu);
+	color: #ffffff;
+	border-radius: 12px;
+	padding: 26px 30px;
+	font-family: var(--hdp-b-font);
+}
+.hdp-b-welkom-eyebrow {
+	display: block;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	color: #ff8a8a;
+	margin-bottom: 6px;
+}
+.hdp-b-welkom h2 { color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 6px; padding: 0; }
+.hdp-b-welkom p { color: #c9cbd1; font-size: 14px; margin: 0 0 16px; }
+.hdp-b-welkom-knoppen { display: flex; flex-wrap: wrap; gap: 10px; }
+#wpbody-content .hdp-b-welkom-knoppen a {
+	display: inline-block;
+	text-decoration: none;
+	font-size: 13px;
+	font-weight: 700;
+	padding: 10px 16px;
+	border-radius: 8px;
+}
+#wpbody-content .hdp-b-welkom-knoppen a.hdp-b-rood { background: var(--hdp-b-rood); color: #ffffff; }
+#wpbody-content .hdp-b-welkom-knoppen a.hdp-b-rood:hover { background: var(--hdp-b-rood-donker); }
+#wpbody-content .hdp-b-welkom-knoppen a.hdp-b-wit { background: #ffffff; color: var(--hdp-b-menu); }
+#wpbody-content .hdp-b-welkom-knoppen a.hdp-b-rand { border: 1px solid #55585e; color: #ffffff; padding: 9px 15px; }
+#wpbody-content .hdp-b-welkom-knoppen a.hdp-b-rand:hover { border-color: #ffffff; }
+/* Het omhulsel van WordPress zelf (met de sluitknop) zonder zijn eigen blauwe vlak. */
+#welcome-panel {
+	background: transparent;
+	border: 0;
+	padding: 0;
+	min-height: 0;
+	overflow: visible;
+}
+#welcome-panel::before { display: none; }
+#welcome-panel .welcome-panel-close { color: #c9cbd1; top: 14px; right: 14px; z-index: 2; }
+#welcome-panel .welcome-panel-close:before { color: #c9cbd1; }
+#welcome-panel .welcome-panel-close:hover,
+#welcome-panel .welcome-panel-close:hover:before { color: #ffffff; }

@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.117.0
+
+- **Beheerkant in Homburg-stijl** (optie A van het ontwerp). Menu links donker zoals het portaal, het actieve onderdeel in Homburg-rood, Montserrat in menu en bovenbalk. Bovenbalk: "HOMBURG BEHEER" in plaats van het WordPress-logo, en "Naar het portaal" in plaats van de sitenaam. Knoppen, links en invoervelden in Homburg-rood in plaats van WordPress-blauw. Op het dashboard een eigen welkomstblok met "Download toevoegen", "Bericht plaatsen" en "Portaalgebruik bekijken" in plaats van "Welkom bij WordPress". Aan schermen en rechten verandert niets.
+
 ## 1.116.0
 
 - **Nieuw filter op Downloads, Content en Huisstijl: een zijkolom met vinkjes** (zoals het merkfilter van de webshop). Merk: meerdere tegelijk aan te vinken, met het aantal bestanden erachter, grootste merk bovenaan. Taal van het bestand: Alle talen, Nederlands, Frans of Engels (vervangt "Regio"; alleen talen die er echt zijn). Soort bestand: PDF, Excel, afbeelding of software (zip). Bovenaan de lijst staat wat er aan staat ("27 bestanden · HARDI × · Nederlands ×"), met een kruisje per filter en "Filters wissen". Op een telefoon is de kolom een knop "Filters" om open te klappen. Een groep met maar één keuze wordt niet getoond.
