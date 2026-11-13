@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.118.0
+
+- **Garantie rustiger ingedeeld (optie C).** Geen eigen filterkolom meer naast het portaalmenu. Bovenaan de knoppen "Machine aanmelden" en "Claim indienen", daaronder een donker blok met wat op de dealer wacht (per claim een knop "Reageren op dit ticket"), en daaronder twee kaarten: **Mijn claims** (keuzelijst Alles / Wacht op jou / In behandeling / Afgehandeld met aantallen, plus zoeken) en **Mijn machines** (de eerste vijf met de stand van de garantie, "Alle machines bekijken", en het contact voor garantievragen). Een ticket opent nu op een eigen pagina; de volledige machinelijst ook (?toon=machines).
+
 ## 1.117.0
 
 - **Beheerkant in Homburg-stijl** (optie A van het ontwerp). Menu links donker zoals het portaal, het actieve onderdeel in Homburg-rood, Montserrat in menu en bovenbalk. Bovenbalk: "HOMBURG BEHEER" in plaats van het WordPress-logo, en "Naar het portaal" in plaats van de sitenaam. Knoppen, links en invoervelden in Homburg-rood in plaats van WordPress-blauw. Op het dashboard een eigen welkomstblok met "Download toevoegen", "Bericht plaatsen" en "Portaalgebruik bekijken" in plaats van "Welkom bij WordPress". Aan schermen en rechten verandert niets.

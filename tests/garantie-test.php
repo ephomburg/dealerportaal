@@ -398,50 +398,46 @@ class Garantie_Test extends WP_UnitTestCase {
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
-		$this->assertStringContainsString( 'hdp-garantie-werkblad', $html );
-		$this->assertStringContainsString( 'hdp-garantie-rail', $html );
+		$this->assertStringContainsString( 'hdp-g-overzicht', $html );
+		$this->assertStringContainsString( 'hdp-g-claims', $html );
+		$this->assertStringContainsString( 'hdp-g-machines', $html );
 		$this->assertStringContainsString( 'hdp-garantie-lijst', $html );
+		// Geen eigen filterkolom meer naast het portaalmenu (2026-11-13).
+		$this->assertStringNotContainsString( 'hdp-garantie-rail', $html );
 	}
 
-	/**
-	 * De filterkolom zegt met een getal hoeveel er in elke groep zit.
-	 * Zonder die tellingen moet je elke groep openklikken om te zien of er
-	 * iets in zit — precies wat deze indeling moest voorkomen.
-	 */
-	public function test_filterkolom_telt_de_claims_per_groep() {
+	/** De keuzelijst boven de claims kent de vier groepen, met aantallen. */
+	public function test_keuzelijst_telt_de_claims_per_groep() {
 		$this->als_goedgekeurde_dealer();
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
 		foreach ( array( 'alles', 'wacht', 'loopt', 'klaar' ) as $groep ) {
-			$this->assertStringContainsString( "toon=$groep", $html, "Groep $groep ontbreekt in de filterkolom." );
+			$this->assertMatchesRegularExpression( '/<option value="' . $groep . '"[^>]*>[^<]*\(\d+\)/', $html, "Groep $groep ontbreekt in de keuzelijst." );
 		}
-		$this->assertStringContainsString( 'toon=machines', $html );
-		$this->assertStringContainsString( 'hdp-rail-aantal', $html );
+		$this->assertStringContainsString( 'toon=machines', $html, 'Link naar alle machines.' );
+		$this->assertStringContainsString( 'data-groep="', $html );
 	}
 
-	/** Een claim opent rechts in het overzicht, niet op een eigen scherm. */
-	public function test_claim_opent_in_de_detailkolom() {
+	/** Een claim opent op een eigen pagina, met de weg terug naar het overzicht. */
+	public function test_claim_opent_op_een_eigen_pagina() {
 		$this->als_goedgekeurde_dealer();
 		$_GET['ticket'] = 'T100001';
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
-		// De lijst blijft ernaast staan.
-		$this->assertStringContainsString( 'hdp-garantie-werkblad', $html );
-		$this->assertStringContainsString( 'hdp-detail-kaart', $html );
+		$this->assertStringContainsString( 'hdp-ticket', $html );
 		$this->assertStringContainsString( 'hdp-gesprek', $html );
-		// En het volledige scherm is van daaruit bereikbaar.
-		$this->assertStringContainsString( 'volledig=1', $html );
+		$this->assertStringNotContainsString( 'hdp-g-overzicht', $html );
 	}
 
-	/** Zonder gekozen claim staat er rechts een uitnodiging, geen leegte. */
-	public function test_zonder_gekozen_claim_staat_er_een_lege_toestand() {
+	/** Elke claim in de lijst linkt naar zijn ticket. */
+	public function test_claims_linken_naar_hun_ticket() {
 		$this->als_goedgekeurde_dealer();
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
-		$this->assertStringContainsString( 'hdp-leeg-kaart', $html );
+		$this->assertStringContainsString( 'ticket=T100001', $html );
 	}
 
 	/**
@@ -505,12 +501,11 @@ class Garantie_Test extends WP_UnitTestCase {
 
 		$html = HDP_Garantie_Render::render_garantie_pagina( $this->attributen );
 
-		// Staat nu als eigen groep bovenin de filterkolom, met een telling
-		// die opvalt zolang er iets openstaat.
-		$this->assertStringContainsString( 'hdp-rail-wacht', $html );
+		// Een donker blok bovenaan, met per claim de knop om te reageren.
+		$this->assertStringContainsString( 'hdp-g-wacht', $html );
 		$this->assertLessThan(
 			strpos( $html, 'hdp-garantie-lijst' ),
-			strpos( $html, 'hdp-rail-wacht' ),
+			strpos( $html, 'hdp-g-wacht' ),
 			'Wat op de dealer wacht hoort vóór de lijst te staan.'
 		);
 	}

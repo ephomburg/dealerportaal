@@ -953,6 +953,8 @@ class HDP_I18N {
 				'nl' => 'Open het volledige ticket',
 				'fr' => 'Ouvrir le ticket complet',
 			),
+			'garantie_mijn_claims'   => array( 'nl' => 'Mijn claims', 'fr' => 'Mes demandes' ),
+			'garantie_alle_machines' => array( 'nl' => 'Alle machines bekijken', 'fr' => 'Voir toutes les machines' ),
 			'garantie_mijn_machines'  => array( 'nl' => 'Mijn machines', 'fr' => 'Mes machines' ),
 			'garantie_geen_machines'  => array(
 				'nl' => 'Je hebt nog geen machines aangemeld. Meld een machine aan om er claims op in te kunnen dienen.',

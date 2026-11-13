@@ -4571,3 +4571,111 @@ body.hdp-app-layout .hdp-tekstpagina { max-width: none; margin: 0; padding: 0 0 
 	box-shadow: var(--hdp-schaduw);
 }
 .hdp-collega-geen-toegang p { margin: 0; }
+
+/* ==========================================================================
+   GARANTIE – OVERZICHT (optie C, 2026-11-13)
+   Eerst wat op de dealer wacht, daaronder twee kaarten: Mijn claims en
+   Mijn machines. Geen eigen filterkolom meer naast het portaalmenu; een
+   ticket opent op een eigen pagina.
+   ========================================================================== */
+.hdp-g-overzicht { display: flex; flex-direction: column; gap: 1.25rem; }
+.hdp-g-acties { display: flex; justify-content: flex-end; gap: 0.75rem; flex-wrap: wrap; }
+.hdp-g-wacht {
+	background: var(--wp--preset--color--donkergrijs);
+	color: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	padding: 1.4rem 1.6rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.8rem;
+}
+.hdp-g-wacht-kop {
+	margin: 0;
+	font-size: 0.72rem;
+	font-weight: 800;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: #ffb4b4;
+}
+.hdp-g-wacht-regel {
+	display: flex;
+	align-items: center;
+	gap: 1.25rem;
+	flex-wrap: wrap;
+	background: #36383d;
+	border-radius: 10px;
+	padding: 1rem 1.25rem;
+}
+.hdp-g-wacht-tekst { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 0.25rem; }
+.hdp-g-wacht-meta { font-size: 0.8rem; color: #c9cbd1; }
+.hdp-g-wacht-tekst strong { font-size: 1.05rem; color: var(--wp--preset--color--wit); }
+.hdp-g-wacht-vraag { font-size: 0.85rem; color: #ffd9a8; }
+.hdp-g-twee {
+	display: grid;
+	grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+	gap: 1.25rem;
+	align-items: start;
+}
+.hdp-g-kaart {
+	background: var(--wp--preset--color--wit);
+	border-radius: var(--hdp-radius);
+	box-shadow: var(--hdp-schaduw);
+	padding: 1.15rem 1.3rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.9rem;
+	min-width: 0;
+}
+.hdp-g-kaart-kop { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.hdp-g-kaart-kop h2 { margin: 0; font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem; }
+.hdp-g-kaart .hdp-garantie-zoeken { margin: 0; }
+.hdp-g-buiten-filter { display: none !important; }
+.hdp-g-filter-leeg { margin: 0; font-size: 0.9rem; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-g-machinelijst { list-style: none; margin: 0; padding: 0; }
+.hdp-g-machinelijst a {
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+	padding: 0.7rem 0;
+	border-bottom: 1px solid var(--wp--preset--color--rand);
+	color: var(--wp--preset--color--donkergrijs);
+	text-decoration: none;
+}
+.hdp-g-machinelijst a:hover strong { color: var(--wp--preset--color--homburg-rood); }
+.hdp-g-machinelijst strong { font-size: 0.92rem; }
+.hdp-g-machine-stand { font-size: 0.8rem; color: var(--wp--preset--color--grijs-tekst); }
+.hdp-g-machine-stand-in_behandeling { color: #8a4b00; font-weight: 600; }
+.hdp-g-machine-stand-afgewezen { color: var(--wp--preset--color--homburg-rood-donker); font-weight: 600; }
+.hdp-g-alle-machines { margin: 0; font-size: 0.9rem; font-weight: 700; }
+.hdp-g-contact {
+	border-top: 1px solid var(--wp--preset--color--rand);
+	padding-top: 0.9rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+	font-size: 0.88rem;
+}
+.hdp-g-contact-kop {
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--grijs-tekst);
+}
+.hdp-g-contact a {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: var(--wp--preset--color--donkergrijs);
+	text-decoration: none;
+	overflow-wrap: anywhere;
+}
+.hdp-g-contact a:hover { color: var(--wp--preset--color--homburg-rood); }
+.hdp-g-contact svg { width: 16px; height: 16px; flex: none; }
+.hdp-g-terug { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin: 0 0 1rem; }
+.hdp-g-terug a:first-child { font-weight: 700; text-decoration: none; }
+@media (max-width: 900px) {
+	.hdp-g-twee { grid-template-columns: minmax(0, 1fr); }
+	.hdp-g-acties { justify-content: stretch; }
+	.hdp-g-acties .hdp-btn { flex: 1 1 auto; text-align: center; }
+}

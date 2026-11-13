@@ -465,6 +465,8 @@ class HDP_I18N_EN {
 			'garantie_nog_niets_tekst'       => 'You can submit a claim for ordered parts straight away. For a claim on a machine, register the machine first.',
 			'garantie_nog_niets_met_machines' => 'Once you submit a claim, you can read it here.',
 			'garantie_open_volledig'         => 'Open the full ticket',
+			'garantie_mijn_claims'           => 'My claims',
+			'garantie_alle_machines'         => 'View all machines',
 			'garantie_mijn_machines'         => 'My machines',
 			'garantie_geen_machines'         => 'You haven’t registered any machines yet. Register a machine to be able to submit claims for it.',
 			'garantie_machine_lopend_een'    => '1 open claim',
