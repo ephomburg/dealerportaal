@@ -1758,25 +1758,26 @@ class HDP_Garantie_Render {
 		<div class="hdp-ticket-regels<?php echo $met_uren ? ' hdp-ticket-regels-uren' : ''; ?>">
 			<h4><?php echo esc_html( HDP_I18N::t( 'garantie_veld_regels' ) ); ?></h4>
 
-			<div class="hdp-ticket-regel hdp-ticket-regel-kop" aria-hidden="true">
-				<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_nummer' ) ); ?></span>
-				<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_aantal' ) ); ?></span>
-				<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_bedrag' ) ); ?></span>
-				<?php if ( $met_uren ) : ?>
-					<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_uren' ) ); ?></span>
-				<?php endif; ?>
-				<span><?php echo esc_html( HDP_I18N::t( 'garantie_regel_herkomst' ) ); ?></span>
-			</div>
-
+			<?php
+			// Per onderdeel één regel: het nummer, en daaronder de rest met
+			// een woord ervoor. Dit stond als tabel met vijf kolommen in de
+			// smalle zijkolom van het ticket; de koppen liepen over elkaar en
+			// bedrag en uren plakten aan elkaar ("€ 251,271,5").
+			?>
 			<?php foreach ( $regels as $regel ) : ?>
+				<?php
+				$delen = array( HDP_I18N::t( 'garantie_regel_aantal' ) . ' ' . (int) $regel['aantal'] );
+				if ( null !== $regel['bedrag_cent'] ) {
+					$delen[] = '€ ' . number_format( $regel['bedrag_cent'] / 100, 2, ',', '.' );
+				}
+				if ( $met_uren && null !== $regel['uren'] ) {
+					$delen[] = HDP_I18N::t( 'garantie_regel_uren' ) . ' ' . rtrim( rtrim( number_format( $regel['uren'], 2, ',', '' ), '0' ), ',' );
+				}
+				$delen[] = HDP_I18N::t( 'garantie_regel_herkomst' ) . ': ' . HDP_I18N::t( $regel['homburg_factuur'] ? 'garantie_regel_homburg' : 'garantie_regel_derden' );
+				?>
 				<div class="hdp-ticket-regel">
 					<span class="hdp-ticket-regel-nummer"><?php echo esc_html( $regel['nummer'] ); ?></span>
-					<span><?php echo esc_html( (string) $regel['aantal'] ); ?></span>
-					<span><?php echo esc_html( null === $regel['bedrag_cent'] ? '—' : '€ ' . number_format( $regel['bedrag_cent'] / 100, 2, ',', '.' ) ); ?></span>
-					<?php if ( $met_uren ) : ?>
-						<span><?php echo esc_html( null === $regel['uren'] ? '—' : rtrim( rtrim( number_format( $regel['uren'], 2, ',', '' ), '0' ), ',' ) ); ?></span>
-					<?php endif; ?>
-					<span><?php echo esc_html( HDP_I18N::t( $regel['homburg_factuur'] ? 'garantie_regel_homburg' : 'garantie_regel_derden' ) ); ?></span>
+					<span class="hdp-ticket-regel-details"><?php echo esc_html( implode( ' · ', $delen ) ); ?></span>
 				</div>
 			<?php endforeach; ?>
 

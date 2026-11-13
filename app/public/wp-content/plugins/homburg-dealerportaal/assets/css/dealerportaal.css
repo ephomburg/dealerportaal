@@ -573,26 +573,14 @@ body.hdp-login-actief {
 	color: var(--wp--preset--color--grijs-tekst);
 }
 .hdp-ticket-regel {
-	display: grid;
-	grid-template-columns: minmax(0, 1.6fr) 3.2rem minmax(0, 1fr) minmax(0, 1fr);
-	gap: 0.6rem;
-	align-items: baseline;
-	padding: 0.45rem 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+	padding: 0.55rem 0;
 	border-top: 1px solid var(--wp--preset--color--rand);
 	font-size: 0.85rem;
 }
-.hdp-ticket-regels-uren .hdp-ticket-regel {
-	grid-template-columns: minmax(0, 1.6fr) 3.2rem minmax(0, 1fr) 3.2rem minmax(0, 1fr);
-}
-.hdp-ticket-regel-kop {
-	border-top: 0;
-	padding-top: 0;
-	font-size: 0.68rem;
-	font-weight: 700;
-	letter-spacing: 0.05em;
-	text-transform: uppercase;
-	color: var(--wp--preset--color--grijs-tekst);
-}
+.hdp-ticket-regel-details { color: var(--wp--preset--color--grijs-tekst); }
 .hdp-ticket-regel-nummer {
 	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 	font-weight: 700;
@@ -606,16 +594,7 @@ body.hdp-login-actief {
 	font-weight: 700;
 }
 
-@media (max-width: 40rem) {
-	/* Vier of vijf kolommen passen niet naast elkaar op een telefoon. */
-	.hdp-ticket-regel-kop { display: none; }
-	.hdp-ticket-regel,
-	.hdp-ticket-regels-uren .hdp-ticket-regel {
-		grid-template-columns: 1fr auto;
-		row-gap: 0.1rem;
-	}
-	.hdp-ticket-regel-nummer { grid-column: 1 / -1; }
-}
+
 
 /* --- De machinelijst inkorten --------------------------------------- */
 /* Bij veel machines staan ze er allemaal (de zoekbalk filtert in de

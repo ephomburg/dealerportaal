@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.118.1
+
+- Ticket, "Te claimen onderdelen": per onderdeel één regel (nummer, en daaronder "Aantal 1 · € 251,27 · Uren 1,5 · Factuur: Homburg") in plaats van een tabel met vijf kolommen. In de smalle zijkolom liepen de koppen over elkaar en plakten bedrag en uren aan elkaar ("€ 251,271,5").
+
 ## 1.118.0
 
 - **Garantie rustiger ingedeeld (optie C).** Geen eigen filterkolom meer naast het portaalmenu. Bovenaan de knoppen "Machine aanmelden" en "Claim indienen", daaronder een donker blok met wat op de dealer wacht (per claim een knop "Reageren op dit ticket"), en daaronder twee kaarten: **Mijn claims** (keuzelijst Alles / Wacht op jou / In behandeling / Afgehandeld met aantallen, plus zoeken) en **Mijn machines** (de eerste vijf met de stand van de garantie, "Alle machines bekijken", en het contact voor garantievragen). Een ticket opent nu op een eigen pagina; de volledige machinelijst ook (?toon=machines).
