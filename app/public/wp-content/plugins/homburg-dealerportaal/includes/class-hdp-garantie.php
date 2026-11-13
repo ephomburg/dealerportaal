@@ -428,7 +428,8 @@ class HDP_Garantie {
 			return 0;
 		}
 		$gekozen = (int) get_user_meta( $user_id, self::META_NAMENS, true );
-		return $gekozen && $gekozen !== $user_id && array_key_exists( $gekozen, self::kiesbare_dealers() ) ? $gekozen : 0;
+		// Ook zichzelf, als de medewerker zelf een dealeraccount heeft (Gerard).
+		return $gekozen && array_key_exists( $gekozen, self::kiesbare_dealers() ) ? $gekozen : 0;
 	}
 
 	/** Een medewerker kiest (of wist) de dealer waarvoor hij werkt. */

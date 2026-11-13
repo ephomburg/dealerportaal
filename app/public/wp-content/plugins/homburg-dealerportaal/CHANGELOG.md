@@ -8,6 +8,10 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.119.1
+
+- Garantie namens dealers: een medewerker met een eigen dealeraccount (Gerard) kan in de keuzelijst ook zichzelf kiezen, zodat zijn eigen machines en claims bereikbaar blijven.
+
 ## 1.119.0
 
 - **Garantie namens elke dealer** voor Homburg-medewerkers. Beheerders, en wie bij zijn account het vinkje "Garantie namens dealers" heeft (Gebruikers > profiel), zien bovenaan de garantiepagina "Je werkt namens: [dealer]". Na het kiezen staan daar de machines en claims van die dealer, en gaan aanmelden, claimen en reageren op diens naam; bij de claim staat "Ingediend door … (Homburg) namens de dealer". Zonder gekozen dealer staat alleen de keuzelijst er, zodat er niets op de eigen naam van de medewerker terechtkomt.
