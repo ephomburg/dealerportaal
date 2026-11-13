@@ -24,6 +24,28 @@ class HDP_Garantie_Formulier {
 
 	public static function init() {
 		add_action( 'template_redirect', array( __CLASS__, 'verwerk' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'verwerk_namens' ), 5 );
+	}
+
+	/** Nonce voor het kiezen van de dealer waarvoor een medewerker werkt. */
+	const NAMENS_NONCE = 'hdp_garantie_namens';
+
+	/**
+	 * Een Homburg-medewerker kiest in de balk bovenaan de dealer waarvoor hij
+	 * werkt. Daarna terug naar het overzicht, zonder de keuze in de URL.
+	 */
+	public static function verwerk_namens() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- de nonce wordt hieronder gecontroleerd.
+		if ( ! isset( $_GET['hdp_namens'] ) ) {
+			return;
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- zie hieronder.
+		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+		if ( HDP_Garantie::mag_namens() && wp_verify_nonce( $nonce, self::NAMENS_NONCE ) ) {
+			HDP_Garantie::kies_namens( (int) $_GET['hdp_namens'] );
+		}
+		wp_safe_redirect( home_url( '/garantie/' ) );
+		exit;
 	}
 
 	/** Waar de melding en de ingevulde waarden tijdelijk staan. */

@@ -8,6 +8,11 @@ functionaliteit), zodat elke commit die de plugin-header raakt precies één
 duidelijk afgebakende wijziging vertegenwoordigt. Zie ook `git log --
 homburg-dealerportaal.php` voor de onderliggende commits.
 
+## 1.119.0
+
+- **Garantie namens elke dealer** voor Homburg-medewerkers. Beheerders, en wie bij zijn account het vinkje "Garantie namens dealers" heeft (Gebruikers > profiel), zien bovenaan de garantiepagina "Je werkt namens: [dealer]". Na het kiezen staan daar de machines en claims van die dealer, en gaan aanmelden, claimen en reageren op diens naam; bij de claim staat "Ingediend door … (Homburg) namens de dealer". Zonder gekozen dealer staat alleen de keuzelijst er, zodat er niets op de eigen naam van de medewerker terechtkomt.
+- **Mijn machines** op het overzicht: per machine een icoon, merk en eindklant, en een gekleurd label (groen: garantie loopt, met een balkje; oranje: bijna verlopen of wordt beoordeeld; grijs: verlopen; rood: afgewezen).
+
 ## 1.118.1
 
 - Ticket, "Te claimen onderdelen": per onderdeel één regel (nummer, en daaronder "Aantal 1 · € 251,27 · Uren 1,5 · Factuur: Homburg") in plaats van een tabel met vijf kolommen. In de smalle zijkolom liepen de koppen over elkaar en plakten bedrag en uren aan elkaar ("€ 251,271,5").

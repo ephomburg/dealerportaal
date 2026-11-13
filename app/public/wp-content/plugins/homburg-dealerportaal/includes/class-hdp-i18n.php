@@ -954,6 +954,13 @@ class HDP_I18N {
 				'fr' => 'Ouvrir le ticket complet',
 			),
 			'garantie_mijn_claims'   => array( 'nl' => 'Mijn claims', 'fr' => 'Mes demandes' ),
+			// Homburg-medewerkers die namens een dealer werken.
+			'garantie_namens_label'      => array( 'nl' => 'Je werkt namens', 'fr' => 'Vous agissez pour' ),
+			'garantie_namens_kies'       => array( 'nl' => '— Kies een dealer —', 'fr' => '— Choisissez un concessionnaire —' ),
+			'garantie_namens_knop'       => array( 'nl' => 'Kiezen', 'fr' => 'Choisir' ),
+			'garantie_namens_kies_eerst' => array( 'nl' => 'Kies eerst de dealer waarvoor je een machine aanmeldt of een claim indient.', 'fr' => 'Choisissez d’abord le concessionnaire pour lequel vous enregistrez une machine ou introduisez une demande.' ),
+			'garantie_namens_uitleg'     => array( 'nl' => 'Machines, claims en berichten komen op naam van deze dealer; bij de claim staat dat jij hem indiende.', 'fr' => 'Les machines, demandes et messages sont enregistrés au nom de ce concessionnaire ; la demande indique que vous l’avez introduite.' ),
+			'garantie_namens_ingediend'  => array( 'nl' => 'Ingediend door %s (Homburg) namens de dealer.', 'fr' => 'Introduit par %s (Homburg) pour le concessionnaire.' ),
 			'garantie_alle_machines' => array( 'nl' => 'Alle machines bekijken', 'fr' => 'Voir toutes les machines' ),
 			'garantie_mijn_machines'  => array( 'nl' => 'Mijn machines', 'fr' => 'Mes machines' ),
 			'garantie_geen_machines'  => array(

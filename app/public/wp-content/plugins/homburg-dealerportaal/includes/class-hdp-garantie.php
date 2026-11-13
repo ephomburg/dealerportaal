@@ -381,8 +381,85 @@ class HDP_Garantie {
 		HDP_Zoeken::vergeet_garantiegegevens();
 	}
 
+	/* --- Namens een dealer werken (Homburg-medewerkers) ------------------ */
+
+	/** Welke dealer een medewerker gekozen heeft. */
+	const META_NAMENS = 'hdp_garantie_namens';
+
+	/** Mag deze gebruiker (naast beheerders) namens elke dealer werken? */
+	const META_MAG_NAMENS = 'hdp_garantie_namens_toegestaan';
+
+	/**
+	 * Mag deze gebruiker garantie doen namens elke dealer? Beheerders altijd;
+	 * anderen (zoals Gerard) als het vinkje bij hun account aan staat.
+	 */
+	public static function mag_namens( $user_id = 0 ) {
+		$user_id = $user_id ? (int) $user_id : get_current_user_id();
+		if ( ! $user_id ) {
+			return false;
+		}
+		return HDP_Roles::is_superbeheerder( $user_id ) || (bool) get_user_meta( $user_id, self::META_MAG_NAMENS, true );
+	}
+
+	/**
+	 * De dealers waarvoor een medewerker kan kiezen: goedgekeurde
+	 * hoofdaccounts (geen collega's, geen beheerders), op bedrijfsnaam.
+	 *
+	 * @return array<int, string> Gebruikers-id => "Bedrijf (e-mail)".
+	 */
+	public static function kiesbare_dealers() {
+		$uit = array();
+		foreach ( get_users( array( 'role' => 'dealer', 'fields' => array( 'ID', 'display_name', 'user_email' ) ) ) as $user ) {
+			$id = (int) $user->ID;
+			if ( ! HDP_Roles::mag_portaal_zien( $id ) || ( class_exists( 'HDP_Collegas' ) && HDP_Collegas::is_collega( $id ) ) ) {
+				continue;
+			}
+			$bedrijf    = trim( (string) get_user_meta( $id, 'billing_company', true ) );
+			$uit[ $id ] = ( $bedrijf ? $bedrijf : $user->display_name ) . ' (' . $user->user_email . ')';
+		}
+		natcasesort( $uit );
+		return $uit;
+	}
+
+	/** De dealer waarvoor de ingelogde medewerker nu werkt; 0 = geen. */
+	public static function namens_dealer() {
+		$user_id = get_current_user_id();
+		if ( ! self::mag_namens( $user_id ) ) {
+			return 0;
+		}
+		$gekozen = (int) get_user_meta( $user_id, self::META_NAMENS, true );
+		return $gekozen && $gekozen !== $user_id && array_key_exists( $gekozen, self::kiesbare_dealers() ) ? $gekozen : 0;
+	}
+
+	/** Een medewerker kiest (of wist) de dealer waarvoor hij werkt. */
+	public static function kies_namens( $dealer_id ) {
+		$user_id = get_current_user_id();
+		if ( ! self::mag_namens( $user_id ) ) {
+			return false;
+		}
+		$dealer_id = (int) $dealer_id;
+		if ( $dealer_id && ! array_key_exists( $dealer_id, self::kiesbare_dealers() ) ) {
+			return false;
+		}
+		if ( $dealer_id ) {
+			update_user_meta( $user_id, self::META_NAMENS, $dealer_id );
+		} else {
+			delete_user_meta( $user_id, self::META_NAMENS );
+		}
+		self::vergeet_buffer();
+		return true;
+	}
+
 	/** Het accountnummer waarop gefilterd wordt; '' als er niemand (geldig) is ingelogd. */
 	private static function dealer_id( $user_id = 0 ) {
+		// Een medewerker die namens een dealer werkt: alles gaat over die dealer.
+		// Nog geen dealer gekozen: dan over niemand, zodat er nooit per
+		// ongeluk iets op naam van de medewerker zelf komt.
+		if ( ! $user_id && self::mag_namens() ) {
+			$namens = self::namens_dealer();
+			return $namens ? (string) $namens : '';
+		}
+
 		$user_id = $user_id ? (int) $user_id : get_current_user_id();
 
 		if ( ! $user_id || ! HDP_Roles::mag_portaal_zien( $user_id ) ) {
@@ -1153,6 +1230,12 @@ class HDP_Garantie {
 	 */
 	public static function met_indiener( $opmerkingen ) {
 		$user_id = get_current_user_id();
+		// Ingediend door een Homburg-medewerker namens de dealer.
+		if ( self::namens_dealer() ) {
+			$user  = wp_get_current_user();
+			$regel = sprintf( HDP_I18N::t_in( 'garantie_namens_ingediend', 'nl' ), $user->display_name );
+			return trim( $regel . "\n" . (string) $opmerkingen );
+		}
 		if ( ! class_exists( 'HDP_Collegas' ) || ! HDP_Collegas::is_collega( $user_id ) ) {
 			return $opmerkingen;
 		}

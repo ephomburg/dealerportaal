@@ -18,6 +18,47 @@ if ( ! defined( 'ABSPATH' ) ) {
 class HDP_Garantie_Render {
 
 	public static function render_garantie_pagina( $a ) {
+		if ( ! is_user_logged_in() || ! HDP_Garantie::mag_namens() ) {
+			return self::render_garantie_inhoud( $a );
+		}
+
+		// Een Homburg-medewerker: eerst de balk "Je werkt namens …". Zonder
+		// gekozen dealer alleen die balk, zodat er niets op zijn eigen naam
+		// terechtkomt.
+		$balk = self::render_namens_balk();
+		if ( ! HDP_Garantie::namens_dealer() ) {
+			return '<div class="hdp-portaal alignfull"><section class="hdp-garantie">' . $balk . '</section></div>';
+		}
+
+		$html = self::render_garantie_inhoud( $a );
+		// Binnen de garantiesectie, zodat de balk even breed is als de inhoud.
+		$plek = strpos( $html, '<section class="hdp-garantie' );
+		$plek = false === $plek ? false : strpos( $html, '>', $plek );
+		return false === $plek ? $balk . $html : substr_replace( $html, $balk, $plek + 1, 0 );
+	}
+
+	/** De keuzelijst voor medewerkers: namens welke dealer ze werken. */
+	private static function render_namens_balk() {
+		$gekozen = HDP_Garantie::namens_dealer();
+		ob_start();
+		?>
+		<form class="hdp-g-namens" method="get" action="<?php echo esc_url( home_url( '/garantie/' ) ); ?>">
+			<input type="hidden" name="_wpnonce" value="<?php echo esc_attr( wp_create_nonce( HDP_Garantie_Formulier::NAMENS_NONCE ) ); ?>">
+			<label for="hdp-g-namens-keuze"><?php echo esc_html( HDP_I18N::t( 'garantie_namens_label' ) ); ?></label>
+			<select id="hdp-g-namens-keuze" name="hdp_namens" onchange="this.form.submit()">
+				<option value="0"><?php echo esc_html( HDP_I18N::t( 'garantie_namens_kies' ) ); ?></option>
+				<?php foreach ( HDP_Garantie::kiesbare_dealers() as $id => $naam ) : ?>
+					<option value="<?php echo (int) $id; ?>" <?php selected( $gekozen, $id ); ?>><?php echo esc_html( $naam ); ?></option>
+				<?php endforeach; ?>
+			</select>
+			<noscript><button type="submit" class="hdp-btn hdp-btn-klein"><?php echo esc_html( HDP_I18N::t( 'garantie_namens_knop' ) ); ?></button></noscript>
+			<p><?php echo esc_html( HDP_I18N::t( $gekozen ? 'garantie_namens_uitleg' : 'garantie_namens_kies_eerst' ) ); ?></p>
+		</form>
+		<?php
+		return ob_get_clean();
+	}
+
+	private static function render_garantie_inhoud( $a ) {
 		$mag_zien = is_user_logged_in() && HDP_Roles::mag_portaal_zien( get_current_user_id() );
 
 		if ( ! $mag_zien ) {
@@ -305,15 +346,24 @@ class HDP_Garantie_Render {
 			<ul class="hdp-g-machinelijst">
 				<?php foreach ( array_slice( $machines, 0, self::MACHINES_IN_KAART ) as $machine ) : ?>
 					<?php
+					// Eén label met kleur per machine: loopt (groen, met balkje),
+					// bijna verlopen (oranje), verlopen (grijs), wordt beoordeeld
+					// (oranje) of afgewezen (rood).
 					$stand       = HDP_Garantie::garantiestand( $machine );
 					$beoordeling = isset( $machine['status'] ) ? $machine['status'] : 'goedgekeurd';
+					$balkje      = false;
 					if ( 'goedgekeurd' !== $beoordeling ) {
 						$stand_tekst = HDP_I18N::t( 'garantie_machine_' . $beoordeling );
+						$soort       = 'afgewezen' === $beoordeling ? 'rood' : 'oranje';
 					} elseif ( $stand['verlopen'] ) {
 						$stand_tekst = sprintf( HDP_I18N::t( 'garantie_verlopen_op' ), HDP_I18N::datum( 'j M Y', strtotime( $stand['tot'] ) ) );
+						$soort       = 'grijs';
 					} else {
 						$stand_tekst = sprintf( HDP_I18N::t( 'garantie_tot_en_met' ), HDP_I18N::datum( 'j M Y', strtotime( $stand['tot'] ) ) );
+						$soort       = $stand['bijna'] ? 'oranje' : 'groen';
+						$balkje      = true;
 					}
+					$onder = array_filter( array( isset( $machine['merk'] ) ? $machine['merk'] : '', isset( $machine['klant'] ) ? $machine['klant'] : '' ) );
 					$link = add_query_arg(
 						array(
 							'toon'        => 'machines',
@@ -324,8 +374,17 @@ class HDP_Garantie_Render {
 					?>
 					<li>
 						<a href="<?php echo esc_url( $link . '#hdp-machine-gekozen' ); ?>">
-							<strong><?php echo esc_html( HDP_Garantie::machinenaam( $machine['machine'], $machine['serienummer'] ) ); ?></strong>
-							<span class="hdp-g-machine-stand hdp-g-machine-stand-<?php echo esc_attr( $beoordeling ); ?>"><?php echo esc_html( $stand_tekst ); ?></span>
+							<?php HDP_Icons::render_icoon( 'machine', 'hdp-g-machine-icoon' ); ?>
+							<span class="hdp-g-machine-tekst">
+								<strong><?php echo esc_html( $machine['machine'] ); ?></strong>
+								<span class="hdp-g-machine-sub"><?php echo esc_html( implode( ' · ', array_merge( array( $machine['serienummer'] ), $onder ) ) ); ?></span>
+								<span class="hdp-g-machine-stand">
+									<span class="hdp-g-machine-label hdp-g-machine-label-<?php echo esc_attr( $soort ); ?>"><?php echo esc_html( $stand_tekst ); ?></span>
+									<?php if ( $balkje ) : ?>
+										<span class="hdp-g-machine-balk hdp-g-machine-balk-<?php echo esc_attr( $soort ); ?>" aria-hidden="true"><i style="width:<?php echo esc_attr( (string) $stand['verstreken'] ); ?>%"></i></span>
+									<?php endif; ?>
+								</span>
+							</span>
 						</a>
 					</li>
 				<?php endforeach; ?>

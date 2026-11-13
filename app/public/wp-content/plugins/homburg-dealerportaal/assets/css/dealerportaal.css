@@ -4613,18 +4613,45 @@ body.hdp-app-layout .hdp-tekstpagina { max-width: none; margin: 0; padding: 0 0 
 .hdp-g-machinelijst { list-style: none; margin: 0; padding: 0; }
 .hdp-g-machinelijst a {
 	display: flex;
-	flex-direction: column;
-	gap: 0.15rem;
-	padding: 0.7rem 0;
+	align-items: flex-start;
+	gap: 0.8rem;
+	padding: 0.75rem 0;
 	border-bottom: 1px solid var(--wp--preset--color--rand);
 	color: var(--wp--preset--color--donkergrijs);
 	text-decoration: none;
 }
 .hdp-g-machinelijst a:hover strong { color: var(--wp--preset--color--homburg-rood); }
-.hdp-g-machinelijst strong { font-size: 0.92rem; }
-.hdp-g-machine-stand { font-size: 0.8rem; color: var(--wp--preset--color--grijs-tekst); }
-.hdp-g-machine-stand-in_behandeling { color: #8a4b00; font-weight: 600; }
-.hdp-g-machine-stand-afgewezen { color: var(--wp--preset--color--homburg-rood-donker); font-weight: 600; }
+.hdp-g-machine-icoon {
+	flex: none;
+	width: 38px;
+	height: 38px;
+	border-radius: 10px;
+	background: var(--wp--preset--color--grijs-licht);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--wp--preset--color--homburg-rood);
+}
+.hdp-g-machine-icoon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.hdp-g-machine-tekst { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.15rem; }
+.hdp-g-machinelijst strong { font-size: 0.95rem; }
+.hdp-g-machine-sub { font-size: 0.78rem; color: var(--wp--preset--color--grijs-tekst); overflow-wrap: anywhere; }
+.hdp-g-machine-stand { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.35rem; }
+.hdp-g-machine-balk { display: block; flex: 1 1 80px; height: 4px; border-radius: 4px; background: var(--wp--preset--color--rand); max-width: 160px; overflow: hidden; }
+.hdp-g-machine-balk i { display: block; height: 100%; border-radius: 4px; background: #2e7d32; }
+.hdp-g-machine-balk-oranje i { background: #c77700; }
+.hdp-g-machine-label {
+	flex: none;
+	font-size: 0.74rem;
+	font-weight: 700;
+	padding: 0.25rem 0.6rem;
+	border-radius: 999px;
+	white-space: nowrap;
+}
+.hdp-g-machine-label-groen { background: #e6f4ea; color: #1e5f2a; }
+.hdp-g-machine-label-oranje { background: #fdecc8; color: #7a4100; }
+.hdp-g-machine-label-grijs { background: #eceef1; color: #4a4d53; }
+.hdp-g-machine-label-rood { background: #fdecec; color: #9a0a0a; }
 .hdp-g-alle-machines { margin: 0; font-size: 0.9rem; font-weight: 700; }
 .hdp-g-contact {
 	border-top: 1px solid var(--wp--preset--color--rand);
@@ -4658,3 +4685,28 @@ body.hdp-app-layout .hdp-tekstpagina { max-width: none; margin: 0; padding: 0 0 
 	.hdp-g-acties { justify-content: stretch; }
 	.hdp-g-acties .hdp-btn { flex: 1 1 auto; text-align: center; }
 }
+
+/* Homburg-medewerkers: namens welke dealer ze werken. */
+.hdp-g-namens {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.6rem 0.9rem;
+	background: #fff8ee;
+	border: 2px solid #e8a33d;
+	border-radius: var(--hdp-radius);
+	padding: 0.9rem 1.1rem;
+	margin-bottom: 1.25rem;
+}
+.hdp-g-namens label { font-weight: 800; font-size: 0.9rem; }
+.hdp-g-namens select {
+	font: inherit;
+	font-size: 0.9rem;
+	padding: 0.5rem 0.7rem;
+	border: 1px solid #d6d8dd;
+	border-radius: 8px;
+	background: var(--wp--preset--color--wit);
+	min-width: min(100%, 22rem);
+	max-width: 100%;
+}
+.hdp-g-namens p { margin: 0; flex-basis: 100%; font-size: 0.82rem; color: #6b4a14; }

@@ -67,6 +67,15 @@ class HDP_User_Fields {
 					</label>
 				</td>
 			</tr>
+			<tr>
+				<th><label for="hdp_garantie_namens_toegestaan">Garantie namens dealers</label></th>
+				<td>
+					<label>
+						<input type="checkbox" name="hdp_garantie_namens_toegestaan" id="hdp_garantie_namens_toegestaan" value="1" <?php checked( (bool) get_user_meta( $user->ID, HDP_Garantie::META_MAG_NAMENS, true ) ); ?>>
+						Mag voor elke dealer machines aanmelden en claims indienen (voor Homburg-medewerkers; beheerders mogen dit altijd)
+					</label>
+				</td>
+			</tr>
 		</table>
 		<?php
 	}
@@ -92,6 +101,7 @@ class HDP_User_Fields {
 		update_user_meta( $user_id, 'hdp_merken', $merken );
 
 		update_user_meta( $user_id, HDP_Gebruik::TEST_META, isset( $_POST['hdp_testaccount'] ) ? '1' : '' );
+		update_user_meta( $user_id, HDP_Garantie::META_MAG_NAMENS, isset( $_POST['hdp_garantie_namens_toegestaan'] ) ? '1' : '' );
 
 		if ( isset( $_POST['hdp_korting'] ) ) {
 			update_user_meta( $user_id, 'hdp_korting', sanitize_text_field( wp_unslash( $_POST['hdp_korting'] ) ) );
